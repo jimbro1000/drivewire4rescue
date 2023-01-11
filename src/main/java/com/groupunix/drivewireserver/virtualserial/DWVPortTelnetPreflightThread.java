@@ -52,7 +52,7 @@ public class DWVPortTelnetPreflightThread implements Runnable {
     try {
       // hello
       if (this.telnet)
-        sktchan.socket().getOutputStream().write(("DriveWire Telnet Server " + DriveWireServer.DWServerVersion + "\r\n\n").getBytes());
+        sktchan.socket().getOutputStream().write(("DriveWire Telnet Server " + DriveWireServer.DW_SERVER_VERSION + "\r\n\n").getBytes());
 
 
       if (telnet == true) {

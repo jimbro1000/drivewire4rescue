@@ -477,7 +477,7 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
 
 
   private void DoOP_AARON() {
-    logger.warn("DriveWire " + DriveWireServer.DWServerVersion + " (" + DriveWireServer.DWServerVersionDate + ") by Aaron Wolfe");
+    logger.warn("DriveWire " + DriveWireServer.DW_SERVER_VERSION + " (" + DriveWireServer.DW_SERVER_VERSION_DATE + ") by Aaron Wolfe");
 
   }
 

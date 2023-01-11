@@ -20,17 +20,15 @@ import com.groupunix.drivewireserver.dwexceptions.DWInvalidSectorException;
 import com.groupunix.drivewireserver.dwexceptions.DWSeekPastEndOfDeviceException;
 
 public class DWDECBFileSystem extends DWFileSystem {
-
-
   private static final String FSNAME = "DECB";
-  private List<String> fserrors = new ArrayList<String>();
+  private final List<String> fserrors = new ArrayList<>();
 
   public DWDECBFileSystem(DWDisk disk) {
     super(disk);
   }
 
   public List<DWFileSystemDirEntry> getDirectory(String path) throws IOException, DWFileSystemInvalidDirectoryException {
-    List<DWFileSystemDirEntry> dir = new ArrayList<DWFileSystemDirEntry>();
+    List<DWFileSystemDirEntry> dir = new ArrayList<>();
 
     try {
       for (int i = 0; i < 9; i++) {
@@ -45,15 +43,10 @@ public class DWDECBFileSystem extends DWFileSystem {
     } catch (DWDiskInvalidSectorNumber e) {
       throw new DWFileSystemInvalidDirectoryException("Invalid DECB directory: " + e.getMessage());
     }
-
-
     return dir;
-
   }
 
-
   public boolean hasFile(String filename) throws IOException {
-
     try {
       for (DWFileSystemDirEntry e : this.getDirectory(null)) {
         if ((e.getFileName().trim() + "." + e.getFileExt()).equalsIgnoreCase(filename)) {
@@ -61,22 +54,16 @@ public class DWDECBFileSystem extends DWFileSystem {
         }
       }
     } catch (DWFileSystemInvalidDirectoryException e) {
-    }
 
+    }
     return false;
   }
 
-
   public ArrayList<DWDiskSector> getFileSectors(String filename) throws DWFileSystemFileNotFoundException, DWFileSystemInvalidFATException, IOException, DWDiskInvalidSectorNumber, DWFileSystemInvalidDirectoryException {
-
-
     return (getFAT().getFileSectors(disk.getSectors(), ((DWDECBFileSystemDirEntry) getDirEntry(filename)).getFirstGranule()));
-
   }
 
-
   public DWFileSystemDirEntry getDirEntry(String filename) throws DWFileSystemFileNotFoundException, IOException, DWFileSystemInvalidDirectoryException {
-
     for (DWFileSystemDirEntry e : this.getDirectory(null)) {
       if ((e.getFileName().trim() + "." + e.getFileExt()).equalsIgnoreCase(filename)) {
         return e;
@@ -86,9 +73,7 @@ public class DWDECBFileSystem extends DWFileSystem {
     throw (new DWFileSystemFileNotFoundException("File '" + filename + "' not found in DOS directory."));
   }
 
-
   public byte[] getFileContents(String filename) throws DWFileSystemFileNotFoundException, DWFileSystemInvalidFATException, IOException, DWDiskInvalidSectorNumber, DWFileSystemInvalidDirectoryException {
-
 
     byte[] res = new byte[0];
 
@@ -103,15 +88,11 @@ public class DWDECBFileSystem extends DWFileSystem {
         System.arraycopy(sectors.get(i).getData(), 0, res, i * DWDefs.DISK_SECTORSIZE, DWDefs.DISK_SECTORSIZE);
       }
     }
-
     // last sector is partial bytes
-
 
     if (bl > 0) {
       System.arraycopy(sectors.get(sectors.size() - 1).getData(), 0, res, (sectors.size() - 1) * DWDefs.DISK_SECTORSIZE, bl);
-
     }
-
     return res;
   }
 

@@ -292,7 +292,7 @@ public class DWVModem {
             break;
           case 1:
           case 3:
-            write(getCRLF() + "DriveWire " + DriveWireServer.DWServerVersion + " Virtual Modem on port " + dwVSerialPorts.prettyPort(this.vport) + getCRLF());
+            write(getCRLF() + "DriveWire " + DriveWireServer.DW_SERVER_VERSION + " Virtual Modem on port " + dwVSerialPorts.prettyPort(this.vport) + getCRLF());
             break;
           case 2:
             try {

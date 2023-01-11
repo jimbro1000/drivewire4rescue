@@ -44,8 +44,8 @@ import com.groupunix.drivewireserver.dwprotocolhandler.vmodem.VModemProtocolHand
 public class DriveWireServer {
   private static final String MSG_BANNER = "--------------------------------------------------------------------------------";
 
-  public static final String DWServerVersion = "4.3.3p";
-  public static final String DWServerVersionDate = "09/17/2013";
+  public static final String DW_SERVER_VERSION = "4.3.3p";
+  public static final String DW_SERVER_VERSION_DATE = "09/17/2013";
   public static final int THREAD_MAX_TIME_TO_DIE_MILLIS = 15000;
   public static XMLConfiguration serverConfiguration;
   public static int configSerial = 0;
@@ -238,7 +238,7 @@ public class DriveWireServer {
     // 	set up initial logging config
     initLogging();
 
-    logger.info("DriveWire Server v" + DWServerVersion + " starting");
+    logger.info("DriveWire Server v" + DW_SERVER_VERSION + " starting");
     logger.debug("Heap max: " + Runtime.getRuntime().maxMemory() / 1024 / 1024 + "MB " + " cur: " + Runtime.getRuntime().totalMemory() / 1024 / 1024 + "MB");
     // load server settings
     try {

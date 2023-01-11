@@ -27,7 +27,7 @@ public class DWCmdServerStatus extends DWCommand {
 
   private DWCommandResponse doServerStatus() {
     String text = "";
-    text += "DriveWire version " + DriveWireServer.DWServerVersion + " (" + DriveWireServer.DWServerVersionDate + ") status:\r\n\n";
+    text += "DriveWire version " + DriveWireServer.DW_SERVER_VERSION + " (" + DriveWireServer.DW_SERVER_VERSION_DATE + ") status:\r\n\n";
     text += "Total memory:  " + Runtime.getRuntime().totalMemory() / 1024 + " KB";
     text += "\r\nFree memory:   " + Runtime.getRuntime().freeMemory() / 1024 + " KB";
     text += "\r\n";
