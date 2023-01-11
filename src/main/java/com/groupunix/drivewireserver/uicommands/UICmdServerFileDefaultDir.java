@@ -17,7 +17,7 @@ public class UICmdServerFileDefaultDir extends DWCommand {
   }
 
   public DWCommandResponse parse(String cmdline) {
-    return (new DWCommandResponse(DWUtils.getFileDescriptor(new File(DriveWireServer.serverconfig.getString("LocalDiskDir", "."))) + "|false"));
+    return (new DWCommandResponse(DWUtils.getFileDescriptor(new File(DriveWireServer.serverConfiguration.getString("LocalDiskDir", "."))) + "|false"));
   }
 
 

@@ -48,9 +48,9 @@ public class UICmdServerConfigSet extends DWCommand {
 
   private DWCommandResponse doSetConfig(String item) {
 
-    if (DriveWireServer.serverconfig.containsKey(item)) {
-      synchronized (DriveWireServer.serverconfig) {
-        DriveWireServer.serverconfig.setProperty(item, null);
+    if (DriveWireServer.serverConfiguration.containsKey(item)) {
+      synchronized (DriveWireServer.serverConfiguration) {
+        DriveWireServer.serverConfiguration.setProperty(item, null);
       }
 
     }
@@ -61,12 +61,12 @@ public class UICmdServerConfigSet extends DWCommand {
 
 
   private DWCommandResponse doSetConfig(String item, String value) {
-    synchronized (DriveWireServer.serverconfig) {
-      if (DriveWireServer.serverconfig.containsKey(item)) {
-        if (!DriveWireServer.serverconfig.getProperty(item).equals(value))
-          DriveWireServer.serverconfig.setProperty(item, value);
+    synchronized (DriveWireServer.serverConfiguration) {
+      if (DriveWireServer.serverConfiguration.containsKey(item)) {
+        if (!DriveWireServer.serverConfiguration.getProperty(item).equals(value))
+          DriveWireServer.serverConfiguration.setProperty(item, value);
       } else {
-        DriveWireServer.serverconfig.setProperty(item, value);
+        DriveWireServer.serverConfiguration.setProperty(item, value);
       }
     }
     return (new DWCommandResponse(item + " set."));

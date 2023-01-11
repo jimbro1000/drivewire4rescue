@@ -794,7 +794,7 @@ public class DWVSerialPorts {
   @SuppressWarnings("unchecked")
   public boolean setMidiProfile(String profile) {
 
-    List<HierarchicalConfiguration> profiles = DriveWireServer.serverconfig.configurationsAt("midisynthprofile");
+    List<HierarchicalConfiguration> profiles = DriveWireServer.serverConfiguration.configurationsAt("midisynthprofile");
 
     for (Iterator<HierarchicalConfiguration> it = profiles.iterator(); it.hasNext(); ) {
       HierarchicalConfiguration mprof = it.next();

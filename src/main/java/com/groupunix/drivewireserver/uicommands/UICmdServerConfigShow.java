@@ -24,16 +24,16 @@ public class UICmdServerConfigShow extends DWCommand {
 
 
     if (cmdline.length() == 0) {
-      for (Iterator<String> i = DriveWireServer.serverconfig.getKeys(); i.hasNext(); ) {
+      for (Iterator<String> i = DriveWireServer.serverConfiguration.getKeys(); i.hasNext(); ) {
         String key = i.next();
-        String value = StringUtils.join(DriveWireServer.serverconfig.getStringArray(key), ", ");
+        String value = StringUtils.join(DriveWireServer.serverConfiguration.getStringArray(key), ", ");
 
         res += key + " = " + value + "\r\n";
 
       }
     } else {
-      if (DriveWireServer.serverconfig.containsKey(cmdline)) {
-        String value = StringUtils.join(DriveWireServer.serverconfig.getStringArray(cmdline), ", ");
+      if (DriveWireServer.serverConfiguration.containsKey(cmdline)) {
+        String value = StringUtils.join(DriveWireServer.serverConfiguration.getStringArray(cmdline), ", ");
         return (new DWCommandResponse(value));
       } else {
         return (new DWCommandResponse(false, DWDefs.RC_CONFIG_KEY_NOT_SET, "Key '" + cmdline + "' is not set."));

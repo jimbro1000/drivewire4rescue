@@ -45,7 +45,7 @@ public class DWCmdConfigSet extends DWCommand {
   private DWCommandResponse doSetConfig(String item) {
 
     if (dwProto.getConfig().containsKey(item)) {
-      synchronized (DriveWireServer.serverconfig) {
+      synchronized (DriveWireServer.serverConfiguration) {
         dwProto.getConfig().clearProperty(item);
       }
     }
@@ -56,7 +56,7 @@ public class DWCmdConfigSet extends DWCommand {
 
 
   private DWCommandResponse doSetConfig(String item, String value) {
-    synchronized (DriveWireServer.serverconfig) {
+    synchronized (DriveWireServer.serverConfiguration) {
       dwProto.getConfig().setProperty(item, value);
     }
     return (new DWCommandResponse("Item '" + item + "' set to '" + value + "'"));

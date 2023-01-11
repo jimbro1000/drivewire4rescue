@@ -36,7 +36,7 @@ public class UICmdServerShowStatus extends DWCommand {
     text += "freemem|" + Runtime.getRuntime().freeMemory() / 1024 + "\n";
 
     text += "instances|" + DriveWireServer.getNumHandlers() + "\n";
-    text += "configpath|" + DriveWireServer.serverconfig.getBasePath() + "\n";
+    text += "configpath|" + DriveWireServer.serverConfiguration.getBasePath() + "\n";
 
     return (new DWCommandResponse(text));
   }

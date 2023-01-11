@@ -35,7 +35,7 @@ public class UICmdServerShowSynthProfiles extends DWCommand {
   public DWCommandResponse parse(String cmdline) {
     String res = new String();
 
-    List<HierarchicalConfiguration> profiles = DriveWireServer.serverconfig.configurationsAt("midisynthprofile");
+    List<HierarchicalConfiguration> profiles = DriveWireServer.serverConfiguration.configurationsAt("midisynthprofile");
 
     for (Iterator<HierarchicalConfiguration> it = profiles.iterator(); it.hasNext(); ) {
 

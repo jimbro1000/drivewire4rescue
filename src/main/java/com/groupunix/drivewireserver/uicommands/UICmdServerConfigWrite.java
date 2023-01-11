@@ -24,7 +24,7 @@ public class UICmdServerConfigWrite extends DWCommand {
     StringWriter sw = new StringWriter();
 
     try {
-      DriveWireServer.serverconfig.save(sw);
+      DriveWireServer.serverConfiguration.save(sw);
     } catch (ConfigurationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

@@ -203,17 +203,17 @@ public class DWDECBFileSystem extends DWFileSystem {
     // try to recognize filetype.. assume binary?
     DWDECBFileSystemDirExtensionMapping mapping = new DWDECBFileSystemDirExtensionMapping(ext, DECBDefs.FLAG_BIN, DECBDefs.FILETYPE_ML);
 
-    if (DriveWireServer.serverconfig.getMaxIndex("DECBExtensionMapping") > -1) {
-      for (int i = 0; i <= DriveWireServer.serverconfig.getMaxIndex("DECBExtensionMapping"); i++) {
+    if (DriveWireServer.serverConfiguration.getMaxIndex("DECBExtensionMapping") > -1) {
+      for (int i = 0; i <= DriveWireServer.serverConfiguration.getMaxIndex("DECBExtensionMapping"); i++) {
         String kp = "DECBExtensionMapping(" + i + ")";
         // validate entry first
-        if (DriveWireServer.serverconfig.containsKey(kp + "[@extension]") && DriveWireServer.serverconfig.containsKey(kp + "[@ascii]") && DriveWireServer.serverconfig.containsKey(kp + "[@filetype]")) {
-          if (DriveWireServer.serverconfig.getString(kp + "[@extension]").equalsIgnoreCase(ext)) {
+        if (DriveWireServer.serverConfiguration.containsKey(kp + "[@extension]") && DriveWireServer.serverConfiguration.containsKey(kp + "[@ascii]") && DriveWireServer.serverConfiguration.containsKey(kp + "[@filetype]")) {
+          if (DriveWireServer.serverConfiguration.getString(kp + "[@extension]").equalsIgnoreCase(ext)) {
             // we have a winner
 
-            mapping.setType(DriveWireServer.serverconfig.getByte(kp + "[@filetype]"));
+            mapping.setType(DriveWireServer.serverConfiguration.getByte(kp + "[@filetype]"));
 
-            if (DriveWireServer.serverconfig.getBoolean(kp + "[@ascii]"))
+            if (DriveWireServer.serverConfiguration.getBoolean(kp + "[@ascii]"))
               mapping.setFlag(DECBDefs.FLAG_ASCII);
             else
               mapping.setFlag(DECBDefs.FLAG_BIN);

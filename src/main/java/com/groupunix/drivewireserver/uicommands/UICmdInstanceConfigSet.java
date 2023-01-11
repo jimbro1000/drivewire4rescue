@@ -62,7 +62,7 @@ public class UICmdInstanceConfigSet extends DWCommand {
 
     if (this.uiref != null) {
       if (DriveWireServer.getHandler(this.uiref.getInstance()).getConfig().containsKey(item)) {
-        synchronized (DriveWireServer.serverconfig) {
+        synchronized (DriveWireServer.serverConfiguration) {
           DriveWireServer.getHandler(this.uiref.getInstance()).getConfig().clearProperty(item);
         }
         return (new DWCommandResponse("Item '" + item + "' removed from config."));
@@ -72,7 +72,7 @@ public class UICmdInstanceConfigSet extends DWCommand {
 
     } else {
       if (dwProto.getConfig().containsKey(item)) {
-        synchronized (DriveWireServer.serverconfig) {
+        synchronized (DriveWireServer.serverConfiguration) {
           dwProto.getConfig().clearProperty(item);
         }
         return (new DWCommandResponse("Item '" + item + "' removed from config."));
@@ -85,7 +85,7 @@ public class UICmdInstanceConfigSet extends DWCommand {
 
 
   private DWCommandResponse doSetConfig(String item, String value) {
-    synchronized (DriveWireServer.serverconfig) {
+    synchronized (DriveWireServer.serverConfiguration) {
       if (this.uiref != null)
         DriveWireServer.getHandler(this.uiref.getInstance()).getConfig().setProperty(item, value);
       else

@@ -68,7 +68,7 @@ public class DWUIThread implements Runnable {
       wanttodie = true;
 
       // hrmmmm
-      if (DriveWireServer.serverconfig.getBoolean("UIorBust", true)) {
+      if (DriveWireServer.serverConfiguration.getBoolean("UIorBust", true)) {
         DriveWireServer.shutdown();
       }
     }
@@ -79,7 +79,7 @@ public class DWUIThread implements Runnable {
       try {
         skt = srvr.accept();
 
-        if (DriveWireServer.serverconfig.getBoolean("LogUIConnections", false))
+        if (DriveWireServer.serverConfiguration.getBoolean("LogUIConnections", false))
           logger.debug("new UI connection from " + skt.getInetAddress().getHostAddress());
 
         Thread uiclientthread = new Thread(new DWUIClientThread(skt, this.clientThreads));

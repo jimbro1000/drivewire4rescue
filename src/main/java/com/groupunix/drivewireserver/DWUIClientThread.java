@@ -146,7 +146,7 @@ public class DWUIClientThread implements Runnable {
     // strip instance
     cmd = cmd.substring(div + 1);
 
-    if (DriveWireServer.serverconfig.getBoolean("LogUIConnections", false))
+    if (DriveWireServer.serverConfiguration.getBoolean("LogUIConnections", false))
       logger.debug("UI command '" + cmd + "' for instance " + this.instance);
 
     // wait for server/instance ready
@@ -207,7 +207,7 @@ public class DWUIClientThread implements Runnable {
 
 
   private void sendUIresponse(DWCommandResponse resp) throws IOException {
-    if (DriveWireServer.serverconfig.getBoolean("LogUIConnections", false)) {
+    if (DriveWireServer.serverConfiguration.getBoolean("LogUIConnections", false)) {
       if (resp.getResponseCode() == 0)
         logger.debug("UI command success");
       else

@@ -40,10 +40,10 @@ public class UICmdServerShowLocalDisks extends DWCommand {
 		String res = new String();
 
 		try {
-			if (!DriveWireServer.serverconfig.containsKey("LocalDiskDir"))
+			if (!DriveWireServer.serverConfiguration.containsKey("LocalDiskDir"))
 				return (new DWCommandResponse(false, DWDefs.RC_CONFIG_KEY_NOT_SET, "LocalDiskDir must be defined in configuration"));
 
-			String path = DriveWireServer.serverconfig.getString("LocalDiskDir");
+			String path = DriveWireServer.serverConfiguration.getString("LocalDiskDir");
 
 			FileSystemManager fsManager;
 

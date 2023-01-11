@@ -82,7 +82,7 @@ public class UICmdInstanceMIDIStatus extends DWCommand {
           }
 
           @SuppressWarnings("unchecked")
-          List<HierarchicalConfiguration> profiles = DriveWireServer.serverconfig.configurationsAt("midisynthprofile");
+          List<HierarchicalConfiguration> profiles = DriveWireServer.serverConfiguration.configurationsAt("midisynthprofile");
 
           for (Iterator<HierarchicalConfiguration> it = profiles.iterator(); it.hasNext(); ) {
             HierarchicalConfiguration mprof = it.next();
