@@ -46,6 +46,7 @@ public class DriveWireServer {
 
   public static final String DWServerVersion = "4.3.3p";
   public static final String DWServerVersionDate = "09/17/2013";
+  public static final int THREAD_MAX_TIME_TO_DIE_MILLIS = 15000;
   public static XMLConfiguration serverConfiguration;
   public static int configSerial = 0;
   private static final Logger logger = Logger.getLogger(DriveWireServer.class);
@@ -71,9 +72,9 @@ public class DriveWireServer {
 
   private static DWEvent statusEvent = new DWEvent(DWDefs.EVENT_TYPE_STATUS, -1);
   private static long lastMemoryUpdate = 0;
-  private static ArrayList<DWEvent> logCache = new ArrayList<DWEvent>();
+  private static ArrayList<DWEvent> logCache = new ArrayList<>();
   private static boolean useDebug = false;
-  private static long magic = System.currentTimeMillis();
+  private static final long magic = System.currentTimeMillis();
   private static DWEvent evt = new DWEvent(DWDefs.EVENT_TYPE_STATUS, -1);
   private static DWEvent fevt;
   private static boolean noMIDI = false;
@@ -289,7 +290,6 @@ public class DriveWireServer {
     applyUISettings();
   }
 
-
   private static void startProtoHandlers() {
     @SuppressWarnings("unchecked")
     List<HierarchicalConfiguration> handlerConfigurations = serverConfiguration.configurationsAt("instance");
@@ -299,32 +299,31 @@ public class DriveWireServer {
 
     int hno = 0;
 
-    for (HierarchicalConfiguration hconf : handlerConfigurations) {
-      if (hconf.containsKey("Protocol")) {
-        if (hconf.getString("Protocol").equals("DriveWire")) {
-          dwProtoHandlers.add(new DWProtocolHandler(hno, hconf));
-        } else if (hconf.getString("Protocol").equals("MCX")) {
-          dwProtoHandlers.add(new MCXProtocolHandler(hno, hconf));
-        } else if (hconf.getString("Protocol").equals("VModem")) {
-          dwProtoHandlers.add(new VModemProtocolHandler(hno, hconf));
+    for (HierarchicalConfiguration hierarchicalConfiguration : handlerConfigurations) {
+      if (hierarchicalConfiguration.containsKey("Protocol")) {
+        if (hierarchicalConfiguration.getString("Protocol").equals("DriveWire")) {
+          dwProtoHandlers.add(new DWProtocolHandler(hno, hierarchicalConfiguration));
+        } else if (hierarchicalConfiguration.getString("Protocol").equals("MCX")) {
+          dwProtoHandlers.add(new MCXProtocolHandler(hno, hierarchicalConfiguration));
+        } else if (hierarchicalConfiguration.getString("Protocol").equals("VModem")) {
+          dwProtoHandlers.add(new VModemProtocolHandler(hno, hierarchicalConfiguration));
         } else {
-          logger.error("Unknown protocol '" + hconf.getString("Protocol") + "' in handler.");
+          logger.error("Unknown protocol '" + hierarchicalConfiguration.getString("Protocol") + "' in handler.");
         }
       } else {
         // default to drivewire
-        dwProtoHandlers.add(new DWProtocolHandler(hno, hconf));
+        dwProtoHandlers.add(new DWProtocolHandler(hno, hierarchicalConfiguration));
       }
 
       dwProtoHandlerThreads.add(new Thread(dwProtoHandlers.get(hno)));
 
-      if (hconf.getBoolean("AutoStart", true)) {
+      if (hierarchicalConfiguration.getBoolean("AutoStart", true)) {
         startHandler(hno);
       }
 
       hno++;
     }
   }
-
 
   public static void startHandler(int hno) {
     if (dwProtoHandlerThreads.get(hno).isAlive()) {
@@ -352,7 +351,7 @@ public class DriveWireServer {
     dwProtoHandlers.get(hno).shutdown();
 
     try {
-      dwProtoHandlerThreads.get(hno).join(15000);
+      dwProtoHandlerThreads.get(hno).join(THREAD_MAX_TIME_TO_DIE_MILLIS);
     } catch (InterruptedException e) {
       logger.warn("Interrupted while waiting for handler " + hno + " to exit");
     }
@@ -365,34 +364,32 @@ public class DriveWireServer {
 
 
   private static boolean checkRXTXLoaded() {
-    // try to load RXTX, redirect it's version messages into our logs
+    // try to load RXTX, redirect its version messages into our logs
 
     PrintStream ops = System.out;
     PrintStream eps = System.err;
 
-    ByteArrayOutputStream rxtxbaos = new ByteArrayOutputStream();
-    ByteArrayOutputStream rxtxbaes = new ByteArrayOutputStream();
+    ByteArrayOutputStream rxtxBaos = new ByteArrayOutputStream();
+    ByteArrayOutputStream rxtxBaes = new ByteArrayOutputStream();
 
-    PrintStream rxtxout = new PrintStream(rxtxbaos);
-    PrintStream rxtxerr = new PrintStream(rxtxbaes);
+    PrintStream rxtxOut = new PrintStream(rxtxBaos);
+    PrintStream rxtxErr = new PrintStream(rxtxBaes);
 
-    System.setOut(rxtxout);
-    System.setErr(rxtxerr);
+    System.setOut(rxtxOut);
+    System.setErr(rxtxErr);
 
     boolean res = DWUtils.testClassPath("gnu.io.RXTXCommDriver");
 
-    for (String l : rxtxbaes.toString().trim().split("\n")) {
+    for (String l : rxtxBaes.toString().trim().split("\n")) {
       System.out.println(l);
-
       if (!l.equals(""))
         logger.warn(l);
     }
 
-    for (String l : rxtxbaos.toString().trim().split("\n")) {
+    for (String l : rxtxBaos.toString().trim().split("\n")) {
       System.out.println(l);
       // ignore pesky version warning that doesn't ever seem to matter
       if (!l.equals("WARNING:  RXTX Version mismatch") && !l.equals("")) {
-
         logger.debug(l);
       }
     }
@@ -432,10 +429,10 @@ public class DriveWireServer {
         throw new DWPlatformUnknownException("No native dir for os '" + System.getProperty("os.name") + "' arch '" + System.getProperty("os.arch") + "'");
       }
 
-      // add this dir to path..
+      // add this dir to path...
       System.setProperty("java.library.path", System.getProperty("java.library.path") + File.pathSeparator + rxtxpath);
 
-      //set sys_paths to null so they will be reread by jvm
+      //set sys_paths to null, so they will be reread by jvm
       Field sysPathsField;
       sysPathsField = ClassLoader.class.getDeclaredField("sys_paths");
       sysPathsField.setAccessible(true);
