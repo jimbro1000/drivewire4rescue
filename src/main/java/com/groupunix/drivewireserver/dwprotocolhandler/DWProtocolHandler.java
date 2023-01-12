@@ -31,9 +31,7 @@ import com.groupunix.drivewireserver.virtualserial.DWVPortTermThread;
 import com.groupunix.drivewireserver.virtualserial.DWVSerialPorts;
 
 public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
-
   private final Logger logger = Logger.getLogger("DWServer.DWProtocolHandler");
-
 
   // record keeping portion of dwTransferData
   private int lastDrive = 0;
@@ -52,60 +50,41 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
   private long vserial_ops = 0;
   private boolean inOp = false;
   private int syncSkipped = 0;
-
   private GregorianCalendar dwinitTime = new GregorianCalendar();
-
   // serial port instance
-
   private DWProtocolDevice protodev = null;
-
   // printer
   private DWVPrinter vprinter;
-
   // disk drives
   private DWDiskDrives diskDrives;
-
   private boolean wanttodie = false;
-
   // RFM handler
   private DWRFMHandler rfmhandler;
-
   private int handlerno;
   private HierarchicalConfiguration config;
   private Thread termT;
   private DWVSerialPorts dwVSerialPorts;
-
   private DWVPortTermThread termHandler;
-
-
   private DWHelp dwhelp;
   private DWProtocolTimers timers;
-
   private boolean ready = false;
   private boolean started = false;
-
   private boolean resetPending = false;
-
 
   public DWProtocolHandler(int handlerno, HierarchicalConfiguration hconf) {
     this.handlerno = handlerno;
     this.config = hconf;
 
     config.addConfigurationListener(new DWProtocolConfigListener(this));
-
-
   }
-
 
   public HierarchicalConfiguration getConfig() {
     return (this.config);
   }
 
-
   public void reset() {
     DoOP_RESET();
   }
-
 
   public boolean isConnected() {
     if (protodev != null)
@@ -113,26 +92,20 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     return false;
   }
 
-
   public void shutdown() {
     logger.debug("handler #" + handlerno + ": shutdown requested");
-
     this.wanttodie = true;
-
     if (this.protodev != null)
       this.protodev.shutdown();
   }
 
-
   public void run() {
     int opcodeint = -1;
     this.started = true;
-
     this.timers = new DWProtocolTimers();
     this.timers.resetTimer(DWDefs.TIMER_START);
 
     Thread.currentThread().setName("dwproto-" + handlerno + "-" + Thread.currentThread().getId());
-
 
     // this thread should run a LOT or we might lose bytes on the serial port on slow computers
     Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
@@ -145,7 +118,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     if (!wanttodie) {
       // setup drives
       diskDrives = new DWDiskDrives(this);
-
       // setup virtual ports
       this.dwVSerialPorts = new DWVSerialPorts(this);
       dwVSerialPorts.resetAllPorts();
@@ -155,10 +127,8 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
 
       // setup printer
       vprinter = new DWVPrinter(this);
-
       // setup RFM handler
       rfmhandler = new DWRFMHandler(handlerno);
-
       // setup term device
       if (config.containsKey("TermPort")) {
         logger.debug("handler #" + handlerno + ": starting term device listener thread");
@@ -174,7 +144,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
       } else {
         this.dwhelp = new DWHelp(this);
       }
-
     }
 
     this.ready = true;
@@ -184,12 +153,9 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     logger.debug("handler #" + handlerno + " is ready");
 
     // protocol loop
-
     try {
-
       while (!wanttodie) {
         opcodeint = -1;
-
         // try to get an opcode
         if (!(protodev == null) && !resetPending) {
           try {
@@ -203,22 +169,15 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
           }
         }
 
-
         if ((opcodeint > -1) && (this.protodev != null)) {
-
           if (this.protodev.getClass().getCanonicalName().equals("com.groupunix.drivewireserver.dwprotocolhandler.DWSerialDevice"))
             ((DWSerialDevice) this.protodev).resetReadtime();
 
-
           optime = System.currentTimeMillis();
-
           this.inOp = true;
           lastOpcode = (byte) opcodeint;
           total_ops++;
-
           try {
-
-
             // fast writes
             if ((lastOpcode >= DWDefs.OP_FASTWRITE_BASE) && (lastOpcode <= (DWDefs.OP_FASTWRITE_BASE + this.dwVSerialPorts.getMaxPorts() - 1))) {
               DoOP_FASTSERWRITE(lastOpcode);
@@ -226,8 +185,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
               vserial_ops++;
             } else {
               // regular OP decode
-
-
               switch (lastOpcode) {
                 case DWDefs.OP_RESET1:
                 case DWDefs.OP_RESET2:
@@ -235,156 +192,125 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
                   this.timers.resetTimer(DWDefs.TIMER_RESET, optime);
                   DoOP_RESET();
                   break;
-
                 case DWDefs.OP_DWINIT:
                   this.timers.resetTimer(DWDefs.TIMER_DWINIT, optime);
                   DoOP_DWINIT();
                   break;
-
                 case DWDefs.OP_INIT:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_INIT();
                   break;
-
                 case DWDefs.OP_TERM:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_TERM();
                   break;
-
                 case DWDefs.OP_REREAD:
                 case DWDefs.OP_READ:
                   this.timers.resetTimer(DWDefs.TIMER_READ, optime);
                   DoOP_READ(lastOpcode);
                   disk_ops++;
                   break;
-
                 case DWDefs.OP_REREADEX:
                 case DWDefs.OP_READEX:
-
                   this.timers.resetTimer(DWDefs.TIMER_READ, optime);
                   DoOP_READEX(lastOpcode);
                   disk_ops++;
                   break;
-
                 case DWDefs.OP_WRITE:
                 case DWDefs.OP_REWRITE:
-
                   this.timers.resetTimer(DWDefs.TIMER_WRITE, optime);
                   DoOP_WRITE(lastOpcode);
                   disk_ops++;
                   break;
-
                 case DWDefs.OP_GETSTAT:
                 case DWDefs.OP_SETSTAT:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_STAT(lastOpcode);
                   disk_ops++;
                   break;
-
                 case DWDefs.OP_TIME:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_TIME();
                   break;
-
                 case DWDefs.OP_SETTIME:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_SETTIME();
                   break;
-
                 case DWDefs.OP_PRINT:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_PRINT();
                   break;
-
                 case DWDefs.OP_PRINTFLUSH:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_PRINTFLUSH();
                   break;
-
                 case DWDefs.OP_SERREADM:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_SERREADM();
                   vserial_ops++;
                   break;
-
                 case DWDefs.OP_SERREAD:
                   this.timers.resetTimer(DWDefs.TIMER_POLL, optime);
                   DoOP_SERREAD();
                   vserial_ops++;
                   break;
-
                 case DWDefs.OP_SERWRITE:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_SERWRITE();
                   vserial_ops++;
                   break;
-
                 case DWDefs.OP_SERWRITEM:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_SERWRITEM();
                   vserial_ops++;
                   break;
-
                 case DWDefs.OP_SERSETSTAT:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_SERSETSTAT();
                   vserial_ops++;
                   break;
-
                 case DWDefs.OP_SERGETSTAT:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_SERGETSTAT();
                   vserial_ops++;
                   break;
-
                 case DWDefs.OP_SERINIT:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_SERINIT();
                   vserial_ops++;
                   break;
-
                 case DWDefs.OP_SERTERM:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_SERTERM();
                   vserial_ops++;
                   break;
-
                 case DWDefs.OP_NOP:
                 case DWDefs.OP_230K230K:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_NOP();
                   break;
-
                 case DWDefs.OP_RFM:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_RFM();
                   break;
-
                 case DWDefs.OP_230K115K:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_230K115K();
                   break;
-
                 case DWDefs.OP_NAMEOBJ_MOUNT:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_NAMEOBJ_MOUNT();
                   break;
-
                 case DWDefs.OP_TIMER:
-
                   DoOP_TIMER();
                   break;
-
                 case DWDefs.OP_RESET_TIMER:
-
                   DoOP_RESET_TIMER();
                   break;
-
                 case DWDefs.OP_AARON:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
                   DoOP_AARON();
                   break;
-
                 default:
                   this.timers.resetTimer(DWDefs.TIMER_BAD_DATA, optime);
                   logger.warn("UNKNOWN OPCODE: " + opcodeint + " " + ((char) opcodeint));
@@ -400,7 +326,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
           }
 
           this.inOp = false;
-
           optook = System.currentTimeMillis() - optime;
 
           if (optook > DWDefs.SERVER_SLOW_OP)
@@ -408,12 +333,9 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
           else if (config.getBoolean("LogTiming", false))
             logger.debug(DWUtils.prettyOP(lastOpcode) + " took " + optook + "ms, serial read delay was " + ((DWSerialDevice) this.protodev).getReadtime());
         } else {
-
           if (!this.wanttodie) {
-
             if (this.resetPending) {
               logger.debug("device is resetting...");
-
               // kill device
               if (protodev != null)
                 this.protodev.shutdown();
@@ -424,23 +346,17 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
 
             // take a break, reset, hope things work themselves out
             try {
-
               Thread.sleep(config.getInt("DeviceFailRetryTime", 6000));
-
               setupProtocolDevice();
-
             } catch (InterruptedException e) {
               logger.error("Interrupted during failed port delay.. giving up on this crazy situation");
               wanttodie = true;
             }
           }
         }
-
       }
 
-
       logger.debug("handler #" + handlerno + ": shutting down");
-
 
       if (this.dwVSerialPorts != null) {
         this.dwVSerialPorts.shutdown();
@@ -455,15 +371,10 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
         termT.interrupt();
       }
 
-
     } catch (Exception e) {
-
       System.out.println("\n\n");
-
       e.printStackTrace();
-
       System.out.println("\n\n");
-
       logger.error(e.getMessage());
     } finally {
       if (protodev != null) {
@@ -472,15 +383,11 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     }
 
     logger.debug("handler #" + handlerno + ": exiting");
-
   }
-
 
   private void DoOP_AARON() {
     logger.warn("DriveWire " + DriveWireServer.DW_SERVER_VERSION + " (" + DriveWireServer.DW_SERVER_VERSION_DATE + ") by Aaron Wolfe");
-
   }
-
 
   private void DoOP_NAMEOBJ_MOUNT() throws DWCommTimeOutException, IOException {
     long starttime = System.currentTimeMillis();
@@ -489,8 +396,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     byte[] namebuf = new byte[namesize];
     namebuf = protodev.comRead(namesize);
     String objname = new String(namebuf);
-
-
     int result = diskDrives.nameObjMount(objname);
 
     // artificial delay test
@@ -509,10 +414,7 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
       long delay = System.currentTimeMillis() - starttime;
       logger.info("DoOP_NAMEOBJ_MOUNT for '" + objname + "' result: " + result + ", call took " + delay + "ms");
     }
-
-
   }
-
 
   private void DoOP_230K115K() {
     if (config.getBoolean("DetectDATurbo", false)) {
@@ -527,32 +429,24 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     }
   }
 
-
   private void DoOP_FASTSERWRITE(byte opcode) throws DWCommTimeOutException, IOException {
     int databyte;
     int port = opcode - DWDefs.OP_FASTWRITE_BASE;
 
     try {
       databyte = protodev.comRead1(true);
-
       dwVSerialPorts.serWrite(port, databyte);
-
       if (config.getBoolean("LogOpCode", false)) {
         logger.info("DoOP_FASTSERWRITE to port " + port + ": " + databyte);
       }
-
     } catch (DWPortNotOpenException e1) {
       logger.error(e1.getMessage());
     } catch (DWPortNotValidException e2) {
       logger.error(e2.getMessage());
     }
-
   }
 
-
   // DW OP methods
-
-
   private void DoOP_DWINIT() throws DWCommTimeOutException, IOException {
     int drv_version;
 
@@ -567,7 +461,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
       // send response
       protodev.comWrite1(DWDefs.DW_PROTOCOL_VERSION, true);
 
-
       if (drv_version <= 0x3F) {
         logger.debug("DWINIT from NitrOS9! Implementation variety type # " + drv_version);
       } else if ((drv_version >= 0x40) && (drv_version <= 0x4F)) {
@@ -578,7 +471,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
         logger.info("DWINIT got unknown driver version # " + drv_version);
       }
 
-
       // possibly extend this to all DWINITs..
       if (drv_version < 0x80) {
         if (this.config.getBoolean("HDBDOSMode", false)) {
@@ -587,19 +479,14 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
         }
       }
 
-
       // coco has just booted an os..
       dwinitTime = new GregorianCalendar();
-
       // reset all ports
       dwVSerialPorts.resetAllPorts();
-
     } else {
       logger.info("DWINIT received, ignoring due to DW3Only setting");
     }
-
   }
-
 
   private void DoOP_NOP() {
     if (config.getBoolean("LogOpCode", false)) {
@@ -607,19 +494,13 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     }
   }
 
-
   private void DoOP_RFM() throws DWCommTimeOutException, IOException {
     int rfm_op;
 
-
     rfm_op = protodev.comRead1(true);
     logger.info("DoOP_RFM call " + rfm_op);
-
     rfmhandler.DoRFMOP(protodev, rfm_op);
-
-
   }
-
 
   private void DoOP_TERM() {
     if (config.getBoolean("LogOpCode", false)) {
@@ -635,9 +516,7 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
 
   private void DoOP_RESET() {
     // coco has been reset/turned on
-
     // reset stats
-
     lastDrive = 0;
     readRetries = 0;
     writeRetries = 0;
@@ -659,9 +538,7 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     if (config.getBoolean("LogOpCode", false)) {
       logger.info("DoOP_RESET");
     }
-
   }
-
 
   private void DoOP_WRITE(byte opcode) throws DWCommTimeOutException, IOException {
     byte[] cocosum = new byte[2];
@@ -677,21 +554,16 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     System.arraycopy(responsebuf, 4, sector, 0, getConfig().getInt("DiskSectorSize", DWDefs.DISK_SECTORSIZE));
     System.arraycopy(responsebuf, getConfig().getInt("DiskSectorSize", DWDefs.DISK_SECTORSIZE) + 4, cocosum, 0, 2);
 
-
     // Compute Checksum on sector received - NOTE: no V1 version checksum
     lastChecksum = computeChecksum(sector, getConfig().getInt("DiskSectorSize", DWDefs.DISK_SECTORSIZE));
-
 
     // Compare checksums
     if (lastChecksum != DWUtils.int2(cocosum)) {
       // checksums do not match, tell Coco
       protodev.comWrite1(DWDefs.DWERROR_CRC, true);
-
       logger.warn("DoOP_WRITE: Bad checksum, drive: " + lastDrive + " LSN: " + DWUtils.int3(lastLSN) + " CocoSum: " + DWUtils.int2(cocosum) + " ServerSum: " + lastChecksum);
-
       return;
     }
-
 
     // do the write
     response = DWDefs.DWOK;
@@ -724,14 +596,11 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     // record error
     if (response != DWDefs.DWOK)
       lastError = response;
-
     // send response
     protodev.comWrite1(response, true);
-
     // Increment sectorsWritten count
     if (response == DWDefs.DWOK)
       sectorsWritten++;
-
     if (opcode == DWDefs.OP_REWRITE) {
       writeRetries++;
       if (config.getBoolean("LogOpCode", false)) {
@@ -742,10 +611,8 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
         logger.info("DoOP_WRITE lastDrive: " + lastDrive + " LSN: " + DWUtils.int3(lastLSN));
       }
     }
-
     return;
   }
-
 
   private void DoOP_READ(int opcode) throws IOException, DWCommTimeOutException {
     byte[] mysum = new byte[2];
@@ -756,18 +623,13 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     try {
       // read rest of packet - drive # and 3 byte LSN
       responsebuf = protodev.comRead(4);
-
       // store that..
       lastDrive = responsebuf[0] & 0xff;
       System.arraycopy(responsebuf, 1, lastLSN, 0, 3);
-
       // attempt seek to requested LSN (will throw one of the many exceptions caught below if it cannot)
       diskDrives.seekSector(lastDrive, DWUtils.int3(lastLSN));
-
       // we didn't throw an exception in our seek, so load a buffer with the sector's data
       sector = diskDrives.readSector(lastDrive);
-
-
       // deal with all kinds of things that could have gone wrong as we did the seek and read above...
     } catch (DWDriveNotLoadedException e1) {
       logger.warn("DoOP_READ: " + e1.getMessage());
@@ -787,28 +649,20 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     }
 
     // send ultimate result to coco in a response byte
-
     protodev.comWrite1(result, true);
-
 
     if (result == DWDefs.DWOK) {
       // if our response was OK, next we send the sector data
-
       // write out response sector
       protodev.comWrite(sector, getConfig().getInt("DiskSectorSize", DWDefs.DISK_SECTORSIZE), true);
-
       // calc a checksum
       lastChecksum = computeChecksum(sector, getConfig().getInt("DiskSectorSize", DWDefs.DISK_SECTORSIZE));
-
       mysum[0] = (byte) ((lastChecksum >> 8) & 0xFF);
       mysum[1] = (byte) ((lastChecksum << 0) & 0xFF);
-
       // send checksum to coco
       protodev.comWrite(mysum, 2, true);
-
       // we're done.. do housekeeping stuff
       sectorsRead++;
-
       if (opcode == DWDefs.OP_REREAD) {
         readRetries++;
         logger.warn("DoOP_REREAD lastDrive: " + lastDrive + " LSN: " + DWUtils.int3(lastLSN));
@@ -817,11 +671,8 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
           logger.info("DoOP_READ lastDrive: " + lastDrive + " LSN: " + DWUtils.int3(lastLSN));
         }
       }
-
     }
-
   }
-
 
   private void DoOP_READEX(int opcode) throws IOException, DWCommTimeOutException {
     byte[] cocosum = new byte[2];
@@ -832,18 +683,13 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
 
     try {
       // read rest of packet
-
       responsebuf = protodev.comRead(4);
-
       lastDrive = responsebuf[0] & 0xff;
       System.arraycopy(responsebuf, 1, lastLSN, 0, 3);
-
       // seek to requested LSN
       diskDrives.seekSector(lastDrive, DWUtils.int3(lastLSN));
-
       // load lastSector with bytes from file
       sector = diskDrives.readSector(lastDrive);
-
     } catch (DWDriveNotLoadedException e1) {
       // zero sector
       sector = diskDrives.nullSector();
@@ -868,7 +714,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
       result = DWDefs.DWERROR_READ;
     }
 
-
     // artificial delay test
     if (config.containsKey("ReadDelay")) {
       try {
@@ -881,22 +726,16 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
 
     // write out response sector
     protodev.comWrite(sector, getConfig().getInt("DiskSectorSize", DWDefs.DISK_SECTORSIZE), true);
-
     if (!config.getBoolean("ProtocolDisableReadChecksum", false)) {
       // calc checksum
       lastChecksum = computeChecksum(sector, getConfig().getInt("DiskSectorSize", DWDefs.DISK_SECTORSIZE));
-
       mysum[0] = (byte) ((lastChecksum >> 8) & 0xFF);
       mysum[1] = (byte) ((lastChecksum << 0) & 0xFF);
-
       // 	logger.debug("looking for checksum " + mysum[0] + ":" + mysum[1]);
-
       cocosum = protodev.comRead(2);
-
       if (((mysum[0] == cocosum[0]) && (mysum[1] == cocosum[1])) || config.getBoolean("ProtocolLieAboutCRC", false)) {
         // Good checksum, all is well
         sectorsRead++;
-
         if (opcode == DWDefs.OP_REREADEX) {
           readRetries++;
           logger.warn("DoOP_REREADEX lastDrive: " + lastDrive + " LSN: " + DWUtils.int3(lastLSN));
@@ -908,9 +747,7 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
       } else {
         // checksum mismatch
         // 	sectorsRead++;  should we increment this?
-
         result = DWDefs.DWERROR_CRC;
-
         if (opcode == DWDefs.OP_REREADEX) {
           readRetries++;
           logger.warn("DoOP_REREADEX CRC check failed, lastDrive: " + lastDrive + " LSN: " + DWUtils.int3(lastLSN));
@@ -924,18 +761,12 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
           } catch (DWDriveNotValidException e) {
             logger.warn(e.getMessage());
           }
-
-
         }
-
       }
-
     }
     // send result byte
     protodev.comWrite1(result, true);
-
   }
-
 
   private void DoOP_STAT(byte opcode) throws IOException, DWCommTimeOutException {
     byte[] responsebuf = new byte[2];
@@ -1011,7 +842,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     }
   }
 
-
   private void DoOP_RESET_TIMER() throws IOException, DWCommTimeOutException {
 
     // read rest of packet - timer #
@@ -1024,7 +854,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     }
   }
 
-
   // serial ports
 
   private void DoOP_SERGETSTAT() throws IOException, DWCommTimeOutException {
@@ -1033,16 +862,12 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     // get packet args
     // port # and stat
     responsebuf = protodev.comRead(2);
-
-
     // Z
     if ((responsebuf[0] >= this.dwVSerialPorts.getMaxNPorts()) && (responsebuf[0] < this.dwVSerialPorts.getMaxZPorts())) {
       switch (responsebuf[1]) {
         case OS9Defs.SS_KySns:
           protodev.comWrite1(0, true);
       }
-
-
     }
 
     //if (responsebuf[1] != 1)
@@ -1051,13 +876,10 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
         logger.info("DoOP_SERGETSTAT: " + DWUtils.prettySS(responsebuf[1]) + " port: " + responsebuf[0] + "(" + dwVSerialPorts.prettyPort(responsebuf[0]) + ")");
       }
     }
-
-
   }
 
   private void DoOP_SERSETSTAT() throws IOException, DWCommTimeOutException {
     byte[] responsebuf = new byte[2];
-
 
     try {
       // get packet args
@@ -1067,7 +889,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
       if (config.getBoolean("LogOpCode", false)) {
         logger.info("DoOP_SERSETSTAT: " + DWUtils.prettySS(responsebuf[1]) + " port: " + responsebuf[0] + "(" + dwVSerialPorts.prettyPort(responsebuf[0]) + ")");
       }
-
 
       switch (responsebuf[1]) {
         // SS.ComSt
@@ -1104,13 +925,10 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
         case 0x2A:
           dwVSerialPorts.closePort(responsebuf[0]);
           break;
-
       }
-
     } catch (DWPortNotValidException e) {
       logger.error(e.getMessage());
     }
-
   }
 
   private void DoOP_SERINIT() throws IOException, DWCommTimeOutException, DWPortNotValidException {
@@ -1119,17 +937,12 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     // get packet args
     // port # (mode no longer sent)
     responsebuf = protodev.comRead(1);
-
     int portnum = responsebuf[0];
-
     //dwVSerialPorts.openPort(portnum);
-
     if (config.getBoolean("LogOpCode", false)) {
       logger.info("DoOP_SERINIT for port " + dwVSerialPorts.prettyPort(portnum));
     }
-
   }
-
 
   private void DoOP_SERTERM() throws IOException, DWCommTimeOutException, DWPortNotValidException {
     int portnum;
@@ -1137,14 +950,11 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     // get packet args
     // just port #
     portnum = protodev.comRead1(true);
-
     //dwVSerialPorts.closePort(portnum);
-
     if (config.getBoolean("LogOpCode", false)) {
       logger.info("DoOP_SERTERM for port " + portnum);
     }
   }
-
 
   private void DoOP_SERREAD() {
     byte[] result = new byte[2];
@@ -1176,7 +986,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     } catch (DWPortNotValidException e2) {
       logger.error(e2.getMessage());
     }
-
   }
 
   private void DoOP_SERREADM() throws IOException, DWCommTimeOutException {
@@ -1199,8 +1008,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     } catch (DWPortNotValidException e2) {
       logger.error(e2.getMessage());
     }
-
-
   }
 
   private void DoOP_SERWRITEM() throws IOException, DWCommTimeOutException {
@@ -1219,15 +1026,12 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
         logger.debug("DoOP_SERWRITEM to port " + cmdpacket[0] + ", " + (0xff & cmdpacket[1]) + " bytes");
       }
 
-
     } catch (DWPortNotOpenException e1) {
       logger.error(e1.getMessage());
     } catch (DWPortNotValidException e2) {
       logger.error(e2.getMessage());
     }
-
   }
-
 
   // printing
 
@@ -1239,19 +1043,15 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     if (config.getBoolean("LogOpCode", false)) {
       logger.info("DoOP_PRINT: byte " + tmpint);
     }
-
     vprinter.addByte((byte) tmpint);
-
   }
 
   private void DoOP_PRINTFLUSH() {
     if (config.getBoolean("LogOpCode", false)) {
       logger.info("DoOP_PRINTFLUSH");
     }
-
     vprinter.flush();
   }
-
 
   private int computeChecksum(byte[] data, int numbytes) {
     int lastChecksum = 0;
@@ -1261,71 +1061,56 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
       numbytes--;
       lastChecksum += (int) (data[numbytes] & 0xFF);
     }
-
     return (lastChecksum);
-
   }
-
 
   public int getLastDrive() {
     return lastDrive;
   }
 
-
   public int getReadRetries() {
     return readRetries;
   }
-
 
   public int getWriteRetries() {
     return writeRetries;
   }
 
-
   public int getSectorsRead() {
     return sectorsRead;
   }
-
 
   public int getSectorsWritten() {
     return sectorsWritten;
   }
 
-
   public byte getLastOpcode() {
     return lastOpcode;
   }
-
 
   public byte getLastGetStat() {
     return lastGetStat;
   }
 
-
   public byte getLastSetStat() {
     return lastSetStat;
   }
-
 
   public int getLastChecksum() {
     return lastChecksum;
   }
 
-
   public int getLastError() {
     return lastError;
   }
-
 
   public byte[] getLastLSN() {
     return lastLSN;
   }
 
-
   public GregorianCalendar getInitTime() {
     return (dwinitTime);
   }
-
 
   public DWDiskDrives getDiskDrives() {
     return this.diskDrives;
@@ -1335,16 +1120,13 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     return this.dwVSerialPorts;
   }
 
-
   public boolean isDying() {
     return this.wanttodie;
   }
 
-
   public DWProtocolDevice getProtoDev() {
     return (this.protodev);
   }
-
 
   public void resetProtocolDevice() {
     if (!this.wanttodie) {
@@ -1356,21 +1138,16 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
       if (this.protodev != null) {
         this.protodev.close();
       }
-
     }
   }
 
-
   private void setupProtocolDevice() {
-
     if ((protodev != null) && (!resetPending))
       protodev.shutdown();
-
 
     if (config.getString("DeviceType", "dummy").equalsIgnoreCase("dummy")) {
       this.resetPending = false;
     } else if (config.getString("DeviceType").equalsIgnoreCase("serial")) {
-
       // create serial device
       if ((config.containsKey("SerialDevice") && config.containsKey("SerialRate"))) {
         try {
@@ -1409,7 +1186,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
         logger.error("TCP server mode requires TCPServerPort to be set, cannot use this configuration");
         //wanttodie = true;
       }
-
     } else if (config.getString("DeviceType").equalsIgnoreCase("tcp-client")) {
       // create TCP device
       if (config.containsKey("TCPClientPort") && config.containsKey("TCPClientHost")) {
@@ -1423,10 +1199,8 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
         logger.error("TCP client mode requires TCPClientPort and TCPClientHost to be set, cannot use this configuration");
         //wanttodie = true;
       }
-
     }
   }
-
 
   @Override
   public String getStatusText() {
@@ -1438,27 +1212,22 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     text += "Last Drive:    " + getLastDrive() + "\r\n";
     text += "Last LSN:      " + DWUtils.int3(getLastLSN()) + "\r\n";
     text += "Last Error:    " + ((int) getLastError() & 0xFF) + "\r\n";
-
     text += "\r\n";
 
     // TODO:  include read and write retries per disk
     // text += "Total Read Sectors:  " + String.format("%6d",DriveWireServer.getHandler(handlerno).getSectorsRead()) + "  (" + DriveWireServer.getHandler(handlerno).getReadRetries() + " retries)\r\n";
     //text += "Total Write Sectors: " + String.format("%6d",DriveWireServer.getHandler(handlerno).getSectorsWritten()) + "  (" + DriveWireServer.getHandler(handlerno).getWriteRetries() + " retries)\r\n";
 
-
     return (text);
   }
 
-
   public String getName() {
     return (this.config.getString("[@name]", "Unnamed #" + this.handlerno));
-
   }
 
   public int getHandlerNo() {
     return this.handlerno;
   }
-
 
   @Override
   public void syncStorage() {
@@ -1471,7 +1240,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     } else {
       logger.debug("handler is alive, but disk drive object is null, probably startup taking a while.. skipping");
     }
-
   }
 
   public DWVPrinter getVPrinter() {
@@ -1482,28 +1250,23 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     return this.logger;
   }
 
-
   public int getCMDCols() {
     return getConfig().getInt("DWCommandOutputWidth", DWDefs.DWCMD_DEFAULT_COLS);
   }
 
-
   public DWHelp getHelp() {
     return dwhelp;
   }
-
 
   @Override
   public boolean isReady() {
     return this.ready;
   }
 
-
   @Override
   public void submitConfigEvent(String key, String val) {
     DriveWireServer.submitInstanceConfigEvent(this.handlerno, key, val);
   }
-
 
   @Override
   public long getNumOps() {
@@ -1511,13 +1274,11 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     return this.total_ops;
   }
 
-
   @Override
   public long getNumDiskOps() {
     // TODO Auto-generated method stub
     return this.disk_ops;
   }
-
 
   @Override
   public long getNumVSerialOps() {
@@ -1529,43 +1290,33 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     return this.inOp;
   }
 
-
   @Override
   public DWProtocolTimers getTimers() {
     return this.timers;
   }
 
-
   @Override
   public boolean isStarted() {
-
     return this.started;
   }
 
   @Override
   public boolean hasPrinters() {
-
     return true;
   }
 
   @Override
   public boolean hasDisks() {
-
     return true;
   }
 
   @Override
   public boolean hasMIDI() {
-
     return true;
   }
 
   @Override
   public boolean hasVSerial() {
-
     return true;
   }
-
 }
-	
-
