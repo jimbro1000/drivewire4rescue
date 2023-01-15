@@ -4,7 +4,11 @@ public class DWPrinterNotDefinedException extends Exception {
 
   private static final long serialVersionUID = 1L;
 
-  public DWPrinterNotDefinedException(String msg) {
+  /**
+   * Printer not defined exception constructor.
+   * @param msg
+   */
+  public DWPrinterNotDefinedException(final String msg) {
     super(msg);
   }
 }

@@ -4,7 +4,11 @@ public class DWDriveWriteProtectedException extends Exception {
 
   private static final long serialVersionUID = 1L;
 
-  public DWDriveWriteProtectedException(String msg) {
+  /**
+   * Drive write protected exception constructor.
+   * @param msg
+   */
+  public DWDriveWriteProtectedException(final String msg) {
     super(msg);
   }
 }

@@ -2,7 +2,6 @@ package com.groupunix.drivewireserver.dwprotocolhandler;
 
 import java.io.IOException;
 
-import org.apache.commons.vfs2.FileSystemException;
 import org.apache.log4j.Logger;
 
 import com.groupunix.drivewireserver.OS9Defs;
@@ -154,7 +153,7 @@ public class DWRFMHandler {
 					getSTT_FD(protodev, pathno);
 					break;
 
-				case OS9Defs.SS_DirEnt:
+				case OS9Defs.SS_DIR_ENT:
 					setSTT_FD(protodev, pathno);
 					break;
 

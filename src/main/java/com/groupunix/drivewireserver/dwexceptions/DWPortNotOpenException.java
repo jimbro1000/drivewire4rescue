@@ -4,7 +4,11 @@ public class DWPortNotOpenException extends Exception {
 
   private static final long serialVersionUID = 1L;
 
-  public DWPortNotOpenException(String msg) {
+  /**
+   * Port not open exception constructor.
+   * @param msg
+   */
+  public DWPortNotOpenException(final String msg) {
     super(msg);
   }
 

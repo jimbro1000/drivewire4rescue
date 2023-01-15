@@ -1,6 +1,9 @@
 package com.groupunix.drivewireserver;
 
-public class OS9Defs {
+public final class OS9Defs {
+  private OS9Defs() {
+    //hidden constructor
+  }
   // Constants from OS9
 
   // Mode byte
@@ -14,124 +17,118 @@ public class OS9Defs {
   public static final byte MODE_DIR = (byte) 128;
 
   // Status codes for Get/SetStat
-  public static final byte SS_Opt = 0;
-  public static final byte SS_Ready = 1;
-  public static final byte SS_Size = 2;
-  public static final byte SS_Reset = 3;
-  public static final byte SS_WTrk = 4;
-  public static final byte SS_Pos = 5;
+  public static final byte SS_OPT = 0;
+  public static final byte SS_READY = 1;
+  public static final byte SS_SIZE = 2;
+  public static final byte SS_RESET = 3;
+  public static final byte SS_W_TRK = 4;
+  public static final byte SS_POS = 5;
   public static final byte SS_EOF = 6;
-  public static final byte SS_Link = 7;
-  public static final byte SS_ULink = 8;
-  public static final byte SS_Feed = 9;
-  public static final byte SS_Frz = 10;
+  public static final byte SS_LINK = 7;
+  public static final byte SS_U_LINK = 8;
+  public static final byte SS_FEED = 9;
+  public static final byte SS_FRZ = 10;
   public static final byte SS_SPT = 11;
   public static final byte SS_SQD = 12;
-  public static final byte SS_DCmd = 13;
-  public static final byte SS_DevNm = 14;
+  public static final byte SS_D_CMD = 13;
+  public static final byte SS_DEV_NM = 14;
   public static final byte SS_FD = 15;
-  public static final byte SS_Ticks = 16;
-  public static final byte SS_Lock = 17;
-
-  public static final byte SS_KySns = 0x27;
-
-  public static final byte SS_DirEnt = 0x21;
+  public static final byte SS_TICKS = 16;
+  public static final byte SS_LOCK = 17;
+  public static final byte SS_KY_SNS = 0x27;
+  public static final byte SS_DIR_ENT = 0x21;
 
   // General commands
-  public static final byte CMD_Escape = 0x1b;
+  public static final byte CMD_ESCAPE = 0x1b;
+  public static final byte CMD_DW_EXT = 0x7F;
+  public static final byte CMD_DW_EXT_DEV_NAME = 0x01;
+  public static final byte CMD_DW_EXT_DEF_WIN = 0x02;
+  public static final byte CMD_DW_EXT_TITLE = 0x03;
+  public static final byte CMD_DW_EXT_PALETTE = 0x04;
+  public static final byte CMD_DW_EXT_ICON = 0x05;
+  public static final byte CMD_DW_EXT_ICON_NORMAL = 0x00;
+  public static final byte CMD_DW_EXT_ICON_OK = 0x01;
+  public static final byte CMD_DW_EXT_ICON_INFO = 0x02;
+  public static final byte CMD_DW_EXT_ICON_WARN = 0x03;
+  public static final byte CMD_DW_EXT_ICON_ERROR = 0x04;
+  public static final byte CMD_DW_EXT_ICON_BUSY = 0x05;
+  public static final byte CMD_B_COLOR = 0x33;
+  public static final byte CMD_BOLD_SW = 0x3D;
+  public static final byte CMD_BORDER = 0x34;
+  public static final byte CMD_CW_AREA = 0x25;
+  public static final byte CMD_DEF_COLR = 0x30;
+  public static final byte CMD_DFN_GP_BUF = 0x29;
+  public static final byte CMD_DW_END = 0x24;
+  public static final byte CMD_DW_PROT_SW = 0x36;
+  public static final byte CMD_DW_SET = 0x20;
+  public static final byte STY_CURRENT_DISPLAY = (byte) 0xff;
+  public static final byte STY_CURRENT_PROCESS = 0x00;
+  public static final byte STY_TEXT_40 = 0x01;
+  public static final byte STY_TEXT_80 = 0x02;
+  public static final byte STY_GFX_HI_RES_2_COL = 0x05;
+  public static final byte STY_GFX_LO_RES_4_COL = 0x06;
+  public static final byte STY_GFX_HI_RES_4_COL = 0x07;
+  public static final byte STY_GFX_LO_RES_16_COL = 0x08;
 
-  public static final byte CMD_DWExt = 0x7F;
-  public static final byte CMD_DWExt_DevName = 0x01;
-  public static final byte CMD_DWExt_DefWin = 0x02;
-  public static final byte CMD_DWExt_Title = 0x03;
-  public static final byte CMD_DWExt_Palette = 0x04;
-  public static final byte CMD_DWExt_Icon = 0x05;
-  public static final byte CMD_DWExt_Icon_Normal = 0x00;
-  public static final byte CMD_DWExt_Icon_OK = 0x01;
-  public static final byte CMD_DWExt_Icon_Info = 0x02;
-  public static final byte CMD_DWExt_Icon_Warn = 0x03;
-  public static final byte CMD_DWExt_Icon_Error = 0x04;
-  public static final byte CMD_DWExt_Icon_Busy = 0x05;
-
-  public static final byte CMD_BColor = 0x33;
-  public static final byte CMD_BoldSw = 0x3D;
-  public static final byte CMD_Border = 0x34;
-  public static final byte CMD_CWArea = 0x25;
-  public static final byte CMD_DefColr = 0x30;
-  public static final byte CMD_DfnGPBuf = 0x29;
-  public static final byte CMD_DWEnd = 0x24;
-  public static final byte CMD_DWProtSw = 0x36;
-  public static final byte CMD_DWSet = 0x20;
-
-  public static final byte STY_CurrentDisplay = (byte) 0xff;
-  public static final byte STY_CurrentProcess = 0x00;
-  public static final byte STY_Text40 = 0x01;
-  public static final byte STY_Text80 = 0x02;
-  public static final byte STY_GfxHiRes2Col = 0x05;
-  public static final byte STY_GfxLoRes4Col = 0x06;
-  public static final byte STY_GfxHiRes4Col = 0x07;
-  public static final byte STY_GfxLoRes16Col = 0x08;
-
-  public static final byte CMD_FColor = 0x32;
-  public static final byte CMD_Font = 0x3a;
-  public static final byte CMD_GCSet = 0x39;
-  public static final byte CMD_GetBlk = 0x2c;
-  public static final byte CMD_GPLoad = 0x2b;
-  public static final byte CMD_KilBuf = 0x2a;
-  public static final byte CMD_LSet = 0x2f;
-  public static final byte CMD_OWEnd = 0x23;
-  public static final byte CMD_OWSet = 0x22;
-  public static final byte CMD_Palette = 0x31;
-  public static final byte CMD_PropSw = 0x3f;
-  public static final byte CMD_PSet = 0x2e;
-  public static final byte CMD_PutBlk = 0x2d;
-  public static final byte CMD_ScaleSw = 0x35;
-  public static final byte CMD_Select = 0x21;
-  public static final byte CMD_TCharSw = 0x3c;
+  public static final byte CMD_F_COLOR = 0x32;
+  public static final byte CMD_FONT = 0x3a;
+  public static final byte CMD_GC_SET = 0x39;
+  public static final byte CMD_GET_BLK = 0x2c;
+  public static final byte CMD_GP_LOAD = 0x2b;
+  public static final byte CMD_KIL_BUF = 0x2a;
+  public static final byte CMD_L_SET = 0x2f;
+  public static final byte CMD_OW_END = 0x23;
+  public static final byte CMD_OW_SET = 0x22;
+  public static final byte CMD_PALETTE = 0x31;
+  public static final byte CMD_PROP_SW = 0x3f;
+  public static final byte CMD_P_SET = 0x2e;
+  public static final byte CMD_PUT_BLK = 0x2d;
+  public static final byte CMD_SCALE_SW = 0x35;
+  public static final byte CMD_SELECT = 0x21;
+  public static final byte CMD_T_CHAR_SW = 0x3c;
 
   // Drawing commands
-  public static final byte CMD_Arc3P = 0x52;
-  public static final byte CMD_Bar = 0x4a;
-  public static final byte CMD_RBar = 0x4b;
-  public static final byte CMD_Box = 0x48;
-  public static final byte CMD_RBox = 0x49;
-  public static final byte CMD_Circle = 0x50;
-  public static final byte CMD_Ellipse = 0x51;
-  public static final byte CMD_FFill = 0x4f;
-  public static final byte CMD_Line = 0x44;
-  public static final byte CMD_RLine = 0x45;
-  public static final byte CMD_LineM = 0x46;
-  public static final byte CMD_RLineM = 0x47;
-  public static final byte CMD_Point = 0x42;
-  public static final byte CMD_RPoint = 0x43;
-  public static final byte CMD_PutGC = 0x4e;
-  public static final byte CMD_SetDPtr = 0x40;
-  public static final byte CMD_RSetDPtr = 0x41;
+  public static final byte CMD_ARC_3_P = 0x52;
+  public static final byte CMD_BAR = 0x4a;
+  public static final byte CMD_R_BAR = 0x4b;
+  public static final byte CMD_BOX = 0x48;
+  public static final byte CMD_R_BOX = 0x49;
+  public static final byte CMD_CIRCLE = 0x50;
+  public static final byte CMD_ELLIPSE = 0x51;
+  public static final byte CMD_F_FILL = 0x4f;
+  public static final byte CMD_LINE = 0x44;
+  public static final byte CMD_R_LINE = 0x45;
+  public static final byte CMD_LINE_M = 0x46;
+  public static final byte CMD_R_LINE_M = 0x47;
+  public static final byte CMD_POINT = 0x42;
+  public static final byte CMD_R_POINT = 0x43;
+  public static final byte CMD_PUT_GC = 0x4e;
+  public static final byte CMD_SET_D_PTR = 0x40;
+  public static final byte CMD_R_SET_D_PTR = 0x41;
 
   // Text commands
-  public static final byte CTL_Home = 0x01;
-  public static final byte CTL_Position = 0x02;
-  public static final byte CTL_EraseLine = 0x03;
-  public static final byte CTL_EraseToEOL = 0x04;
-  public static final byte CTL_CursorOnOff = 0x05;
-  public static final byte CTL_CursorOnOff_Off = 0x20;
-  public static final byte CTL_CursorOnOff_On = 0x21;
-  public static final byte CTL_CursorRight = 0x06;
-  public static final byte CTL_Bell = 0x07;
-  public static final byte CTL_CursorLeft = 0x08;
-  public static final byte CTL_CursorUp = 0x09;
-  public static final byte CTL_CursorDown = 0x0a;
-  public static final byte CTL_EraseToEOS = 0x0b;
-  public static final byte CTL_ClearScreen = 0x0c;
+  public static final byte CTL_HOME = 0x01;
+  public static final byte CTL_POSITION = 0x02;
+  public static final byte CTL_ERASE_LINE = 0x03;
+  public static final byte CTL_ERASE_TO_EOL = 0x04;
+  public static final byte CTL_CURSOR_ON_OFF = 0x05;
+  public static final byte CTL_CURSOR_ON_OFF_OFF = 0x20;
+  public static final byte CTL_CURSOR_ON_OFF_ON = 0x21;
+  public static final byte CTL_CURSOR_RIGHT = 0x06;
+  public static final byte CTL_BELL = 0x07;
+  public static final byte CTL_CURSOR_LEFT = 0x08;
+  public static final byte CTL_CURSOR_UP = 0x09;
+  public static final byte CTL_CURSOR_DOWN = 0x0a;
+  public static final byte CTL_ERASE_TO_EOS = 0x0b;
+  public static final byte CTL_CLEAR_SCREEN = 0x0c;
   public static final byte CTL_CR = 0x0d;
-
-  public static final byte CTL_Extended = 0x1f;
-  public static final byte CTL_Ext_Reverse_On = 0x20;
-  public static final byte CTL_Ext_Reverse_Off = 0x21;
-  public static final byte CTL_Ext_Underline_On = 0x22;
-  public static final byte CTL_Ext_Underline_Off = 0x23;
-  public static final byte CTL_Ext_Blink_On = 0x24;
-  public static final byte CTL_Ext_Blink_Off = 0x25;
-  public static final byte CTL_Ext_Insert_Line = 0x30;
-  public static final byte CTL_Ext_Delete_Line = 0x31;
+  public static final byte CTL_EXTENDED = 0x1f;
+  public static final byte CTL_EXT_REVERSE_ON = 0x20;
+  public static final byte CTL_EXT_REVERSE_OFF = 0x21;
+  public static final byte CTL_EXT_UNDERLINE_ON = 0x22;
+  public static final byte CTL_EXT_UNDERLINE_OFF = 0x23;
+  public static final byte CTL_EXT_BLINK_ON = 0x24;
+  public static final byte CTL_EXT_BLINK_OFF = 0x25;
+  public static final byte CTL_EXT_INSERT_LINE = 0x30;
+  public static final byte CTL_EXT_DELETE_LINE = 0x31;
 }

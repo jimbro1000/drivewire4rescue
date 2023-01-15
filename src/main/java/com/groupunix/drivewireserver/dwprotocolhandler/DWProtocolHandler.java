@@ -865,7 +865,7 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     // Z
     if ((responsebuf[0] >= this.dwVSerialPorts.getMaxNPorts()) && (responsebuf[0] < this.dwVSerialPorts.getMaxZPorts())) {
       switch (responsebuf[1]) {
-        case OS9Defs.SS_KySns:
+        case OS9Defs.SS_KY_SNS:
           protodev.comWrite1(0, true);
       }
     }
