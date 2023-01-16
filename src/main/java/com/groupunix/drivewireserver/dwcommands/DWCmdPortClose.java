@@ -6,54 +6,92 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
 public class DWCmdPortClose extends DWCommand {
 
-  private DWVSerialProtocol dwProto;
+  /**
+   * Port serial protocol.
+   */
+  private DWVSerialProtocol dwProtocol;
 
-  public DWCmdPortClose(DWVSerialProtocol dwProtocol, DWCommand parent) {
+  /**
+   * Port close command constructor.
+   * @param protocol
+   * @param parent
+   */
+  public DWCmdPortClose(
+      final DWVSerialProtocol protocol,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProtocol;
+    this.dwProtocol = protocol;
   }
 
+  /**
+   * Get command.
+   * @return command name
+   */
   public String getCommand() {
     return "close";
   }
 
+  /**
+   * Get short help.
+   * @return short help details
+   */
   public String getShortHelp() {
     return "Close port #";
   }
 
-
+  /**
+   * Get usage information.
+   * @return usage
+   */
   public String getUsage() {
     return "dw port close #";
   }
 
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command.
+   * @param cmdline
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "dw port close requires a port # as an argument"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "dw port close requires a port # as an argument"
+      );
     }
     return (doPortClose(cmdline));
   }
 
-
-  private DWCommandResponse doPortClose(String port) {
-
-
+  private DWCommandResponse doPortClose(final String port) {
     try {
-      int portno = Integer.parseInt(port);
-
-      dwProto.getVPorts().closePort(portno);
-
-      return (new DWCommandResponse("Port #" + portno + " closed."));
-
+      final int portNumber = Integer.parseInt(port);
+      dwProtocol.getVPorts().closePort(portNumber);
+      return new DWCommandResponse(
+          "Port #" + portNumber + " closed."
+      );
     } catch (NumberFormatException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error: non numeric port #"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "Syntax error: non numeric port #"
+      );
     } catch (DWPortNotValidException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_INVALID_PORT, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_INVALID_PORT,
+          e.getMessage()
+      );
     }
-
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command.
+   * @param cmdline
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
 }

@@ -7,70 +7,132 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
 public class DWCmdDiskSet extends DWCommand {
+  /**
+   * Maximum number of command arguments.
+   */
+  public static final int MAX_COMMANDS = 3;
+  /**
+   * Drivewire protocol handler.
+   */
+  private DWProtocolHandler dwProtocolHandler;
 
-  private DWProtocolHandler dwProto;
-
-  public DWCmdDiskSet(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Disk set command constructor.
+   * @param protocolHandler protocol handler
+   * @param parent command parent
+   */
+  public DWCmdDiskSet(
+      final DWProtocolHandler protocolHandler,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocolHandler = protocolHandler;
   }
 
+  /**
+   * Get command.
+   * @return command name
+   */
   public String getCommand() {
     return "set";
   }
 
-
+  /**
+   * Get short help.
+   * @return short help details
+   */
   public String getShortHelp() {
     return "Set disk parameters";
   }
 
-
+  /**
+   * Get usage.
+   * @return usage information
+   */
   public String getUsage() {
     return "dw disk set # param val";
   }
 
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command.
+   * @param cmdline
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     String[] args = cmdline.split(" ");
-
-    if (args.length < 3) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "dw disk set requires 3 arguments."));
+    if (args.length < MAX_COMMANDS) {
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "dw disk set requires 3 arguments."
+      );
     }
-
     try {
-      return (doDiskSet(dwProto.getDiskDrives().getDriveNoFromString(args[0]), DWUtils.dropFirstToken(cmdline)));
+      return doDiskSet(dwProtocolHandler
+          .getDiskDrives()
+          .getDriveNoFromString(args[0]), DWUtils.dropFirstToken(cmdline)
+      );
     } catch (DWDriveNotValidException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_INVALID_DRIVE, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_INVALID_DRIVE,
+          e.getMessage()
+      );
     }
-
   }
 
-
-  private DWCommandResponse doDiskSet(int driveno, String cmdline) {
-    // driveno + param/val
-
+  private DWCommandResponse doDiskSet(
+      final int driveNumber,
+      final String cmdline
+  ) {
+    // driveNumber + param/val
     String[] parts = cmdline.split(" ");
-
     // set item
-
     try {
-      if (dwProto.getDiskDrives().getDisk(driveno).getParams().containsKey(parts[0])) {
-        dwProto.getDiskDrives().getDisk(driveno).getParams().setProperty(parts[0], DWUtils.dropFirstToken(cmdline));
-        return (new DWCommandResponse("Param '" + parts[0] + "' set for disk " + driveno + "."));
+      if (dwProtocolHandler
+          .getDiskDrives()
+          .getDisk(driveNumber)
+          .getParams()
+          .containsKey(parts[0])
+      ) {
+        dwProtocolHandler
+            .getDiskDrives()
+            .getDisk(driveNumber)
+            .getParams()
+            .setProperty(parts[0], DWUtils.dropFirstToken(cmdline));
+        return new DWCommandResponse(
+            "Param '" + parts[0]
+                + "' set for disk " + driveNumber + "."
+        );
       } else {
-        return (new DWCommandResponse(false, DWDefs.RC_INVALID_DISK_DEF, "No parameter '" + parts[0] + "' available for disk " + driveno + "."));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_INVALID_DISK_DEF,
+            "No parameter '" + parts[0]
+                + "' available for disk " + driveNumber + "."
+        );
       }
     } catch (DWDriveNotLoadedException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_DRIVE_NOT_LOADED, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_DRIVE_NOT_LOADED,
+          e.getMessage()
+      );
     } catch (DWDriveNotValidException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_INVALID_DRIVE, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_INVALID_DRIVE,
+          e.getMessage()
+      );
     }
-
-
   }
 
-
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command.
+   * @param cmdline
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
 }
