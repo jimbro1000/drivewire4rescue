@@ -7,10 +7,10 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 public final class DWCmdInstanceStart extends DWCommand {
   /**
    * Command Instance Start constructor.
-   * @param dwProto2 protocol
+   * @param protocol protocol
    * @param parent parent
    */
-  public DWCmdInstanceStart(final DWProtocol dwProto2, final DWCommand parent) {
+  public DWCmdInstanceStart(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
   }
 
