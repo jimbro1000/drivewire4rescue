@@ -7,74 +7,98 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
 public class DWCmdPortShow extends DWCommand {
 
-  private DWVSerialProtocol dwProto;
+  /**
+   * drivewire protocol.
+   */
+  private final DWVSerialProtocol dwProtocol;
 
-  public DWCmdPortShow(DWVSerialProtocol dwProtocol, DWCommand parent) {
+  /**
+   * port show command constructor.
+   * @param protocol serial protocol
+   * @param parent command parent
+   */
+  public DWCmdPortShow(
+      final DWVSerialProtocol protocol,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProtocol;
+    this.dwProtocol = protocol;
   }
 
+  /**
+   * get command.
+   * @return command name
+   */
   public String getCommand() {
     return "show";
   }
 
-
+  /**
+   * get short help.
+   * @return short help details
+   */
   public String getShortHelp() {
     return "Show port status";
   }
 
-
+  /**
+   * get usage.
+   * @return usage information
+   */
   public String getUsage() {
     return "dw port show";
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (doPortShow());
+  /**
+   * parse command.
+   * @param cmdline
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return doPortShow();
   }
-
 
   private DWCommandResponse doPortShow() {
-    String text = new String();
+    StringBuilder text = new StringBuilder();
 
-    text += "\r\nCurrent port status:\r\n\n";
-
-    for (int i = 0; i < dwProto.getVPorts().getMaxPorts(); i++) {
-
-      text += String.format("%6s", dwProto.getVPorts().prettyPort(i));
-
+    text.append("\r\nCurrent port status:\r\n\n");
+    for (int i = 0; i < dwProtocol.getVPorts().getMaxPorts(); i++) {
+      text.append(String.format("%6s", dwProtocol.getVPorts().prettyPort(i)));
       try {
-
-
-        if (dwProto.getVPorts().isOpen(i)) {
-          text += String.format(" %-8s", "open(" + dwProto.getVPorts().getOpen(i) + ")");
-
-          //text += String.format(" %-11s", "PD.INT=" + dwProto.getVPorts().getPD_INT(i));
-          //text += String.format(" %-11s", "PD.QUT=" + dwProto.getVPorts().getPD_QUT(i));
-          text += String.format(" %-9s", "buf: " + dwProto.getVPorts().bytesWaiting(i));
-
+        if (dwProtocol.getVPorts().isOpen(i)) {
+          text.append(
+              String.format(
+                  " %-8s",
+                  "open(" + dwProtocol.getVPorts().getOpen(i) + ")")
+          );
+          text.append(
+              String.format(
+                  " %-9s",
+                  "buf: " + dwProtocol.getVPorts().bytesWaiting(i)
+              )
+          );
         } else {
-          text += " closed";
+          text.append(" closed");
         }
-
-
-        if (dwProto.getVPorts().getUtilMode(i) != DWDefs.UTILMODE_UNSET)
-          text += DWUtils.prettyUtilMode(dwProto.getVPorts().getUtilMode(i));
-
-        //text += " " + DWProtocolHandler.byteArrayToHexString(DWVSerialPorts.getDD(i));
+        if (dwProtocol.getVPorts().getUtilMode(i) != DWDefs.UTILMODE_UNSET) {
+          text.append(DWUtils.prettyUtilMode(
+              dwProtocol.getVPorts().getUtilMode(i))
+          );
+        }
       } catch (DWPortNotValidException e) {
-        text += " Error: " + e.getMessage();
+        text.append(" Error: ").append(e.getMessage());
       }
-
-
-      text += "\r\n";
+      text.append("\r\n");
     }
-
-    return (new DWCommandResponse(text));
-
+    return new DWCommandResponse(text.toString());
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * validate command.
+   * @param cmdline
+   * @return true if command valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
 }

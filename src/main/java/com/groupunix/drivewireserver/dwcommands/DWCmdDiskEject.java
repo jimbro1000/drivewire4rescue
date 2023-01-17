@@ -6,72 +6,113 @@ import com.groupunix.drivewireserver.dwexceptions.DWDriveNotValidException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class DWCmdDiskEject extends DWCommand {
-  private DWProtocolHandler dwProto;
+  /**
+   * protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-  public DWCmdDiskEject(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * disk eject command constructor.
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdDiskEject(
+      final DWProtocolHandler protocolHandler,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocolHandler = protocolHandler;
   }
 
+  /**
+   * get command.
+   * @return command name
+   */
   public String getCommand() {
     return "eject";
   }
 
-  public DWCommandResponse parse(String cmdline) {
-
+  /**
+   * parse command.
+   * @param cmdline
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     String[] args = cmdline.split(" ");
-
     if (args.length == 1) {
-
-
       if (args[0].equals("all")) {
         // eject all disks
-        return (doDiskEjectAll());
+        return doDiskEjectAll();
       } else {
         // eject specified disk
         try {
-          return (doDiskEject(dwProto.getDiskDrives().getDriveNoFromString(args[0])));
+          return doDiskEject(
+              dwProtocolHandler.getDiskDrives().getDriveNoFromString(args[0])
+          );
         } catch (DWDriveNotValidException e) {
-          return (new DWCommandResponse(false, DWDefs.RC_INVALID_DRIVE, e.getMessage()));
+          return new DWCommandResponse(
+              false,
+              DWDefs.RC_INVALID_DRIVE,
+              e.getMessage()
+          );
         }
       }
     }
-
-    return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error"));
-
+    return new DWCommandResponse(
+        false,
+        DWDefs.RC_SYNTAX_ERROR,
+        "Syntax error"
+    );
   }
-
 
   private DWCommandResponse doDiskEjectAll() {
-    dwProto.getDiskDrives().EjectAllDisks();
-    return (new DWCommandResponse("Ejected all disks.\r\n"));
+    dwProtocolHandler.getDiskDrives().EjectAllDisks();
+    return new DWCommandResponse("Ejected all disks.\r\n");
   }
 
-
-  private DWCommandResponse doDiskEject(int driveno) {
+  private DWCommandResponse doDiskEject(final int driveNumber) {
     try {
-      dwProto.getDiskDrives().EjectDisk(driveno);
-
-      return (new DWCommandResponse("Disk ejected from drive " + driveno + ".\r\n"));
+      dwProtocolHandler.getDiskDrives().EjectDisk(driveNumber);
+      return new DWCommandResponse(
+          "Disk ejected from drive " + driveNumber + ".\r\n"
+      );
     } catch (DWDriveNotValidException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_INVALID_DRIVE, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_INVALID_DRIVE,
+          e.getMessage()
+      );
     } catch (DWDriveNotLoadedException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_DRIVE_NOT_LOADED, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_DRIVE_NOT_LOADED,
+          e.getMessage()
+      );
     }
-
-
   }
 
-
+  /**
+   * get short help.
+   * @return short help details
+   */
   public String getShortHelp() {
     return "Eject disk from drive #";
   }
 
+  /**
+   * get usage.
+   * @return usage information
+   */
   public String getUsage() {
     return "dw disk eject {# | all}";
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * validate command.
+   * @param cmdline
+   * @return true if command valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }
