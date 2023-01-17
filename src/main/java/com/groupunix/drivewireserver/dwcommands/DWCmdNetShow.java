@@ -5,64 +5,131 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 import com.groupunix.drivewireserver.virtualserial.DWVPortListenerPool;
 
 public class DWCmdNetShow extends DWCommand {
+  /**
+   * drivewire serial protocol.
+   */
+  private final DWVSerialProtocol dwProtocol;
 
-  private DWVSerialProtocol dwProto;
-
-  public DWCmdNetShow(DWVSerialProtocol dwProtocol, DWCommand parent) {
+  /**
+   * net show command constructor.
+   * @param protocol protocol
+   * @param parent command parent
+   */
+  public DWCmdNetShow(
+      final DWVSerialProtocol protocol,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProtocol;
+    this.dwProtocol = protocol;
   }
 
+  /**
+   * get command.
+   * @return command name
+   */
   public String getCommand() {
     return "show";
   }
 
-
+  /**
+   * get short help.
+   * @return short help details
+   */
   public String getShortHelp() {
     return "Show networking status";
   }
 
-
+  /**
+   * get usage.
+   * @return usage information
+   */
   public String getUsage() {
     return "dw net show";
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (doNetShow());
+  /**
+   * parse command.
+   * @param cmdline
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return doNetShow();
   }
 
-
   private DWCommandResponse doNetShow() {
-    String text = new String();
+    StringBuilder text = new StringBuilder();
 
-    text += "\r\nDriveWire Network Connections:\r\n\n";
-
-
+    text.append("\r\nDriveWire Network Connections:\r\n\n");
     for (int i = 0; i < DWVPortListenerPool.MAX_CONN; i++) {
-
-
       try {
-        text += "Connection " + i + ": " + dwProto.getVPorts().getListenerPool().getConn(i).socket().getInetAddress().getHostName() + ":" + dwProto.getVPorts().getListenerPool().getConn(i).socket().getPort() + " (connected to port " + dwProto.getVPorts().prettyPort(dwProto.getVPorts().getListenerPool().getConnPort(i)) + ")\r\n";
+        text.append("Connection ")
+            .append(i)
+            .append(": ")
+            .append(dwProtocol
+                .getVPorts()
+                .getListenerPool()
+                .getConn(i)
+                .socket()
+                .getInetAddress()
+                .getHostName()
+            )
+            .append(":")
+            .append(
+                dwProtocol
+                    .getVPorts()
+                    .getListenerPool()
+                    .getConn(i)
+                    .socket()
+                    .getPort()
+            )
+            .append(" (connected to port ")
+            .append(dwProtocol
+                .getVPorts()
+                .prettyPort(dwProtocol
+                    .getVPorts()
+                    .getListenerPool()
+                    .getConnPort(i)
+                )
+            )
+            .append(")\r\n");
       } catch (DWConnectionNotValidException e) {
         // text += e.getMessage();
       }
     }
-
-    text += "\r\n";
-
+    text.append("\r\n");
     for (int i = 0; i < DWVPortListenerPool.MAX_LISTEN; i++) {
-      if (dwProto.getVPorts().getListenerPool().getListener(i) != null) {
-        text += "Listener " + i + ": TCP port " + dwProto.getVPorts().getListenerPool().getListener(i).socket().getLocalPort() + " (control port " + dwProto.getVPorts().prettyPort(dwProto.getVPorts().getListenerPool().getListenerPort(i)) + ")\r\n";
+      if (dwProtocol.getVPorts().getListenerPool().getListener(i) != null) {
+        text.append("Listener ")
+            .append(i)
+            .append(": TCP port ")
+            .append(dwProtocol
+                .getVPorts()
+                .getListenerPool()
+                .getListener(i)
+                .socket()
+                .getLocalPort()
+            )
+            .append(" (control port ")
+            .append(dwProtocol
+                .getVPorts()
+                .prettyPort(dwProtocol
+                    .getVPorts()
+                    .getListenerPool()
+                    .getListenerPort(i)
+                )
+            )
+            .append(")\r\n");
       }
     }
-
-    return (new DWCommandResponse(text));
-
+    return new DWCommandResponse(text.toString());
   }
 
-
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * validate command.
+   * @param cmdline
+   * @return true if command valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
 }

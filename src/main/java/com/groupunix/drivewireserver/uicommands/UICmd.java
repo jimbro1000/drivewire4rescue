@@ -1,6 +1,5 @@
 package com.groupunix.drivewireserver.uicommands;
 
-
 import com.groupunix.drivewireserver.DWUIClientThread;
 import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandList;
@@ -8,60 +7,89 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmd extends DWCommand {
+  /**
+   * command name.
+   */
+  static final String COMMAND = "ui";
+  /**
+   * command list.
+   */
+  private final DWCommandList commands;
 
-  static final String command = "ui";
-  private DWCommandList commands;
-
-
-  public UICmd(DWUIClientThread ct) {
+  /**
+   * ui command constructor.
+   * @param clientThread ui client thread
+   */
+  public UICmd(final DWUIClientThread clientThread) {
     commands = new DWCommandList(null);
-    commands.addcommand(new UICmdInstance(ct));
-    commands.addcommand(new UICmdServer(ct));
-    commands.addcommand(new UICmdSync(ct));
-    commands.addcommand(new UICmdTest(ct));
+    commands.addcommand(new UICmdInstance(clientThread));
+    commands.addcommand(new UICmdServer(clientThread));
+    commands.addcommand(new UICmdSync(clientThread));
+    commands.addcommand(new UICmdTest(clientThread));
   }
 
-
-  public UICmd(DWProtocol dwProto) {
+  /**
+   * ui command constructor.
+   * @param protocol protocol
+   */
+  public UICmd(final DWProtocol protocol) {
     commands = new DWCommandList(null);
-    commands.addcommand(new UICmdInstance(dwProto));
-    commands.addcommand(new UICmdServer(dwProto));
-    //	commands.addcommand(new UICmdSync(dwProto));
-    //	commands.addcommand(new UICmdTest(dwProto));
+    commands.addcommand(new UICmdInstance(protocol));
+    commands.addcommand(new UICmdServer(protocol));
+    //	commands.addcommand(new UICmdSync(protocol));
+    //	commands.addcommand(new UICmdTest(protocol));
   }
 
-
+  /**
+   * get command.
+   * @return command name
+   */
   public String getCommand() {
-    return command;
+    return COMMAND;
   }
 
+  /**
+   * get commands.
+   * @return component command list
+   */
   public DWCommandList getCommandList() {
     return (this.commands);
   }
 
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * parse command.
+   * @param cmdline
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
       return (new DWCommandResponse(this.commands.getShortHelp()));
     }
-
     return (commands.parse(cmdline));
   }
 
-
+  /**
+   * get short help.
+   * @return short help details
+   */
   public String getShortHelp() {
-    return "Managment commands with machine parsable output";
+    return "Management commands with machine parsable output";
   }
 
-
+  /**
+   * get usage.
+   * @return usage information
+   */
   public String getUsage() {
     return "ui [command]";
   }
 
-
-  public boolean validate(String cmdline) {
+  /**
+   * validate command.
+   * @param cmdline
+   * @return true if command valid
+   */
+  public boolean validate(final String cmdline) {
     return (commands.validate(cmdline));
   }
-
-
 }
