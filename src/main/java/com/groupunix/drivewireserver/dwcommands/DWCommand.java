@@ -2,13 +2,17 @@ package com.groupunix.drivewireserver.dwcommands;
 
 import com.groupunix.drivewireserver.DWDefs;
 
-public abstract class DWCommand {
+public abstract class DWCommand implements DWCmdHelp {
   protected DWCommandList commands = new DWCommandList(null);
-  ;
+  protected String commandName;
+  protected String shortHelp;
+  protected String usage;
 
   private DWCommand parentcmd = null;
 
-  public abstract String getCommand();
+  public String getCommand() {
+    return commandName;
+  }
 
   public DWCommandList getCommandList() {
     return (this.commands);
@@ -27,11 +31,11 @@ public abstract class DWCommand {
   }
 
   public String getShortHelp() {
-    return ("Not implemented.");
+    return shortHelp;
   }
 
   public String getUsage() {
-    return ("Not implemented.");
+    return usage;
   }
 
   public boolean validate(String cmdline) {

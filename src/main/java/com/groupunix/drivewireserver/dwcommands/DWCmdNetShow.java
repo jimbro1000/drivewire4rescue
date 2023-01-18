@@ -4,7 +4,7 @@ import com.groupunix.drivewireserver.dwexceptions.DWConnectionNotValidException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 import com.groupunix.drivewireserver.virtualserial.DWVPortListenerPool;
 
-public class DWCmdNetShow extends DWCommand {
+public final class DWCmdNetShow extends DWCommand {
   /**
    * drivewire serial protocol.
    */
@@ -21,35 +21,14 @@ public class DWCmdNetShow extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocol = protocol;
-  }
-
-  /**
-   * get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return "show";
-  }
-
-  /**
-   * get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Show networking status";
-  }
-
-  /**
-   * get usage.
-   * @return usage information
-   */
-  public String getUsage() {
-    return "dw net show";
+    commandName = "show";
+    shortHelp = "Show networking status";
+    usage = "dw net show";
   }
 
   /**
    * parse command.
-   * @param cmdline
+   * @param cmdline command string
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
@@ -126,7 +105,7 @@ public class DWCmdNetShow extends DWCommand {
 
   /**
    * validate command.
-   * @param cmdline
+   * @param cmdline command string
    * @return true if command valid
    */
   public boolean validate(final String cmdline) {

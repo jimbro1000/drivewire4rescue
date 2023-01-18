@@ -8,13 +8,15 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmd extends DWCommand {
   /**
-   * command name.
-   */
-  static final String COMMAND = "ui";
-  /**
    * command list.
    */
   private final DWCommandList commands;
+
+  private void commandHelp() {
+    commandName = "ui";
+    shortHelp = "Management commands with machine parsable output";
+    usage = "ui [command]";
+  }
 
   /**
    * ui command constructor.
@@ -26,6 +28,7 @@ public class UICmd extends DWCommand {
     commands.addcommand(new UICmdServer(clientThread));
     commands.addcommand(new UICmdSync(clientThread));
     commands.addcommand(new UICmdTest(clientThread));
+    commandHelp();
   }
 
   /**
@@ -36,16 +39,7 @@ public class UICmd extends DWCommand {
     commands = new DWCommandList(null);
     commands.addcommand(new UICmdInstance(protocol));
     commands.addcommand(new UICmdServer(protocol));
-    //	commands.addcommand(new UICmdSync(protocol));
-    //	commands.addcommand(new UICmdTest(protocol));
-  }
-
-  /**
-   * get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return COMMAND;
+    commandHelp();
   }
 
   /**
@@ -66,22 +60,6 @@ public class UICmd extends DWCommand {
       return (new DWCommandResponse(this.commands.getShortHelp()));
     }
     return (commands.parse(cmdline));
-  }
-
-  /**
-   * get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Management commands with machine parsable output";
-  }
-
-  /**
-   * get usage.
-   * @return usage information
-   */
-  public String getUsage() {
-    return "ui [command]";
   }
 
   /**
