@@ -4,7 +4,7 @@ import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.DriveWireServer;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
-public class DWCmdInstanceRestart extends DWCommand {
+public final class DWCmdInstanceRestart extends DWCommand {
   /**
    * Command Instance Restart constructor.
    *
