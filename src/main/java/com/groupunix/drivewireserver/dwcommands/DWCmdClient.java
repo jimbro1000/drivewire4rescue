@@ -3,8 +3,6 @@ package com.groupunix.drivewireserver.dwcommands;
 import com.groupunix.drivewireserver.dwprotocolhandler.*;
 
 public class DWCmdClient extends DWCommand {
-
-  static final String command = "client";
   private DWCommandList commands;
   private DWVSerialProtocol dwProto;
 
@@ -12,12 +10,10 @@ public class DWCmdClient extends DWCommand {
     setParentCmd(parent);
     this.dwProto = dwProto;
     commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-
     commands.addcommand(new DWCmdClientRestart(dwProto, this));
-  }
-
-  public String getCommand() {
-    return command;
+    commandName = "client";
+    shortHelp = "Commands that manage the attached client device";
+    usage = "dw client [command]";
   }
 
   public DWCommandList getCommandList() {
@@ -29,14 +25,6 @@ public class DWCmdClient extends DWCommand {
       return (new DWCommandResponse(this.commands.getShortHelp()));
     }
     return (commands.parse(cmdline));
-  }
-
-  public String getShortHelp() {
-    return "Commands that manage the attached client device";
-  }
-
-  public String getUsage() {
-    return "dw client [command]";
   }
 
   public boolean validate(String cmdline) {

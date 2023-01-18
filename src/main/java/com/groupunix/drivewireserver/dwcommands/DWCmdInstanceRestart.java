@@ -7,40 +7,24 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 public class DWCmdInstanceRestart extends DWCommand {
   /**
    * Command Instance Restart constructor.
-   * @param protocol
-   * @param parent
+   *
+   * @param protocol protocol
+   * @param parent parent command
    */
-  public DWCmdInstanceRestart(final DWProtocol protocol, final DWCommand parent) {
+  public DWCmdInstanceRestart(
+      final DWProtocol protocol,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-  }
-
-  /**
-   * Get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return "restart";
-  }
-
-  /**
-   * Get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Restart instance #";
-  }
-
-  /**
-   * Get usage information.
-   * @return usage
-   */
-  public String getUsage() {
-    return "dw instance restart #";
+    commandName = "restart";
+    shortHelp = "Restart instance #";
+    usage = "dw instance restart #";
   }
 
   /**
    * Parse command.
-   * @param cmdline
+   *
+   * @param cmdline command string
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
@@ -52,10 +36,10 @@ public class DWCmdInstanceRestart extends DWCommand {
               + "dw instance restart requires an instance # as an argument"
       );
     }
-    return doStart(cmdline);
+    return doRestart(cmdline);
   }
 
-  private DWCommandResponse doStart(final String instance) {
+  private DWCommandResponse doRestart(final String instance) {
     try {
       int instanceNumber = Integer.parseInt(instance);
       if (!DriveWireServer.isValidHandlerNo(instanceNumber)) {
@@ -102,7 +86,8 @@ public class DWCmdInstanceRestart extends DWCommand {
 
   /**
    * Validate command.
-   * @param cmdline
+   *
+   * @param cmdline command string
    * @return true if valid
    */
   public boolean validate(final String cmdline) {

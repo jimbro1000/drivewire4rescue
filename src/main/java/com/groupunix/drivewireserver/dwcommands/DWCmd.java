@@ -6,10 +6,6 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
 public final class DWCmd extends DWCommand {
   /**
-   * command name.
-   */
-  static final String COMMAND = "dw";
-  /**
    * component command list.
    */
   private final DWCommandList commands;
@@ -19,14 +15,14 @@ public final class DWCmd extends DWCommand {
   private final DWProtocol dwProtocol;
 
   /**
-   * drivewire command constructor.
-   * @param protocol
+   * Drivewire command constructor.
+   *
+   * @param protocol protocol
    */
   public DWCmd(final DWProtocol protocol) {
     this.dwProtocol = protocol;
 
     commands = new DWCommandList(this.dwProtocol, this.dwProtocol.getCMDCols());
-
     commands.addcommand(new DWCmdServer(protocol, this));
     commands.addcommand(new DWCmdConfig(protocol, this));
     commands.addcommand(new DWCmdLog(protocol, this));
@@ -55,18 +51,14 @@ public final class DWCmd extends DWCommand {
           new DWCmdMidi((DWProtocolHandler) protocol, this)
       );
     }
-  }
-
-  /**
-   * get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return COMMAND;
+    commandName = "dw";
+    shortHelp = "Manage all aspects of the server";
+    usage = "dw [command]";
   }
 
   /**
    * get component commands.
+   *
    * @return all component commands
    */
   public DWCommandList getCommandList() {
@@ -75,7 +67,8 @@ public final class DWCmd extends DWCommand {
 
   /**
    * parse command.
-   * @param cmdline
+   *
+   * @param cmdline command string
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
@@ -86,24 +79,9 @@ public final class DWCmd extends DWCommand {
   }
 
   /**
-   * Get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Manage all aspects of the server";
-  }
-
-  /**
-   * Get usage.
-   * @return usage information
-   */
-  public String getUsage() {
-    return "dw [command]";
-  }
-
-  /**
    * validate command.
-   * @param cmdline
+   *
+   * @param cmdline command string
    * @return true if command is valid
    */
   public boolean validate(final String cmdline) {

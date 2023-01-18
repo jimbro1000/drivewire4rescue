@@ -6,40 +6,21 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 public final class DWCmdInstanceShow extends DWCommand {
   /**
    * Command instance constructor.
-   * @param protocol
-   * @param parent
+   *
+   * @param protocol protocol
+   * @param parent parent command
    */
   DWCmdInstanceShow(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
-  }
-
-  /**
-   * Get command name.
-   * @return name
-   */
-  public String getCommand() {
-    return "show";
-  }
-
-  /**
-   * Get short help.
-   * @return short help information
-   */
-  public String getShortHelp() {
-    return "Show instance status";
-  }
-
-  /**
-   * Get usage.
-   * @return usage information
-   */
-  public String getUsage() {
-    return "dw instance show";
+    commandName = "show";
+    shortHelp = "Show instance status";
+    usage = "dw instance show";
   }
 
   /**
    * Parse command line.
-   * @param cmdline
+   *
+   * @param cmdline command string
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
@@ -102,7 +83,8 @@ public final class DWCmdInstanceShow extends DWCommand {
 
   /**
    * Validate command.
-   * @param cmdline
+   *
+   * @param cmdline command string
    * @return true if valid
    */
   public boolean validate(final String cmdline) {

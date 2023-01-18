@@ -7,41 +7,23 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 public final class DWCmdInstanceStart extends DWCommand {
   /**
    * Command Instance Start constructor.
+   *
    * @param protocol protocol
    * @param parent parent
    */
   public DWCmdInstanceStart(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
-  }
-
-  /**
-   * get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return "start";
-  }
-
-  /**
-   * Short help for class.
-   * @return short help text
-   */
-  public String getShortHelp() {
-    return "Start instance #";
-  }
-
-  /**
-   * get usage instruction for class.
-   * @return instruction
-   */
-  public String getUsage() {
-    return "dw instance start #";
+    commandName = "start";
+    shortHelp = "Start instance #";
+    usage = "dw instance start #";
   }
 
   /**
    * parse command.
+   * <p>
    * Checks that the provided command is not empty and starts the command
-   * @param cmdline
+   * </p>
+   * @param cmdline command string
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
@@ -60,7 +42,8 @@ public final class DWCmdInstanceStart extends DWCommand {
 
   /**
    * start command.
-   * @param instr
+   *
+   * @param instr interrupt handler id
    * @return command response
    */
   private DWCommandResponse doStart(final String instr) {
@@ -117,7 +100,8 @@ public final class DWCmdInstanceStart extends DWCommand {
 
   /**
    * validate provided command line instruction.
-   * @param cmdline
+   *
+   * @param cmdline command string
    * @return true if valid
    */
   public boolean validate(final String cmdline) {

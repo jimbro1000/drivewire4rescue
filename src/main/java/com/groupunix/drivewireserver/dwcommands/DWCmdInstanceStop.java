@@ -1,6 +1,5 @@
 package com.groupunix.drivewireserver.dwcommands;
 
-
 import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.DriveWireServer;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
@@ -8,40 +7,21 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 public final class DWCmdInstanceStop extends DWCommand {
   /**
    * Command Instance Stop constructor.
+   *
    * @param protocol protocol
    * @param parent parent
    */
   public DWCmdInstanceStop(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
-  }
-
-  /**
-   * Get command information.
-   * @return command name
-   */
-  public String getCommand() {
-    return "stop";
-  }
-
-  /**
-   * Get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Stop instance #";
-  }
-
-  /**
-   * Get usage information.
-   * @return usage
-   */
-  public String getUsage() {
-    return "dw instance stop #";
+    commandName = "stop";
+    shortHelp = "Stop instance #";
+    usage = "dw instance stop #";
   }
 
   /**
    * Parse command.
-   * @param cmdline
+   *
+   * @param cmdline command string
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
@@ -102,10 +82,11 @@ public final class DWCmdInstanceStop extends DWCommand {
 
   /**
    * Validate command.
-   * @param cmdline
+   *
+   * @param cmdline command string
    * @return true if valid
    */
   public boolean validate(final String cmdline) {
-    return (true);
+    return true;
   }
 }
