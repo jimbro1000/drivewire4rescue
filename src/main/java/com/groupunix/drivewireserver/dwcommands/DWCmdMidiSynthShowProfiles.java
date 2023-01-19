@@ -1,6 +1,5 @@
 package com.groupunix.drivewireserver.dwcommands;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -9,47 +8,57 @@ import com.groupunix.drivewireserver.DriveWireServer;
 
 public class DWCmdMidiSynthShowProfiles extends DWCommand {
 
-
-  public DWCmdMidiSynthShowProfiles(DWCommand parent) {
+  /**
+   * Midi synth show profiles command constructor.
+   *
+   * @param parent parent command
+   */
+  public DWCmdMidiSynthShowProfiles(final DWCommand parent) {
     setParentCmd(parent);
+    commandName = "profiles";
+    shortHelp = "Show internal synth profiles";
+    usage = "dw midi synth show profiles";
   }
 
-  public String getCommand() {
-    return "profiles";
-  }
-
-
-  public String getShortHelp() {
-    return "Show internal synth profiles";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth show profiles";
-  }
-
+  /**
+   * parse command.
+   *
+   * @param cmdline command string
+   * @return command response
+   */
   @SuppressWarnings("unchecked")
-  public DWCommandResponse parse(String cmdline) {
-    String text = new String();
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder text = new StringBuilder();
 
-    text = "\r\nAvailable sound translation profiles:\r\n\n";
+    text.append("\r\nAvailable sound translation profiles:\r\n\n");
 
-    List<HierarchicalConfiguration> profiles = DriveWireServer.serverConfiguration.configurationsAt("midisynthprofile");
+    List<HierarchicalConfiguration> profiles = DriveWireServer
+        .serverConfiguration
+        .configurationsAt("midisynthprofile");
 
-    for (Iterator<HierarchicalConfiguration> it = profiles.iterator(); it.hasNext(); ) {
-      HierarchicalConfiguration mprof = it.next();
-
-      text += String.format("%-10s: %-35s dev_adjust: %2d  gm_adjust: %2d", mprof.getString("[@name]", "n/a"), mprof.getString("[@desc]", "n/a"), mprof.getInt("[@dev_adjust]", 0), mprof.getInt("[@gm_adjust]", 0));
-      text += "\r\n";
+    for (HierarchicalConfiguration midiProfile : profiles) {
+      text.append(
+          String.format(
+              "%-10s: %-35s dev_adjust: %2d  gm_adjust: %2d",
+              midiProfile.getString("[@name]", "n/a"),
+              midiProfile.getString("[@desc]", "n/a"),
+              midiProfile.getInt("[@dev_adjust]", 0),
+              midiProfile.getInt("[@gm_adjust]", 0)
+          )
+      );
+      text.append("\r\n");
     }
-
-    text += "\r\n";
-
-    return (new DWCommandResponse(text));
+    text.append("\r\n");
+    return new DWCommandResponse(text.toString());
   }
 
-
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command.
+   *
+   * @param cmdline command string
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

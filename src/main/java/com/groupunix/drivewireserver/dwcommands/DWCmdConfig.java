@@ -25,9 +25,9 @@ public class DWCmdConfig extends DWCommand {
     setParentCmd(parent);
     this.dwProtocol = protocol;
     commands = new DWCommandList(this.dwProtocol, this.dwProtocol.getCMDCols());
-    commands.addcommand(new DWCmdConfigShow(protocol, this));
-    commands.addcommand(new DWCmdConfigSet(protocol, this));
-    commands.addcommand(new DWCmdConfigSave(protocol, this));
+    commands.addCommand(new DWCmdConfigShow(protocol, this));
+    commands.addCommand(new DWCmdConfigSet(protocol, this));
+    commands.addCommand(new DWCmdConfigSave(protocol, this));
     // save/load not implemented here
   }
 

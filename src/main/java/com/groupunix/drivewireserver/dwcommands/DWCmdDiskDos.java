@@ -29,10 +29,10 @@ public final class DWCmdDiskDos extends DWCommand {
         this.dwProtocolHandler,
         this.dwProtocolHandler.getCMDCols()
     );
-    commands.addcommand(new DWCmdDiskDosDir(protocolHandler, this));
-    commands.addcommand(new DWCmdDiskDosList(protocolHandler, this));
-    commands.addcommand(new DWCmdDiskDosFormat(protocolHandler, this));
-    commands.addcommand(new DWCmdDiskDosAdd(protocolHandler, this));
+    commands.addCommand(new DWCmdDiskDosDir(protocolHandler, this));
+    commands.addCommand(new DWCmdDiskDosList(protocolHandler, this));
+    commands.addCommand(new DWCmdDiskDosFormat(protocolHandler, this));
+    commands.addCommand(new DWCmdDiskDosAdd(protocolHandler, this));
     commandName = "dos";
     shortHelp = "Manage DOS disks";
     usage = "dw disk dos [command]";

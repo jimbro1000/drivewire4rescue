@@ -10,7 +10,7 @@ public class DWCmdClient extends DWCommand {
     setParentCmd(parent);
     this.dwProto = dwProto;
     commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdClientRestart(dwProto, this));
+    commands.addCommand(new DWCmdClientRestart(dwProto, this));
     commandName = "client";
     shortHelp = "Commands that manage the attached client device";
     usage = "dw client [command]";

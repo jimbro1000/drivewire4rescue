@@ -12,9 +12,9 @@ public class DWCmdMidi extends DWCommand {
     setParentCmd(parent);
     this.dwProto = dwProto;
     commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdMidiStatus(dwProto, this));
-    commands.addcommand(new DWCmdMidiOutput(dwProto, this));
-    commands.addcommand(new DWCmdMidiSynth(dwProto, this));
+    commands.addCommand(new DWCmdMidiStatus(dwProto, this));
+    commands.addCommand(new DWCmdMidiOutput(dwProto, this));
+    commands.addCommand(new DWCmdMidiSynth(dwProto, this));
 
   }
 

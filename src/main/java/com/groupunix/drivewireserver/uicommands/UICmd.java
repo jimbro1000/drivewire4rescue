@@ -24,10 +24,10 @@ public class UICmd extends DWCommand {
    */
   public UICmd(final DWUIClientThread clientThread) {
     commands = new DWCommandList(null);
-    commands.addcommand(new UICmdInstance(clientThread));
-    commands.addcommand(new UICmdServer(clientThread));
-    commands.addcommand(new UICmdSync(clientThread));
-    commands.addcommand(new UICmdTest(clientThread));
+    commands.addCommand(new UICmdInstance(clientThread));
+    commands.addCommand(new UICmdServer(clientThread));
+    commands.addCommand(new UICmdSync(clientThread));
+    commands.addCommand(new UICmdTest(clientThread));
     commandHelp();
   }
 
@@ -37,8 +37,8 @@ public class UICmd extends DWCommand {
    */
   public UICmd(final DWProtocol protocol) {
     commands = new DWCommandList(null);
-    commands.addcommand(new UICmdInstance(protocol));
-    commands.addcommand(new UICmdServer(protocol));
+    commands.addCommand(new UICmdInstance(protocol));
+    commands.addCommand(new UICmdServer(protocol));
     commandHelp();
   }
 

@@ -13,8 +13,8 @@ public class DWCmdServerHelp extends DWCommand {
     setParentCmd(parent);
     this.dwProto = dwProtocol;
     commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdServerHelpShow(dwProtocol, this));
-    commands.addcommand(new DWCmdServerHelpReload(dwProtocol, this));
+    commands.addCommand(new DWCmdServerHelpShow(dwProtocol, this));
+    commands.addCommand(new DWCmdServerHelpReload(dwProtocol, this));
 
   }
 

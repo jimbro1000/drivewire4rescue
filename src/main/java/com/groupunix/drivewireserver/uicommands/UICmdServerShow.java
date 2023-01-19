@@ -11,34 +11,34 @@ public class UICmdServerShow extends DWCommand {
 
 
   public UICmdServerShow(DWUIClientThread dwuiClientThread) {
-    commands.addcommand(new UICmdServerShowVersion());
-    commands.addcommand(new UICmdServerShowInstances());
-    commands.addcommand(new UICmdServerShowMIDIDevs());
-    commands.addcommand(new UICmdServerShowSynthProfiles());
-    commands.addcommand(new UICmdServerShowLocalDisks());
-    commands.addcommand(new UICmdServerShowSerialDevs());
-    commands.addcommand(new UICmdServerShowStatus());
-    commands.addcommand(new UICmdServerShowNet());
-    commands.addcommand(new UICmdServerShowLog());
-    commands.addcommand(new UICmdServerShowTopics(dwuiClientThread));
-    commands.addcommand(new UICmdServerShowHelp(dwuiClientThread));
-    commands.addcommand(new UICmdServerShowErrors(dwuiClientThread));
+    commands.addCommand(new UICmdServerShowVersion());
+    commands.addCommand(new UICmdServerShowInstances());
+    commands.addCommand(new UICmdServerShowMIDIDevs());
+    commands.addCommand(new UICmdServerShowSynthProfiles());
+    commands.addCommand(new UICmdServerShowLocalDisks());
+    commands.addCommand(new UICmdServerShowSerialDevs());
+    commands.addCommand(new UICmdServerShowStatus());
+    commands.addCommand(new UICmdServerShowNet());
+    commands.addCommand(new UICmdServerShowLog());
+    commands.addCommand(new UICmdServerShowTopics(dwuiClientThread));
+    commands.addCommand(new UICmdServerShowHelp(dwuiClientThread));
+    commands.addCommand(new UICmdServerShowErrors(dwuiClientThread));
   }
 
 
   public UICmdServerShow(DWProtocol dwProto) {
-    commands.addcommand(new UICmdServerShowVersion());
-    commands.addcommand(new UICmdServerShowInstances());
-    commands.addcommand(new UICmdServerShowMIDIDevs());
-    commands.addcommand(new UICmdServerShowSynthProfiles());
-    commands.addcommand(new UICmdServerShowLocalDisks());
-    commands.addcommand(new UICmdServerShowSerialDevs());
-    commands.addcommand(new UICmdServerShowStatus());
-    commands.addcommand(new UICmdServerShowNet());
-    commands.addcommand(new UICmdServerShowLog());
-    commands.addcommand(new UICmdServerShowTopics(dwProto));
-    commands.addcommand(new UICmdServerShowHelp(dwProto));
-    commands.addcommand(new UICmdServerShowErrors(dwProto));
+    commands.addCommand(new UICmdServerShowVersion());
+    commands.addCommand(new UICmdServerShowInstances());
+    commands.addCommand(new UICmdServerShowMIDIDevs());
+    commands.addCommand(new UICmdServerShowSynthProfiles());
+    commands.addCommand(new UICmdServerShowLocalDisks());
+    commands.addCommand(new UICmdServerShowSerialDevs());
+    commands.addCommand(new UICmdServerShowStatus());
+    commands.addCommand(new UICmdServerShowNet());
+    commands.addCommand(new UICmdServerShowLog());
+    commands.addCommand(new UICmdServerShowTopics(dwProto));
+    commands.addCommand(new UICmdServerShowHelp(dwProto));
+    commands.addCommand(new UICmdServerShowErrors(dwProto));
   }
 
 

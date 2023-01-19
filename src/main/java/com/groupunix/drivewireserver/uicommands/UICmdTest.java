@@ -10,7 +10,7 @@ public class UICmdTest extends DWCommand {
 
 
   public UICmdTest(DWUIClientThread dwuiClientThread) {
-    commands.addcommand(new UICmdTestDGraph(dwuiClientThread));
+    commands.addCommand(new UICmdTestDGraph(dwuiClientThread));
   }
 
 

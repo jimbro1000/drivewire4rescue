@@ -12,14 +12,14 @@ public class UICmdInstanceConfig extends DWCommand {
 
   public UICmdInstanceConfig(DWUIClientThread dwuiClientThread) {
 
-    commands.addcommand(new UICmdInstanceConfigShow(dwuiClientThread));
-    commands.addcommand(new UICmdInstanceConfigSet(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceConfigShow(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceConfigSet(dwuiClientThread));
   }
 
 
   public UICmdInstanceConfig(DWProtocol dwProto) {
-    commands.addcommand(new UICmdInstanceConfigShow(dwProto));
-    commands.addcommand(new UICmdInstanceConfigSet(dwProto));
+    commands.addCommand(new UICmdInstanceConfigShow(dwProto));
+    commands.addCommand(new UICmdInstanceConfigSet(dwProto));
   }
 
 

@@ -12,14 +12,14 @@ public class DWCmdServer extends DWCommand {
     setParentCmd(parent);
     this.dwProto = dwProto;
     commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdServerStatus(dwProto, this));
-    commands.addcommand(new DWCmdServerShow(dwProto, this));
-    commands.addcommand(new DWCmdServerList(this));
-    commands.addcommand(new DWCmdServerDir(this));
-    commands.addcommand(new DWCmdServerTerminate(this));
-    commands.addcommand(new DWCmdServerTurbo(dwProto, this));
-    commands.addcommand(new DWCmdServerPrint(dwProto, this));
-    commands.addcommand(new DWCmdServerHelp(dwProto, this));
+    commands.addCommand(new DWCmdServerStatus(dwProto, this));
+    commands.addCommand(new DWCmdServerShow(dwProto, this));
+    commands.addCommand(new DWCmdServerList(this));
+    commands.addCommand(new DWCmdServerDir(this));
+    commands.addCommand(new DWCmdServerTerminate(this));
+    commands.addCommand(new DWCmdServerTurbo(dwProto, this));
+    commands.addCommand(new DWCmdServerPrint(dwProto, this));
+    commands.addCommand(new DWCmdServerHelp(dwProto, this));
 
     //	commands.addcommand(new DWCmdServerRestart(handlerno));
   }

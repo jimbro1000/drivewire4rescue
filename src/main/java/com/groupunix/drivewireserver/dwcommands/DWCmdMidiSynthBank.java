@@ -11,67 +11,100 @@ import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class DWCmdMidiSynthBank extends DWCommand {
+  /**
+   * protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-  private DWProtocolHandler dwProto;
-
-  public DWCmdMidiSynthBank(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Midi synth bank command constructor.
+   *
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdMidiSynthBank(
+      final DWProtocolHandler protocolHandler,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocolHandler = protocolHandler;
+    commandName = "bank";
+    shortHelp = "Load soundbank file";
+    usage = "dw midi synth bank filepath";
   }
 
-  public String getCommand() {
-    return "bank";
-  }
-
-
-  public String getShortHelp() {
-    return "Load soundbank file";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth bank filepath";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * parse command.
+   *
+   * @param cmdline command string
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "dw midi synth bank requires a file path as an argument"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "dw midi synth bank requires a file path as an argument"
+      );
     }
-
-    return (doMidiSynthBank(cmdline));
+    return doMidiSynthBank(cmdline);
   }
 
-
-  private DWCommandResponse doMidiSynthBank(String path) {
+  private DWCommandResponse doMidiSynthBank(final String path) {
     Soundbank soundbank = null;
 
-    if (dwProto.getConfig().getBoolean("UseMIDI", true)) {
+    if (dwProtocolHandler.getConfig().getBoolean("UseMIDI", true)) {
       File file = new File(path);
       try {
         soundbank = MidiSystem.getSoundbank(file);
       } catch (InvalidMidiDataException e) {
-        return (new DWCommandResponse(false, DWDefs.RC_MIDI_INVALID_DATA, e.getMessage()));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_MIDI_INVALID_DATA,
+            e.getMessage()
+        );
       } catch (IOException e) {
-        return (new DWCommandResponse(false, DWDefs.RC_SERVER_IO_EXCEPTION, e.getMessage()));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_SERVER_IO_EXCEPTION,
+            e.getMessage()
+        );
       }
-
-      if (dwProto.getVPorts().isSoundbankSupported(soundbank)) {
-        if (dwProto.getVPorts().setMidiSoundbank(soundbank, path)) {
-          return (new DWCommandResponse("Soundbank loaded without error"));
+      if (dwProtocolHandler.getVPorts().isSoundbankSupported(soundbank)) {
+        if (dwProtocolHandler.getVPorts().setMidiSoundbank(soundbank, path)) {
+          return new DWCommandResponse(
+              "Soundbank loaded without error"
+          );
         } else {
-          return (new DWCommandResponse(false, DWDefs.RC_MIDI_SOUNDBANK_FAILED, "Failed to load soundbank"));
+          return new DWCommandResponse(
+              false,
+              DWDefs.RC_MIDI_SOUNDBANK_FAILED,
+              "Failed to load soundbank"
+          );
         }
-
       } else {
-        return (new DWCommandResponse(false, DWDefs.RC_MIDI_SOUNDBANK_NOT_SUPPORTED, "Soundbank not supported"));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_MIDI_SOUNDBANK_NOT_SUPPORTED,
+            "Soundbank not supported"
+        );
       }
     } else {
-      return (new DWCommandResponse(false, DWDefs.RC_MIDI_UNAVAILABLE, "MIDI is disabled."));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_MIDI_UNAVAILABLE,
+          "MIDI is disabled."
+      );
     }
   }
 
-
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command.
+   *
+   * @param cmdline command string
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

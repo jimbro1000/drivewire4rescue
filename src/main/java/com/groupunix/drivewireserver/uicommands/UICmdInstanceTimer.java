@@ -11,15 +11,15 @@ public class UICmdInstanceTimer extends DWCommand {
 
 
   public UICmdInstanceTimer(DWProtocol dwProtocol) {
-    commands.addcommand(new UICmdInstanceTimerShow(dwProtocol));
-    commands.addcommand(new UICmdInstanceTimerReset(dwProtocol));
+    commands.addCommand(new UICmdInstanceTimerShow(dwProtocol));
+    commands.addCommand(new UICmdInstanceTimerReset(dwProtocol));
 
   }
 
 
   public UICmdInstanceTimer(DWUIClientThread dwuiClientThread) {
-    commands.addcommand(new UICmdInstanceTimerShow(dwuiClientThread));
-    commands.addcommand(new UICmdInstanceTimerReset(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceTimerShow(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceTimerReset(dwuiClientThread));
 
   }
 

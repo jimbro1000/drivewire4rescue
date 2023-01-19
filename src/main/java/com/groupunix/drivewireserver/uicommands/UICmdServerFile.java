@@ -10,11 +10,11 @@ public class UICmdServerFile extends DWCommand {
 
   public UICmdServerFile() {
 
-    commands.addcommand(new UICmdServerFileRoots());
-    commands.addcommand(new UICmdServerFileDefaultDir());
-    commands.addcommand(new UICmdServerFileDir());
-    commands.addcommand(new UICmdServerFileXDir());
-    commands.addcommand(new UICmdServerFileInfo());
+    commands.addCommand(new UICmdServerFileRoots());
+    commands.addCommand(new UICmdServerFileDefaultDir());
+    commands.addCommand(new UICmdServerFileDir());
+    commands.addCommand(new UICmdServerFileXDir());
+    commands.addCommand(new UICmdServerFileInfo());
   }
 
 

@@ -12,36 +12,36 @@ public class UICmdInstance extends DWCommand {
   static final String command = "instance";
 
   public UICmdInstance(DWUIClientThread dwuiClientThread) {
-    commands.addcommand(new UICmdInstanceAttach(dwuiClientThread));
-    commands.addcommand(new UICmdInstanceConfig(dwuiClientThread));
-    commands.addcommand(new UICmdInstanceDisk(dwuiClientThread));
-    commands.addcommand(new UICmdInstanceReset(dwuiClientThread));
-    commands.addcommand(new UICmdInstanceStatus(dwuiClientThread));
-    commands.addcommand(new UICmdInstanceMIDIStatus(dwuiClientThread));
-    commands.addcommand(new UICmdInstancePrinterStatus(dwuiClientThread));
-    commands.addcommand(new UICmdInstancePortStatus(dwuiClientThread));
-    commands.addcommand(new UICmdInstanceTimer(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceAttach(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceConfig(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceDisk(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceReset(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceStatus(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceMIDIStatus(dwuiClientThread));
+    commands.addCommand(new UICmdInstancePrinterStatus(dwuiClientThread));
+    commands.addCommand(new UICmdInstancePortStatus(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceTimer(dwuiClientThread));
   }
 
 
   public UICmdInstance(DWProtocol dwProto) {
-    commands.addcommand(new UICmdInstanceConfig(dwProto));
+    commands.addCommand(new UICmdInstanceConfig(dwProto));
     if (dwProto.hasDisks())
-      commands.addcommand(new UICmdInstanceDisk((DWProtocolHandler) dwProto));
+      commands.addCommand(new UICmdInstanceDisk((DWProtocolHandler) dwProto));
 
-    commands.addcommand(new UICmdInstanceReset(dwProto));
-    commands.addcommand(new UICmdInstanceStatus(dwProto));
+    commands.addCommand(new UICmdInstanceReset(dwProto));
+    commands.addCommand(new UICmdInstanceStatus(dwProto));
 
     if (dwProto.hasMIDI())
-      commands.addcommand(new UICmdInstanceMIDIStatus(dwProto));
+      commands.addCommand(new UICmdInstanceMIDIStatus(dwProto));
 
     if (dwProto.hasPrinters())
-      commands.addcommand(new UICmdInstancePrinterStatus((DWProtocolHandler) dwProto));
+      commands.addCommand(new UICmdInstancePrinterStatus((DWProtocolHandler) dwProto));
 
     if (dwProto.hasVSerial())
-      commands.addcommand(new UICmdInstancePortStatus((DWVSerialProtocol) dwProto));
+      commands.addCommand(new UICmdInstancePortStatus((DWVSerialProtocol) dwProto));
 
-    commands.addcommand(new UICmdInstanceTimer(dwProto));
+    commands.addCommand(new UICmdInstanceTimer(dwProto));
   }
 
 

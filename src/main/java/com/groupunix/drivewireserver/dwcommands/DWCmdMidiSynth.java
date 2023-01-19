@@ -31,12 +31,12 @@ public class DWCmdMidiSynth extends DWCommand {
         this.dwProtocolHandler,
         this.dwProtocolHandler.getCMDCols()
     );
-    commands.addcommand(new DWCmdMidiSynthStatus(protocolHandler, this));
-    commands.addcommand(new DWCmdMidiSynthShow(protocolHandler, this));
-    commands.addcommand(new DWCmdMidiSynthBank(protocolHandler, this));
-    commands.addcommand(new DWCmdMidiSynthProfile(protocolHandler, this));
-    commands.addcommand(new DWCmdMidiSynthLock(protocolHandler, this));
-    commands.addcommand(new DWCmdMidiSynthInstr(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthStatus(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthShow(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthBank(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthProfile(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthLock(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthInstr(protocolHandler, this));
   }
 
   /**

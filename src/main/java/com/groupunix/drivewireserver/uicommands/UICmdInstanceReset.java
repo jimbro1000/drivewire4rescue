@@ -12,13 +12,13 @@ public class UICmdInstanceReset extends DWCommand {
 
   public UICmdInstanceReset(DWUIClientThread dwuiClientThread) {
 
-    commands.addcommand(new UICmdInstanceResetProtodev(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceResetProtodev(dwuiClientThread));
 
   }
 
 
   public UICmdInstanceReset(DWProtocol dwProto) {
-    commands.addcommand(new UICmdInstanceResetProtodev(dwProto));
+    commands.addCommand(new UICmdInstanceResetProtodev(dwProto));
 
   }
 

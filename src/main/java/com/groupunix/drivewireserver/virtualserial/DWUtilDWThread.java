@@ -32,8 +32,8 @@ public class DWUtilDWThread implements Runnable {
 
 
     commands = new DWCommandList(dwProto, dwProto.getCMDCols());
-    commands.addcommand(new DWCmd(dwProto));
-    commands.addcommand(new UICmd(dwProto));
+    commands.addCommand(new DWCmd(dwProto));
+    commands.addCommand(new UICmd(dwProto));
 
     logger.debug("init dw util thread (protected mode: " + this.protect + ")");
   }

@@ -13,7 +13,7 @@ public class DWCmdLog extends DWCommand {
     this.dwProto = dwProto;
 
     commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdLogShow(this));
+    commands.addCommand(new DWCmdLogShow(this));
 
   }
 

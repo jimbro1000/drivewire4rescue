@@ -27,9 +27,9 @@ public final class DWCmdMidiSynthShow extends DWCommand {
         this.dwProtocolHandler,
         this.dwProtocolHandler.getCMDCols()
     );
-    commands.addcommand(new DWCmdMidiSynthShowChannels(protocolHandler, this));
-    commands.addcommand(new DWCmdMidiSynthShowInstr(protocolHandler, this));
-    commands.addcommand(new DWCmdMidiSynthShowProfiles(this));
+    commands.addCommand(new DWCmdMidiSynthShowChannels(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthShowInstr(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthShowProfiles(this));
     commandName = "show";
     shortHelp = "View details about the synth";
     usage = "dw midi synth show [item]";

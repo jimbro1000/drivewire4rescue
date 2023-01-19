@@ -15,14 +15,14 @@ public class DWCmdDisk extends DWCommand {
 
     commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
 
-    commands.addcommand(new DWCmdDiskShow(dwProto, this));
-    commands.addcommand(new DWCmdDiskEject(dwProto, this));
-    commands.addcommand(new DWCmdDiskInsert(dwProto, this));
-    commands.addcommand(new DWCmdDiskReload(dwProto, this));
-    commands.addcommand(new DWCmdDiskWrite(dwProto, this));
-    commands.addcommand(new DWCmdDiskCreate(dwProto, this));
-    commands.addcommand(new DWCmdDiskSet(dwProto, this));
-    commands.addcommand(new DWCmdDiskDos(dwProto, this));
+    commands.addCommand(new DWCmdDiskShow(dwProto, this));
+    commands.addCommand(new DWCmdDiskEject(dwProto, this));
+    commands.addCommand(new DWCmdDiskInsert(dwProto, this));
+    commands.addCommand(new DWCmdDiskReload(dwProto, this));
+    commands.addCommand(new DWCmdDiskWrite(dwProto, this));
+    commands.addCommand(new DWCmdDiskCreate(dwProto, this));
+    commands.addCommand(new DWCmdDiskSet(dwProto, this));
+    commands.addCommand(new DWCmdDiskDos(dwProto, this));
     // testing only, little point
     //commands.addcommand(new DWCmdDiskDump(dwProto,this));
   }

@@ -12,18 +12,18 @@ public class UICmdServerConfig extends DWCommand {
 
   public UICmdServerConfig(DWUIClientThread dwuiClientThread) {
 
-    commands.addcommand(new UICmdServerConfigShow());
-    commands.addcommand(new UICmdServerConfigSet());
-    commands.addcommand(new UICmdServerConfigSerial());
-    commands.addcommand(new UICmdServerConfigWrite());
-    commands.addcommand(new UICmdServerConfigFreeze());
+    commands.addCommand(new UICmdServerConfigShow());
+    commands.addCommand(new UICmdServerConfigSet());
+    commands.addCommand(new UICmdServerConfigSerial());
+    commands.addCommand(new UICmdServerConfigWrite());
+    commands.addCommand(new UICmdServerConfigFreeze());
   }
 
 
   public UICmdServerConfig(DWProtocol dwProto) {
-    commands.addcommand(new UICmdServerConfigShow());
-    commands.addcommand(new UICmdServerConfigSet());
-    commands.addcommand(new UICmdServerConfigWrite());
+    commands.addCommand(new UICmdServerConfigShow());
+    commands.addCommand(new UICmdServerConfigSet());
+    commands.addCommand(new UICmdServerConfigWrite());
   }
 
 

@@ -13,7 +13,7 @@ public class DWCmdNet extends DWCommand {
     setParentCmd(parent);
     this.dwProto = dwProtocol;
     commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdNetShow(dwProtocol, this));
+    commands.addCommand(new DWCmdNetShow(dwProtocol, this));
 
   }
 

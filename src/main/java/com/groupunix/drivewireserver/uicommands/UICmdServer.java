@@ -10,18 +10,18 @@ public class UICmdServer extends DWCommand {
   static final String command = "server";
 
   public UICmdServer(DWUIClientThread dwuiClientThread) {
-    commands.addcommand(new UICmdServerShow(dwuiClientThread));
-    commands.addcommand(new UICmdServerConfig(dwuiClientThread));
-    commands.addcommand(new UICmdServerTerminate(dwuiClientThread));
-    commands.addcommand(new UICmdServerFile());
+    commands.addCommand(new UICmdServerShow(dwuiClientThread));
+    commands.addCommand(new UICmdServerConfig(dwuiClientThread));
+    commands.addCommand(new UICmdServerTerminate(dwuiClientThread));
+    commands.addCommand(new UICmdServerFile());
   }
 
 
   public UICmdServer(DWProtocol dwProto) {
-    commands.addcommand(new UICmdServerShow(dwProto));
-    commands.addcommand(new UICmdServerConfig(dwProto));
-    commands.addcommand(new UICmdServerTerminate(dwProto));
-    commands.addcommand(new UICmdServerFile());
+    commands.addCommand(new UICmdServerShow(dwProto));
+    commands.addCommand(new UICmdServerConfig(dwProto));
+    commands.addCommand(new UICmdServerTerminate(dwProto));
+    commands.addCommand(new UICmdServerFile());
   }
 
 
