@@ -6,14 +6,38 @@ public final class OS9Defs {
   }
   // Constants from OS9
 
-  // Mode byte
+  // File Attributes Byte
+  /**
+   * Read.
+   */
   public static final byte MODE_R = (byte) 1;
+  /**
+   * Write.
+   */
   public static final byte MODE_W = (byte) 2;
+  /**
+   * Execute.
+   */
   public static final byte MODE_E = (byte) 4;
+  /**
+   * Public Read.
+   */
   public static final byte MODE_PR = (byte) 8;
+  /**
+   * Public Write.
+   */
   public static final byte MODE_PW = (byte) 16;
+  /**
+   * Public Execute.
+   */
   public static final byte MODE_PE = (byte) 32;
+  /**
+   * Shared.
+   */
   public static final byte MODE_SHARE = (byte) 64;
+  /**
+   * Directory.
+   */
   public static final byte MODE_DIR = (byte) 128;
 
   // Status codes for Get/SetStat

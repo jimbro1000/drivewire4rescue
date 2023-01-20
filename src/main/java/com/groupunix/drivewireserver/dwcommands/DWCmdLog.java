@@ -3,47 +3,47 @@ package com.groupunix.drivewireserver.dwcommands;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class DWCmdLog extends DWCommand {
+  /**
+   * Drivewire protocol.
+   */
+  private final DWProtocol dwProtocol;
 
-  static final String command = "log";
-  private DWCommandList commands;
-  private DWProtocol dwProto;
-
-  public DWCmdLog(DWProtocol dwProto, DWCommand parent) {
+  /**
+   * Log command constructor.
+   *
+   * @param protocol protocol
+   * @param parent parent command
+   */
+  public DWCmdLog(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
-
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
+    this.dwProtocol = protocol;
+    commands = new DWCommandList(this.dwProtocol, this.dwProtocol.getCMDCols());
     commands.addCommand(new DWCmdLogShow(this));
-
+    commandName = "log";
+    shortHelp = "View the server log";
+    usage = "dw log [command]";
   }
 
-
-  public String getCommand() {
-    return command;
-  }
-
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return new DWCommandResponse(this.commands.getShortHelp());
     }
-    return (commands.parse(cmdline));
+    return commands.parse(cmdline);
   }
 
-
-  public String getShortHelp() {
-    return "View the server log";
-  }
-
-
-  public String getUsage() {
-    return "dw log [command]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return commands.validate(cmdline);
   }
 }

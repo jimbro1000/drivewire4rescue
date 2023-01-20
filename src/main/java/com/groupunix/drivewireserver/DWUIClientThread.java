@@ -220,7 +220,7 @@ public class DWUIClientThread implements Runnable {
     this.bufferedout.write(0);
 
     // data
-    if (resp.isUsebytes() && (resp.getResponseBytes() != null))
+    if (resp.isUseBytes() && (resp.getResponseBytes() != null))
       this.bufferedout.write(resp.getResponseBytes());
     else if (resp.getResponseText() != null)
       this.bufferedout.write(resp.getResponseText().getBytes());
