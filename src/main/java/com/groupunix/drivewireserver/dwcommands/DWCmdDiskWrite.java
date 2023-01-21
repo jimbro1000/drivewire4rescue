@@ -10,84 +10,142 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
 public class DWCmdDiskWrite extends DWCommand {
+  /**
+   * Drivewire protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-  private DWProtocolHandler dwProto;
-
-  public DWCmdDiskWrite(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Disk write command constructor.
+   *
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdDiskWrite(
+      final DWProtocolHandler protocolHandler, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocolHandler = protocolHandler;
     this.setCommand("write");
     this.setShortHelp("Write disk image in drive #");
     this.setUsage("dw disk write # [path]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    if (cmdline.length() == 0)
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error"));
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    if (cmdline.length() == 0) {
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "Syntax error"
+      );
+    }
     String[] args = cmdline.split(" ");
-
     if (args.length == 1) {
       try {
-        return (doDiskWrite(dwProto.getDiskDrives().getDriveNoFromString(args[0])));
+        return doDiskWrite(
+            dwProtocolHandler.getDiskDrives().getDriveNoFromString(args[0])
+        );
       } catch (DWDriveNotValidException e) {
-        return (new DWCommandResponse(false, DWDefs.RC_INVALID_DRIVE, e.getMessage()));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_INVALID_DRIVE,
+            e.getMessage()
+        );
       }
     } else {
-
       try {
-        return (doDiskWrite(dwProto.getDiskDrives().getDriveNoFromString(args[0]), DWUtils.dropFirstToken(cmdline)));
+        return doDiskWrite(
+            dwProtocolHandler
+                .getDiskDrives()
+                .getDriveNoFromString(args[0]), DWUtils.dropFirstToken(cmdline)
+        );
       } catch (DWDriveNotValidException e) {
         // its an int, but its not a valid drive
-        return (new DWCommandResponse(false, DWDefs.RC_INVALID_DRIVE, "Invalid drive number."));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_INVALID_DRIVE,
+            "Invalid drive number."
+        );
       }
-
     }
-
   }
 
-
-  private DWCommandResponse doDiskWrite(int driveno) {
-
+  private DWCommandResponse doDiskWrite(final int driveNumber) {
     try {
-
-      dwProto.getDiskDrives().writeDisk(driveno);
-
-      return (new DWCommandResponse("Wrote disk #" + driveno + " to source image."));
-
+      dwProtocolHandler.getDiskDrives().writeDisk(driveNumber);
+      return new DWCommandResponse(
+          "Wrote disk #" + driveNumber + " to source image."
+      );
     } catch (IOException e1) {
-      return (new DWCommandResponse(false, DWDefs.RC_SERVER_IO_EXCEPTION, e1.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SERVER_IO_EXCEPTION,
+          e1.getMessage()
+      );
     } catch (DWDriveNotLoadedException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_DRIVE_NOT_LOADED, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_DRIVE_NOT_LOADED,
+          e.getMessage()
+      );
     } catch (DWDriveNotValidException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_INVALID_DRIVE, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_INVALID_DRIVE,
+          e.getMessage()
+      );
     } catch (DWImageHasNoSourceException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_SERVER_FILE_NOT_FOUND, e.getMessage()));
-
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SERVER_FILE_NOT_FOUND,
+          e.getMessage()
+      );
     }
   }
 
-
-  private DWCommandResponse doDiskWrite(int driveno, String path) {
-    path = DWUtils.convertStarToBang(path);
-
+  private DWCommandResponse doDiskWrite(
+      final int driveNumber, final String path
+  ) {
+    String safePath = DWUtils.convertStarToBang(path);
     try {
-      System.out.println("write " + path);
-
-      dwProto.getDiskDrives().writeDisk(driveno, path);
-
-      return (new DWCommandResponse("Wrote disk #" + driveno + " to '" + path + "'"));
-
+      System.out.println("write " + safePath);
+      dwProtocolHandler.getDiskDrives().writeDisk(driveNumber, safePath);
+      return new DWCommandResponse(
+          "Wrote disk #" + driveNumber + " to '" + safePath + "'"
+      );
     } catch (IOException e1) {
-      return (new DWCommandResponse(false, DWDefs.RC_SERVER_IO_EXCEPTION, e1.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SERVER_IO_EXCEPTION,
+          e1.getMessage()
+      );
     } catch (DWDriveNotLoadedException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_DRIVE_NOT_LOADED, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_DRIVE_NOT_LOADED,
+          e.getMessage()
+      );
     } catch (DWDriveNotValidException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_INVALID_DRIVE, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_INVALID_DRIVE,
+          e.getMessage());
     }
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

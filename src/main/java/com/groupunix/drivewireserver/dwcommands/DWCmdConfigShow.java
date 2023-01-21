@@ -74,7 +74,7 @@ public class DWCmdConfigShow extends DWCommand {
     StringBuilder text = new StringBuilder(
         "Current protocol handler configuration:\r\n\n"
     );
-    for (Iterator<String> i = dwProtocol.getConfig().getKeys(); i.hasNext(); ) {
+    for (Iterator<String> i = dwProtocol.getConfig().getKeys(); i.hasNext();) {
       String key = i.next();
       String value = dwProtocol.getConfig().getProperty(key).toString();
       text.append(key).append(" = ").append(value).append("\r\n");

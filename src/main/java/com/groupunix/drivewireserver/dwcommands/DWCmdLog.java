@@ -17,7 +17,9 @@ public class DWCmdLog extends DWCommand {
   public DWCmdLog(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
     this.dwProtocol = protocol;
-    this.setCommandList(new DWCommandList(this.dwProtocol, this.dwProtocol.getCMDCols()));
+    this.setCommandList(new DWCommandList(
+        this.dwProtocol, this.dwProtocol.getCMDCols()
+    ));
     this.getCommandList().addCommand(new DWCmdLogShow(this));
     this.setCommand("log");
     this.setShortHelp("View the server log");

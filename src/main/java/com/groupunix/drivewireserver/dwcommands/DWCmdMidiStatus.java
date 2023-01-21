@@ -7,65 +7,90 @@ import javax.sound.midi.MidiUnavailableException;
 import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
-public class DWCmdMidiStatus extends DWCommand {
+public final class DWCmdMidiStatus extends DWCommand {
+  /**
+   * Drivewire protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-  private DWProtocolHandler dwProto;
-
-  public DWCmdMidiStatus(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Midi status command constructor.
+   *
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdMidiStatus(
+      final DWProtocolHandler protocolHandler, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocolHandler = protocolHandler;
     this.setCommand("status");
     this.setShortHelp("Show MIDI status");
     this.setUsage("dw midi status");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (doMidiStatus());
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return doMidiStatus();
   }
 
   private DWCommandResponse doMidiStatus() {
-    String text = new String();
-
-    text += "\r\nDriveWire MIDI status:\r\n\n";
-
-    if (dwProto.getConfig().getBoolean("UseMIDI", true)) {
-      text += "Devices:\r\n";
-
+    StringBuilder text = new StringBuilder();
+    text.append("\r\nDriveWire MIDI status:\r\n\n");
+    if (
+        dwProtocolHandler
+            .getConfig()
+            .getBoolean("UseMIDI", true)
+    ) {
+      text.append("Devices:\r\n");
       MidiDevice device;
       MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
-
       for (int i = 0; i < infos.length; i++) {
         try {
           device = MidiSystem.getMidiDevice(infos[i]);
-          text += "[" + i + "] ";
-          text += device.getDeviceInfo().getName() + " (" + device.getClass().getSimpleName() + ")\r\n";
-          text += "    " + device.getDeviceInfo().getDescription() + ", ";
-          text += device.getDeviceInfo().getVendor() + " ";
-          text += device.getDeviceInfo().getVersion() + "\r\n";
-
+          text.append("[").append(i).append("] ");
+          text.append(device.getDeviceInfo().getName())
+              .append(" (")
+              .append(device.getClass().getSimpleName())
+              .append(")\r\n");
+          text.append("    ")
+              .append(device.getDeviceInfo().getDescription())
+              .append(", ");
+          text.append(device.getDeviceInfo().getVendor()).append(" ");
+          text.append(device.getDeviceInfo().getVersion()).append("\r\n");
         } catch (MidiUnavailableException e) {
-          return (new DWCommandResponse(false, DWDefs.RC_MIDI_UNAVAILABLE, e.getMessage()));
+          return new DWCommandResponse(
+              false,
+              DWDefs.RC_MIDI_UNAVAILABLE,
+              e.getMessage()
+          );
         }
-
       }
-
-      text += "\r\nCurrent MIDI output device: ";
-
-      if (dwProto.getVPorts().getMidiDeviceInfo() == null) {
-
-        text += "none\r\n";
+      text.append("\r\nCurrent MIDI output device: ");
+      if (dwProtocolHandler.getVPorts().getMidiDeviceInfo() == null) {
+        text.append("none\r\n");
       } else {
-        text += dwProto.getVPorts().getMidiDeviceInfo().getName() + "\r\n";
+        text.append(dwProtocolHandler.getVPorts().getMidiDeviceInfo().getName())
+            .append("\r\n");
       }
     } else {
-      text += "MIDI is disabled.\r\n";
+      text.append("MIDI is disabled.\r\n");
     }
-
-    return (new DWCommandResponse(text));
+    return new DWCommandResponse(text.toString());
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
 }

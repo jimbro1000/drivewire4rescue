@@ -2,28 +2,53 @@ package com.groupunix.drivewireserver.dwcommands;
 
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
-public class DWCmdNet extends DWCommand {
-  private DWVSerialProtocol dwProto;
+public final class DWCmdNet extends DWCommand {
+  /**
+   * Drivewire serial protocol.
+   */
+  private DWVSerialProtocol dwvSerialProtocol;
 
-  public DWCmdNet(DWVSerialProtocol dwProtocol, DWCommand parent) {
+  /**
+   * Net command constructor.
+   *
+   * @param protocol protocol
+   * @param parent parent command
+   */
+  public DWCmdNet(
+      final DWVSerialProtocol protocol, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProtocol;
-    DWCommandList commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
+    this.dwvSerialProtocol = protocol;
+    DWCommandList commands = new DWCommandList(
+        this.dwvSerialProtocol, this.dwvSerialProtocol.getCMDCols()
+    );
     this.setCommandList(commands);
-    commands.addCommand(new DWCmdNetShow(dwProtocol, this));
+    commands.addCommand(new DWCmdNetShow(protocol, this));
     this.setCommand("net");
     this.setShortHelp("Manage network connections");
     this.setUsage("dw net [command]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
+      return new DWCommandResponse(this.getCommandList().getShortHelp());
     }
-    return (this.getCommandList().parse(cmdline));
+    return this.getCommandList().parse(cmdline);
   }
 
-  public boolean validate(String cmdline) {
-    return (this.getCommandList().validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
 }

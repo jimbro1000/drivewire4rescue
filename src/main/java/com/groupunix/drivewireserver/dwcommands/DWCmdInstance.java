@@ -17,7 +17,9 @@ public final class DWCmdInstance extends DWCommand {
   public DWCmdInstance(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
     this.dwProtocol = protocol;
-    DWCommandList commands = new DWCommandList(this.dwProtocol, this.dwProtocol.getCMDCols());
+    DWCommandList commands = new DWCommandList(
+        this.dwProtocol, this.dwProtocol.getCMDCols()
+    );
     this.setCommandList(commands);
     commands.addCommand(new DWCmdInstanceShow(protocol, this));
     commands.addCommand(new DWCmdInstanceStart(protocol, this));

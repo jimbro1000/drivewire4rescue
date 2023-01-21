@@ -39,7 +39,7 @@ public abstract class DWCommand implements DWCmdHelp {
    *
    * @param command command name
    */
-  public final void setCommand(String command) {
+  public final void setCommand(final String command) {
     commandName = command;
   }
 
@@ -57,7 +57,7 @@ public abstract class DWCommand implements DWCmdHelp {
    *
    * @param commandList component command list
    */
-  public final void setCommandList(DWCommandList commandList) {
+  public final void setCommandList(final DWCommandList commandList) {
     this.commands = commandList;
   }
 
@@ -107,7 +107,7 @@ public abstract class DWCommand implements DWCmdHelp {
    *
    * @param helpText short help text
    */
-  public void setShortHelp(String helpText) {
+  public void setShortHelp(final String helpText) {
     shortHelp = helpText;
   }
 
@@ -125,7 +125,7 @@ public abstract class DWCommand implements DWCmdHelp {
    *
    * @param usageText usage text
    */
-  public final void setUsage(String usageText) {
+  public final void setUsage(final String usageText) {
     usage = usageText;
   }
 
