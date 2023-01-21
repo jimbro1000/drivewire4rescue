@@ -4,37 +4,60 @@ package com.groupunix.drivewireserver.dwcommands;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class DWCmdDisk extends DWCommand {
-  private DWProtocolHandler dwProto;
+  /**
+   * Drivewire protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-  public DWCmdDisk(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Disk command constructor.
+   *
+   * @param protocolHandler protocol handler
+   * @param parent          parent command
+   */
+  public DWCmdDisk(
+      final DWProtocolHandler protocolHandler, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocolHandler = protocolHandler;
 
-    DWCommandList commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
+    DWCommandList commands = new DWCommandList(
+        this.dwProtocolHandler, this.dwProtocolHandler.getCMDCols()
+    );
     this.setCommandList(commands);
-    commands.addCommand(new DWCmdDiskShow(dwProto, this));
-    commands.addCommand(new DWCmdDiskEject(dwProto, this));
-    commands.addCommand(new DWCmdDiskInsert(dwProto, this));
-    commands.addCommand(new DWCmdDiskReload(dwProto, this));
-    commands.addCommand(new DWCmdDiskWrite(dwProto, this));
-    commands.addCommand(new DWCmdDiskCreate(dwProto, this));
-    commands.addCommand(new DWCmdDiskSet(dwProto, this));
-    commands.addCommand(new DWCmdDiskDos(dwProto, this));
-    // testing only, little point
-    //commands.addcommand(new DWCmdDiskDump(dwProto,this));
+    commands.addCommand(new DWCmdDiskShow(protocolHandler, this));
+    commands.addCommand(new DWCmdDiskEject(protocolHandler, this));
+    commands.addCommand(new DWCmdDiskInsert(protocolHandler, this));
+    commands.addCommand(new DWCmdDiskReload(protocolHandler, this));
+    commands.addCommand(new DWCmdDiskWrite(protocolHandler, this));
+    commands.addCommand(new DWCmdDiskCreate(protocolHandler, this));
+    commands.addCommand(new DWCmdDiskSet(protocolHandler, this));
+    commands.addCommand(new DWCmdDiskDos(protocolHandler, this));
     this.setCommand("disk");
     this.setShortHelp("Manage disks and disksets");
     this.setUsage("dw disk [command]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * parse command.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
       return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
     return (this.getCommandList().parse(cmdline));
   }
 
-  public boolean validate(String cmdline) {
-    return (this.getCommandList().validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
 }

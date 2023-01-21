@@ -4,58 +4,81 @@ import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.DriveWireServer;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
-public class DWCmdConfigSet extends DWCommand {
+public final class DWCmdConfigSet extends DWCommand {
+  /**
+   * Drivewire protocol.
+   */
+  private final DWProtocol dwProtocol;
 
-  DWProtocol dwProto;
-
-  public DWCmdConfigSet(DWProtocol dwProtocol, DWCommand parent) {
+  /**
+   * Configuration set command constructor.
+   *
+   * @param protocol protcol
+   * @param parent   parent command
+   */
+  public DWCmdConfigSet(
+      final DWProtocol protocol, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProtocol;
+    this.dwProtocol = protocol;
     this.setCommand("set");
     this.setShortHelp("Set config item, omit value to remove item");
     this.setUsage("dw config set item [value]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * parse command.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error: dw config set requires an item and value as arguments"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "Syntax error: dw config set requires an item and value as arguments"
+      );
     }
-
     String[] args = cmdline.split(" ");
-
     if (args.length == 1) {
       return (doSetConfig(args[0]));
     } else {
-      return (doSetConfig(args[0], cmdline.substring(args[0].length() + 1)));
+      return doSetConfig(
+          args[0], cmdline.substring(args[0].length() + 1)
+      );
     }
-
   }
 
-  private DWCommandResponse doSetConfig(String item) {
-
-    if (dwProto.getConfig().containsKey(item)) {
+  private DWCommandResponse doSetConfig(final String item) {
+    if (dwProtocol.getConfig().containsKey(item)) {
       synchronized (DriveWireServer.serverConfiguration) {
-        dwProto.getConfig().clearProperty(item);
+        dwProtocol.getConfig().clearProperty(item);
       }
     }
-
-    return (new DWCommandResponse("Item '" + item + "' removed from config"));
-
+    return new DWCommandResponse(
+        "Item '" + item + "' removed from config"
+    );
   }
 
-
-  private DWCommandResponse doSetConfig(String item, String value) {
+  private DWCommandResponse doSetConfig(
+      final String item, final String value
+  ) {
     synchronized (DriveWireServer.serverConfiguration) {
-      dwProto.getConfig().setProperty(item, value);
+      dwProtocol.getConfig().setProperty(item, value);
     }
-    return (new DWCommandResponse("Item '" + item + "' set to '" + value + "'"));
+    return new DWCommandResponse(
+        "Item '" + item + "' set to '" + value + "'"
+    );
   }
 
-
-  public boolean validate(String cmdline) {
-
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
     return true;
   }
-
-
 }
