@@ -4,14 +4,6 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class DWCmdConfig extends DWCommand {
   /**
-   * command name.
-   */
-  static final String COMMAND = "config";
-  /**
-   * command list.
-   */
-  private final DWCommandList commands;
-  /**
    * drivewire protocol.
    */
   private final DWProtocol dwProtocol;
@@ -24,63 +16,38 @@ public class DWCmdConfig extends DWCommand {
   public DWCmdConfig(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
     this.dwProtocol = protocol;
-    commands = new DWCommandList(this.dwProtocol, this.dwProtocol.getCMDCols());
+    DWCommandList commands = new DWCommandList(
+        this.dwProtocol, this.dwProtocol.getCMDCols()
+    );
+    this.setCommandList(commands);
     commands.addCommand(new DWCmdConfigShow(protocol, this));
     commands.addCommand(new DWCmdConfigSet(protocol, this));
     commands.addCommand(new DWCmdConfigSave(protocol, this));
     // save/load not implemented here
-  }
-
-  /**
-   * get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return COMMAND;
-  }
-
-  /**
-   * get component commands.
-   * @return all component commands
-   */
-  public DWCommandList getCommandList() {
-    return (this.commands);
+    this.setCommand("config");
+    this.setShortHelp("Commands to manipulate the config");
+    this.setUsage("dw config [command]");
   }
 
   /**
    * parse command.
-   * @param cmdline
+   *
+   * @param cmdline command line
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
-  }
-
-  /**
-   * get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Commands to manipulate the config";
-  }
-
-  /**
-   * get usage.
-   * @return usage information
-   */
-  public String getUsage() {
-    return "dw config [command]";
+    return (this.getCommandList().parse(cmdline));
   }
 
   /**
    * validate command.
-   * @param cmdline
+   * @param cmdline command line
    * @return true if command valid
    */
   public boolean validate(final String cmdline) {
-    return (commands.validate(cmdline));
+    return (this.getCommandList().validate(cmdline));
   }
 }

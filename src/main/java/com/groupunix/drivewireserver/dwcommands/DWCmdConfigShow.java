@@ -14,20 +14,9 @@ public class DWCmdConfigShow extends DWCommand {
   public DWCmdConfigShow(DWProtocol dwProtocol, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProtocol;
-  }
-
-  public String getCommand() {
-    return "show";
-  }
-
-
-  public String getShortHelp() {
-    return "Show current instance config (or item)";
-  }
-
-
-  public String getUsage() {
-    return "dw config show [item]";
+    this.setCommand("show");
+    this.setShortHelp("Show current instance config (or item)");
+    this.setUsage("dw config show [item]");
   }
 
   public DWCommandResponse parse(String cmdline) {

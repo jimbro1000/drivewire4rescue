@@ -15,30 +15,17 @@ public class DWCmdDiskReload extends DWCommand {
   public DWCmdDiskReload(DWProtocolHandler dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
-  }
-
-  public String getCommand() {
-    return "reload";
-  }
-
-
-  public String getShortHelp() {
-    return "Reload disk in drive #";
-  }
-
-
-  public String getUsage() {
-    return "dw disk reload {# | all}";
+    this.setCommand("reload");
+    this.setShortHelp("Reload disk in drive #");
+    this.setUsage("dw disk reload {# | all}");
   }
 
   public DWCommandResponse parse(String cmdline) {
     if (cmdline.length() == 0) {
       return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "dw disk reload requires a drive # or 'all' as an argument"));
     }
-
     return (doDiskReload(cmdline));
   }
-
 
   private DWCommandResponse doDiskReload(String drivestr) {
 
@@ -64,10 +51,7 @@ public class DWCmdDiskReload extends DWCommand {
     } catch (DWImageFormatException e) {
       return (new DWCommandResponse(false, DWDefs.RC_IMAGE_FORMAT_EXCEPTION, e.getMessage()));
     }
-
-
   }
-
 
   public boolean validate(String cmdline) {
     return (true);

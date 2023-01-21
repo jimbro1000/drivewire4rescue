@@ -18,20 +18,9 @@ public class DWCmdMidiSynthStatus extends DWCommand {
   public DWCmdMidiSynthStatus(DWProtocolHandler dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
-  }
-
-  public String getCommand() {
-    return "status";
-  }
-
-
-  public String getShortHelp() {
-    return "Show internal synth status";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth status";
+    this.setCommand("status");
+    this.setShortHelp("Show internal synth status");
+    this.setUsage("dw midi synth status");
   }
 
   public DWCommandResponse parse(String cmdline) {
@@ -39,7 +28,7 @@ public class DWCmdMidiSynthStatus extends DWCommand {
   }
 
   private DWCommandResponse doSynthStatus() {
-    String text = new String();
+    String text;
 
     // dw midi synth show
     text = "\r\nInternal synthesizer status:\r\n\n";

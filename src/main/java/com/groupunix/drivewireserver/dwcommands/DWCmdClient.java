@@ -1,33 +1,57 @@
 package com.groupunix.drivewireserver.dwcommands;
 
-import com.groupunix.drivewireserver.dwprotocolhandler.*;
 
-public class DWCmdClient extends DWCommand {
-  private DWCommandList commands;
-  private DWVSerialProtocol dwProto;
+import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
-  public DWCmdClient(DWVSerialProtocol dwProto, DWCommand parent) {
+public final class DWCmdClient extends DWCommand {
+  /**
+   * Drivewire serial protocol.
+   */
+  private final DWVSerialProtocol dwvSerialProtocol;
+
+  /**
+   * Client command constructor.
+   *
+   * @param protocol serial protocol
+   * @param parent   parent command
+   */
+  public DWCmdClient(
+      final DWVSerialProtocol protocol, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addCommand(new DWCmdClientRestart(dwProto, this));
-    commandName = "client";
-    shortHelp = "Commands that manage the attached client device";
-    usage = "dw client [command]";
+    this.dwvSerialProtocol = protocol;
+    DWCommandList commands = new DWCommandList(
+        this.dwvSerialProtocol, this.dwvSerialProtocol.getCMDCols()
+    );
+    this.setCommandList(commands);
+    commands.addCommand(new DWCmdClientRestart(protocol, this));
+    this.setCommand("client");
+    this.setShortHelp("Commands that manage the attached client device");
+    this.setUsage("dw client [command]");
   }
 
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return new DWCommandResponse(
+          this.getCommandList().getShortHelp()
+      );
     }
-    return (commands.parse(cmdline));
+    return this.getCommandList().parse(cmdline);
   }
 
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
 }

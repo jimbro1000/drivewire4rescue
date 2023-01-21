@@ -11,20 +11,9 @@ public class DWCmdConfigSet extends DWCommand {
   public DWCmdConfigSet(DWProtocol dwProtocol, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProtocol;
-  }
-
-  public String getCommand() {
-    return "set";
-  }
-
-
-  public String getShortHelp() {
-    return "Set config item, omit value to remove item";
-  }
-
-
-  public String getUsage() {
-    return "dw config set item [value]";
+    this.setCommand("set");
+    this.setShortHelp("Set config item, omit value to remove item");
+    this.setUsage("dw config set item [value]");
   }
 
   public DWCommandResponse parse(String cmdline) {

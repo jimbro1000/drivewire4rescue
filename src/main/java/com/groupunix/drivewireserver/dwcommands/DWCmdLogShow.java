@@ -13,32 +13,10 @@ public class DWCmdLogShow extends DWCommand {
    */
   public DWCmdLogShow(final DWCommand parent) {
     setParentCmd(parent);
+    this.setCommand("show");
+    this.setShortHelp("Show last 20 (or #) log entries");
+    this.setUsage("dw log show [#]");
   }
-
-  /**
-   * Get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return "show";
-  }
-
-  /**
-   * Get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Show last 20 (or #) log entries";
-  }
-
-  /**
-   * Get usage.
-   * @return usage information
-   */
-  public String getUsage() {
-    return "dw log show [#]";
-  }
-
   /**
    * Parse command.
    * @param cmdline

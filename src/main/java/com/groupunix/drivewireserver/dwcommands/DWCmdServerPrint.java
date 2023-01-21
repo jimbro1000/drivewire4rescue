@@ -33,9 +33,9 @@ public class DWCmdServerPrint extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocol = protocol;
-    commandName = "print";
-    shortHelp = "Print contents of file on server";
-    usage = "dw server print URI/path";
+    this.setCommand("print");
+    this.setShortHelp("Print contents of file on server");
+    this.setUsage("dw server print URI/path");
   }
 
   /**

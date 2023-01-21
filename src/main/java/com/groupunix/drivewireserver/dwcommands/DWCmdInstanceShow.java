@@ -12,9 +12,9 @@ public final class DWCmdInstanceShow extends DWCommand {
    */
   DWCmdInstanceShow(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
-    commandName = "show";
-    shortHelp = "Show instance status";
-    usage = "dw instance show";
+    this.setCommand("show");
+    this.setShortHelp("Show instance status");
+    this.setUsage("dw instance show");
   }
 
   /**

@@ -3,47 +3,29 @@ package com.groupunix.drivewireserver.dwcommands;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
 public class DWCmdPort extends DWCommand {
-
-  static final String command = "port";
-  private DWCommandList commands;
   private DWVSerialProtocol dwProto;
 
   public DWCmdPort(DWVSerialProtocol dwProtocol, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProtocol;
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
+    DWCommandList commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
+    this.setCommandList(commands);
     commands.addCommand(new DWCmdPortShow(dwProtocol, this));
     commands.addCommand(new DWCmdPortClose(dwProtocol, this));
     commands.addCommand(new DWCmdPortOpen(dwProtocol, this));
-  }
-
-
-  public String getCommand() {
-    return command;
-  }
-
-  public DWCommandList getCommandList() {
-    return (this.commands);
+    this.setCommand("port");
+    this.setShortHelp("Manage virtual serial ports");
+    this.setUsage("dw port [command]");
   }
 
   public DWCommandResponse parse(String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
-  }
-
-
-  public String getShortHelp() {
-    return "Manage virtual serial ports";
-  }
-
-
-  public String getUsage() {
-    return "dw port [command]";
+    return (this.getCommandList().parse(cmdline));
   }
 
   public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+    return (this.getCommandList().validate(cmdline));
   }
 }

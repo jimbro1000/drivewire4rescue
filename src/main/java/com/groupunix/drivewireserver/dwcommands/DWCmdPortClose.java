@@ -22,30 +22,9 @@ public class DWCmdPortClose extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocol = protocol;
-  }
-
-  /**
-   * Get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return "close";
-  }
-
-  /**
-   * Get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Close port #";
-  }
-
-  /**
-   * Get usage information.
-   * @return usage
-   */
-  public String getUsage() {
-    return "dw port close #";
+    this.setCommand("close");
+    this.setShortHelp("Close port #");
+    this.setUsage("dw port close #");
   }
 
   /**

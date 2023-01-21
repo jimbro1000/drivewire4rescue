@@ -28,9 +28,9 @@ public class DWCmdMidiSynthBank extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-    commandName = "bank";
-    shortHelp = "Load soundbank file";
-    usage = "dw midi synth bank filepath";
+    this.setCommand("bank");
+    this.setShortHelp("Load soundbank file");
+    this.setUsage("dw midi synth bank filepath");
   }
 
   /**

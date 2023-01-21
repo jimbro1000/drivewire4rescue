@@ -31,9 +31,9 @@ public final class DWCmdDiskDosDir extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-    commandName = "dir";
-    shortHelp = "Show DOS directory of disk in drive #";
-    usage = "dw disk dos dir #";
+    this.setCommand("dir");
+    this.setShortHelp("Show DOS directory of disk in drive #");
+    this.setUsage("dw disk dos dir #");
   }
 
   /**

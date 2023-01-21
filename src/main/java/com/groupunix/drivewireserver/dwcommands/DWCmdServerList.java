@@ -17,23 +17,10 @@ public class DWCmdServerList extends DWCommand {
 
 	public DWCmdServerList(DWCommand parent) {
 		setParentCmd(parent);
+		this.setCommand("list");
+		this.setShortHelp("List contents of file on server");
+		this.setUsage("dw server list URI/path");
 	}
-
-
-	public String getCommand() {
-		return "list";
-	}
-
-
-	public String getShortHelp() {
-		return "List contents of file on server";
-	}
-
-
-	public String getUsage() {
-		return "dw server list URI/path";
-	}
-
 	public DWCommandResponse parse(String cmdline) {
 		if (cmdline.length() == 0) {
 			return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "dw server list requires a URI or local file path as an argument"));

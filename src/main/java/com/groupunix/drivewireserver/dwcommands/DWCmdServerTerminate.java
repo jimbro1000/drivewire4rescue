@@ -10,9 +10,9 @@ public class DWCmdServerTerminate extends DWCommand {
    */
   public DWCmdServerTerminate(final DWCommand parent) {
     setParentCmd(parent);
-    commandName = "terminate";
-    shortHelp = "Shut down server";
-    usage = "dw server terminate [force]";
+    this.setCommand("terminate");
+    this.setShortHelp("Shut down server");
+    this.setUsage("dw server terminate [force]");
   }
 
   /**

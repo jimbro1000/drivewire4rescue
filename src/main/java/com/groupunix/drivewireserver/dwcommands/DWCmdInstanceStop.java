@@ -13,9 +13,9 @@ public final class DWCmdInstanceStop extends DWCommand {
    */
   public DWCmdInstanceStop(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
-    commandName = "stop";
-    shortHelp = "Stop instance #";
-    usage = "dw instance stop #";
+    this.setCommand("stop");
+    this.setShortHelp("Stop instance #");
+    this.setUsage("dw instance stop #");
   }
 
   /**

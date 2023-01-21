@@ -23,9 +23,9 @@ public class DWCmdMidiSynthShowChannels extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-    commandName = "channels";
-    shortHelp = "Show internal synth channel status";
-    usage = "dw midi synth show channels";
+    this.setCommand("channels");
+    this.setShortHelp("Show internal synth channel status");
+    this.setUsage("dw midi synth show channels");
   }
 
   /**

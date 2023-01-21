@@ -8,25 +8,11 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 
 public class DWCmdServerShowSerial extends DWCommand {
-
-
   DWCmdServerShowSerial(DWProtocol dwProto, DWCommand parent) {
-
     setParentCmd(parent);
-  }
-
-  public String getCommand() {
-    return "serial";
-  }
-
-
-  public String getShortHelp() {
-    return "Show serial device information";
-  }
-
-
-  public String getUsage() {
-    return "dw server show serial";
+    this.setCommand("serial");
+    this.setShortHelp("Show serial device information");
+    this.setUsage("dw server show serial");
   }
 
   public DWCommandResponse parse(String cmdline) {

@@ -4,14 +4,6 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class DWCmdMidiSynth extends DWCommand {
   /**
-   * command name.
-   */
-  static final String COMMAND = "synth";
-  /**
-   * component commands.
-   */
-  private final DWCommandList commands;
-  /**
    * protocol handler.
    */
   private final DWProtocolHandler dwProtocolHandler;
@@ -27,61 +19,35 @@ public class DWCmdMidiSynth extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-    commands = new DWCommandList(
+    DWCommandList commands = new DWCommandList(
         this.dwProtocolHandler,
         this.dwProtocolHandler.getCMDCols()
     );
+    this.setCommandList(commands);
     commands.addCommand(new DWCmdMidiSynthStatus(protocolHandler, this));
     commands.addCommand(new DWCmdMidiSynthShow(protocolHandler, this));
     commands.addCommand(new DWCmdMidiSynthBank(protocolHandler, this));
     commands.addCommand(new DWCmdMidiSynthProfile(protocolHandler, this));
     commands.addCommand(new DWCmdMidiSynthLock(protocolHandler, this));
     commands.addCommand(new DWCmdMidiSynthInstr(protocolHandler, this));
-  }
-
-  /**
-   * get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return COMMAND;
-  }
-
-  /**
-   * get command list.
-   * @return component commands
-   */
-  public DWCommandList getCommandList() {
-    return (this.commands);
+    this.setCommand("synth");
+    this.setShortHelp("Manage the MIDI synth");
+    this.setUsage("dw midi synth [command]");
   }
 
   /**
    * parse command.
-   * @param cmdline
+   *
+   * @param cmdline command line
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
+    return (this.getCommandList().parse(cmdline));
   }
 
-  /**
-   * get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Manage the MIDI synth";
-  }
-
-  /**
-   * get usage.
-   * @return usage information
-   */
-  public String getUsage() {
-    return "dw midi synth [command]";
-  }
 
   /**
    * validate command.
@@ -89,6 +55,6 @@ public class DWCmdMidiSynth extends DWCommand {
    * @return true if command valid
    */
   public boolean validate(final String cmdline) {
-    return (commands.validate(cmdline));
+    return (this.getCommandList().validate(cmdline));
   }
 }

@@ -21,9 +21,9 @@ public final class DWCmdNetShow extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocol = protocol;
-    commandName = "show";
-    shortHelp = "Show networking status";
-    usage = "dw net show";
+    this.setCommand("show");
+    this.setShortHelp("Show networking status");
+    this.setUsage("dw net show");
   }
 
   /**

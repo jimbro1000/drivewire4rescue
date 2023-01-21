@@ -6,10 +6,6 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
 public final class DWCmd extends DWCommand {
   /**
-   * component command list.
-   */
-  private final DWCommandList commands;
-  /**
    * command protocol.
    */
   private final DWProtocol dwProtocol;
@@ -21,19 +17,20 @@ public final class DWCmd extends DWCommand {
    */
   public DWCmd(final DWProtocol protocol) {
     this.dwProtocol = protocol;
-
-    commands = new DWCommandList(this.dwProtocol, this.dwProtocol.getCMDCols());
+    DWCommandList commands = new DWCommandList(
+        this.dwProtocol,
+        this.dwProtocol.getCMDCols()
+    );
+    this.setCommandList(commands);
     commands.addCommand(new DWCmdServer(protocol, this));
     commands.addCommand(new DWCmdConfig(protocol, this));
     commands.addCommand(new DWCmdLog(protocol, this));
     commands.addCommand(new DWCmdInstance(protocol, this));
-
     if (this.dwProtocol.hasDisks()) {
       commands.addCommand(
           new DWCmdDisk((DWProtocolHandler) protocol, this)
       );
     }
-
     if (this.dwProtocol.hasVSerial()) {
       commands.addCommand(
           new DWCmdPort((DWVSerialProtocol) protocol, this)
@@ -51,18 +48,9 @@ public final class DWCmd extends DWCommand {
           new DWCmdMidi((DWProtocolHandler) protocol, this)
       );
     }
-    commandName = "dw";
-    shortHelp = "Manage all aspects of the server";
-    usage = "dw [command]";
-  }
-
-  /**
-   * get component commands.
-   *
-   * @return all component commands
-   */
-  public DWCommandList getCommandList() {
-    return (this.commands);
+    this.setCommand("dw");
+    this.setShortHelp("Manage all aspects of the server");
+    this.setUsage("dw [command]");
   }
 
   /**
@@ -73,9 +61,9 @@ public final class DWCmd extends DWCommand {
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
+    return (this.getCommandList().parse(cmdline));
   }
 
   /**
@@ -85,6 +73,6 @@ public final class DWCmd extends DWCommand {
    * @return true if command is valid
    */
   public boolean validate(final String cmdline) {
-    return (commands.validate(cmdline));
+    return (this.getCommandList().validate(cmdline));
   }
 }

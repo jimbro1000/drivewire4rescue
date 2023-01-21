@@ -22,14 +22,9 @@ public class DWCmdDiskEject extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-  }
-
-  /**
-   * get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return "eject";
+    this.setCommand("eject");
+    this.setShortHelp("Eject disk from drive #");
+    this.setUsage("dw disk eject {# | all}");
   }
 
   /**
@@ -91,21 +86,7 @@ public class DWCmdDiskEject extends DWCommand {
     }
   }
 
-  /**
-   * get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Eject disk from drive #";
-  }
 
-  /**
-   * get usage.
-   * @return usage information
-   */
-  public String getUsage() {
-    return "dw disk eject {# | all}";
-  }
 
   /**
    * validate command.

@@ -18,7 +18,7 @@ public final class DWCmdDiskCreate extends DWCommand {
   /**
    * protocol handler.
    */
-  private DWProtocolHandler dwProtocolHandler;
+  private final DWProtocolHandler dwProtocolHandler;
 
   /**
    * disk create command constructor.
@@ -31,9 +31,9 @@ public final class DWCmdDiskCreate extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-    commandName = "create";
-    shortHelp = "Create new disk image";
-    usage = "dw disk create # [path]";
+    this.setCommand("create");
+    this.setShortHelp("Create new disk image");
+    this.setUsage("dw disk create # [path]");
   }
 
   /**

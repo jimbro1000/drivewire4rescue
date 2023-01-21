@@ -7,45 +7,53 @@ import com.groupunix.drivewireserver.DriveWireServer;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class DWCmdConfigSave extends DWCommand {
+  /**
+   * Drivewire protocol.
+   */
+  private final DWProtocol dwProtocol;
 
-  DWProtocol dwProto;
-
-
-  public DWCmdConfigSave(DWProtocol dwProtocol, DWCommand parent) {
+  /**
+   * Configuration save command constructor.
+   *
+   * @param protocol protocol
+   * @param parent   parent command
+   */
+  public DWCmdConfigSave(
+      final DWProtocol protocol, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProtocol;
+    this.dwProtocol = protocol;
+    this.setCommand("save");
+    this.setShortHelp("Save configuration");
+    this.setUsage("dw config save");
   }
 
-  public String getCommand() {
-    return "save";
-  }
-
-
-  public String getShortHelp() {
-    return "Save configuration";
-  }
-
-
-  public String getUsage() {
-    return "dw config save";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
-
+  /**
+   * parse command.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     try {
       DriveWireServer.saveServerConfig();
     } catch (ConfigurationException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_SERVER_IO_EXCEPTION, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SERVER_IO_EXCEPTION,
+          e.getMessage()
+      );
     }
-
-    return (new DWCommandResponse("Configuration saved."));
+    return new DWCommandResponse("Configuration saved.");
   }
 
-
-  public boolean validate(String cmdline) {
-
+  /**
+   * validate command.
+   *
+   * @param cmdline command line
+   * @return true if command valid
+   */
+  public boolean validate(final String cmdline) {
     return true;
   }
-
-
 }

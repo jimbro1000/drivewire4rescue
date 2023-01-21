@@ -16,10 +16,9 @@ public class DWCmdDiskDosFormat extends DWCommand {
   public DWCmdDiskDosFormat(DWProtocolHandler dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
-  }
-
-  public String getCommand() {
-    return "format";
+    this.setCommand("format");
+    this.setShortHelp("Format disk image with DOS filesystem");
+    this.setUsage("dw disk dos format #");
   }
 
   public DWCommandResponse parse(String cmdline) {
@@ -42,27 +41,13 @@ public class DWCmdDiskDosFormat extends DWCommand {
       } catch (IOException e) {
         return (new DWCommandResponse(false, DWDefs.RC_SERVER_IO_EXCEPTION, e.getMessage()));
       }
-
     }
-
     return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error"));
   }
 
-
   private DWCommandResponse doDiskDosCreate(int driveno) throws DWDriveNotValidException, DWDriveNotLoadedException, DWInvalidSectorException, DWSeekPastEndOfDeviceException, DWDriveWriteProtectedException, IOException {
     dwProto.getDiskDrives().formatDOSFS(driveno);
-
     return (new DWCommandResponse("Formatted new DOS disk image in drive " + driveno + "."));
-
-  }
-
-
-  public String getShortHelp() {
-    return "Format disk image with DOS filesystem";
-  }
-
-  public String getUsage() {
-    return "dw disk dos format #";
   }
 
   public boolean validate(String cmdline) {

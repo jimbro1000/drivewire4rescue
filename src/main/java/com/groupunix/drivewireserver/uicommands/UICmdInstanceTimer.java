@@ -1,49 +1,35 @@
 package com.groupunix.drivewireserver.uicommands;
 
 import com.groupunix.drivewireserver.DWUIClientThread;
-import com.groupunix.drivewireserver.dwcommands.DWCommand;
-import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
+import com.groupunix.drivewireserver.dwcommands.*;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdInstanceTimer extends DWCommand {
-
-  static final String command = "timer";
-
-
   public UICmdInstanceTimer(DWProtocol dwProtocol) {
+    DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdInstanceTimerShow(dwProtocol));
     commands.addCommand(new UICmdInstanceTimerReset(dwProtocol));
-
+    setHelp();
   }
-
 
   public UICmdInstanceTimer(DWUIClientThread dwuiClientThread) {
+    DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdInstanceTimerShow(dwuiClientThread));
     commands.addCommand(new UICmdInstanceTimerReset(dwuiClientThread));
-
+    setHelp();
   }
 
-
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    this.setCommand("timer");
+    this.setShortHelp("Timer commands");
+    this.setUsage("ui instance timer [command]");
   }
 
   public DWCommandResponse parse(String cmdline) {
-    return (commands.parse(cmdline));
-  }
-
-
-  public String getShortHelp() {
-    return "Timer commands";
-  }
-
-
-  public String getUsage() {
-    return "ui instance timer [command]";
+    return (this.getCommandList().parse(cmdline));
   }
 
   public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+    return (this.getCommandList().validate(cmdline));
   }
-
 }

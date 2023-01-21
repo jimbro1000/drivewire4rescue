@@ -23,30 +23,9 @@ public class DWCmdPortShow extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocol = protocol;
-  }
-
-  /**
-   * get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return "show";
-  }
-
-  /**
-   * get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Show port status";
-  }
-
-  /**
-   * get usage.
-   * @return usage information
-   */
-  public String getUsage() {
-    return "dw port show";
+    this.setCommand("show");
+    this.setShortHelp("Show port status");
+    this.setUsage("dw port show");
   }
 
   /**

@@ -16,22 +16,10 @@ public class DWCmdDiskWrite extends DWCommand {
   public DWCmdDiskWrite(DWProtocolHandler dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
+    this.setCommand("write");
+    this.setShortHelp("Write disk image in drive #");
+    this.setUsage("dw disk write # [path]");
   }
-
-
-  public String getCommand() {
-    return "write";
-  }
-
-
-  public String getShortHelp() {
-    return "Write disk image in drive #";
-  }
-
-  public String getUsage() {
-    return "dw disk write # [path]";
-  }
-
 
   public DWCommandResponse parse(String cmdline) {
     if (cmdline.length() == 0)

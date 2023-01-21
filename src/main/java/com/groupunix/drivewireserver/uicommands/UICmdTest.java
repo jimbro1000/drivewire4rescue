@@ -6,34 +6,19 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdTest extends DWCommand {
 
-  static final String command = "test";
-
-
   public UICmdTest(DWUIClientThread dwuiClientThread) {
-    commands.addCommand(new UICmdTestDGraph(dwuiClientThread));
-  }
-
-
-  public String getCommand() {
-    return command;
+    this.getCommandList().addCommand(new UICmdTestDGraph(dwuiClientThread));
+    this.setCommand("test");
+    this.setShortHelp("Test commands");
+    this.setUsage("ui test [command]");
   }
 
   public DWCommandResponse parse(String cmdline) {
-    return (commands.parse(cmdline));
-  }
-
-
-  public String getShortHelp() {
-    return "Test commands";
-  }
-
-
-  public String getUsage() {
-    return "ui test [command]";
+    return (this.getCommandList().parse(cmdline));
   }
 
   public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+    return (this.getCommandList().validate(cmdline));
   }
 
 }

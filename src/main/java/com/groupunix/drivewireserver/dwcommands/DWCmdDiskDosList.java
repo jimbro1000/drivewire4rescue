@@ -29,9 +29,9 @@ public final class DWCmdDiskDosList extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-    commandName = "list";
-    shortHelp = "List contents of DOS file";
-    usage = "dw disk dos list # filename";
+    this.setCommand("list");
+    this.setShortHelp("List contents of DOS file");
+    this.setUsage("dw disk dos list # filename");
   }
 
   /**

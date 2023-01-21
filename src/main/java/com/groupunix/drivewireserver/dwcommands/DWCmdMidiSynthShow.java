@@ -4,10 +4,6 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public final class DWCmdMidiSynthShow extends DWCommand {
   /**
-   * component commands.
-   */
-  private final DWCommandList commands;
-  /**
    * protocol handler.
    */
   private final DWProtocolHandler dwProtocolHandler;
@@ -23,41 +19,35 @@ public final class DWCmdMidiSynthShow extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-    commands = new DWCommandList(
+    DWCommandList commands = new DWCommandList(
         this.dwProtocolHandler,
         this.dwProtocolHandler.getCMDCols()
     );
+    this.setCommandList(commands);
     commands.addCommand(new DWCmdMidiSynthShowChannels(protocolHandler, this));
     commands.addCommand(new DWCmdMidiSynthShowInstr(protocolHandler, this));
     commands.addCommand(new DWCmdMidiSynthShowProfiles(this));
-    commandName = "show";
-    shortHelp = "View details about the synth";
-    usage = "dw midi synth show [item]";
-  }
-
-  /**
-   * get commands.
-   * @return component command list
-   */
-  public DWCommandList getCommandList() {
-    return (this.commands);
+    this.setCommand("show");
+    this.setShortHelp("View details about the synth");
+    this.setUsage("dw midi synth show [item]");
   }
 
   /**
    * parse command.
-   * @param cmdline
+   *
+   * @param cmdline command line
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
+    return (this.getCommandList().parse(cmdline));
   }
 
   /**
    * validate command.
-   * @param cmdline
+   * @param cmdline command line
    * @return true if command valid
    */
   public boolean validate(final String cmdline) {

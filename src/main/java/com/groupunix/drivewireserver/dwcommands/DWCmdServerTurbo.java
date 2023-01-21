@@ -12,20 +12,10 @@ public class DWCmdServerTurbo extends DWCommand {
   public DWCmdServerTurbo(DWProtocol dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
-  }
+    this.setCommand("turbo");
+    this.setShortHelp("Turn on DATurbo mode (testing only)");
+    this.setUsage("dw server turbo");
 
-  public String getCommand() {
-    return "turbo";
-  }
-
-
-  public String getShortHelp() {
-    return "Turn on DATurbo mode (testing only)";
-  }
-
-
-  public String getUsage() {
-    return "dw server turbo";
   }
 
   public DWCommandResponse parse(String cmdline) {

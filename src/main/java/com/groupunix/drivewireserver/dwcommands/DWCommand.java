@@ -6,19 +6,19 @@ public abstract class DWCommand implements DWCmdHelp {
   /**
    * Component command list.
    */
-  protected DWCommandList commands = new DWCommandList(null);
+  private DWCommandList commands = new DWCommandList(null);
   /**
    * Command name.
    */
-  protected String commandName;
+  private String commandName;
   /**
    * Short help text.
    */
-  protected String shortHelp;
+  private String shortHelp;
   /**
    * Usage information.
    */
-  protected String usage;
+  private String usage;
 
   /**
    * Parent command.
@@ -35,12 +35,30 @@ public abstract class DWCommand implements DWCmdHelp {
   }
 
   /**
+   * Set command name.
+   *
+   * @param command command name
+   */
+  public final void setCommand(String command) {
+    commandName = command;
+  }
+
+  /**
    * Provides component command list.
    *
    * @return command list
    */
   public final DWCommandList getCommandList() {
     return this.commands;
+  }
+
+  /**
+   * Set component command list.
+   *
+   * @param commandList component command list
+   */
+  public final void setCommandList(DWCommandList commandList) {
+    this.commands = commandList;
   }
 
   /**
@@ -85,12 +103,30 @@ public abstract class DWCommand implements DWCmdHelp {
   }
 
   /**
+   * Set short help text.
+   *
+   * @param helpText short help text
+   */
+  public void setShortHelp(String helpText) {
+    shortHelp = helpText;
+  }
+
+  /**
    * Provides usage information for the command.
    *
    * @return usage details
    */
   public final String getUsage() {
     return usage;
+  }
+
+  /**
+   * Set usage text.
+   *
+   * @param usageText usage text
+   */
+  public final void setUsage(String usageText) {
+    usage = usageText;
   }
 
   /**

@@ -9,20 +9,9 @@ public class DWCmdServerShowThreads extends DWCommand {
 
   DWCmdServerShowThreads(DWCommand parent) {
     setParentCmd(parent);
-  }
-
-  public String getCommand() {
-    return "threads";
-  }
-
-
-  public String getShortHelp() {
-    return "Show server threads";
-  }
-
-
-  public String getUsage() {
-    return "dw server show threads";
+    this.setCommand("threads");
+    this.setShortHelp("Show server threads");
+    this.setUsage("dw server show threads");
   }
 
   public DWCommandResponse parse(String cmdline) {

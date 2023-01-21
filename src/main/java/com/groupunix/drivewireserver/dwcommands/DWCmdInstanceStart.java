@@ -13,9 +13,9 @@ public final class DWCmdInstanceStart extends DWCommand {
    */
   public DWCmdInstanceStart(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
-    commandName = "start";
-    shortHelp = "Start instance #";
-    usage = "dw instance start #";
+    this.setCommand("start");
+    this.setShortHelp("Start instance #");
+    this.setUsage("dw instance start #");
   }
 
   /**

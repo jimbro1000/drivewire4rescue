@@ -10,20 +10,9 @@ public class DWCmdMidiSynthProfile extends DWCommand {
   public DWCmdMidiSynthProfile(DWProtocolHandler dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
-  }
-
-  public String getCommand() {
-    return "profile";
-  }
-
-
-  public String getShortHelp() {
-    return "Load synth translation profile";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth profile name";
+    this.setCommand("profile");
+    this.setShortHelp("Load synth translation profile");
+    this.setUsage("dw midi synth profile name");
   }
 
   public DWCommandResponse parse(String cmdline) {

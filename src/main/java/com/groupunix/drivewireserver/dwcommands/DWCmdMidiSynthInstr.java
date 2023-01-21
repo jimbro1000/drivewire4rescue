@@ -4,7 +4,6 @@ import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class DWCmdMidiSynthInstr extends DWCommand {
-
   /**
    * Protocol handler.
    */
@@ -21,35 +20,15 @@ public class DWCmdMidiSynthInstr extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-  }
-
-  /**
-   * Get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return "instr";
-  }
-
-  /**
-   * Get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Manually set chan X to instrument Y";
-  }
-
-  /**
-   * Get usage information.
-   * @return usage
-   */
-  public String getUsage() {
-    return "dw midi synth instr #X #Y";
+    this.setCommand("instr");
+    this.setShortHelp("Manually set chan X to instrument Y");
+    this.setUsage("dw midi synth instr #X #Y");
   }
 
   /**
    * Parse command.
-   * @param cmdline
+   *
+   * @param cmdline command line
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {

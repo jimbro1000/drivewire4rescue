@@ -12,40 +12,20 @@ public class DWCmdServerStatus extends DWCommand {
 
   /**
    * Server status command constructor.
-   * @param protocol
-   * @param parent
+   *
+   * @param protocol protocol
+   * @param parent   parent command
    */
   public DWCmdServerStatus(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
-  }
-
-  /**
-   * Get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return "status";
-  }
-
-  /**
-   * Get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Show server status information";
-  }
-
-  /**
-   * Get usage.
-   * @return usage information
-   */
-  public String getUsage() {
-    return "dw server status";
+    this.setCommand("status");
+    this.setShortHelp("Show server status information");
+    this.setUsage("dw server status");
   }
 
   /**
    * Parse command.
-   * @param cmdline
+   * @param cmdline command line
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
@@ -69,9 +49,9 @@ public class DWCmdServerStatus extends DWCommand {
   }
 
   /**
-  * Validate command.
-  * @param cmdline
-  * @return true if valid
+   * Validate command.
+   * @param cmdline command line
+   * @return true if valid
   */
   public boolean validate(final String cmdline) {
     return (true);

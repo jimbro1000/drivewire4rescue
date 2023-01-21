@@ -24,9 +24,9 @@ public class DWCmdServerHelpShow extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocol = protocol;
-    commandName = "show";
-    shortHelp = "Show help topic";
-    usage = "dw help show [topic]";
+    this.setCommand("show");
+    this.setShortHelp("Show help topic");
+    this.setUsage("dw help show [topic]");
   }
 
   /**

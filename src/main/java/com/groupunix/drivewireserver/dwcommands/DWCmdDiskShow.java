@@ -20,20 +20,9 @@ public class DWCmdDiskShow extends DWCommand {
   public DWCmdDiskShow(DWProtocolHandler dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
-  }
-
-  public String getCommand() {
-    return "show";
-  }
-
-
-  public String getShortHelp() {
-    return "Show current disk details";
-  }
-
-
-  public String getUsage() {
-    return "dw disk show [#]";
+    this.setCommand("show");
+    this.setShortHelp("Show current disk details");
+    this.setUsage("dw disk show [#]");
   }
 
   public DWCommandResponse parse(String cmdline) {
@@ -42,7 +31,6 @@ public class DWCmdDiskShow extends DWCommand {
     if (cmdline.length() == 0) {
       return (doDiskShow());
     }
-
 
     String[] args = cmdline.split(" ");
 

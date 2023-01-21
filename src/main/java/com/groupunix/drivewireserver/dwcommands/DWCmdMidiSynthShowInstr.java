@@ -12,20 +12,9 @@ public class DWCmdMidiSynthShowInstr extends DWCommand {
   public DWCmdMidiSynthShowInstr(DWProtocolHandler dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
-  }
-
-  public String getCommand() {
-    return "instr";
-  }
-
-
-  public String getShortHelp() {
-    return "Show internal synth instruments";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth show instr";
+    this.setCommand("instr");
+    this.setShortHelp("Show internal synth instruments");
+    this.setUsage("dw midi synth show instr");
   }
 
   public DWCommandResponse parse(String cmdline) {

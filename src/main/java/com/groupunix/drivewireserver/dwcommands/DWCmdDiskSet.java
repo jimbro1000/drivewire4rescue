@@ -15,7 +15,6 @@ public class DWCmdDiskSet extends DWCommand {
    * Drivewire protocol handler.
    */
   private DWProtocolHandler dwProtocolHandler;
-
   /**
    * Disk set command constructor.
    * @param protocolHandler protocol handler
@@ -27,30 +26,9 @@ public class DWCmdDiskSet extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-  }
-
-  /**
-   * Get command.
-   * @return command name
-   */
-  public String getCommand() {
-    return "set";
-  }
-
-  /**
-   * Get short help.
-   * @return short help details
-   */
-  public String getShortHelp() {
-    return "Set disk parameters";
-  }
-
-  /**
-   * Get usage.
-   * @return usage information
-   */
-  public String getUsage() {
-    return "dw disk set # param val";
+    this.setCommand("set");
+    this.setShortHelp("Set disk parameters");
+    this.setUsage("dw disk set # param val");
   }
 
   /**

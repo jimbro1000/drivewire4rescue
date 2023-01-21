@@ -25,9 +25,9 @@ public final class DWCmdServerShowTimers extends DWCommand {
   ) {
     this.dwProtocol = protocol;
     setParentCmd(parent);
-    commandName = "timers";
-    shortHelp = "Show instance timers";
-    usage = "dw server show timers";
+    this.setCommand("timers");
+    this.setShortHelp("Show instance timers");
+    this.setUsage("dw server show timers");
   }
 
   /**

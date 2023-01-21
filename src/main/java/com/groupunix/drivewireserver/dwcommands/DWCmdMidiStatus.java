@@ -14,20 +14,9 @@ public class DWCmdMidiStatus extends DWCommand {
   public DWCmdMidiStatus(DWProtocolHandler dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
-  }
-
-  public String getCommand() {
-    return "status";
-  }
-
-
-  public String getShortHelp() {
-    return "Show MIDI status";
-  }
-
-
-  public String getUsage() {
-    return "dw midi status";
+    this.setCommand("status");
+    this.setShortHelp("Show MIDI status");
+    this.setUsage("dw midi status");
   }
 
   public DWCommandResponse parse(String cmdline) {

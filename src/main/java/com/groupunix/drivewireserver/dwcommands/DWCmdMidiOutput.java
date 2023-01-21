@@ -14,20 +14,9 @@ public class DWCmdMidiOutput extends DWCommand {
   public DWCmdMidiOutput(DWProtocolHandler dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
-  }
-
-  public String getCommand() {
-    return "output";
-  }
-
-
-  public String getShortHelp() {
-    return "Set midi output to device #";
-  }
-
-
-  public String getUsage() {
-    return "dw midi output #";
+    this.setCommand("output");
+    this.setShortHelp("Set midi output to device #");
+    this.setUsage("dw midi output #");
   }
 
   public DWCommandResponse parse(String cmdline) {

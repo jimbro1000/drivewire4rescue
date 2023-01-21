@@ -15,9 +15,9 @@ public class DWCmdMidiSynthShowProfiles extends DWCommand {
    */
   public DWCmdMidiSynthShowProfiles(final DWCommand parent) {
     setParentCmd(parent);
-    commandName = "profiles";
-    shortHelp = "Show internal synth profiles";
-    usage = "dw midi synth show profiles";
+    this.setCommand("profiles");
+    this.setShortHelp("Show internal synth profiles");
+    this.setUsage("dw midi synth show profiles");
   }
 
   /**

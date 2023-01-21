@@ -23,9 +23,9 @@ public class DWCmdPortOpen extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwvSerialProtocol = protocol;
-    commandName = "open";
-    shortHelp = "Connect port # to tcp host:port";
-    usage = "dw port open port# host:port";
+    this.setCommand("open");
+    this.setShortHelp("Connect port # to tcp host:port");
+    this.setUsage("dw port open port# host:port");
   }
 
   /**

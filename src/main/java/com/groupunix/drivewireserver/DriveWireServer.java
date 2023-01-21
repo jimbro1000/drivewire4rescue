@@ -49,32 +49,101 @@ import com.groupunix.drivewireserver.dwprotocolhandler.vmodem.VModemProtocolHand
  * </p>
  */
 public final class DriveWireServer {
+  /**
+   * Drivewire server version.
+   */
   public static final String DW_SERVER_VERSION = "4.3.3p";
+  /**
+   * Drivewire server version date.
+   */
   public static final String DW_SERVER_VERSION_DATE = "09/17/2013";
+  /**
+   * Maximum number of milliseconds allowed for a thread to die gracefully.
+   */
   public static final int THREAD_MAX_TIME_TO_DIE_MILLIS = 15000;
+  /**
+   * Thread sleep time in milliseconds.
+   */
   public static final int THREAD_SLEEP_MILLIS = 100;
+  /**
+   * Status poll interval in milliseconds.
+   */
   public static final int STATUS_POLL_INTERVAL_MILLIS = 1000;
+  /**
+   * Bytes in a kilobyte.
+   */
   public static final int KILOBYTE_FACTOR = 1024;
+  /**
+   * Timeout in milliseconds for receiving data.
+   */
   public static final int RECEIVE_TIMEOUT = 3000;
+  /**
+   * Timeout in milliseconds for opening ports.
+   */
   public static final int OPEN_PORT_TIMEOUT_MILLIS = 2000;
+  /**
+   * Buffer size in bytes for appenders.
+   */
   public static final int APPENDER_BUFFER_SIZE = 128;
+  /**
+   * Home source repository URL.
+   */
   public static final String SOURCE_REPOSITORY
       = "https://sourceforge.net/apps/mediawiki/drivewireserver/index.php"
       + "?title=Installation";
+  /**
+   * Console output banner/separator.
+   */
   private static final String MSG_BANNER = "-".repeat(80);
+  /**
+   * Log appender.
+   */
   private static final Logger LOGGER = Logger.getLogger(DriveWireServer.class);
+  /**
+   * Someone called it magic - current time.
+   */
   private static final long MAGIC = System.currentTimeMillis();
+  /**
+   * Vector table for protocol handler threads.
+   */
   private static final Vector<Thread> DW_PROTO_HANDLER_THREADS = new Vector<>();
+  /**
+   * Vector table for protocol handlers.
+   */
   private static final Vector<DWProtocol> DW_PROTOCOL_HANDLERS = new Vector<>();
+  /**
+   * Default status event.
+   */
   private static final DWEvent STATUS_EVENT
       = new DWEvent(DWDefs.EVENT_TYPE_STATUS, -1);
+  /**
+   * Event log cache.
+   */
   private static final ArrayList<DWEvent> LOG_CACHE = new ArrayList<>();
+  /**
+   * Another use for default status event.
+   */
   private static final DWEvent EVT
       = new DWEvent(DWDefs.EVENT_TYPE_STATUS, -1);
+  /**
+   * Server configuration.
+   */
   public static XMLConfiguration serverConfiguration;
+  /**
+   * Serial configuration flags.
+   */
   public static int configSerial = 0;
+  /**
+   * Console output appender.
+   */
   private static ConsoleAppender consoleAppender;
+  /**
+   * Drivewire log appender.
+   */
   private static DWLogAppender dwAppender;
+  /**
+   * log formatting pattern.
+   */
   private static PatternLayout logLayout
       = new PatternLayout("%d{dd MMM yyyy HH:mm:ss} %-5p [%-14t] %m%n");
   private static Thread lazyWriterT;

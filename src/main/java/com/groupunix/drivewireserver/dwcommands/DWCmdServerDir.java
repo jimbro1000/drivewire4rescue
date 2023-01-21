@@ -13,23 +13,10 @@ public class DWCmdServerDir extends DWCommand {
 
   public DWCmdServerDir(DWCommand parent) {
     setParentCmd(parent);
+    this.setCommand("dir");
+    this.setShortHelp("Show directory of URI or local path");
+    this.setUsage("dw server dir URI/path");
   }
-
-
-  public String getCommand() {
-    return "dir";
-  }
-
-
-  public String getShortHelp() {
-    return "Show directory of URI or local path";
-  }
-
-
-  public String getUsage() {
-    return "dw server dir URI/path";
-  }
-
   public DWCommandResponse parse(String cmdline) {
     if (cmdline.length() == 0) {
       return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "dw server dir requires a URI or path as an argument"));

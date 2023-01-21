@@ -9,26 +9,14 @@ public class DWCmdMidiSynthLock extends DWCommand {
   public DWCmdMidiSynthLock(DWProtocolHandler dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
-  }
-
-  public String getCommand() {
-    return "lock";
-  }
-
-
-  public String getShortHelp() {
-    return "Toggle instrument lock";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth lock";
+    this.setCommand("lock");
+    this.setShortHelp("Toggle instrument lock");
+    this.setUsage("dw midi synth lock");
   }
 
   public DWCommandResponse parse(String cmdline) {
     return (doMidiSynthLock());
   }
-
 
   private DWCommandResponse doMidiSynthLock() {
     if (dwProto.getVPorts().getMidiVoicelock()) {

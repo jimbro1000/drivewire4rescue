@@ -4,48 +4,29 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class DWCmdMidi extends DWCommand {
 
-  static final String command = "midi";
-  private DWCommandList commands;
   private DWProtocolHandler dwProto;
 
   public DWCmdMidi(DWProtocolHandler dwProto, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProto;
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
+    DWCommandList commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
+    this.setCommandList(commands);
     commands.addCommand(new DWCmdMidiStatus(dwProto, this));
     commands.addCommand(new DWCmdMidiOutput(dwProto, this));
     commands.addCommand(new DWCmdMidiSynth(dwProto, this));
-
+    this.setCommand("midi");
+    this.setShortHelp("Manage the MIDI subsystem");
+    this.setUsage("dw midi [command]");
   }
-
-
-  public String getCommand() {
-    return command;
-  }
-
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
 
   public DWCommandResponse parse(String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
-  }
-
-
-  public String getShortHelp() {
-    return "Manage the MIDI subsystem";
-  }
-
-
-  public String getUsage() {
-    return "dw midi [command]";
+    return (this.getCommandList().parse(cmdline));
   }
 
   public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+    return (this.getCommandList().validate(cmdline));
   }
 }

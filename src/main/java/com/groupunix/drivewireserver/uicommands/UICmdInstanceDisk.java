@@ -6,46 +6,28 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class UICmdInstanceDisk extends DWCommand {
-
-  static final String command = "disk";
-
-
   public UICmdInstanceDisk(DWUIClientThread dwuiClientThread) {
-
-    commands.addCommand(new UICmdInstanceDiskShow(dwuiClientThread));
+    this.getCommandList().addCommand(new UICmdInstanceDiskShow(dwuiClientThread));
     // commands.addcommand(new UICmdInstanceDiskSerial(dwuiClientThread));
     // commands.addcommand(new UICmdInstanceDiskStatus(dwuiClientThread));
+    this.setCommand("disk");
+    this.setShortHelp("Instance disk commands");
+    this.setUsage("ui instance disk [command]");
   }
 
-
   public UICmdInstanceDisk(DWProtocolHandler dwProto) {
-    commands.addCommand(new UICmdInstanceDiskShow(dwProto));
+    this.getCommandList().addCommand(new UICmdInstanceDiskShow(dwProto));
     // commands.addcommand(new UICmdInstanceDiskSerial(dwProto));
     // commands.addcommand(new UICmdInstanceDiskStatus(dwProto));
 
   }
 
-
-  public String getCommand() {
-    return command;
-  }
-
   public DWCommandResponse parse(String cmdline) {
-    return (commands.parse(cmdline));
+    return (this.getCommandList().parse(cmdline));
   }
 
-
-  public String getShortHelp() {
-    return "Instance disk commands";
-  }
-
-
-  public String getUsage() {
-    return "ui instance disk [command]";
-  }
 
   public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+    return (this.getCommandList().validate(cmdline));
   }
-
 }

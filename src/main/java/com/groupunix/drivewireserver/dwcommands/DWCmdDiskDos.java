@@ -5,10 +5,6 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public final class DWCmdDiskDos extends DWCommand {
   /**
-   * component commands.
-   */
-  private final DWCommandList commands;
-  /**
    * protocol handler.
    */
   private final DWProtocolHandler dwProtocolHandler;
@@ -25,17 +21,18 @@ public final class DWCmdDiskDos extends DWCommand {
   ) {
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-    commands = new DWCommandList(
+    DWCommandList commands = new DWCommandList(
         this.dwProtocolHandler,
         this.dwProtocolHandler.getCMDCols()
     );
+    this.setCommandList(commands);
     commands.addCommand(new DWCmdDiskDosDir(protocolHandler, this));
     commands.addCommand(new DWCmdDiskDosList(protocolHandler, this));
     commands.addCommand(new DWCmdDiskDosFormat(protocolHandler, this));
     commands.addCommand(new DWCmdDiskDosAdd(protocolHandler, this));
-    commandName = "dos";
-    shortHelp = "Manage DOS disks";
-    usage = "dw disk dos [command]";
+    this.setCommand("dos");
+    this.setShortHelp("Manage DOS disks");
+    this.setUsage("dw disk dos [command]");
   }
 
   /**
@@ -46,18 +43,9 @@ public final class DWCmdDiskDos extends DWCommand {
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return commands.parse(cmdline);
-  }
-
-  /**
-   * get commands.
-   *
-   * @return component command list
-   */
-  public DWCommandList getCommandList() {
-    return this.commands;
+    return this.getCommandList().parse(cmdline);
   }
 
   /**
@@ -67,6 +55,6 @@ public final class DWCmdDiskDos extends DWCommand {
    * @return true if command valid
    */
   public boolean validate(final String cmdline) {
-    return (commands.validate(cmdline));
+    return (this.getCommandList().validate(cmdline));
   }
 }

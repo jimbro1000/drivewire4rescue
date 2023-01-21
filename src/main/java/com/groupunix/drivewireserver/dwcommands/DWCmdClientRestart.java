@@ -1,48 +1,51 @@
 package com.groupunix.drivewireserver.dwcommands;
 
-
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
 public class DWCmdClientRestart extends DWCommand {
+  /**
+   * Drivewire serial protocol.
+   */
+  private final DWVSerialProtocol dwvSerialProtocol;
 
-
-  private DWVSerialProtocol dwproto;
-
-
-  public DWCmdClientRestart(DWVSerialProtocol dwProto2, DWCommand parent) {
-    this.dwproto = dwProto2;
+  /**
+   * Client restart command constructor.
+   *
+   * @param serialProtocol serial protocol
+   * @param parent         parent command
+   */
+  public DWCmdClientRestart(
+      final DWVSerialProtocol serialProtocol, final DWCommand parent
+  ) {
+    this.dwvSerialProtocol = serialProtocol;
     setParentCmd(parent);
-
+    this.setCommand("restart");
+    this.setShortHelp("Restart client device");
+    this.setUsage("dw client restart");
   }
 
-  public String getCommand() {
-    return "restart";
-  }
-
-
-  public String getShortHelp() {
-    return "Restart client device";
-  }
-
-
-  public String getUsage() {
-    return "dw client restart";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     return (doStart());
   }
 
-
   private DWCommandResponse doStart() {
-
-    this.dwproto.getVPorts().setRebootRequested(true);
-
+    this.dwvSerialProtocol.getVPorts().setRebootRequested(true);
     return (new DWCommandResponse("Restart pending"));
   }
 
-
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

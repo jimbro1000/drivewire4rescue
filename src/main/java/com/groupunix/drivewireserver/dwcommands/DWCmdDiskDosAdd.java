@@ -25,10 +25,9 @@ public class DWCmdDiskDosAdd extends DWCommand {
 	public DWCmdDiskDosAdd(DWProtocolHandler dwProto, DWCommand parent) {
 		setParentCmd(parent);
 		this.dwProto = dwProto;
-	}
-
-	public String getCommand() {
-		return "add";
+		this.setCommand("add");
+		this.setShortHelp("Add file to disk image with DOS filesystem");
+		this.setUsage("dw disk dos add # path");
 	}
 
 	public DWCommandResponse parse(String cmdline) {
@@ -102,15 +101,6 @@ public class DWCmdDiskDosAdd extends DWCommand {
 		}
 
 		return (new DWCommandResponse("File added to DOS disk."));
-	}
-
-
-	public String getShortHelp() {
-		return "Add file to disk image with DOS filesystem";
-	}
-
-	public String getUsage() {
-		return "dw disk dos add # path";
 	}
 
 	public boolean validate(String cmdline) {

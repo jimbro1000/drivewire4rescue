@@ -1,17 +1,14 @@
 package com.groupunix.drivewireserver.uicommands;
 
 import com.groupunix.drivewireserver.DWUIClientThread;
-import com.groupunix.drivewireserver.dwcommands.DWCommand;
-import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
+import com.groupunix.drivewireserver.dwcommands.*;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
 public class UICmdInstance extends DWCommand {
-
-  static final String command = "instance";
-
   public UICmdInstance(DWUIClientThread dwuiClientThread) {
+    DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdInstanceAttach(dwuiClientThread));
     commands.addCommand(new UICmdInstanceConfig(dwuiClientThread));
     commands.addCommand(new UICmdInstanceDisk(dwuiClientThread));
@@ -21,50 +18,43 @@ public class UICmdInstance extends DWCommand {
     commands.addCommand(new UICmdInstancePrinterStatus(dwuiClientThread));
     commands.addCommand(new UICmdInstancePortStatus(dwuiClientThread));
     commands.addCommand(new UICmdInstanceTimer(dwuiClientThread));
+    this.setCommand("instance");
+    this.setShortHelp("Instance commands");
+    this.setUsage("ui instance [command]");
   }
 
-
   public UICmdInstance(DWProtocol dwProto) {
+    DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdInstanceConfig(dwProto));
-    if (dwProto.hasDisks())
+    if (dwProto.hasDisks()) {
       commands.addCommand(new UICmdInstanceDisk((DWProtocolHandler) dwProto));
+    }
 
     commands.addCommand(new UICmdInstanceReset(dwProto));
     commands.addCommand(new UICmdInstanceStatus(dwProto));
 
-    if (dwProto.hasMIDI())
+    if (dwProto.hasMIDI()) {
       commands.addCommand(new UICmdInstanceMIDIStatus(dwProto));
+    }
 
-    if (dwProto.hasPrinters())
+    if (dwProto.hasPrinters()) {
       commands.addCommand(new UICmdInstancePrinterStatus((DWProtocolHandler) dwProto));
+    }
 
-    if (dwProto.hasVSerial())
+    if (dwProto.hasVSerial()) {
       commands.addCommand(new UICmdInstancePortStatus((DWVSerialProtocol) dwProto));
+    }
 
     commands.addCommand(new UICmdInstanceTimer(dwProto));
   }
 
-
-  public String getCommand() {
-    return command;
-  }
-
   public DWCommandResponse parse(String cmdline) {
-    return (commands.parse(cmdline));
+    return (this.getCommandList().parse(cmdline));
   }
 
-
-  public String getShortHelp() {
-    return "Instance commands";
-  }
-
-
-  public String getUsage() {
-    return "ui instance [command]";
-  }
 
   public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+    return (this.getCommandList().validate(cmdline));
   }
 
 }

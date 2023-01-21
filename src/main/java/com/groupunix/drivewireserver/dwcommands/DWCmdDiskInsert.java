@@ -30,9 +30,9 @@ public final class DWCmdDiskInsert extends DWCommand {
 	) {
 		setParentCmd(parent);
 		this.dwProtocolHandler = protocolHandler;
-		commandName = "insert";
-		shortHelp = "Load disk into drive #";
-		usage = "dw disk insert # path";
+		this.setCommand("insert");
+		this.setShortHelp("Load disk into drive #");
+		this.setUsage("dw disk insert # path");
 	}
 
 	/**

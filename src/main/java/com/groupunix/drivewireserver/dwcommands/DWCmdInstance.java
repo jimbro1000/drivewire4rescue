@@ -3,11 +3,6 @@ package com.groupunix.drivewireserver.dwcommands;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public final class DWCmdInstance extends DWCommand {
-
-  /**
-   * Drivewire commands.
-   */
-  private final DWCommandList commands;
   /**
    * Drivewire protocol.
    */
@@ -22,23 +17,15 @@ public final class DWCmdInstance extends DWCommand {
   public DWCmdInstance(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
     this.dwProtocol = protocol;
-    commands = new DWCommandList(this.dwProtocol, this.dwProtocol.getCMDCols());
+    DWCommandList commands = new DWCommandList(this.dwProtocol, this.dwProtocol.getCMDCols());
+    this.setCommandList(commands);
     commands.addCommand(new DWCmdInstanceShow(protocol, this));
     commands.addCommand(new DWCmdInstanceStart(protocol, this));
     commands.addCommand(new DWCmdInstanceStop(protocol, this));
     commands.addCommand(new DWCmdInstanceRestart(protocol, this));
-    commandName = "instance";
-    shortHelp = "Commands to control instances";
-    usage = "dw instance [command]";
-  }
-
-  /**
-   * Get commands.
-   *
-   * @return list of commands
-   */
-  public DWCommandList getCommandList() {
-    return (this.commands);
+    this.setCommand("instance");
+    this.setShortHelp("Commands to control instances");
+    this.setUsage("dw instance [command]");
   }
 
   /**
@@ -49,9 +36,9 @@ public final class DWCmdInstance extends DWCommand {
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
+    return (this.getCommandList().parse(cmdline));
   }
 
   /**
@@ -61,6 +48,6 @@ public final class DWCmdInstance extends DWCommand {
    * @return true if valid for all actions
    */
   public boolean validate(final String cmdline) {
-    return (commands.validate(cmdline));
+    return (this.getCommandList().validate(cmdline));
   }
 }

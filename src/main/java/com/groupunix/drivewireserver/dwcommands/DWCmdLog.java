@@ -17,11 +17,11 @@ public class DWCmdLog extends DWCommand {
   public DWCmdLog(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
     this.dwProtocol = protocol;
-    commands = new DWCommandList(this.dwProtocol, this.dwProtocol.getCMDCols());
-    commands.addCommand(new DWCmdLogShow(this));
-    commandName = "log";
-    shortHelp = "View the server log";
-    usage = "dw log [command]";
+    this.setCommandList(new DWCommandList(this.dwProtocol, this.dwProtocol.getCMDCols()));
+    this.getCommandList().addCommand(new DWCmdLogShow(this));
+    this.setCommand("log");
+    this.setShortHelp("View the server log");
+    this.setUsage("dw log [command]");
   }
 
   /**
@@ -32,9 +32,9 @@ public class DWCmdLog extends DWCommand {
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return new DWCommandResponse(this.commands.getShortHelp());
+      return new DWCommandResponse(this.getCommandList().getShortHelp());
     }
-    return commands.parse(cmdline);
+    return this.getCommandList().parse(cmdline);
   }
 
   /**
@@ -44,6 +44,6 @@ public class DWCmdLog extends DWCommand {
    * @return true if valid
    */
   public boolean validate(final String cmdline) {
-    return commands.validate(cmdline);
+    return this.getCommandList().validate(cmdline);
   }
 }

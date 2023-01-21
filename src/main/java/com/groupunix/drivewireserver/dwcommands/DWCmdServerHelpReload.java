@@ -12,21 +12,9 @@ public class DWCmdServerHelpReload extends DWCommand {
   public DWCmdServerHelpReload(DWProtocol dwProtocol, DWCommand parent) {
     setParentCmd(parent);
     this.dwProto = dwProtocol;
-  }
-
-
-  public String getCommand() {
-    return "reload";
-  }
-
-
-  public String getShortHelp() {
-    return "Reload help topics";
-  }
-
-
-  public String getUsage() {
-    return "dw help reload";
+    this.setCommand("reload");
+    this.setShortHelp("Reload help topics");
+    this.setUsage("dw help reload");
   }
 
   public DWCommandResponse parse(String cmdline) {

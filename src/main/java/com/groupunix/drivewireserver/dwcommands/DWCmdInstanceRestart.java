@@ -16,9 +16,9 @@ public final class DWCmdInstanceRestart extends DWCommand {
       final DWCommand parent
   ) {
     setParentCmd(parent);
-    commandName = "restart";
-    shortHelp = "Restart instance #";
-    usage = "dw instance restart #";
+    this.setCommand("restart");
+    this.setShortHelp("Restart instance #");
+    this.setUsage("dw instance restart #");
   }
 
   /**
