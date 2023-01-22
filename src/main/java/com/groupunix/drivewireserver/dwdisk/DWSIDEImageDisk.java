@@ -65,10 +65,10 @@ public class DWSIDEImageDisk extends DWDisk {
 
     int sz = 0;
 
-    this.sectors.setSize((int) (filesize / 256));
+    this.getSectors().setSize((int) (filesize / 256));
 
     while (sz < filesize) {
-      this.sectors.set(sector, new DWDiskSector(this, sector, 256, true));
+      this.getSectors().set(sector, new DWDiskSector(this, sector, 256, true));
       sector++;
       sz += 256;
     }
@@ -77,7 +77,7 @@ public class DWSIDEImageDisk extends DWDisk {
     long lastmodtime = -1;
 
     try {
-      lastmodtime = this.fileobj.getContent().getLastModifiedTime();
+      lastmodtime = this.getFileObject().getContent().getLastModifiedTime();
     } catch (FileSystemException e) {
       logger.warn(e.getMessage());
     }
@@ -86,7 +86,7 @@ public class DWSIDEImageDisk extends DWDisk {
 
     this.setParam("_sectors", sector);
 
-    this.setParam("_filesystem", DWUtils.prettyFileSystem(DWDiskDrives.getDiskFSType(this.sectors)));
+    this.setParam("_filesystem", DWUtils.prettyFileSystem(DWDiskDrives.getDiskFSType(this.getSectors())));
 
 
   }

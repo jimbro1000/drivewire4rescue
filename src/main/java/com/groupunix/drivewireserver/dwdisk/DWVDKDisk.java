@@ -203,9 +203,9 @@ follow the disk name.
     // load file into sector array
     InputStream fis;
 
-    fis = this.fileobj.getContent().getInputStream();
+    fis = this.getFileObject().getContent().getInputStream();
 
-    this.setLastModifiedTime(this.fileobj.getContent().getLastModifiedTime());
+    this.setLastModifiedTime(this.getFileObject().getContent().getLastModifiedTime());
 
     // read disk header
     this.header = readHeader(fis);
@@ -217,37 +217,37 @@ follow the disk name.
     this.setParam("_sectors", (header.getTracks() * header.getSides() * DWVDKDisk.VDK_SECTORS_PER_TRACK));
 
 
-    if (this.fileobj.getContent().getSize() != (this.params.getInt("_sectors") * DWVDKDisk.VDK_SECTOR_SIZE + this.header.getHeaderLen())) {
+    if (this.getFileObject().getContent().getSize() != (this.getParams().getInt("_sectors") * DWVDKDisk.VDK_SECTOR_SIZE + this.header.getHeaderLen())) {
       throw new DWImageFormatException("Invalid VDK image, wrong file size");
     }
 
-    this.sectors.setSize(this.params.getInt("_sectors"));
+    this.getSectors().setSize(this.getParams().getInt("_sectors"));
 
     byte[] buf = new byte[DWVDKDisk.VDK_SECTOR_SIZE];
     int readres;
 
-    for (int i = 0; i < this.params.getInt("_sectors"); i++) {
+    for (int i = 0; i < this.getParams().getInt("_sectors"); i++) {
       readres = 0;
 
       while (readres < DWVDKDisk.VDK_SECTOR_SIZE)
         readres += fis.read(buf, readres, DWVDKDisk.VDK_SECTOR_SIZE - readres);
 
-      this.sectors.set(i, new DWDiskSector(this, i, DWVDKDisk.VDK_SECTOR_SIZE, false));
-      this.sectors.get(i).setData(buf, false);
+      this.getSectors().set(i, new DWDiskSector(this, i, DWVDKDisk.VDK_SECTOR_SIZE, false));
+      this.getSectors().get(i).setData(buf, false);
 
 
     }
 
     fis.close();
 
-    this.setParam("_filesystem", DWUtils.prettyFileSystem(DWDiskDrives.getDiskFSType(this.sectors)));
+    this.setParam("_filesystem", DWUtils.prettyFileSystem(DWDiskDrives.getDiskFSType(this.getSectors())));
 
   }
 
   public void seekSector(int newLSN) throws DWInvalidSectorException, DWSeekPastEndOfDeviceException {
     if (newLSN < 0) {
       throw new DWInvalidSectorException("Sector " + newLSN + " is not valid");
-    } else if (newLSN > (this.sectors.size() - 1)) {
+    } else if (newLSN > (this.getSectors().size() - 1)) {
       throw new DWSeekPastEndOfDeviceException("Attempt to seek beyond end of image");
     } else {
       this.setParam("_lsn", newLSN);
@@ -259,7 +259,7 @@ follow the disk name.
       throw new DWDriveWriteProtectedException("Disk is write protected");
     } else {
 
-      this.sectors.get(this.getLSN()).setData(data);
+      this.getSectors().get(this.getLSN()).setData(data);
 
       this.incParam("_writes");
 
@@ -268,7 +268,7 @@ follow the disk name.
 
   public byte[] readSector() throws IOException {
     this.incParam("_reads");
-    return (this.sectors.get(this.getLSN()).getData());
+    return (this.getSectors().get(this.getLSN()).getData());
   }
 
 }

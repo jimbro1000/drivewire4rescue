@@ -58,7 +58,7 @@ public class DWDMKDisk extends DWDisk {
     // load file into sector array
     InputStream fis;
 
-    fis = this.fileobj.getContent().getInputStream();
+    fis = this.getFileObject().getContent().getInputStream();
 
     // read disk header
     int readres = 0;
@@ -131,14 +131,14 @@ public class DWDMKDisk extends DWDisk {
     // all tracks loaded ok, find sector data
     loadSectors();
 
-    this.setParam("_filesystem", DWUtils.prettyFileSystem(DWDiskDrives.getDiskFSType(this.sectors)));
+    this.setParam("_filesystem", DWUtils.prettyFileSystem(DWDiskDrives.getDiskFSType(this.getSectors())));
 
   }
 
   private void loadSectors() throws DWImageFormatException, FileSystemException {
-    this.sectors.clear();
+    this.getSectors().clear();
     // hard coded to 18 spt until i find a reason not to
-    this.sectors.setSize(header.getTracks() * 18);
+    this.getSectors().setSize(header.getTracks() * 18);
     this.setParam("_sectors", header.getTracks() * 18);
 
     for (int t = 0; t < header.getTracks(); t++) {
@@ -164,9 +164,9 @@ public class DWDMKDisk extends DWDisk {
   private void addSectorFrom(DWDMKDiskIDAM idam, int track) throws DWImageFormatException, FileSystemException {
     int lsn = calcLSN(idam);
 
-    if ((lsn > -1) && (lsn < this.sectors.size())) {
-      this.sectors.set(lsn, new DWDiskSector(this, lsn, idam.getSectorSize(), false));
-      this.sectors.get(lsn).setData(getSectorDataFrom(idam, track), false);
+    if ((lsn > -1) && (lsn < this.getSectors().size())) {
+      this.getSectors().set(lsn, new DWDiskSector(this, lsn, idam.getSectorSize(), false));
+      this.getSectors().get(lsn).setData(getSectorDataFrom(idam, track), false);
     } else {
       throw new DWImageFormatException("Invalid LSN " + lsn + " while adding sector from DMK!");
     }
@@ -227,7 +227,7 @@ public class DWDMKDisk extends DWDisk {
   public void seekSector(int newLSN) throws DWInvalidSectorException, DWSeekPastEndOfDeviceException {
     if (newLSN < 0) {
       throw new DWInvalidSectorException("Sector " + newLSN + " is not valid");
-    } else if (newLSN > (this.sectors.size() - 1)) {
+    } else if (newLSN > (this.getSectors().size() - 1)) {
       throw new DWSeekPastEndOfDeviceException("Attempt to seek beyond end of image");
     } else {
       this.setParam("_lsn", newLSN);
@@ -239,7 +239,7 @@ public class DWDMKDisk extends DWDisk {
       throw new DWDriveWriteProtectedException("Disk is write protected");
     } else {
 
-      this.sectors.get(this.getLSN()).setData(data);
+      this.getSectors().get(this.getLSN()).setData(data);
 
       this.incParam("_writes");
 
@@ -249,7 +249,7 @@ public class DWDMKDisk extends DWDisk {
 
   public byte[] readSector() throws IOException {
     this.incParam("_reads");
-    return (this.sectors.get(this.getLSN()).getData());
+    return (this.getSectors().get(this.getLSN()).getData());
   }
 
 }

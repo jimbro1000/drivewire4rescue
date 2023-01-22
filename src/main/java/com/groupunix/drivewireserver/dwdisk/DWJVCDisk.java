@@ -67,11 +67,11 @@ public class DWJVCDisk extends DWDisk {
 		// load file into sector array
 		InputStream fis;
 
-		fis = this.fileobj.getContent().getInputStream();
+		fis = this.getFileObject().getContent().getInputStream();
 
 		this.header = new DWJVCDiskHeader();
 
-		int filelen = (int) this.fileobj.getContent().getSize();
+		int filelen = (int) this.getFileObject().getContent().getSize();
 		int headerlen = (filelen % 256);
 
 		if (headerlen > 0) {
@@ -99,33 +99,33 @@ public class DWJVCDisk extends DWDisk {
 		this.setParam("_sectors", (tracks * header.getSides() * header.getSectorsPerTrack()));
 
 
-		this.sectors.setSize(this.params.getInt("_sectors"));
+		this.getSectors().setSize(this.getParams().getInt("_sectors"));
 
 		byte[] buf = new byte[header.getSectorSize()];
 		int readres;
 
-		for (int i = 0; i < this.params.getInt("_sectors"); i++) {
+		for (int i = 0; i < this.getParams().getInt("_sectors"); i++) {
 			readres = 0;
 
 			while (readres < header.getSectorSize())
 				readres += fis.read(buf, readres, header.getSectorSize() - readres);
 
-			this.sectors.set(i, new DWDiskSector(this, i, header.getSectorSize(), false));
-			this.sectors.get(i).setData(buf, false);
+			this.getSectors().set(i, new DWDiskSector(this, i, header.getSectorSize(), false));
+			this.getSectors().get(i).setData(buf, false);
 
 
 		}
 
 		fis.close();
 
-		this.setParam("_filesystem", DWUtils.prettyFileSystem(DWDiskDrives.getDiskFSType(this.sectors)));
+		this.setParam("_filesystem", DWUtils.prettyFileSystem(DWDiskDrives.getDiskFSType(this.getSectors())));
 
 	}
 
 	public void seekSector(int newLSN) throws DWInvalidSectorException, DWSeekPastEndOfDeviceException {
 		if (newLSN < 0) {
 			throw new DWInvalidSectorException("Sector " + newLSN + " is not valid");
-		} else if (newLSN > (this.sectors.size() - 1)) {
+		} else if (newLSN > (this.getSectors().size() - 1)) {
 			throw new DWSeekPastEndOfDeviceException("Attempt to seek beyond end of image");
 		} else {
 			this.setParam("_lsn", newLSN);
@@ -137,7 +137,7 @@ public class DWJVCDisk extends DWDisk {
 			throw new DWDriveWriteProtectedException("Disk is write protected");
 		} else {
 
-			this.sectors.get(this.getLSN()).setData(data);
+			this.getSectors().get(this.getLSN()).setData(data);
 
 			this.incParam("_writes");
 
@@ -146,7 +146,7 @@ public class DWJVCDisk extends DWDisk {
 
 	public byte[] readSector() throws IOException {
 		this.incParam("_reads");
-		return (this.sectors.get(this.getLSN()).getData());
+		return (this.getSectors().get(this.getLSN()).getData());
 	}
 
 }

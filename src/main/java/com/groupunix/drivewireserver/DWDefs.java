@@ -1,92 +1,309 @@
 package com.groupunix.drivewireserver;
 
+/**
+ * Static helper class.
+ * <p>
+ * Provides drivewire protocol constants
+ * </p>
+ */
 public class DWDefs {
-  // DW protocol contants
+  /**
+   * Drivewire protocol version.
+   */
   public static final byte DW_PROTOCOL_VERSION = 4;
 
-  // DW protocol op codes
+  /**
+   * NOP - no operation.
+   */
   public static final byte OP_NOP = (byte) 0;    // 0x00
-
+  /**
+   * Named object mount.
+   */
   public static final byte OP_NAMEOBJ_MOUNT = (byte) 1;    // 0x01
+  /**
+   * Named object create.
+   */
   public static final byte OP_NAMEOBJ_CREATE = (byte) 2;    // 0x02
+  /**
+   * Named object type.
+   */
   public static final byte OP_NAMEOBJ_TYPE = (byte) 3;    // 0x03
   // 0x04 - 0x0F reserved for named object future use
+  /**
+   * Time op.
+   */
   public static final byte OP_TIME = (byte) 35;  // 0x23 #
+  /**
+   * Set time op.
+   */
   public static final byte OP_SETTIME = (byte) 36;  // 0x24 $
+  /**
+   * Timer op.
+   */
   public static final byte OP_TIMER = (byte) 37;  // 0x25
+  /**
+   * Reset timer op.
+   */
   public static final byte OP_RESET_TIMER = (byte) 38;  // 0x26
 
   public static final byte OP_AARON = (byte) 65;  // 0x41 A
   public static final byte OP_WIREBUG_MODE = (byte) 66;  // 0x42 B
+  /**
+   * Serial read.
+   */
   public static final byte OP_SERREAD = (byte) 67;  // 0x43 C
+  /**
+   * Serial get status.
+   */
   public static final byte OP_SERGETSTAT = (byte) 68;  // 0x44 D
+  /**
+   * Serial initialize.
+   */
   public static final byte OP_SERINIT = (byte) 69;  // 0x45 E
+  /**
+   * Flush print.
+   */
   public static final byte OP_PRINTFLUSH = (byte) 70;  // 0x46 F
+  /**
+   * Get status.
+   */
   public static final byte OP_GETSTAT = (byte) 71;    // 0x47 G
+  /**
+   * Initialize.
+   */
   public static final byte OP_INIT = (byte) 73;  // 0x49 I
+  /**
+   * Print.
+   */
   public static final byte OP_PRINT = (byte) 80;  // 0x50 P
+  /**
+   * Read.
+   */
   public static final byte OP_READ = (byte) 82;    // 0x52 R
+  /**
+   * Set status.
+   */
   public static final byte OP_SETSTAT = (byte) 83;    // 0x53 S
+  /**
+   * Term?.
+   */
   public static final byte OP_TERM = (byte) 84;  // 0x54 T
+  /**
+   * Write.
+   */
   public static final byte OP_WRITE = (byte) 87;  // 0x57 W
+  /**
+   * Drivewire initialize.
+   */
   public static final byte OP_DWINIT = (byte) 90;  // 0x5A Z
+  /**
+   * Serial read M?.
+   */
   public static final byte OP_SERREADM = (byte) 99;  // 0x63 c
+  /**
+   * Serial write M?.
+   */
   public static final byte OP_SERWRITEM = (byte) 100;  // 0x64 d
+  /**
+   * Reread.
+   */
   public static final byte OP_REREAD = (byte) 114;  // 0x72 r
+  /**
+   * Rewrite.
+   */
   public static final byte OP_REWRITE = (byte) 119;  // 0x77 w
-
+  /**
+   * Fast write base.
+   */
   public static final byte OP_FASTWRITE_BASE = (byte) 128;  // 0x80
+  /**
+   * Fast Write Port N1.
+   */
   public static final byte OP_FASTWRITE_N1 = (byte) 129;  // 0x81
+  /**
+   * Fast Write Port N2.
+   */
   public static final byte OP_FASTWRITE_N2 = (byte) 130;  // 0x82
+  /**
+   * Fast Write Port N3.
+   */
   public static final byte OP_FASTWRITE_N3 = (byte) 131;  // 0x83
+  /**
+   * Fast Write Port N4.
+   */
   public static final byte OP_FASTWRITE_N4 = (byte) 132;  // 0x84
+  /**
+   * Fast Write Port N5.
+   */
   public static final byte OP_FASTWRITE_N5 = (byte) 133;  // 0x85
+  /**
+   * Fast Write Port N6.
+   */
   public static final byte OP_FASTWRITE_N6 = (byte) 134;  // 0x86
+  /**
+   * Fast Write Port N7.
+   */
   public static final byte OP_FASTWRITE_N7 = (byte) 135;  // 0x87
+  /**
+   * Fast Write Port N8.
+   */
   public static final byte OP_FASTWRITE_N8 = (byte) 136;  // 0x88
+  /**
+   * Fast Write Port N9.
+   */
   public static final byte OP_FASTWRITE_N9 = (byte) 137;  // 0x89
+  /**
+   * Fast Write Port N10.
+   */
   public static final byte OP_FASTWRITE_N10 = (byte) 138;  // 0x8A
+  /**
+   * Fast Write Port N11.
+   */
   public static final byte OP_FASTWRITE_N11 = (byte) 139;  // 0x8B
+  /**
+   * Fast Write Port N12.
+   */
   public static final byte OP_FASTWRITE_N12 = (byte) 140;  // 0x8C
+  /**
+   * Fast Write Port N13.
+   */
   public static final byte OP_FASTWRITE_N13 = (byte) 141;  // 0x8D
+  /**
+   * Fast Write Port N14.
+   */
   public static final byte OP_FASTWRITE_N14 = (byte) 142;  // 0x8E
 
   // one value here is wasted due to 15 port per type instead of 16...
 
+  /**
+   * Fast write Port Z0.
+   */
   public static final byte OP_FASTWRITE_Z0 = (byte) 144;  // 0x90
+  /**
+   * Fast write Port Z1.
+   */
   public static final byte OP_FASTWRITE_Z1 = (byte) 145;  // 0x91
+  /**
+   * Fast write Port Z2.
+   */
   public static final byte OP_FASTWRITE_Z2 = (byte) 146;  // 0x92
+  /**
+   * Fast write Port Z3.
+   */
   public static final byte OP_FASTWRITE_Z3 = (byte) 147;  // 0x93
+  /**
+   * Fast write Port Z4.
+   */
   public static final byte OP_FASTWRITE_Z4 = (byte) 148;  // 0x94
+  /**
+   * Fast write Port Z5.
+   */
   public static final byte OP_FASTWRITE_Z5 = (byte) 149;  // 0x95
+  /**
+   * Fast write Port Z6.
+   */
   public static final byte OP_FASTWRITE_Z6 = (byte) 150;  // 0x96
+  /**
+   * Fast write Port Z7.
+   */
   public static final byte OP_FASTWRITE_Z7 = (byte) 151;  // 0x97
+  /**
+   * Fast write Port Z8.
+   */
   public static final byte OP_FASTWRITE_Z8 = (byte) 152;  // 0x98
+  /**
+   * Fast write Port Z9.
+   */
   public static final byte OP_FASTWRITE_Z9 = (byte) 153;  // 0x99
+  /**
+   * Fast write Port Z10.
+   */
   public static final byte OP_FASTWRITE_Z10 = (byte) 154;  // 0x9A
+  /**
+   * Fast write Port Z11.
+   */
   public static final byte OP_FASTWRITE_Z11 = (byte) 155;  // 0x9B
+  /**
+   * Fast write Port Z12.
+   */
   public static final byte OP_FASTWRITE_Z12 = (byte) 156;  // 0x9C
+  /**
+   * Fast write Port Z13.
+   */
   public static final byte OP_FASTWRITE_Z13 = (byte) 157;  // 0x9D
+  /**
+   * Fast write Port Z14.
+   */
   public static final byte OP_FASTWRITE_Z14 = (byte) 143;  // 0x8F
-
+  /**
+   * Serial Write.
+   */
   public static final byte OP_SERWRITE = (byte) 195;  // 0xC3 C+128
+  /**
+   * Serial Set Status.
+   */
   public static final byte OP_SERSETSTAT = (byte) 196;  // 0xC4 D+128
+  /**
+   * Serial term?(terminate).
+   */
   public static final byte OP_SERTERM = (byte) 197;  // 0xC5 E+128
+  /**
+   * Read ex.
+   */
   public static final byte OP_READEX = (byte) 210;  // 0xD2 R+128
+  /**
+   * RFM.
+   */
   public static final byte OP_RFM = (byte) 214;  // 0xD6 V+128
+  /**
+   * 230K230K?.
+   */
   public static final byte OP_230K230K = (byte) 230;  // 0xE6
+  /**
+   * Reread Ex.
+   */
   public static final byte OP_REREADEX = (byte) 242;  // 0xF2 r+128
+  /**
+   * Reset3.
+   */
   public static final byte OP_RESET3 = (byte) 248;  // 0xF8
+  /**
+   * 230K115K?.
+   */
   public static final byte OP_230K115K = (byte) 253;  // 0xFD
+  /**
+   * Reset2.
+   */
   public static final byte OP_RESET2 = (byte) 254;  // 0xFE
+  /**
+   * Reset1.
+   */
   public static final byte OP_RESET1 = (byte) 255;  // 0xFF
 
   // response codes
+  /**
+   * WP Error.
+   */
   public static final byte DWERROR_WP = (byte) 0xF2;
+  /**
+   * Checksum error.
+   */
   public static final byte DWERROR_CRC = (byte) 0xF3;
+  /**
+   * Read error.
+   */
   public static final byte DWERROR_READ = (byte) 0xF4;
+  /**
+   * Write error.
+   */
   public static final byte DWERROR_WRITE = (byte) 0xF5;
+  /**
+   * Not ready error.
+   */
   public static final byte DWERROR_NOTREADY = (byte) 0xF6;
+  /**
+   * Ok.
+   */
   public static final byte DWOK = (byte) 0;
 
   // util modes
