@@ -95,9 +95,9 @@ public final class DWCmdDiskCreate extends DWCommand {
       }
       fileObject.createFile();
       if (dwProtocolHandler.getDiskDrives().isLoaded(driveNumber)) {
-        dwProtocolHandler.getDiskDrives().EjectDisk(driveNumber);
+        dwProtocolHandler.getDiskDrives().ejectDisk(driveNumber);
       }
-      dwProtocolHandler.getDiskDrives().LoadDiskFromFile(driveNumber, filepath);
+      dwProtocolHandler.getDiskDrives().loadDiskFromFile(driveNumber, filepath);
       return new DWCommandResponse(
           "New disk image created for drive " + driveNumber + "."
       );
@@ -137,7 +137,7 @@ public final class DWCmdDiskCreate extends DWCommand {
   private DWCommandResponse doDiskCreate(final int driveNumber) {
     try {
       if (dwProtocolHandler.getDiskDrives().isLoaded(driveNumber)) {
-        dwProtocolHandler.getDiskDrives().EjectDisk(driveNumber);
+        dwProtocolHandler.getDiskDrives().ejectDisk(driveNumber);
       }
       dwProtocolHandler.getDiskDrives().createDisk(driveNumber);
     } catch (DWDriveNotValidException e) {

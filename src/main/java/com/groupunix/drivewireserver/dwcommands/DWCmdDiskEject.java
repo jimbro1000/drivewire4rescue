@@ -61,13 +61,13 @@ public class DWCmdDiskEject extends DWCommand {
   }
 
   private DWCommandResponse doDiskEjectAll() {
-    dwProtocolHandler.getDiskDrives().EjectAllDisks();
+    dwProtocolHandler.getDiskDrives().ejectAllDisks();
     return new DWCommandResponse("Ejected all disks.\r\n");
   }
 
   private DWCommandResponse doDiskEject(final int driveNumber) {
     try {
-      dwProtocolHandler.getDiskDrives().EjectDisk(driveNumber);
+      dwProtocolHandler.getDiskDrives().ejectDisk(driveNumber);
       return new DWCommandResponse(
           "Disk ejected from drive " + driveNumber + ".\r\n"
       );

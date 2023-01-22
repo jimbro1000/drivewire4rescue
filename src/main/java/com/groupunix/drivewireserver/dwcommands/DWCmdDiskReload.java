@@ -50,10 +50,10 @@ public final class DWCmdDiskReload extends DWCommand {
   private DWCommandResponse doDiskReload(final String driveId) {
     try {
       if (driveId.equals("all")) {
-        dwProtocolHandler.getDiskDrives().ReLoadAllDisks();
+        dwProtocolHandler.getDiskDrives().reLoadAllDisks();
         return new DWCommandResponse("All disks reloaded.");
       } else {
-        dwProtocolHandler.getDiskDrives().ReLoadDisk(
+        dwProtocolHandler.getDiskDrives().reLoadDisk(
             dwProtocolHandler
                 .getDiskDrives()
                 .getDriveNoFromString(driveId)

@@ -5,28 +5,65 @@ import org.apache.log4j.Logger;
 import com.groupunix.drivewireserver.DriveWireServer;
 
 public class DWDiskLazyWriter implements Runnable {
-
-  private static final Logger logger = Logger.getLogger("DWServer.DWProtoReader");
+  /**
+   * Log appender.
+   */
+  private static final Logger LOGGER
+      = Logger.getLogger("DWServer.DWProtoReader");
+  /**
+   * Lazy write sleep interval in milliseconds.
+   */
+  private static final int DISK_LAZY_WRITE_SLEEP_INTERVAL = 5000;
+  /**
+   * Lazy write interval in milliseconds.
+   */
+  private static final int WRITE_INTERVAL = 15000;
+  /**
+   * Thread waiting to die.
+   */
   private boolean wantToDie = false;
+  /**
+   * Lazy disk in sync.
+   */
   private boolean inSync = false;
 
+  /**
+   * Run thread.
+   */
   public void run() {
     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-    Thread.currentThread().setName("dskwriter-" + Thread.currentThread().getId());
-
-    logger.debug("started, write interval is " + DriveWireServer.serverConfiguration.getLong("DiskLazyWriteInterval", 15000));
-
-    while (wantToDie == false) {
+    Thread.currentThread().setName(
+        "dskwriter-" + Thread.currentThread().getId()
+    );
+    LOGGER.debug(
+        "started, write interval is "
+            + DriveWireServer.serverConfiguration.getLong(
+            "DiskLazyWriteInterval",
+            WRITE_INTERVAL
+        )
+    );
+    while (!wantToDie) {
       try {
-        logger.debug("sleeping for " + DriveWireServer.serverConfiguration.getLong("DiskLazyWriteInterval", 15000) + " ms...");
-        Thread.sleep(DriveWireServer.serverConfiguration.getLong("DiskLazyWriteInterval", 5000));
+        LOGGER.debug(
+            "sleeping for "
+                + DriveWireServer.serverConfiguration.getLong(
+                "DiskLazyWriteInterval",
+                DISK_LAZY_WRITE_SLEEP_INTERVAL
+            ) + " ms..."
+        );
+        Thread.sleep(
+            DriveWireServer.serverConfiguration.getLong(
+                "DiskLazyWriteInterval",
+                DISK_LAZY_WRITE_SLEEP_INTERVAL
+            )
+        );
         syncDisks();
       } catch (InterruptedException e) {
-        logger.debug("interrupted");
+        LOGGER.debug("interrupted");
         wantToDie = true;
       }
     }
-    logger.debug("exit");
+    LOGGER.debug("exit");
   }
 
   private void syncDisks() {
@@ -39,8 +76,12 @@ public class DWDiskLazyWriter implements Runnable {
     this.inSync = false;
   }
 
+  /**
+   * Disk in sync?.
+   *
+   * @return true if in sync
+   */
   public boolean isInSync() {
     return this.inSync;
   }
-
 }

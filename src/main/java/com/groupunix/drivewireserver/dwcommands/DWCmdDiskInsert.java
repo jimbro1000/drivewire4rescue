@@ -75,7 +75,7 @@ public final class DWCmdDiskInsert extends DWCommand {
     // hack for os9 vs URLs
     try {
       // load new disk
-      dwProtocolHandler.getDiskDrives().LoadDiskFromFile(
+      dwProtocolHandler.getDiskDrives().loadDiskFromFile(
           driveNumber,
           DWUtils.convertStarToBang(path)
       );
