@@ -95,7 +95,7 @@ public class DWUIThread implements Runnable {
       // hrmmmm
       if (
           DriveWireServer
-              .serverConfiguration
+              .getServerConfiguration()
               .getBoolean("UIorBust", true)
       ) {
         DriveWireServer.shutdown();
@@ -109,7 +109,7 @@ public class DWUIThread implements Runnable {
         skt = serverSocket.accept();
         if (
             DriveWireServer
-                .serverConfiguration
+                .getServerConfiguration()
                 .getBoolean("LogUIConnections", false)
         ) {
           LOGGER.debug(

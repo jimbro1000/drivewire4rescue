@@ -128,11 +128,11 @@ public final class DriveWireServer {
   /**
    * Server configuration.
    */
-  public static XMLConfiguration serverConfiguration;
+  private static XMLConfiguration serverConfiguration;
   /**
    * Serial configuration flags.
    */
-  public static int configSerial = 0;
+  private static int configSerial = 0;
   /**
    * Console output appender.
    */
@@ -146,10 +146,25 @@ public final class DriveWireServer {
    */
   private static PatternLayout logLayout
       = new PatternLayout("%d{dd MMM yyyy HH:mm:ss} %-5p [%-14t] %m%n");
+  /**
+   * Lazy writer thread.
+   */
   private static Thread lazyWriterT;
+  /**
+   * UI thread object.
+   */
   private static DWUIThread uiObj;
+  /**
+   * UI thread.
+   */
   private static Thread uiT;
+  /**
+   * Waiting to die gracefully.
+   */
   private static boolean wantToDie = false;
+  /**
+   * Configuration file name.
+   */
   private static String configFile = "config.xml";
   private static boolean ready = false;
   private static boolean useLF5 = false;
@@ -174,10 +189,8 @@ public final class DriveWireServer {
   }
 
   public static void main(final String[] args) throws ConfigurationException {
-
     // catch everything
     Thread.setDefaultUncaughtExceptionHandler(new DWExceptionHandler());
-
     init(args);
 
     // install clean shutdown handler
@@ -192,8 +205,8 @@ public final class DriveWireServer {
             DriveWireServer
                 .serverConfiguration
                 .getInt(
-                    "StatusInterval"
-                    , THREAD_SLEEP_MILLIS * 10
+                    "StatusInterval",
+                    THREAD_SLEEP_MILLIS * 10
                 )
         );
         checkHandlerHealth();
@@ -926,10 +939,22 @@ public final class DriveWireServer {
           .setLevel(
               Level
                   .toLevel(
-                  serverConfiguration
-                      .getString("LogLevel", "INFO"))
+                      serverConfiguration
+                          .getString("LogLevel", "INFO"))
           );
     }
+  }
+
+  public static XMLConfiguration getServerConfiguration() {
+    return serverConfiguration;
+  }
+
+  public static int getConfigSerial() {
+    return configSerial;
+  }
+
+  public static void incConfigSerial() {
+    ++configSerial;
   }
 
   public static DWProtocol getHandler(final int handlerId) {

@@ -1,39 +1,41 @@
 package com.groupunix.drivewireserver.dwdisk;
 
-import org.apache.commons.vfs2.*;
-import org.apache.commons.vfs2.util.*;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.RandomAccessContent;
+import org.apache.commons.vfs2.util.RandomAccessMode;
 
-import java.io.*;
+import java.io.IOException;
 
 public class DWDiskSector {
-  private final int LSN;
+  private final int lsn;
   private byte[] data;
-  //private byte[] dirtydata;
-  private boolean dirty = false;
+  private final DWDisk dwDisk;
   private final int sectorsize;
-  private final DWDisk disk;
-  private final boolean direct;
+  private final boolean directFlag;
+  //private byte[] dirtydata;
+  private boolean dirtyFlag = false;
   private RandomAccessContent raf;
 
   /**
    * Disk sector constructor.
    *
    * @param disk       drivewire disk
-   * @param lsn        logical sector number
-   * @param sectorsize sector size
+   * @param sector     logical sector number
+   * @param sectorSize sector size
    * @param direct     is direct
    * @throws FileSystemException
    */
   public DWDiskSector(
-      DWDisk disk, int lsn, int sectorsize, boolean direct
+      final DWDisk disk, final int sector,
+      final int sectorSize, final boolean direct
   ) throws FileSystemException {
-    this.LSN = lsn;
-    this.sectorsize = sectorsize;
-    this.direct = direct;
-    this.disk = disk;
+    this.lsn = sector;
+    this.sectorsize = sectorSize;
+    this.directFlag = direct;
+    this.dwDisk = disk;
 
     if (!direct) {
-      this.data = new byte[sectorsize];
+      this.data = new byte[sectorSize];
     }
   }
 
@@ -42,22 +44,22 @@ public class DWDiskSector {
    *
    * @return LSN
    */
-  public int getLSN() {
-    return this.LSN;
+  public int getLsn() {
+    return this.lsn;
   }
 
   /**
    * Set sector data to new byte array data.
    *
-   * @param newdata new byte array
+   * @param newData new byte array
    * @param dirty   dirty flag
    */
-  public synchronized void setData(byte[] newdata, boolean dirty) {
-    this.dirty = dirty;
+  public synchronized void setData(final byte[] newData, final boolean dirty) {
+    this.dirtyFlag = dirty;
     if (this.data == null) {
-      this.data = new byte[newdata.length];
+      this.data = new byte[newData.length];
     }
-    System.arraycopy(newdata, 0, this.data, 0, this.sectorsize);
+    System.arraycopy(newData, 0, this.data, 0, this.sectorsize);
   }
 
   /**
@@ -69,7 +71,7 @@ public class DWDiskSector {
   public synchronized byte[] getData() throws IOException {
     if (this.data != null) {
       return this.data;
-    } else if (this.direct) {
+    } else if (this.directFlag) {
       return this.getFileSector();
     } else {
       return new byte[this.sectorsize];
@@ -88,7 +90,7 @@ public class DWDiskSector {
     if (this.data == null) {
       this.data = new byte[newdata.length];
     }
-    this.dirty = true;
+    this.dirtyFlag = true;
     System.arraycopy(newdata, 0, this.data, 0, this.sectorsize);
   }
 
@@ -96,11 +98,11 @@ public class DWDiskSector {
    * Remove dirty tag on sector.
    */
   public synchronized void makeClean() {
-    if (this.dirty) {
-      if (this.direct) {
+    if (this.dirtyFlag) {
+      if (this.directFlag) {
         this.data = null;
       }
-      this.dirty = false;
+      this.dirtyFlag = false;
     }
   }
 
@@ -111,11 +113,11 @@ public class DWDiskSector {
    * @throws IOException
    */
   private byte[] getFileSector() throws IOException {
-    raf = this.disk
+    raf = this.dwDisk
         .getFileObject()
         .getContent()
         .getRandomAccessContent(RandomAccessMode.READ);
-    long pos = (long) this.LSN * this.sectorsize;
+    long pos = (long) this.lsn * this.sectorsize;
     raf.seek(pos);
     byte[] buf = new byte[this.sectorsize];
     raf.readFully(buf);
@@ -130,13 +132,13 @@ public class DWDiskSector {
    * @return true if dirty
    */
   public synchronized boolean isDirty() {
-    return dirty;
+    return dirtyFlag;
   }
 
   /**
    * Modify byte at offset.
    * <p>
-   * Tags sector as dirty
+   *   Tags sector as dirty
    * </p>
    *
    * @param i offset
@@ -148,13 +150,13 @@ public class DWDiskSector {
       this.data = this.getFileSector();
     }
     this.data[i] = b;
-    this.dirty = true;
+    this.dirtyFlag = true;
   }
 
   /**
    * Tag sector as dirty.
    */
   public void makeDirty() {
-    this.dirty = true;
+    this.dirtyFlag = true;
   }
 }
