@@ -7,14 +7,30 @@ import org.apache.commons.vfs2.util.RandomAccessMode;
 import java.io.IOException;
 
 public class DWDiskSector {
+  /**
+   * Logical sector number.
+   */
   private final int lsn;
+  /**
+   * Sector byte array.
+   */
   private byte[] data;
+  /**
+   * Associated drivewire disk.
+   */
   private final DWDisk dwDisk;
+  /**
+   * Sector size.
+   */
   private final int sectorsize;
+  /**
+   * Direct flag.
+   */
   private final boolean directFlag;
-  //private byte[] dirtydata;
+  /**
+   * Dirty flag.
+   */
   private boolean dirtyFlag = false;
-  private RandomAccessContent raf;
 
   /**
    * Disk sector constructor.
@@ -113,7 +129,7 @@ public class DWDiskSector {
    * @throws IOException
    */
   private byte[] getFileSector() throws IOException {
-    raf = this.dwDisk
+    RandomAccessContent raf = this.dwDisk
         .getFileObject()
         .getContent()
         .getRandomAccessContent(RandomAccessMode.READ);
@@ -122,7 +138,6 @@ public class DWDiskSector {
     byte[] buf = new byte[this.sectorsize];
     raf.readFully(buf);
     raf.close();
-    raf = null;
     return buf;
   }
 

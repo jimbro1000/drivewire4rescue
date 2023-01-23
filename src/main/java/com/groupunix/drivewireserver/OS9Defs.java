@@ -1,16 +1,13 @@
 package com.groupunix.drivewireserver;
 
 public final class OS9Defs {
-  private OS9Defs() {
-    //hidden constructor
-  }
-  // Constants from OS9
-
-  // File Attributes Byte
   /**
    * Read.
    */
   public static final byte MODE_R = (byte) 1;
+  // Constants from OS9
+
+  // File Attributes Byte
   /**
    * Write.
    */
@@ -39,7 +36,6 @@ public final class OS9Defs {
    * Directory.
    */
   public static final byte MODE_DIR = (byte) 128;
-
   // Status codes for Get/SetStat
   public static final byte SS_OPT = 0;
   public static final byte SS_READY = 1;
@@ -61,7 +57,6 @@ public final class OS9Defs {
   public static final byte SS_LOCK = 17;
   public static final byte SS_KY_SNS = 0x27;
   public static final byte SS_DIR_ENT = 0x21;
-
   // General commands
   public static final byte CMD_ESCAPE = 0x1b;
   public static final byte CMD_DW_EXT = 0x7F;
@@ -93,7 +88,6 @@ public final class OS9Defs {
   public static final byte STY_GFX_LO_RES_4_COL = 0x06;
   public static final byte STY_GFX_HI_RES_4_COL = 0x07;
   public static final byte STY_GFX_LO_RES_16_COL = 0x08;
-
   public static final byte CMD_F_COLOR = 0x32;
   public static final byte CMD_FONT = 0x3a;
   public static final byte CMD_GC_SET = 0x39;
@@ -110,7 +104,6 @@ public final class OS9Defs {
   public static final byte CMD_SCALE_SW = 0x35;
   public static final byte CMD_SELECT = 0x21;
   public static final byte CMD_T_CHAR_SW = 0x3c;
-
   // Drawing commands
   public static final byte CMD_ARC_3_P = 0x52;
   public static final byte CMD_BAR = 0x4a;
@@ -129,7 +122,6 @@ public final class OS9Defs {
   public static final byte CMD_PUT_GC = 0x4e;
   public static final byte CMD_SET_D_PTR = 0x40;
   public static final byte CMD_R_SET_D_PTR = 0x41;
-
   // Text commands
   public static final byte CTL_HOME = 0x01;
   public static final byte CTL_POSITION = 0x02;
@@ -155,4 +147,7 @@ public final class OS9Defs {
   public static final byte CTL_EXT_BLINK_OFF = 0x25;
   public static final byte CTL_EXT_INSERT_LINE = 0x30;
   public static final byte CTL_EXT_DELETE_LINE = 0x31;
+  private OS9Defs() {
+    //hidden constructor
+  }
 }
