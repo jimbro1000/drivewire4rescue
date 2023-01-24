@@ -16,56 +16,66 @@ import com.groupunix.drivewireserver.dwexceptions.DWSeekPastEndOfDeviceException
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
 public class DWDMKDisk extends DWDisk {
-  public static final int BYTE_MASK = 0xFF;
   /**
    * Log appender.
    */
   private static final Logger LOGGER
       = Logger.getLogger("DWServer.DWDMKDisk");
   /**
-   * Multiplier for converting IDAM track to LSN.
+   * Sectors per track.
    */
-  private static final int IDAM_TRACK_MULTIPLIER = 18;
+  public static final int SECTORS_PER_TRACK = 18;
   /**
-   * Track list.
+   * Byte mask.
+   */
+  private static final int BYTE_MASK = 0xFF;
+  /**
+   * DMK Header size (bytes).
+   */
+  private static final int HEADER_SIZE = 16;
+  /**
+   * Disk tracks.
    */
   private final ArrayList<DWDMKDiskTrack> tracks = new ArrayList<>();
   /**
    * Disk header.
    */
-  private DWDMKDiskHeader diskHeader;
+  private DWDMKDiskHeader header;
 
   /**
-   * DMK Disk constructor.
+   * DMK disc constructor.
    *
-   * @param fileObject source file object
+   * @param fileObj source file object
    * @throws IOException
    * @throws DWImageFormatException
    */
-  public DWDMKDisk(final FileObject fileObject)
+  public DWDMKDisk(final FileObject fileObj)
       throws IOException, DWImageFormatException {
-    super(fileObject);
+    super(fileObj);
     this.setParam("_format", "dmk");
     load();
-    LOGGER.debug("New DMK disk for " + fileObject.getName().getURI());
+    LOGGER.debug("New DMK disk for " + fileObj.getName().getURI());
   }
 
   /**
-   * Attempt to identify image from header.
+   * Determine if header describes a valid disk image.
    *
-   * @param hdr      header byte array
+   * @param hdr header bytes
    * @param fObjSize file object size
-   * @return decision on identification
+   * @return decision
    */
   public static int considerImage(final byte[] hdr, final long fObjSize) {
     // is it big enough to have a header
-    if (fObjSize > 16) {
+    if (fObjSize > HEADER_SIZE) {
       // make a header object
       DWDMKDiskHeader header = new DWDMKDiskHeader(hdr);
       // is the size right?
       if (
-          fObjSize == 16 +
-              (long) header.getSides() * header.getTracks() * header.getTrackLength()
+          fObjSize == HEADER_SIZE + (
+              (long) header.getSides()
+                  * header.getTracks()
+                  * header.getTrackLength()
+          )
       ) {
         // good enough for mess, good enough for me
         return (DWDefs.DISK_CONSIDER_YES);
@@ -77,40 +87,42 @@ public class DWDMKDisk extends DWDisk {
   /**
    * Get disk format.
    *
-   * @return DMK format
+   * @return disk format (DMK)
    */
   public int getDiskFormat() {
     return DWDefs.DISK_FORMAT_DMK;
   }
 
   /**
-   * Load disk.
+   * Load sectors from file.
    *
    * @throws IOException
    * @throws DWImageFormatException
    */
   public void load() throws IOException, DWImageFormatException {
     // load file into sector array
-    InputStream fis = this.getFileObject().getContent().getInputStream();
+    InputStream fis;
+    fis = this.getFileObject().getContent().getInputStream();
     // read disk header
     int readres = 0;
-    byte[] hbuff = new byte[16];
-    while (readres < 16) {
-      readres += fis.read(hbuff, readres, 16 - readres);
+    byte[] hbuff = new byte[HEADER_SIZE];
+
+    while (readres < HEADER_SIZE) {
+      readres += fis.read(hbuff, readres, HEADER_SIZE - readres);
     }
-    this.diskHeader = new DWDMKDiskHeader(hbuff);
-    this.setParam("writeprotect", diskHeader.isWriteProtected());
-    this.setParam("_tracks", diskHeader.getTracks());
-    this.setParam("_sides", diskHeader.getSides());
-    this.setParam("_density", diskHeader.getDensity());
-    if (!diskHeader.isSingleSided() || diskHeader.isSingleDensity()) {
+    this.header = new DWDMKDiskHeader(hbuff);
+    this.setParam("writeprotect", header.isWriteProtected());
+    this.setParam("_tracks", header.getTracks());
+    this.setParam("_sides", header.getSides());
+    this.setParam("_density", header.getDensity());
+    if (!header.isSingleSided() || header.isSingleDensity()) {
       String format = "";
-      if (diskHeader.isSingleSided()) {
+      if (header.isSingleSided()) {
         format += "SS";
       } else {
         format += "DS";
       }
-      if (diskHeader.isSingleDensity()) {
+      if (header.isSingleDensity()) {
         format += "SD";
       } else {
         format += "DD";
@@ -123,12 +135,12 @@ public class DWDMKDisk extends DWDisk {
     }
     // read tracks
     byte[] tbuf;
-    for (int i = 0; i < diskHeader.getTracks(); i++) {
+    for (int i = 0; i < header.getTracks(); i++) {
       // read track data
-      tbuf = new byte[diskHeader.getTrackLength()];
+      tbuf = new byte[header.getTrackLength()];
       readres = 0;
-      while ((readres < diskHeader.getTrackLength()) && (readres > -1)) {
-        int res = fis.read(tbuf, readres, diskHeader.getTrackLength() - readres);
+      while ((readres < header.getTrackLength()) && (readres > -1)) {
+        int res = fis.read(tbuf, readres, header.getTrackLength() - readres);
         if (res > -1) {
           readres += res;
         } else {
@@ -142,11 +154,11 @@ public class DWDMKDisk extends DWDisk {
         );
       }
       DWDMKDiskTrack dmktrack = new DWDMKDiskTrack(tbuf);
-      if (dmktrack.getNumSectors() != 18) {
+      if (dmktrack.getNumSectors() != SECTORS_PER_TRACK) {
         fis.close();
         throw new DWImageFormatException(
-            "Unsupported DMK format, " +
-                "only 18 sectors per track is supported at this time"
+            "Unsupported DMK format, "
+                + "only 18 sectors per track is supported at this time"
         );
       }
       this.tracks.add(dmktrack);
@@ -164,9 +176,9 @@ public class DWDMKDisk extends DWDisk {
       throws DWImageFormatException, FileSystemException {
     this.getSectors().clear();
     // hard coded to 18 spt until i find a reason not to
-    this.getSectors().setSize(diskHeader.getTracks() * 18);
-    this.setParam("_sectors", diskHeader.getTracks() * 18);
-    for (int t = 0; t < diskHeader.getTracks(); t++) {
+    this.getSectors().setSize(header.getTracks() * SECTORS_PER_TRACK);
+    this.setParam("_sectors", header.getTracks() * SECTORS_PER_TRACK);
+    for (int t = 0; t < header.getTracks(); t++) {
       // track header / IDAM ptr table
       for (int i = 0; i < 64; i++) {
         DWDMKDiskIDAM idam = this.tracks.get(t).getIDAM(i);
@@ -185,11 +197,12 @@ public class DWDMKDisk extends DWDisk {
     int lsn = calcLSN(idam);
     if ((lsn > -1) && (lsn < this.getSectors().size())) {
       this.getSectors().set(
-          lsn, new DWDiskSector(this, lsn, idam.getSectorSize(), false)
+          lsn,
+          new DWDiskSector(this, lsn, idam.getSectorSize(), false)
       );
-      this.getSectors().get(lsn).setData(
-          getSectorDataFrom(idam, track), false
-      );
+      this.getSectors()
+          .get(lsn)
+          .setData(getSectorDataFrom(idam, track), false);
     } else {
       throw new DWImageFormatException(
           "Invalid LSN " + lsn + " while adding sector from DMK!"
@@ -202,19 +215,18 @@ public class DWDMKDisk extends DWDisk {
     byte[] buf = new byte[idam.getSectorSize()];
     int loc = idam.getPtr() + 7;
     int gap = 43;
-
     boolean sync = false;
-    if (this.diskHeader.isSingleDensity()) {
+    if (this.header.isSingleDensity()) {
       gap = 30;
     }
     while (gap > 0) {
       if (((BYTE_MASK & this.tracks.get(track).getData()[loc]) >= 0xF8)
           && ((BYTE_MASK & this.tracks.get(track).getData()[loc]) <= 0xFB)) {
-        if (this.diskHeader.isSingleDensity() || sync) {
+        if (this.header.isSingleDensity() || sync) {
           break;
         }
       }
-      if (!this.diskHeader.isSingleDensity()) {
+      if (!this.header.isSingleDensity()) {
         sync = (BYTE_MASK & this.tracks.get(track).getData()[loc]) == 0xA1;
       }
       loc++;
@@ -238,23 +250,17 @@ public class DWDMKDisk extends DWDisk {
     return buf;
   }
 
-  /**
-   * Calculate LSN from IDAM.
-   *
-   * @param idam
-   * @return logical sector number
-   */
   private int calcLSN(final DWDMKDiskIDAM idam) {
-    int t = idam.getTrack() * IDAM_TRACK_MULTIPLIER;
-    if (!diskHeader.isSingleSided()) {
+    int t = idam.getTrack() * SECTORS_PER_TRACK;
+    if (!header.isSingleSided()) {
       t = t * 2;
     }
-    t += (idam.getSector() - 1) + (IDAM_TRACK_MULTIPLIER * idam.getSide());
+    t += (idam.getSector() - 1) + (SECTORS_PER_TRACK * idam.getSide());
     return t;
   }
 
   /**
-   * Seek given sector by LSN.
+   * Seek disk sector by LSN.
    *
    * @param newLSN logical sector number
    * @throws DWInvalidSectorException
@@ -263,7 +269,9 @@ public class DWDMKDisk extends DWDisk {
   public void seekSector(final int newLSN)
       throws DWInvalidSectorException, DWSeekPastEndOfDeviceException {
     if (newLSN < 0) {
-      throw new DWInvalidSectorException("Sector " + newLSN + " is not valid");
+      throw new DWInvalidSectorException(
+          "Sector " + newLSN + " is not valid"
+      );
     } else if (newLSN > (this.getSectors().size() - 1)) {
       throw new DWSeekPastEndOfDeviceException(
           "Attempt to seek beyond end of image"
@@ -274,7 +282,7 @@ public class DWDMKDisk extends DWDisk {
   }
 
   /**
-   * Write disk sector from byte array.
+   * Write sector data.
    *
    * @param data byte array
    * @throws DWDriveWriteProtectedException
@@ -291,13 +299,13 @@ public class DWDMKDisk extends DWDisk {
   }
 
   /**
-   * Read disk sector to byte array.
+   * Read disk sector.
    *
-   * @return byte array
+   * @return sector data
    * @throws IOException
    */
   public byte[] readSector() throws IOException {
     this.incParam("_reads");
-    return (this.getSectors().get(this.getLSN()).getData());
+    return this.getSectors().get(this.getLSN()).getData();
   }
 }

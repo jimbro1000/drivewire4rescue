@@ -6,11 +6,36 @@ import com.groupunix.drivewireserver.dwexceptions.DWPrinterFileError;
 import com.groupunix.drivewireserver.dwexceptions.DWPrinterNotDefinedException;
 
 public interface DWVPrinterDriver {
-  public void flush() throws IOException, DWPrinterFileError, DWPrinterNotDefinedException;
+  /**
+   * Flush printer buffer.
+   *
+   * @throws IOException
+   * @throws DWPrinterFileError
+   * @throws DWPrinterNotDefinedException
+   */
+  void flush()
+      throws IOException, DWPrinterFileError, DWPrinterNotDefinedException;
 
-  public void addByte(byte data) throws IOException;
+  /**
+   * Add byte to printer buffer.
+   *
+   * @param data byte value
+   * @throws IOException
+   */
+  void addByte(byte data)
+      throws IOException;
 
-  public String getDriverName();
+  /**
+   * Get printer driver name.
+   *
+   * @return driver name
+   */
+  String getDriverName();
 
-  public String getPrinterName();
+  /**
+   * Get printer name.
+   *
+   * @return printer name
+   */
+  String getPrinterName();
 }

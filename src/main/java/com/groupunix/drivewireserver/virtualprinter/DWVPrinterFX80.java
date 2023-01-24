@@ -151,6 +151,22 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
    */
   private static final int RESET_PRINTER_CODE = 64;
   /**
+   * Maximum valid character code.
+   */
+  private static final int MAX_CHR_INT = 255;
+  /**
+   * Minimum printable character code.
+   */
+  private static final int MIN_CHR_INT = 32;
+  /**
+   * Delete/backspace character code.
+   */
+  private static final int DEL_CHR = 127;
+  /**
+   * Minimum graphical character(?).
+   */
+  private static final int MIN_GRAPH_CHAR = 160;
+  /**
    * Printer buffer.
    */
   private final DWVSerialCircularBuffer printBuffer
@@ -377,10 +393,10 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
         this.charWidth = getCPI();
         this.mEscape = false;
       } else if (
-          ((int) c < 32)
-              || ((int) c == 127)
-              || (((int) c > 127) && ((int) c < 160))
-              || ((int) c == 255)
+          ((int) c < MIN_CHR_INT)
+              || ((int) c == DEL_CHR)
+              || (((int) c > DEL_CHR) && ((int) c < MIN_GRAPH_CHAR))
+              || ((int) c == MAX_CHR_INT)
       ) {
         processUnprintable(c);
         // apply
