@@ -6,7 +6,7 @@ package com.groupunix.drivewireserver;
  * Provides drivewire protocol constants
  * </p>
  */
-public class DWDefs {
+public final class DWDefs {
   /**
    * DWDefs Utility Class.
    */
@@ -323,7 +323,9 @@ public class DWDefs {
   public static final int UTILMODE_TCPLISTEN = 7;
   public static final int UTILMODE_NINESERVER = 8;
 
-  // result codes for DW virtual channel API calls - all subject to change until I know of anyone actually using these on client side
+  // result codes for DW virtual channel API calls
+  // - all subject to change until I know of anyone
+  // actually using these on client side
   public static final byte RC_SUCCESS = (byte) 0;
 
   public static final byte RC_SYNTAX_ERROR = (byte) 10;
@@ -467,7 +469,9 @@ public class DWDefs {
 
   public static final long SERVER_SLOW_OP = 200;
 
-  public static final String[] LOG_LEVELS = {"ALL", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
+  public static final String[] LOG_LEVELS = {
+      "ALL", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
+  };
 
   public static final int MODEL_COCO1 = 1;
   public static final int MODEL_COCO2 = 2;
@@ -489,19 +493,41 @@ public class DWDefs {
   // client IDs
 
   // Timer defs
-  public static final byte TIMER_START = (byte) 0;  // time since server started
-  public static final byte TIMER_RESET = (byte) 1;  // time since reset
-  public static final byte TIMER_OP = (byte) 2;  // time since last operation
-  public static final byte TIMER_NP_OP = (byte) 3;  // time since last operation (non-poll)
-  public static final byte TIMER_POLL = (byte) 4;  // time since last poll
-  public static final byte TIMER_BAD_DATA = (byte) 5;  // time since last error
-
-  public static final byte TIMER_IO = (byte) 6;  // time of last IO operation
+  /**
+   * Time since server started.
+   */
+  public static final byte TIMER_START = (byte) 0;
+  /**
+   * Time since server reset.
+   */
+  public static final byte TIMER_RESET = (byte) 1;
+  /**
+   * Time since last operation.
+   */
+  public static final byte TIMER_OP = (byte) 2;
+  /**
+   * Time since last operation (non-poll).
+   */
+  public static final byte TIMER_NP_OP = (byte) 3;
+  /**
+   * Time since last poll.
+   */
+  public static final byte TIMER_POLL = (byte) 4;
+  /**
+   * Time since last error.
+   */
+  public static final byte TIMER_BAD_DATA = (byte) 5;
+  /**
+   * Time of last IO operation.
+   */
+  public static final byte TIMER_IO = (byte) 6;
   public static final byte TIMER_DWINIT = (byte) 8;
   public static final byte TIMER_READ = (byte) 9;
   public static final byte TIMER_WRITE = (byte) 10;
-
-  public static final byte TIMER_USER = (byte) 128; // start of user timers
+  /**
+   * Start of user timers.
+   */
+  public static final byte TIMER_USER = (byte) 128;
 
   /**
    * Minimum turbo serial baud rate.
