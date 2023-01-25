@@ -44,6 +44,7 @@ public abstract class DWDisk {
   /**
    * Configuration listener.
    */
+  @SuppressWarnings("unused")
   private DWDiskConfigListener configlistener;
   /**
    * Associated drive.
@@ -57,9 +58,9 @@ public abstract class DWDisk {
   /**
    * File object disk constructor.
    *
-   * @param fileObject
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @param fileObject source file object
+   * @throws IOException Failed to read from file object
+   * @throws DWImageFormatException Invalid file format
    */
   public DWDisk(final FileObject fileObject)
       throws IOException, DWImageFormatException {
@@ -126,8 +127,8 @@ public abstract class DWDisk {
    * Seek sector.
    *
    * @param lsn logical sector number
-   * @throws DWInvalidSectorException
-   * @throws DWSeekPastEndOfDeviceException
+   * @throws DWInvalidSectorException Invalid LSN
+   * @throws DWSeekPastEndOfDeviceException Seek past end of disk
    */
   public abstract void seekSector(int lsn)
       throws DWInvalidSectorException, DWSeekPastEndOfDeviceException;
@@ -136,8 +137,8 @@ public abstract class DWDisk {
    * Write byte array to sector.
    *
    * @param data byte array
-   * @throws DWDriveWriteProtectedException
-   * @throws IOException
+   * @throws DWDriveWriteProtectedException Write protected
+   * @throws IOException Failed to write to file object
    */
   public abstract void writeSector(byte[] data)
       throws DWDriveWriteProtectedException, IOException;
@@ -146,8 +147,8 @@ public abstract class DWDisk {
    * read disk sector.
    *
    * @return byte array of sector
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException Failed to read from file object
+   * @throws DWImageFormatException Invalid file format
    */
   public abstract byte[] readSector()
       throws IOException, DWImageFormatException;
@@ -155,8 +156,8 @@ public abstract class DWDisk {
   /**
    * load disk.
    *
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException Failed to read from file object
+   * @throws DWImageFormatException Invalid file format
    */
   protected abstract void load()
       throws IOException, DWImageFormatException;
@@ -166,6 +167,7 @@ public abstract class DWDisk {
    *
    * @return format id
    */
+  @SuppressWarnings("unused")
   public abstract int getDiskFormat();
 
   /**
@@ -261,8 +263,8 @@ public abstract class DWDisk {
   /**
    * Reload disk image from file system.
    *
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException Failed to read from file object
+   * @throws DWImageFormatException Invalid file format
    */
   public void reload() throws IOException, DWImageFormatException {
     if (this.getFileObject() != null) {
@@ -283,7 +285,7 @@ public abstract class DWDisk {
    * Closes file object
    * </p>
    *
-   * @throws IOException
+   * @throws IOException Failed to write to file object
    */
   public void eject() throws IOException {
     sync();
@@ -300,7 +302,7 @@ public abstract class DWDisk {
    * Always NOP unless overridden
    * </p>
    *
-   * @throws IOException
+   * @throws IOException Failed to write to file object
    */
   public void sync() throws IOException {
     // NOP on readonly image formats
@@ -312,8 +314,8 @@ public abstract class DWDisk {
    * Always fails unless overridden
    * </p>
    *
-   * @throws IOException
-   * @throws DWImageHasNoSourceException
+   * @throws IOException Failed to read from file object
+   * @throws DWImageHasNoSourceException No file object defined
    */
   public void write() throws IOException, DWImageHasNoSourceException {
     // Fail on readonly image formats
@@ -324,7 +326,7 @@ public abstract class DWDisk {
    * Attempt to write to a given file path.
    *
    * @param path filepath
-   * @throws IOException
+   * @throws IOException Failed to write to file object
    */
   public void writeTo(final String path) throws IOException {
     // write in memory image to specified path (raw format)
@@ -353,14 +355,14 @@ public abstract class DWDisk {
    * Write cached sectors to disk file.
    *
    * @param fobj disk file
-   * @throws IOException
+   * @throws IOException Failed to write to file object
    */
   public void writeSectors(final FileObject fobj) throws IOException {
     // write out all sectors
     long timeGetdata = 0;
     long timeWrite = 0;
     long timeClean = 0;
-    long timeInit = 0;
+    long timeInit;
     long timePoint = System.currentTimeMillis();
 
     LOGGER.debug(
@@ -374,7 +376,7 @@ public abstract class DWDisk {
       try {
         ss = (Integer) this.getParam("_sectorsize");
       } catch (NumberFormatException e) {
-        // how did they get a non int value in there.. whatever
+        // how did they get a non int value in there... whatever
       }
     }
     byte[] zerofill = new byte[ss];
@@ -434,7 +436,7 @@ public abstract class DWDisk {
    *
    * @param sectorNumber sector number
    * @return Disk sector
-   * @throws DWDiskInvalidSectorNumber
+   * @throws DWDiskInvalidSectorNumber Invalid LSN
    */
   public DWDiskSector getSector(final int sectorNumber)
       throws DWDiskInvalidSectorNumber {
@@ -492,18 +494,15 @@ public abstract class DWDisk {
   public void insert(final DWDiskDrive targetDrive) {
     this.drive = targetDrive;
     // remove any existing listeners
-    @SuppressWarnings("unchecked")
-    Iterator<ConfigurationListener> citr = this.params
-        .getConfigurationListeners().iterator();
-    while (citr.hasNext()) {
-      this.params.removeConfigurationListener(citr.next());
+    for (ConfigurationListener configurationListener : this.params
+        .getConfigurationListeners()) {
+      this.params.removeConfigurationListener(configurationListener);
     }
     // add for this drive
     this.params.addConfigurationListener(
         new DWDiskConfigListener(this)
     );
     // announce drive info to any event listeners
-    @SuppressWarnings("unchecked")
     Iterator<String> itr = this.params.getKeys();
     while (itr.hasNext()) {
       String key = itr.next();

@@ -13,6 +13,7 @@ import com.groupunix.drivewireserver.dwexceptions.DWInvalidSectorException;
 import com.groupunix.drivewireserver.dwexceptions.DWSeekPastEndOfDeviceException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
+@SuppressWarnings("unused")
 public class DWSIDEImageDisk extends DWDisk {
   /**
    * Log appender.
@@ -31,11 +32,10 @@ public class DWSIDEImageDisk extends DWDisk {
    * End position.
    */
   private final long endPos;
-  /**
-   * Use half sectors flag.
-   */
-  @SuppressWarnings("unused")
-  private final boolean halfsector;
+//  /**
+//   * Use half sectors flag.
+//   */
+//  private final boolean halfsector;
 
   /**
    * SIDE Image disk constructor.
@@ -44,8 +44,8 @@ public class DWSIDEImageDisk extends DWDisk {
    * @param start start position
    * @param end end position
    * @param halfSector half sector flag
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException Failed to load file object
+   * @throws DWImageFormatException Invalid file object format
    */
   public DWSIDEImageDisk(
       final FileObject fileObject,
@@ -57,7 +57,7 @@ public class DWSIDEImageDisk extends DWDisk {
     this.setParam("_format", "side");
     this.startPos = start;
     this.endPos = end;
-    this.halfsector = halfSector;
+//    this.halfsector = halfSector;
     load();
     LOGGER.debug(
         "New SuperIDE image disk for " + fileObject.getName().getURI()
@@ -73,8 +73,8 @@ public class DWSIDEImageDisk extends DWDisk {
    *   Not implemented
    * </p>
    * @param lsn logical sector number
-   * @throws DWInvalidSectorException
-   * @throws DWSeekPastEndOfDeviceException
+   * @throws DWInvalidSectorException invalid sector number
+   * @throws DWSeekPastEndOfDeviceException attempt to seek past end of disk
    */
   @Override
   public void seekSector(final int lsn)
@@ -87,8 +87,8 @@ public class DWSIDEImageDisk extends DWDisk {
    *   not implemented
    * </p>
    * @param data byte array
-   * @throws DWDriveWriteProtectedException
-   * @throws IOException
+   * @throws DWDriveWriteProtectedException write protected sector
+   * @throws IOException failed to write to file object
    */
   @Override
   public void writeSector(final byte[] data)
@@ -99,8 +99,8 @@ public class DWSIDEImageDisk extends DWDisk {
    * Read sector.
    *
    * @return null (not implemented)
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException Failed to read from file object
+   * @throws DWImageFormatException Invalid file object format
    */
   @Override
   public byte[] readSector() throws IOException, DWImageFormatException {
@@ -110,8 +110,8 @@ public class DWSIDEImageDisk extends DWDisk {
   /**
    * Load sector array from file.
    *
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException Failed to read from file object
+   * @throws DWImageFormatException Invalid file object format
    */
   @Override
   protected void load() throws IOException, DWImageFormatException {
