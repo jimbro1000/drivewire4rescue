@@ -8,6 +8,12 @@ package com.groupunix.drivewireserver;
  */
 public class DWDefs {
   /**
+   * DWDefs Utility Class.
+   */
+  private DWDefs() {
+    //hidden constructor
+  }
+  /**
    * Drivewire protocol version.
    */
   public static final byte DW_PROTOCOL_VERSION = 4;
@@ -497,6 +503,20 @@ public class DWDefs {
 
   public static final byte TIMER_USER = (byte) 128; // start of user timers
 
+  /**
+   * Minimum turbo serial baud rate.
+   */
   public static final int COM_MIN_DATURBO_RATE = 57600;
+  /**
+   * Maximum turbo serial baud rate.
+   */
   public static final int COM_MAX_DATURBO_RATE = 115200;
+  /**
+   * Bitwise mask for a single byte.
+   */
+  public static final int BYTE_MASK = 0xFF;
+  /**
+   * Multiplier for most significant byte.
+   */
+  public static final int BYTE_SHIFT = 256;
 }

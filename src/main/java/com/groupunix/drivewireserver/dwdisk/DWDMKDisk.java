@@ -26,13 +26,37 @@ public class DWDMKDisk extends DWDisk {
    */
   public static final int SECTORS_PER_TRACK = 18;
   /**
-   * Byte mask.
-   */
-  private static final int BYTE_MASK = 0xFF;
-  /**
    * DMK Header size (bytes).
    */
   private static final int HEADER_SIZE = 16;
+  /**
+   * Default initial gap.
+   */
+  public static final int INITIAL_GAP = 43;
+  /**
+   * Initial gap for single density.
+   */
+  public static final int SINGLE_DENSITY_GAP = 30;
+  /**
+   * Initial pointer offset.
+   */
+  public static final int LOCATION_OFFSET = 7;
+  /**
+   * Sync value for single density.
+   */
+  public static final int SYNC_VALUE = 0xA1;
+  /**
+   * minimum track data value.
+   */
+  public static final int TRACK_MINIMUM = 0xF8;
+  /**
+   * maximum track data value.
+   */
+  public static final int TRACK_MAXIMUM = 0xFB;
+  /**
+   * Maximum IDAM index.
+   */
+  public static final int IDAM_MAX = 64;
   /**
    * Disk tracks.
    */
@@ -180,7 +204,7 @@ public class DWDMKDisk extends DWDisk {
     this.setParam("_sectors", header.getTracks() * SECTORS_PER_TRACK);
     for (int t = 0; t < header.getTracks(); t++) {
       // track header / IDAM ptr table
-      for (int i = 0; i < 64; i++) {
+      for (int i = 0; i < IDAM_MAX; i++) {
         DWDMKDiskIDAM idam = this.tracks.get(t).getIDAM(i);
         if (idam.getPtr() != 0) {
           if (idam.getTrack() != t) {
@@ -213,21 +237,25 @@ public class DWDMKDisk extends DWDisk {
   private byte[] getSectorDataFrom(final DWDMKDiskIDAM idam, final int track)
       throws DWImageFormatException {
     byte[] buf = new byte[idam.getSectorSize()];
-    int loc = idam.getPtr() + 7;
-    int gap = 43;
+    int loc = idam.getPtr() + LOCATION_OFFSET;
+    int gap = INITIAL_GAP;
     boolean sync = false;
     if (this.header.isSingleDensity()) {
-      gap = 30;
+      gap = SINGLE_DENSITY_GAP;
     }
     while (gap > 0) {
-      if (((BYTE_MASK & this.tracks.get(track).getData()[loc]) >= 0xF8)
-          && ((BYTE_MASK & this.tracks.get(track).getData()[loc]) <= 0xFB)) {
+      if (((DWDefs.BYTE_MASK & this.tracks.get(track).getData()[loc])
+          >= TRACK_MINIMUM)
+          && ((DWDefs.BYTE_MASK & this.tracks.get(track).getData()[loc])
+          <= TRACK_MAXIMUM)
+      ) {
         if (this.header.isSingleDensity() || sync) {
           break;
         }
       }
       if (!this.header.isSingleDensity()) {
-        sync = (BYTE_MASK & this.tracks.get(track).getData()[loc]) == 0xA1;
+        sync = (DWDefs.BYTE_MASK
+            & this.tracks.get(track).getData()[loc]) == SYNC_VALUE;
       }
       loc++;
       gap--;
