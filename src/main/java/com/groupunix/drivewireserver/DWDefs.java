@@ -545,4 +545,15 @@ public final class DWDefs {
    * Multiplier for most significant byte.
    */
   public static final int BYTE_SHIFT = 256;
+  /**
+   * Bit mask for low six bits.
+   * <p>
+   *   Used for masking off bit 15 and 16 from IDAM record
+   * </p>
+   */
+  public static final int LOW_SIX_BITS = 0x3F;
+  /**
+   * Bytes in a kilobyte.
+   */
+  public static final int KILOBYTE = 1024;
 }

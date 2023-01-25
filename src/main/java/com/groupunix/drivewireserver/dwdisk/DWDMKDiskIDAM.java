@@ -2,12 +2,9 @@ package com.groupunix.drivewireserver.dwdisk;
 
 import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
 import static com.groupunix.drivewireserver.DWDefs.BYTE_SHIFT;
+import static com.groupunix.drivewireserver.DWDefs.LOW_SIX_BITS;
 
 public class DWDMKDiskIDAM {
-  /**
-   * Bit mask for low six bits.
-   */
-  private static final int LOW_SIX_BITS = 0x3F;
   /**
    * Offset to sector size.
    */

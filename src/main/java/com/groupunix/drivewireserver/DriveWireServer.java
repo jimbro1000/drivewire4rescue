@@ -170,7 +170,13 @@ public final class DriveWireServer {
    * Configuration file name.
    */
   private static String configFile = "config.xml";
+  /**
+   * Ready flag.
+   */
   private static boolean ready = false;
+  /**
+   * Use LF5 flag.
+   */
   private static boolean useLF5 = false;
   private static LF5Appender lf5appender;
   /**
