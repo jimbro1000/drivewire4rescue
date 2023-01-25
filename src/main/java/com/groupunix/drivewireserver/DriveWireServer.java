@@ -66,6 +66,10 @@ public final class DriveWireServer {
    */
   public static final int THREAD_SLEEP_MILLIS = 100;
   /**
+   * Thread sleep time in milliseconds when dying.
+   */
+  public static final int DYING_THREAD_SLEEP_MILLIS = 1000;
+  /**
    * Status poll interval in milliseconds.
    */
   public static final int STATUS_POLL_INTERVAL_MILLIS = 1000;
@@ -178,6 +182,9 @@ public final class DriveWireServer {
    * Use LF5 flag.
    */
   private static boolean useLF5 = false;
+  /**
+   * LF5 appender object.
+   */
   private static LF5Appender lf5appender;
   /**
    * Use backup flag.
@@ -246,9 +253,6 @@ public final class DriveWireServer {
     Thread.setDefaultUncaughtExceptionHandler(new DWExceptionHandler());
     init(args);
 
-    // install clean shutdown handler
-    //Runtime.getRuntime().addShutdownHook(new DWShutdownHandler());
-    // hang around
     LOGGER.debug("ready...");
 
     DriveWireServer.ready = true;
@@ -259,19 +263,17 @@ public final class DriveWireServer {
                 .serverConfiguration
                 .getInt(
                     "StatusInterval",
-                    THREAD_SLEEP_MILLIS * 10
+                    DYING_THREAD_SLEEP_MILLIS
                 )
         );
         checkHandlerHealth();
         submitServerStatus();
-
       } catch (InterruptedException e) {
         LOGGER.debug("I've been interrupted, now I want to die");
         wantToDie = true;
       }
     }
     serverShutdown();
-    //System.exit(0);
   }
 
   private static void checkHandlerHealth() {

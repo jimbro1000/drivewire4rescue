@@ -51,8 +51,13 @@ public final class DWDefs {
    * Reset timer op.
    */
   public static final byte OP_RESET_TIMER = (byte) 38;  // 0x26
-
+  /**
+   * Aaron mode (SU).
+   */
   public static final byte OP_AARON = (byte) 65;  // 0x41 A
+  /**
+   * Wirebug mode.
+   */
   public static final byte OP_WIREBUG_MODE = (byte) 66;  // 0x42 B
   /**
    * Serial read.
@@ -313,14 +318,41 @@ public final class DWDefs {
   public static final byte DWOK = (byte) 0;
 
   // util modes
+  /**
+   * Unset util mode.
+   */
   public static final int UTILMODE_UNSET = 0;
+  /**
+   * Util command.
+   */
   public static final int UTILMODE_DWCMD = 1;
+  /**
+   * Util URL.
+   */
   public static final int UTILMODE_URL = 2;
+  /**
+   * Util TCP Out.
+   */
   public static final int UTILMODE_TCPOUT = 3;
+  /**
+   * Virtual modem out.
+   */
   public static final int UTILMODE_VMODEMOUT = 4;
+  /**
+   * Util TCP in.
+   */
   public static final int UTILMODE_TCPIN = 5;
+  /**
+   * Virtual modem in.
+   */
   public static final int UTILMODE_VMODEMIN = 6;
+  /**
+   * Util TCP listen.
+   */
   public static final int UTILMODE_TCPLISTEN = 7;
+  /**
+   * Nine server.
+   */
   public static final int UTILMODE_NINESERVER = 8;
 
   // result codes for DW virtual channel API calls
@@ -521,14 +553,22 @@ public final class DWDefs {
    * Time of last IO operation.
    */
   public static final byte TIMER_IO = (byte) 6;
+  /**
+   * Initialise timer.
+   */
   public static final byte TIMER_DWINIT = (byte) 8;
+  /**
+   * Read timer.
+   */
   public static final byte TIMER_READ = (byte) 9;
+  /**
+   * Write timer.
+   */
   public static final byte TIMER_WRITE = (byte) 10;
   /**
    * Start of user timers.
    */
   public static final byte TIMER_USER = (byte) 128;
-
   /**
    * Minimum turbo serial baud rate.
    */
