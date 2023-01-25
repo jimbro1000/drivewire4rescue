@@ -16,10 +16,10 @@ public class DWLW16FileSystemInode {
   private int[] dblocks = new int[14];    // direct blocks
   private int[] indirblocks = new int[2];    // indirect blocks
   private int[] dblindirblocks = new int[4];  // double indirect blocks
-  private int inodenum;
+  private int iNodeNum;
 
-  public DWLW16FileSystemInode(int inodenum, byte[] data) {
-    this.setInodenum(inodenum);
+  public DWLW16FileSystemInode(int iNodeNum, byte[] data) {
+    this.setInodeNum(iNodeNum);
 
     this.setMode(get2(0, data));
     this.setLinks(get2(2, data));
@@ -46,7 +46,7 @@ public class DWLW16FileSystemInode {
   public String toString() {
     String res = new String();
 
-    res += "inode " + this.getInodenum() + System.getProperty("line.separator");
+    res += "inode " + this.getInodeNum() + System.getProperty("line.separator");
     res += "mode  " + this.getMode() + System.getProperty("line.separator");
     res += "links " + this.getLinks() + System.getProperty("line.separator");
     res += "uid   " + this.getUid() + System.getProperty("line.separator");
@@ -110,52 +110,111 @@ public class DWLW16FileSystemInode {
     this.uid = uid;
   }
 
+  /**
+   * get gId.
+   *
+   * @return gId
+   */
   public int getGid() {
     return gid;
   }
 
-  public void setGid(int gid) {
+  /**
+   * Set gId.
+   *
+   * @param gid gId
+   */
+  public void setGid(final int gid) {
     this.gid = gid;
   }
 
+  /**
+   * Get file size.
+   *
+   * @return file size (bytes)
+   */
   public int getFilesize() {
     return filesize;
   }
 
-  public void setFilesize(int filesize) {
+  /**
+   * Set File size.
+   *
+   * @param filesize file size (bytes)
+   */
+  public void setFilesize(final int filesize) {
     this.filesize = filesize;
   }
 
+  /**
+   * Get aTime.
+   *
+   * @return aTime
+   */
   public int getAtime() {
     return atime;
   }
 
-  public void setAtime(int atime) {
+  /**
+   * Set aTime.
+   *
+   * @param atime aTime
+   */
+  public void setAtime(final int atime) {
     this.atime = atime;
   }
 
+  /**
+   * Get mTime.
+   *
+   * @return mTime
+   */
   public int getMtime() {
     return mtime;
   }
 
-  public void setMtime(int mtime) {
+  /**
+   * Set mTime.
+   *
+   * @param mtime mTime
+   */
+  public void setMtime(final int mtime) {
     this.mtime = mtime;
   }
 
+  /**
+   * Get cTime.
+   *
+   * @return cTime
+   */
   public int getCtime() {
     return ctime;
   }
 
-  public void setCtime(int ctime) {
+  /**
+   * Set cTime.
+   *
+   * @param ctime cTime
+   */
+  public void setCtime(final int ctime) {
     this.ctime = ctime;
   }
 
-  public int getInodenum() {
-    return inodenum;
+  /**
+   * Get iNode number.
+   *
+   * @return iNode number
+   */
+  public int getInodeNum() {
+    return iNodeNum;
   }
 
-  public void setInodenum(int inodenum) {
-    this.inodenum = inodenum;
+  /**
+   * Set iNode number.
+   *
+   * @param iNodeNum iNode number
+   */
+  public void setInodeNum(final int iNodeNum) {
+    this.iNodeNum = iNodeNum;
   }
-
 }

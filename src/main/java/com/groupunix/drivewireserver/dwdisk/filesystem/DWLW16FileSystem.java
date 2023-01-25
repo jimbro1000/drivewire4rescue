@@ -103,7 +103,7 @@ public class DWLW16FileSystem extends DWFileSystem {
 
 
   @Override
-  public void addFile(String filename, byte[] filecontents)
+  public void addFile(String filename, byte[] fileContents)
       throws DWFileSystemFullException,
       DWFileSystemInvalidFilenameException,
       DWFileSystemFileNotFoundException, DWFileSystemInvalidFATException,

@@ -97,13 +97,13 @@ public class DWDECBFileSystem extends DWFileSystem {
   }
 
 
-  public void addFile(String filename, byte[] filecontents) throws DWFileSystemFullException, DWFileSystemInvalidFilenameException, DWFileSystemFileNotFoundException, DWFileSystemInvalidFATException, IOException, DWDiskInvalidSectorNumber, DWFileSystemInvalidDirectoryException {
+  public void addFile(String filename, byte[] fileContents) throws DWFileSystemFullException, DWFileSystemInvalidFilenameException, DWFileSystemFileNotFoundException, DWFileSystemInvalidFATException, IOException, DWDiskInvalidSectorNumber, DWFileSystemInvalidDirectoryException {
     DWDECBFileSystemFAT fat = getFAT();
     // make fat entries
-    byte firstgran = fat.allocate(filecontents.length);
+    byte firstgran = fat.allocate(fileContents.length);
 
     // dir entry
-    this.addDirectoryEntry(filename, firstgran, (byte) (filecontents.length % 256));
+    this.addDirectoryEntry(filename, firstgran, (byte) (fileContents.length % 256));
 
     // put content into sectors
     ArrayList<DWDiskSector> sectors = this.getFileSectors(filename);
@@ -112,15 +112,15 @@ public class DWDECBFileSystem extends DWFileSystem {
     byte[] buf = new byte[256];
 
     for (DWDiskSector sector : sectors) {
-      if (filecontents.length - byteswritten >= 256) {
-        System.arraycopy(filecontents, byteswritten, buf, 0, 256);
+      if (fileContents.length - byteswritten >= 256) {
+        System.arraycopy(fileContents, byteswritten, buf, 0, 256);
         byteswritten += 256;
       } else {
-        System.arraycopy(filecontents, byteswritten, buf, 0, (filecontents.length - byteswritten));
+        System.arraycopy(fileContents, byteswritten, buf, 0, (fileContents.length - byteswritten));
         // zero pad partial sectors?
-        for (int i = (filecontents.length - byteswritten); i < 256; i++)
+        for (int i = (fileContents.length - byteswritten); i < 256; i++)
           buf[i] = 0;
-        byteswritten += (filecontents.length - byteswritten);
+        byteswritten += (fileContents.length - byteswritten);
       }
 
       sector.setData(buf);
@@ -184,17 +184,17 @@ public class DWDECBFileSystem extends DWFileSystem {
     // try to recognize filetype.. assume binary?
     DWDECBFileSystemDirExtensionMapping mapping = new DWDECBFileSystemDirExtensionMapping(ext, DECBDefs.FLAG_BIN, DECBDefs.FILETYPE_ML);
 
-    if (DriveWireServer.serverConfiguration.getMaxIndex("DECBExtensionMapping") > -1) {
-      for (int i = 0; i <= DriveWireServer.serverConfiguration.getMaxIndex("DECBExtensionMapping"); i++) {
+    if (DriveWireServer.getServerConfiguration().getMaxIndex("DECBExtensionMapping") > -1) {
+      for (int i = 0; i <= DriveWireServer.getServerConfiguration().getMaxIndex("DECBExtensionMapping"); i++) {
         String kp = "DECBExtensionMapping(" + i + ")";
         // validate entry first
-        if (DriveWireServer.serverConfiguration.containsKey(kp + "[@extension]") && DriveWireServer.serverConfiguration.containsKey(kp + "[@ascii]") && DriveWireServer.serverConfiguration.containsKey(kp + "[@filetype]")) {
-          if (DriveWireServer.serverConfiguration.getString(kp + "[@extension]").equalsIgnoreCase(ext)) {
+        if (DriveWireServer.getServerConfiguration().containsKey(kp + "[@extension]") && DriveWireServer.getServerConfiguration().containsKey(kp + "[@ascii]") && DriveWireServer.getServerConfiguration().containsKey(kp + "[@filetype]")) {
+          if (DriveWireServer.getServerConfiguration().getString(kp + "[@extension]").equalsIgnoreCase(ext)) {
             // we have a winner
 
-            mapping.setType(DriveWireServer.serverConfiguration.getByte(kp + "[@filetype]"));
+            mapping.setType(DriveWireServer.getServerConfiguration().getByte(kp + "[@filetype]"));
 
-            if (DriveWireServer.serverConfiguration.getBoolean(kp + "[@ascii]"))
+            if (DriveWireServer.getServerConfiguration().getBoolean(kp + "[@ascii]"))
               mapping.setFlag(DECBDefs.FLAG_ASCII);
             else
               mapping.setFlag(DECBDefs.FLAG_BIN);
