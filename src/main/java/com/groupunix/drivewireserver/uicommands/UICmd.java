@@ -7,15 +7,10 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmd extends DWCommand {
-  /**
-   * command list.
-   */
-  private final DWCommandList commands;
-
   private void commandHelp() {
-    commandName = "ui";
-    shortHelp = "Management commands with machine parsable output";
-    usage = "ui [command]";
+    setCommand("ui");
+    setShortHelp("Management commands with machine parsable output");
+    setUsage("ui [command]");
   }
 
   /**
@@ -23,11 +18,12 @@ public class UICmd extends DWCommand {
    * @param clientThread ui client thread
    */
   public UICmd(final DWUIClientThread clientThread) {
-    commands = new DWCommandList(null);
+    DWCommandList commands = new DWCommandList(null);
     commands.addCommand(new UICmdInstance(clientThread));
     commands.addCommand(new UICmdServer(clientThread));
     commands.addCommand(new UICmdSync(clientThread));
     commands.addCommand(new UICmdTest(clientThread));
+    this.setCommandList(commands);
     commandHelp();
   }
 
@@ -36,38 +32,31 @@ public class UICmd extends DWCommand {
    * @param protocol protocol
    */
   public UICmd(final DWProtocol protocol) {
-    commands = new DWCommandList(null);
+    DWCommandList commands = new DWCommandList(null);
     commands.addCommand(new UICmdInstance(protocol));
     commands.addCommand(new UICmdServer(protocol));
+    this.setCommandList(commands);
     commandHelp();
   }
 
   /**
-   * get commands.
-   * @return component command list
-   */
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-  /**
    * parse command.
-   * @param cmdline
+   * @param cmdline command line
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
+    return (getCommandList().parse(cmdline));
   }
 
   /**
    * validate command.
-   * @param cmdline
+   * @param cmdline command line
    * @return true if command valid
    */
   public boolean validate(final String cmdline) {
-    return (commands.validate(cmdline));
+    return getCommandList().validate(cmdline);
   }
 }

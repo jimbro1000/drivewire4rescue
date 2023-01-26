@@ -358,77 +358,227 @@ public final class DWDefs {
   // result codes for DW virtual channel API calls
   // - all subject to change until I know of anyone
   // actually using these on client side
+  /**
+   * Success code.
+   */
   public static final byte RC_SUCCESS = (byte) 0;
-
+  /**
+   * Syntax error.
+   */
   public static final byte RC_SYNTAX_ERROR = (byte) 10;
-
+  /**
+   * Drive error.
+   */
   public static final byte RC_DRIVE_ERROR = (byte) 100;
+  /**
+   * Invalid drive error.
+   */
   public static final byte RC_INVALID_DRIVE = (byte) 101;
+  /**
+   * Drive not loaded error.
+   */
   public static final byte RC_DRIVE_NOT_LOADED = (byte) 102;
+  /**
+   * Drive already loaded error.
+   */
   public static final byte RC_DRIVE_ALREADY_LOADED = (byte) 103;
+  /**
+   * Disk image format exception.
+   */
   public static final byte RC_IMAGE_FORMAT_EXCEPTION = (byte) 104;
-
+  /**
+   * No such disk.
+   */
   public static final byte RC_NO_SUCH_DISKSET = (byte) 110;
+  /**
+   * Invalid disk definition.
+   */
   public static final byte RC_INVALID_DISK_DEF = (byte) 111;
-
+  /**
+   * Network error.
+   */
   public static final byte RC_NET_ERROR = (byte) 120;
+  /**
+   * Network IO error.
+   */
   public static final byte RC_NET_IO_ERROR = (byte) 121;
+  /**
+   * Unknown host error.
+   */
   public static final byte RC_NET_UNKNOWN_HOST = (byte) 122;
+  /**
+   * Invalid network connection error.
+   */
   public static final byte RC_NET_INVALID_CONNECTION = (byte) 123;
-
+  /**
+   * Invalid port error.
+   */
   public static final byte RC_INVALID_PORT = (byte) 140;
+  /**
+   * Invalid handler error.
+   */
   public static final byte RC_INVALID_HANDLER = (byte) 141;
+  /**
+   * Configuration key not set.
+   */
   public static final byte RC_CONFIG_KEY_NOT_SET = (byte) 142;
+  /**
+   * Instance wont(?) error.
+   */
   public static final byte RC_INSTANCE_WONT = (byte) 143;
-
+  /**
+   * Midi error.
+   */
   public static final byte RC_MIDI_ERROR = (byte) 150;
+  /**
+   * Midi unavailable.
+   */
   public static final byte RC_MIDI_UNAVAILABLE = (byte) 151;
+  /**
+   * Midi invalid device error.
+   */
   public static final byte RC_MIDI_INVALID_DEVICE = (byte) 152;
+  /**
+   * Midi invalid data error.
+   */
   public static final byte RC_MIDI_INVALID_DATA = (byte) 153;
+  /**
+   * Midi soundbank failed error.
+   */
   public static final byte RC_MIDI_SOUNDBANK_FAILED = (byte) 154;
+  /**
+   * Midi soundbank not supported error.
+   */
   public static final byte RC_MIDI_SOUNDBANK_NOT_SUPPORTED = (byte) 155;
+  /**
+   * Invalid midi profile error.
+   */
   public static final byte RC_MIDI_INVALID_PROFILE = (byte) 156;
-
+  /**
+   * Serial port in use error.
+   */
   public static final byte RC_SERIAL_PORTINUSE = (byte) 180;
+  /**
+   * Serial port invalid error.
+   */
   public static final byte RC_SERIAL_PORTINVALID = (byte) 181;
+  /**
+   * Serial port error.
+   */
   public static final byte RC_SERIAL_PORTERROR = (byte) 182;
-
-
+  /**
+   * Server error.
+   */
   public static final byte RC_SERVER_ERROR = (byte) 200;
+  /**
+   * Server filesystem exception.
+   */
   public static final byte RC_SERVER_FILESYSTEM_EXCEPTION = (byte) 201;
+  /**
+   * Server io exception.
+   */
   public static final byte RC_SERVER_IO_EXCEPTION = (byte) 202;
+  /**
+   * Server file not found error.
+   */
   public static final byte RC_SERVER_FILE_NOT_FOUND = (byte) 203;
+  /**
+   * Server feature not implemented.
+   */
   public static final byte RC_SERVER_NOT_IMPLEMENTED = (byte) 204;
+  /**
+   * Server not ready error.
+   */
   public static final byte RC_SERVER_NOT_READY = (byte) 205;
+  /**
+   * Instance not ready.
+   */
   public static final byte RC_INSTANCE_NOT_READY = (byte) 206;
+  /**
+   * Instance already started.
+   */
   public static final byte RC_INSTANCE_ALREADY_STARTED = (byte) 207;
-
+  /**
+   * User interface error.
+   */
   public static final byte RC_UI_ERROR = (byte) 220;
+  /**
+   * Malformed user interface request.
+   */
   public static final byte RC_UI_MALFORMED_REQUEST = (byte) 221;
+  /**
+   * Malformed user interface response.
+   */
   public static final byte RC_UI_MALFORMED_RESPONSE = (byte) 222;
-
+  /**
+   * Help topic not found error.
+   */
   public static final byte RC_HELP_TOPIC_NOT_FOUND = (byte) 230;
-
+  /**
+   * Other failure.
+   */
   public static final byte RC_FAIL = (byte) 255;
 
   // disk stuff
-
+  /**
+   * Maximum number of drives supported.
+   */
   public static final int DISK_MAXDRIVES = 256;
+  /**
+   * Maximum number of sectors.
+   */
   public static final int DISK_MAXSECTORS = 16777215;
+  /**
+   * Sector size (bytes).
+   */
   public static final int DISK_SECTORSIZE = 256;
+  /**
+   * Maximum number of sync skips.
+   */
   public static final int DISK_MAX_SYNC_SKIPS = 1;
+  /**
+   * Maximum pause for sync inop.
+   */
   public static final long DISK_SYNC_INOP_PAUSE = 40;
+  /**
+   * Size of hdbdos disk.
+   */
   public static final int DISK_HDBDOS_DISKSIZE = 630;
-
+  /**
+   * No disk format.
+   */
   public static final int DISK_FORMAT_NONE = 0;
+  /**
+   * Raw disk format.
+   */
   public static final int DISK_FORMAT_RAW = 1;
+  /**
+   * DMK disk format.
+   */
   public static final int DISK_FORMAT_DMK = 2;
+  /**
+   * JVC disk format.
+   */
   public static final int DISK_FORMAT_JVC = 3;
+  /**
+   * VDK disk format.
+   */
   public static final int DISK_FORMAT_VDK = 4;
+  /**
+   * CCB disk format.
+   */
   public static final int DISK_FORMAT_CCB = 5;
-
+  /**
+   * Disk image consideration NO result.
+   */
   public static final int DISK_CONSIDER_NO = 0;
+  /**
+   * Disk image consideration MAYBE result.
+   */
   public static final int DISK_CONSIDER_MAYBE = 1;
+  /**
+   * Disk image consideration YES result.
+   */
   public static final int DISK_CONSIDER_YES = 2;
 
   public static final Boolean DISK_DEFAULT_EXPAND = true;
