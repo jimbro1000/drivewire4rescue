@@ -6,6 +6,8 @@ import com.groupunix.drivewireserver.dwexceptions.*;
 import java.io.*;
 import java.util.*;
 
+import static com.groupunix.drivewireserver.DWDefs.BYTE_SHIFT;
+
 public class DWLW16FileSystem extends DWFileSystem {
 
 
@@ -72,77 +74,99 @@ public class DWLW16FileSystem extends DWFileSystem {
     return false;
   }
 
-
+  /**
+   * Get file sectors list.
+   * <p>
+   *   Not implemented
+   * </p>
+   * @param filename file name
+   * @return file sectors
+   */
   @Override
-  public ArrayList<DWDiskSector> getFileSectors(String filename)
-      throws DWFileSystemFileNotFoundException,
-      DWFileSystemInvalidFATException, IOException,
-      DWDiskInvalidSectorNumber, DWFileSystemInvalidDirectoryException {
-    // TODO Auto-generated method stub
+  public ArrayList<DWDiskSector> getFileSectors(final String filename) {
     return null;
   }
 
-
+  /**
+   * Get directory entry.
+   * <p>
+   *   Not implemented
+   * </p>
+   * @param filename file name
+   * @return directory entry
+   */
   @Override
-  public DWFileSystemDirEntry getDirEntry(String filename)
-      throws DWFileSystemFileNotFoundException, IOException,
-      DWFileSystemInvalidDirectoryException {
-    // TODO Auto-generated method stub
+  public DWFileSystemDirEntry getDirEntry(final String filename) {
     return null;
   }
 
-
+  /**
+   * Get file contents.
+   * <p>
+   *   Not implemented
+   * </p>
+   * @param filename source file name
+   * @return null
+   */
   @Override
-  public byte[] getFileContents(String filename)
-      throws DWFileSystemFileNotFoundException,
-      DWFileSystemInvalidFATException, IOException,
-      DWDiskInvalidSectorNumber, DWFileSystemInvalidDirectoryException {
-    // TODO Auto-generated method stub
+  public byte[] getFileContents(final String filename) {
     return null;
   }
 
-
+  /**
+   * Add file to filesystem.
+   * <p>
+   *   Not implemented
+   * </p>
+   * @param filename file name
+   * @param fileContents byte array of contents
+   */
   @Override
-  public void addFile(String filename, byte[] fileContents)
-      throws DWFileSystemFullException,
-      DWFileSystemInvalidFilenameException,
-      DWFileSystemFileNotFoundException, DWFileSystemInvalidFATException,
-      IOException, DWDiskInvalidSectorNumber,
-      DWFileSystemInvalidDirectoryException {
-    // TODO Auto-generated method stub
-
+  public void addFile(final String filename, final byte[] fileContents) {
   }
 
-
+  /**
+   * Format filesystem.
+   * <p>
+   *   Not implemented
+   * </p>
+   * @throws DWInvalidSectorException
+   * @throws DWSeekPastEndOfDeviceException
+   * @throws DWDriveWriteProtectedException
+   * @throws IOException
+   */
   @Override
   public void format() throws DWInvalidSectorException,
       DWSeekPastEndOfDeviceException, DWDriveWriteProtectedException,
       IOException {
-    // TODO Auto-generated method stub
-
   }
 
-
+  /**
+   * Get filesystem name.
+   *
+   * @return name
+   */
   @Override
   public String getFSName() {
     return DWLW16FileSystem.FSNAME;
   }
 
-
+  /**
+   * Is filesystem valid.
+   *
+   * @return true if valid
+   */
   @Override
   public boolean isValidFS() {
     // valid superblock?
     if (this.superblock.isValid()) {
       // image size checks
-
-      if ((this.disk.getSectors().size() < 65536) && (this.superblock.getFirstdatablock() < this.disk.getSectors().size()) && (this.superblock.getFirstinodeblock() < this.disk.getSectors().size())) {
-        return true;
-      }
-
+      return (this.disk.getSectors().size() < (BYTE_SHIFT * BYTE_SHIFT))
+          && (this.superblock.getFirstdatablock()
+            < this.disk.getSectors().size())
+          && (this.superblock.getFirstinodeblock()
+            < this.disk.getSectors().size());
     }
-
-
     return false;
   }
-
 }

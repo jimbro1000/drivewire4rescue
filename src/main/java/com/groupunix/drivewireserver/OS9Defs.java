@@ -1,5 +1,6 @@
 package com.groupunix.drivewireserver;
 
+@SuppressWarnings("unused")
 public final class OS9Defs {
   /**
    * Read.
