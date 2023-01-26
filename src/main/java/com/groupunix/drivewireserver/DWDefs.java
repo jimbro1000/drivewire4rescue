@@ -6,6 +6,7 @@ package com.groupunix.drivewireserver;
  * Provides drivewire protocol constants
  * </p>
  */
+@SuppressWarnings("unused")
 public final class DWDefs {
   /**
    * DWDefs Utility Class.
@@ -580,65 +581,195 @@ public final class DWDefs {
    * Disk image consideration YES result.
    */
   public static final int DISK_CONSIDER_YES = 2;
-
+  /**
+   * Disk default expand flag.
+   */
   public static final Boolean DISK_DEFAULT_EXPAND = true;
+  /**
+   * Disk default syncto flag.
+   */
   public static final Boolean DISK_DEFAULT_SYNCTO = true;
+  /**
+   * Disk default syncfrom flag.
+   */
   public static final Boolean DISK_DEFAULT_SYNCFROM = false;
+  /**
+   * Disk default write protect flag.
+   */
   public static final Boolean DISK_DEFAULT_WRITEPROTECT = false;
+  /**
+   * Disk default named object flag.
+   */
   public static final Boolean DISK_DEFAULT_NAMEDOBJECT = false;
+  /**
+   * Disk default offset.
+   */
   public static final int DISK_DEFAULT_OFFSET = 0;
+  /**
+   * Disk default size limit.
+   */
   public static final int DISK_DEFAULT_SIZELIMIT = -1;
-
+  /**
+   * Disk image header size.
+   */
   public static final int DISK_IMAGE_HEADER_SIZE = 256;
-
+  /**
+   * OS9 filesystem.
+   */
   public static final int DISK_FILESYSTEM_OS9 = 1;
+  /**
+   * DECB filesystem.
+   */
   public static final int DISK_FILESYSTEM_DECB = 2;
+  /**
+   * LWFS filesystem.
+   */
   public static final int DISK_FILESYSTEM_LWFS = 3;
+  /**
+   * CCB filesystem.
+   */
   public static final int DISK_FILESYSTEM_CCB = 4;
+  /**
+   * unknown filesystem.
+   */
   public static final int DISK_FILESYSTEM_UNKNOWN = 0;
+  /**
+   * disk format side.
+   */
   public static final int DISK_FORMAT_SIDE = 5;
 
   // help
-
+  /**
+   * default help file name.
+   */
   public static final String HELP_DEFAULT_FILE = "help.xml";
-
+  /**
+   * default columns.
+   */
   public static final int DWCMD_DEFAULT_COLS = 80;
 
   // events
+  /**
+   * Server configuration event.
+   */
   public static final byte EVENT_TYPE_SERVERCONFIG = 'C';
+  /**
+   * Instance configuration event.
+   */
   public static final byte EVENT_TYPE_INSTANCECONFIG = 'I';
+  /**
+   * Disk event.
+   */
   public static final byte EVENT_TYPE_DISK = 'D';
+  /**
+   * Log event.
+   */
   public static final byte EVENT_TYPE_LOG = 'L';
+  /**
+   * Midi event.
+   */
   public static final byte EVENT_TYPE_MIDI = 'M';
+  /**
+   * Network event.
+   */
   public static final byte EVENT_TYPE_NET = 'N';
+  /**
+   * Print event.
+   */
   public static final byte EVENT_TYPE_PRINT = 'P';
+  /**
+   * Virtual serial event.
+   */
   public static final byte EVENT_TYPE_VSERIAL = 'S';
+  /**
+   * Status event.
+   */
   public static final byte EVENT_TYPE_STATUS = '@';
-
+  /**
+   * Item key event.
+   */
   public static final String EVENT_ITEM_KEY = "k";
+  /**
+   * Item value event.
+   */
   public static final String EVENT_ITEM_VALUE = "v";
+  /**
+   * Item drive event.
+   */
   public static final String EVENT_ITEM_DRIVE = "d";
+  /**
+   * Item instance event.
+   */
   public static final String EVENT_ITEM_INSTANCE = "i";
+  /**
+   * Item log level event.
+   */
 
   public static final String EVENT_ITEM_LOGLEVEL = "l";
+  /**
+   * Item timestamp event.
+   */
   public static final String EVENT_ITEM_TIMESTAMP = "t";
+  /**
+   * Item log message event.
+   */
   public static final String EVENT_ITEM_LOGMSG = "m";
+  /**
+   * Item thread event.
+   */
   public static final String EVENT_ITEM_THREAD = "r";
+  /**
+   * Item log source event.
+   */
   public static final String EVENT_ITEM_LOGSRC = "s";
-
+  /**
+   * Item interval event.
+   */
   public static final String EVENT_ITEM_INTERVAL = "0";
+  /**
+   * Item mem total event.
+   */
   public static final String EVENT_ITEM_MEMTOTAL = "1";
+  /**
+   * Item mem free event.
+   */
   public static final String EVENT_ITEM_MEMFREE = "2";
+  /**
+   * Item operations event.
+   */
   public static final String EVENT_ITEM_OPS = "3";
+  /**
+   * Item disk operations event.
+   */
   public static final String EVENT_ITEM_DISKOPS = "4";
+  /**
+   * Item virtual serial operations event.
+   */
   public static final String EVENT_ITEM_VSERIALOPS = "5";
+  /**
+   * Item instances event.
+   */
   public static final String EVENT_ITEM_INSTANCES = "6";
+  /**
+   * Event live instances event.
+   */
   public static final String EVENT_ITEM_INSTANCESALIVE = "7";
+  /**
+   * Item threads event.
+   */
   public static final String EVENT_ITEM_THREADS = "8";
+  /**
+   * Item UI clients event.
+   */
   public static final String EVENT_ITEM_UICLIENTS = "9";
+  /**
+   * Item magic event.
+   */
   public static final String EVENT_ITEM_MAGIC = "!";
 
-
+  /**
+   * Maximum event queue size.
+   */
   public static final int EVENT_MAX_QUEUE_SIZE = 800;
   public static final int EVENT_QUEUE_LOGDROP_SIZE = 500;
   public static final int LOGGING_MAX_BUFFER_EVENTS = 500;
