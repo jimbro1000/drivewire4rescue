@@ -920,6 +920,10 @@ public final class DWDefs {
    */
   public static final int BYTE_SHIFT = 256;
   /**
+   * Multiplier for word.
+   */
+  public static final int WORD_SHIFT = 65536;
+  /**
    * Bit mask for low six bits.
    * <p>
    *   Used for masking off bit 15 and 16 from IDAM record
