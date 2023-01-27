@@ -1,43 +1,78 @@
 package com.groupunix.drivewireserver.dwdisk.filesystem;
 
-import com.groupunix.drivewireserver.dwexceptions.*;
+import com.groupunix.drivewireserver.dwexceptions.DWFileSystemInvalidFATException;
 
 import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
 import static com.groupunix.drivewireserver.DWDefs.BYTE_SHIFT;
 
 public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
+  /**
+   * Sector size.
+   */
   public static final int MAX_SECTOR_SIZE = 256;
+  /**
+   * First granule.
+   */
   public static final int FIRST_GRANULE_OFFSET = 13;
+  /**
+   * Sector size MSB.
+   */
   public static final int HIGH_SECTOR_SIZE_OFFSET = 14;
+  /**
+   * Sector size LSB.
+   */
   public static final int LOW_SECTOR_SIZE_OFFSET = 15;
+  /**
+   * Flag offset.
+   */
   public static final int FILE_FLAG_OFFSET = 12;
+  /**
+   * File type offset.
+   */
   public static final int FILE_TYPE_OFFSET = 11;
+  /**
+   * File type basic.
+   */
   public static final int BASIC_FILE_TYPE = 0;
+  /**
+   * File type data.
+   */
   public static final int DATA_FILE_TYPE = 1;
+  /**
+   * File type ML.
+   */
   public static final int MACHINE_CODE_TYPE = 2;
+  /**
+   * File type text.
+   */
   public static final int TEXT_FILE_TYPE = 3;
+  /**
+   * Dead file offset.
+   */
   public static final int DEAD_FILE_OFFSET = 0;
-  /*
-	Byte Description
-	0�7 Filename, which is left justified and blank, filled. If byte0 is 0,
-	then the file has been �KILL�ed and the directory entry is available
-	for use. If byte0 is $FF, then the entry and all following entries
-	have never been used.
-	8�10 Filename extension
-	11 File type: 0=BASIC, 1=BASIC data, 2=Machine language, 3= Text editor
-	source
-	12 ASCII flag: 0=binary or crunched BASIC, $FF=ASCII
-	13 Number of the first granule in the file
-	14�15 Number of bytes used in the last sector of the file
-	16�31 Unused (future use)
-	*/
+  /**
+   * Start offset of file extension.
+   */
+  public static final int BEGIN_EXT = 8;
+  /**
+   * End offset of file extension.
+   */
+  public static final int END_EXT = 11;
+  /**
+   * Start offset of filename.
+   */
+  public static final int BEGIN_FILENAME = 0;
+  /**
+   * End offset of filename.
+   */
+  public static final int END_FILENAME = 8;
 
   /**
    * DECB file system directory entry constructor.
    *
    * @param buf directory entry byte array
    */
-  public DWDECBFileSystemDirEntry(byte[] buf) {
+  public DWDECBFileSystemDirEntry(final byte[] buf) {
     super(buf);
   }
 
@@ -49,7 +84,7 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return filename
    */
   public String getFileName() {
-    return (new String(data).substring(0, 8));
+    return (new String(data).substring(BEGIN_FILENAME, END_FILENAME));
   }
 
   /**
@@ -60,7 +95,7 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return extension
    */
   public String getFileExt() {
-    return new String(data).substring(8, 11);
+    return new String(data).substring(BEGIN_EXT, END_EXT);
   }
 
   /**

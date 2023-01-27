@@ -771,36 +771,89 @@ public final class DWDefs {
    * Maximum event queue size.
    */
   public static final int EVENT_MAX_QUEUE_SIZE = 800;
+  /**
+   * Event queue log drop size.
+   */
   public static final int EVENT_QUEUE_LOGDROP_SIZE = 500;
+  /**
+   * Logging buffer max size.
+   */
   public static final int LOGGING_MAX_BUFFER_EVENTS = 500;
-
+  /**
+   * UI thread wait tick.
+   */
   public static final long UITHREAD_WAIT_TICK = 200;
+  /**
+   * UI thread server wait time.
+   */
   public static final long UITHREAD_SERVER_WAIT_TIME = 3000;
+  /**
+   * UI thread instance wait time.
+   */
   public static final long UITHREAD_INSTANCE_WAIT_TIME = 3000;
-
+  /**
+   * Server memory update interval.
+   */
   public static final long SERVER_MEM_UPDATE_INTERVAL = 5000;
-
+  /**
+   * Server slow op.
+   */
   public static final long SERVER_SLOW_OP = 200;
-
+  /**
+   * Log levels.
+   */
   public static final String[] LOG_LEVELS = {
       "ALL", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
   };
-
+  /**
+   * Model COCO1.
+   */
   public static final int MODEL_COCO1 = 1;
+  /**
+   * Model COCO2.
+   */
   public static final int MODEL_COCO2 = 2;
+  /**
+   * Model COCO3.
+   */
   public static final int MODEL_COCO3 = 3;
+  /**
+   * Model FPGA (mister).
+   */
   public static final int MODEL_FPGA = 4;
+  /**
+   * Model emulator.
+   */
   public static final int MODEL_EMULATOR = 5;
+  /**
+   * Model atari.
+   */
   public static final int MODEL_ATARI = 6;
+  /**
+   * Model apple 2.
+   */
   public static final int MODEL_APPLE2 = 7;
-
+  /**
+   * Poll response mode serial.
+   */
   public static final int POLL_RESP_MODE_SERIAL = 0;
+  /**
+   * Poll response mode window.
+   */
   public static final int POLL_RESP_MODE_WINDOW = 1;
 
   // server IDs 0-2 reserved
+  /**
+   * DW3 Server Identifier.
+   */
   public static final byte SERVER_ID_DW3_0 = 3;
+  /**
+   * DW4 Server Identifier.
+   */
   public static final byte SERVER_ID_DW4_0 = 4;
-
+  /**
+   * Server ID mark.
+   */
   public static final byte SERVER_ID_MARK_0 = (byte) 128;
 
   // client IDs
