@@ -912,6 +912,14 @@ public final class DWDefs {
    */
   public static final int COM_MAX_DATURBO_RATE = 115200;
   /**
+   * Low nibble mask.
+   */
+  public static final int LOW_NIBBLE_MASK = 0x0F;
+  /**
+   * High nibble mask.
+   */
+  public static final int HIGH_NIBBLE_MASK = 0xF0;
+  /**
    * Bitwise mask for a single byte.
    */
   public static final int BYTE_MASK = 0xFF;
