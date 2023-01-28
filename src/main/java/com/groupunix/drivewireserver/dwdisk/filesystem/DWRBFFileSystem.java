@@ -146,7 +146,7 @@ public class DWRBFFileSystem extends DWFileSystem {
       DWFileSystemInvalidDirectoryException {
     if (filename == null) {
       return new DWRBFFileDescriptor(
-          this.disk.getSector(this.getRootDirectoryLSN()).getData()
+          this.getDisk().getSector(this.getRootDirectoryLSN()).getData()
       );
     }
     String[] path = filename.split("/");
@@ -218,7 +218,7 @@ public class DWRBFFileSystem extends DWFileSystem {
   public boolean isValidFS() {
     try {
       RBFFileSystemIDSector idSector
-          = new RBFFileSystemIDSector(disk.getSector(0).getData());
+          = new RBFFileSystemIDSector(getDisk().getSector(0).getData());
       int ddmap = (Integer) idSector.getAttrib("DD.MAP");
       int ddbit = (Integer) idSector.getAttrib("DD.BIT");
       if (
@@ -253,7 +253,7 @@ public class DWRBFFileSystem extends DWFileSystem {
    */
   public RBFFileSystemIDSector getIDSector()
       throws IOException, DWDiskInvalidSectorNumber {
-    return new RBFFileSystemIDSector(disk.getSector(0).getData());
+    return new RBFFileSystemIDSector(getDisk().getSector(0).getData());
   }
 
   /**
@@ -272,7 +272,7 @@ public class DWRBFFileSystem extends DWFileSystem {
     int lsn = 1;
     int bytesReadTotal = 0;
     while (bytesReadTotal < mapBytes) {
-      DWDiskSector sector = this.disk.getSector(lsn);
+      DWDiskSector sector = this.getDisk().getSector(lsn);
       int toRead = Math.min(MAX_SINGLE_READ, mapBytes - bytesReadTotal);
       System.arraycopy(sector.getData(), 0, res, bytesReadTotal, toRead);
       bytesReadTotal += toRead;
@@ -296,7 +296,7 @@ public class DWRBFFileSystem extends DWFileSystem {
     try {
       int rootsec = this.getRootDirectoryLSN();
       DWRBFFileDescriptor fd = new DWRBFFileDescriptor(
-          this.disk.getSector(rootsec).getData()
+          this.getDisk().getSector(rootsec).getData()
       );
       dir = this.directoryFromContents(this.getFileContentsFromDescriptor(fd));
     } catch (NumberFormatException e) {
@@ -368,7 +368,7 @@ public class DWRBFFileSystem extends DWFileSystem {
             + (entry[SECTOR_OFFSET + 1] & BYTE_MASK) * BYTE_SHIFT
             + (entry[SECTOR_OFFSET + 2] & BYTE_MASK);
         DWRBFFileDescriptor fd = new DWRBFFileDescriptor(
-            this.disk.getSector(lsn).getData()
+            this.getDisk().getSector(lsn).getData()
         );
         res.add(new DWRBFFileSystemDirEntry(DWUtils.OS9String(entry), lsn, fd));
       }
@@ -402,7 +402,7 @@ public class DWRBFFileSystem extends DWFileSystem {
       while ((i < lsn + siz) && (bytesread < res.length)) {
         int toRead = Math.min(MAX_SINGLE_READ, res.length - bytesread);
         System.arraycopy(
-            this.disk.getSector(i).getData(),
+            this.getDisk().getSector(i).getData(),
             0,
             res,
             bytesread,
@@ -425,6 +425,6 @@ public class DWRBFFileSystem extends DWFileSystem {
    */
   public DWDiskSector getSector(final int sector)
       throws DWDiskInvalidSectorNumber {
-    return this.disk.getSector(sector);
+    return this.getDisk().getSector(sector);
   }
 }

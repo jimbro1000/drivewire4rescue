@@ -106,6 +106,8 @@ public class DWLW16FileSystemSuperBlock {
           (this.dataBlockCount + this.iNodeBmpBlocks
               + this.dataBmpBlockCount + 1) <= WORD_SHIFT
       ) {
+        // 256 = sector size
+        // 8 = sectors per iNode
         return Math.ceil(
             (double) this.iNodeCount / 8 / 256
         ) == this.iNodeBmpBlocks;

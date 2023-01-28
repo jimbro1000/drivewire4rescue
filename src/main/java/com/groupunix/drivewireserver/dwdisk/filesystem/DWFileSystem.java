@@ -17,15 +17,27 @@ import com.groupunix.drivewireserver.dwexceptions.DWInvalidSectorException;
 import com.groupunix.drivewireserver.dwexceptions.DWSeekPastEndOfDeviceException;
 
 public abstract class DWFileSystem {
-  protected DWDisk disk;
+  /**
+   * Source disk.
+   */
+  private final DWDisk dwDisk;
 
   /**
    * File system constructor.
    *
    * @param disk source disk
    */
-  public DWFileSystem(DWDisk disk) {
-    this.disk = disk;
+  public DWFileSystem(final DWDisk disk) {
+    this.dwDisk = disk;
+  }
+
+  /**
+   * Get source disk.
+   *
+   * @return source disk
+   */
+  public DWDisk getDisk() {
+    return this.dwDisk;
   }
 
   /**
@@ -37,14 +49,19 @@ public abstract class DWFileSystem {
    * @throws DWFileSystemInvalidDirectoryException invalid file path
    * @throws DWDiskInvalidSectorNumber invalid sector number
    */
-  public abstract List<DWFileSystemDirEntry> getDirectory(String path) throws IOException, DWFileSystemInvalidDirectoryException, DWDiskInvalidSectorNumber;
+  public abstract List<DWFileSystemDirEntry> getDirectory(String path)
+      throws IOException,
+      DWFileSystemInvalidDirectoryException,
+      DWDiskInvalidSectorNumber;
 
   /**
-   * Test if current directory entry contains given file name
+   * Test if current directory entry contains given file name.
+   *
    * @param filename filename
    * @return true if file is present
    * @throws IOException failed to read from source
    */
+  @SuppressWarnings("unused")
   public abstract boolean hasFile(String filename) throws IOException;
 
   /**
@@ -90,7 +107,12 @@ public abstract class DWFileSystem {
    * @throws DWDiskInvalidSectorNumber invalid sector number
    * @throws DWFileSystemInvalidDirectoryException invalid file path
    */
-  public abstract byte[] getFileContents(String filename) throws DWFileSystemFileNotFoundException, DWFileSystemInvalidFATException, IOException, DWDiskInvalidSectorNumber, DWFileSystemInvalidDirectoryException;
+  public abstract byte[] getFileContents(String filename)
+      throws DWFileSystemFileNotFoundException,
+      DWFileSystemInvalidFATException,
+      IOException,
+      DWDiskInvalidSectorNumber,
+      DWFileSystemInvalidDirectoryException;
 
   /**
    * Add file.
@@ -122,13 +144,18 @@ public abstract class DWFileSystem {
    * @throws DWDriveWriteProtectedException write protected filesystem
    * @throws IOException failed to write to source file
    */
-  public abstract void format() throws DWInvalidSectorException, DWSeekPastEndOfDeviceException, DWDriveWriteProtectedException, IOException;
+  public abstract void format()
+      throws DWInvalidSectorException,
+      DWSeekPastEndOfDeviceException,
+      DWDriveWriteProtectedException,
+      IOException;
 
   /**
    * Get filesystem name.
    *
    * @return filesystem name
    */
+  @SuppressWarnings("unused")
   public abstract String getFSName();
 
   /**
@@ -142,5 +169,6 @@ public abstract class DWFileSystem {
    * Get file system errors.
    * @return list of errors
    */
+  @SuppressWarnings("unused")
   public abstract List<String> getFSErrors();
 }

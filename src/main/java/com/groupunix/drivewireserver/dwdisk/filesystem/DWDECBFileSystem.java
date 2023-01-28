@@ -120,7 +120,7 @@ public class DWDECBFileSystem extends DWFileSystem {
         for (int j = 0; j < DIRECTORY_BLOCKS; j++) {
           byte[] buf = new byte[DIRECTORY_SIZE];
           System.arraycopy(
-              disk.getSector(i + DECBDefs.DIRECTORY_OFFSET).getData(),
+              this.getDisk().getSector(i + DECBDefs.DIRECTORY_OFFSET).getData(),
               DIRECTORY_SIZE * j,
               buf,
               0,
@@ -177,7 +177,7 @@ public class DWDECBFileSystem extends DWFileSystem {
       DWDiskInvalidSectorNumber,
       DWFileSystemInvalidDirectoryException {
     return getFAT().getFileSectors(
-        disk.getSectors(),
+        this.getDisk().getSectors(),
         ((DWDECBFileSystemDirEntry) getDirEntry(filename)).getFirstGranule()
     );
   }
@@ -323,12 +323,12 @@ public class DWDECBFileSystem extends DWFileSystem {
    */
   public DWDECBFileSystemFAT getFAT()
       throws DWFileSystemInvalidFATException, DWDiskInvalidSectorNumber {
-    if (disk.getDiskSectors() < DECBDefs.FAT_OFFSET) {
+    if (this.getDisk().getDiskSectors() < DECBDefs.FAT_OFFSET) {
       throw new DWFileSystemInvalidFATException(
           "Image is too small to contain a FAT"
       );
     }
-    return new DWDECBFileSystemFAT(disk.getSector(DECBDefs.FAT_OFFSET));
+    return new DWDECBFileSystemFAT(this.getDisk().getSector(DECBDefs.FAT_OFFSET));
   }
 
   private void addDirectoryEntry(
@@ -355,7 +355,7 @@ public class DWDECBFileSystem extends DWFileSystem {
     byte[] buf = new byte[DIRECTORY_BUFFER_SIZE];
     byte[] secdata;
 
-    DWDiskSector sec = this.disk.getSector(
+    DWDiskSector sec = this.getDisk().getSector(
         (dirsize / DIRECTORY_ENTRY_LEN) + DECBDefs.DIRECTORY_OFFSET
     );
     secdata = sec.getData();
@@ -486,17 +486,17 @@ public class DWDECBFileSystem extends DWFileSystem {
       IOException {
     // just init to all FF (mess does this?)
 
-    if (this.disk != null) {
+    if (this.getDisk() != null) {
       byte[] buf = new byte[BUFFER_SIZE];
       for (int i = 0; i < BUFFER_SIZE; i++) {
         buf[i] = (byte) BYTE_MASK;
       }
-      this.disk.getSectors().removeAllElements();
+      this.getDisk().getSectors().removeAllElements();
       for (int i = 0; i < MAX_SECTORS; i++) {
-        this.disk.getSectors().add(
-            new DWDiskSector(this.disk, i, BUFFER_SIZE, this.disk.getDirect())
+        this.getDisk().getSectors().add(
+            new DWDiskSector(this.getDisk(), i, BUFFER_SIZE, this.getDisk().getDirect())
         );
-        this.disk.getSectors().get(i).setData(buf);
+        this.getDisk().getSectors().get(i).setData(buf);
       }
     }
 
@@ -519,7 +519,7 @@ public class DWDECBFileSystem extends DWFileSystem {
    */
   @Override
   public boolean isValidFS() {
-    if (this.disk.getSectors().size() == MAX_SECTORS) {
+    if (this.getDisk().getSectors().size() == MAX_SECTORS) {
       boolean wacky = false;
 
       try {
@@ -553,7 +553,7 @@ public class DWDECBFileSystem extends DWFileSystem {
           int val;
           try {
             val = BYTE_MASK
-                & this.disk.getSector(DECBDefs.FAT_OFFSET).getData()[i];
+                & this.getDisk().getSector(DECBDefs.FAT_OFFSET).getData()[i];
             if (
                 ((val > DECBDefs.FAT_SIZE) && (val < MIN_SAFE))
                     || ((val > MAX_SAFE) && (val < BYTE_MASK))

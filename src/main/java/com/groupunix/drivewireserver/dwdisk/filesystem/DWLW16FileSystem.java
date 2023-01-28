@@ -40,7 +40,7 @@ public class DWLW16FileSystem extends DWFileSystem {
       throws IOException, DWDiskInvalidSectorNumber {
     super(disk);
     this.superBlock = new DWLW16FileSystemSuperBlock(
-        this.disk.getSector(0)
+        this.getDisk().getSector(0)
     );
   }
 
@@ -95,7 +95,9 @@ public class DWLW16FileSystem extends DWFileSystem {
 
     DWLW16FileSystemInode in0 = new DWLW16FileSystemInode(
         0,
-        this.disk.getSector(this.superBlock.getFirstInodeBlock() + 1).getData()
+        this.getDisk()
+            .getSector(this.superBlock.getFirstInodeBlock() + 1)
+            .getData()
     );
     System.out.println(in0);
     return res;
@@ -198,14 +200,14 @@ public class DWLW16FileSystem extends DWFileSystem {
    */
   @Override
   public boolean isValidFS() {
-    // valid superblock?
+    // valid super block?
     if (this.superBlock.isValid()) {
       // image size checks
-      return (this.disk.getSectors().size() < (BYTE_SHIFT * BYTE_SHIFT))
+      return (this.getDisk().getSectors().size() < (BYTE_SHIFT * BYTE_SHIFT))
           && (this.superBlock.getFirstDataBlock()
-            < this.disk.getSectors().size())
+            < this.getDisk().getSectors().size())
           && (this.superBlock.getFirstInodeBlock()
-            < this.disk.getSectors().size());
+            < this.getDisk().getSectors().size());
     }
     return false;
   }
