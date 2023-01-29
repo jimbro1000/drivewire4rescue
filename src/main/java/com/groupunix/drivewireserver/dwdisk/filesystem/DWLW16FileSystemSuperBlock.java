@@ -38,6 +38,14 @@ public class DWLW16FileSystemSuperBlock {
    */
   public static final int MAGIC_LENGTH = 4;
   /**
+   * Assumed sector size value.
+   */
+  private static final int SECTOR_SIZE = 256;
+  /**
+   * Assumed sectors per node value.
+   */
+  private static final int SECTORS_PER_NODE = 8;
+  /**
    * Magic number.
    */
   private byte[] magic = new byte[MAGIC_LENGTH];
@@ -106,10 +114,11 @@ public class DWLW16FileSystemSuperBlock {
           (this.dataBlockCount + this.iNodeBmpBlocks
               + this.dataBmpBlockCount + 1) <= WORD_SHIFT
       ) {
+        // Assumptions:
         // 256 = sector size
         // 8 = sectors per iNode
         return Math.ceil(
-            (double) this.iNodeCount / 8 / 256
+            (double) this.iNodeCount / SECTORS_PER_NODE / SECTOR_SIZE
         ) == this.iNodeBmpBlocks;
       }
     }

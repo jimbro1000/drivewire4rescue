@@ -27,6 +27,14 @@ public class DWDECBFileSystemFAT {
    */
   public static final int LAST_ENTRY = 0xC0;
   /**
+   * Boundary position.
+   * <p>
+   * After boundary a 2 position offset
+   * is needed
+   * </p>
+   */
+  public static final int GRANULE_BOUNDARY = 34;
+  /**
    * Source disk sector.
    */
   private final DWDiskSector diskSector;
@@ -111,7 +119,7 @@ public class DWDECBFileSystemFAT {
    * @return sector number
    */
   private int getFirstSectorNoForGranule(final byte granule) {
-    if ((granule & BYTE_MASK) < 34) {
+    if ((granule & BYTE_MASK) < GRANULE_BOUNDARY) {
       return (granule * SECTORS_PER_GRANULE);
     } else {
       return ((granule + 2) * SECTORS_PER_GRANULE);

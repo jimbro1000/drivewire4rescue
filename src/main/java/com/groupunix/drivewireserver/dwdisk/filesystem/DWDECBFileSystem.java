@@ -328,7 +328,9 @@ public class DWDECBFileSystem extends DWFileSystem {
           "Image is too small to contain a FAT"
       );
     }
-    return new DWDECBFileSystemFAT(this.getDisk().getSector(DECBDefs.FAT_OFFSET));
+    return new DWDECBFileSystemFAT(
+        this.getDisk().getSector(DECBDefs.FAT_OFFSET)
+    );
   }
 
   private void addDirectoryEntry(
@@ -494,7 +496,9 @@ public class DWDECBFileSystem extends DWFileSystem {
       this.getDisk().getSectors().removeAllElements();
       for (int i = 0; i < MAX_SECTORS; i++) {
         this.getDisk().getSectors().add(
-            new DWDiskSector(this.getDisk(), i, BUFFER_SIZE, this.getDisk().getDirect())
+            new DWDiskSector(
+                this.getDisk(), i, BUFFER_SIZE, this.getDisk().getDirect()
+            )
         );
         this.getDisk().getSectors().get(i).setData(buf);
       }

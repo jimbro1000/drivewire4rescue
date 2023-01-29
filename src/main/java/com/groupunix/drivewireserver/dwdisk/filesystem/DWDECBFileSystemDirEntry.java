@@ -84,7 +84,7 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return filename
    */
   public String getFileName() {
-    return (new String(data).substring(BEGIN_FILENAME, END_FILENAME));
+    return (new String(getData()).substring(BEGIN_FILENAME, END_FILENAME));
   }
 
   /**
@@ -95,7 +95,7 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return extension
    */
   public String getFileExt() {
-    return new String(data).substring(BEGIN_EXT, END_EXT);
+    return new String(getData()).substring(BEGIN_EXT, END_EXT);
   }
 
   /**
@@ -104,10 +104,10 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return true if used
    */
   public boolean isUsed() {
-    if (data[DEAD_FILE_OFFSET] == (byte) BYTE_MASK) {
+    if (getData()[DEAD_FILE_OFFSET] == (byte) BYTE_MASK) {
       return false;
     }
-    return data[DEAD_FILE_OFFSET] != (byte) 0;
+    return getData()[DEAD_FILE_OFFSET] != (byte) 0;
   }
 
   /**
@@ -117,7 +117,7 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    */
   @SuppressWarnings("unused")
   public boolean isKilled() {
-    return data[DEAD_FILE_OFFSET] == (byte) 0;
+    return getData()[DEAD_FILE_OFFSET] == (byte) 0;
   }
 
   /**
@@ -126,7 +126,7 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return file type
    */
   public int getFileType() {
-    return this.data[FILE_TYPE_OFFSET] & BYTE_MASK;
+    return this.getData()[FILE_TYPE_OFFSET] & BYTE_MASK;
   }
 
   /**
@@ -136,7 +136,7 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    */
   public String getPrettyFileType() {
     String res = "unknown";
-    return switch (this.data[FILE_TYPE_OFFSET]) {
+    return switch (this.getData()[FILE_TYPE_OFFSET]) {
       case BASIC_FILE_TYPE -> ("BASIC");
       case DATA_FILE_TYPE -> ("Data");
       case MACHINE_CODE_TYPE -> ("ML");
@@ -151,7 +151,7 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return raw file flag value
    */
   public int getFileFlag() {
-    return (this.data[FILE_FLAG_OFFSET] & BYTE_MASK);
+    return (this.getData()[FILE_FLAG_OFFSET] & BYTE_MASK);
   }
 
   /**
@@ -171,10 +171,10 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
   @SuppressWarnings("unused")
   public String getPrettyFileFlag() {
     String res = "unknown";
-    if ((this.data[FILE_FLAG_OFFSET] & BYTE_MASK) == BYTE_MASK) {
+    if ((this.getData()[FILE_FLAG_OFFSET] & BYTE_MASK) == BYTE_MASK) {
       return "ASCII";
     }
-    if (this.data[FILE_FLAG_OFFSET] == 0) {
+    if (this.getData()[FILE_FLAG_OFFSET] == 0) {
       return "Binary";
     }
     return res;
@@ -186,7 +186,7 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return first granule
    */
   public byte getFirstGranule() {
-    return this.data[FIRST_GRANULE_OFFSET];
+    return this.getData()[FIRST_GRANULE_OFFSET];
   }
 
   /**
@@ -196,8 +196,8 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @throws DWFileSystemInvalidFATException invalid fat descriptor
    */
   public int getBytesInLastSector() throws DWFileSystemInvalidFATException {
-    int res = (BYTE_MASK & this.data[HIGH_SECTOR_SIZE_OFFSET]) * BYTE_SHIFT
-        + (BYTE_MASK & this.data[LOW_SECTOR_SIZE_OFFSET]);
+    int res = (BYTE_MASK & this.getData()[HIGH_SECTOR_SIZE_OFFSET]) * BYTE_SHIFT
+        + (BYTE_MASK & this.getData()[LOW_SECTOR_SIZE_OFFSET]);
     if (res > MAX_SECTOR_SIZE) {
       throw new DWFileSystemInvalidFATException(
           "file " + this.getFileName() + "." + this.getFileExt()

@@ -17,68 +17,92 @@ import com.groupunix.drivewireserver.dwexceptions.DWHelpTopicNotFoundException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class DWHelp {
-  private static final Logger logger = Logger.getLogger("DWHelp");
+  /**
+   * Text topic suffix.
+   */
+  public static final String TEXT_SUFFIX = ".text";
+  /**
+   * Topic prefix.
+   */
+  public static final String TOPICS_PREFIX = "topics.";
+  /**
+   * Log appender.
+   */
+  private static final Logger LOGGER = Logger.getLogger("DWHelp");
+  /**
+   * Maximum line length.
+   */
+  private static final int MAX_LINE_LENGTH = 32;
+  /**
+   * Delimiter character.
+   */
+  private static final char DELIMITER = (char) 10;
+  /**
+   * Number of blanks for termintor.
+   */
+  private static final int KEY_TERMINATOR_LEN = 3;
+  /**
+   * Help configuration.
+   */
   private XMLConfiguration help;
+  /**
+   * Help file source.
+   */
   private String helpfile = null;
 
-  public DWHelp(String helpfile) {
-    this.helpfile = helpfile;
-
+  /**
+   * Drivewire help.
+   *
+   * @param helpFile local help source file (xml config)
+   */
+  public DWHelp(final String helpFile) {
+    this.helpfile = helpFile;
     this.reload();
   }
 
-
-  public DWHelp(DWProtocol dwProto) {
-    //try
-    //{
+  /**
+   * Drivewire help.
+   *
+   * @param dwProto protocol
+   */
+  public DWHelp(final DWProtocol dwProto) {
     help = new XMLConfiguration();
     addAllTopics(new DWCmd(dwProto), "");
-    //help.setFileName(DWDefs.HELP_DEFAULT_FILE);
-    //help.save(DWDefs.HELP_DEFAULT_FILE);
-    //}
-    //catch (ConfigurationException e)
-    //	{
-    //		logger.warn(e.getMessage());
-    //	}
-
   }
 
+  /**
+   * Reload help.
+   */
   public void reload() {
     // load helpfile if possible
-    logger.debug("reading help from '" + this.helpfile + "'");
-
+    LOGGER.debug("reading help from '" + this.helpfile + "'");
     try {
-
       this.help = new XMLConfiguration(helpfile);
-
       // local help file
-
-      this.help.setListDelimiter((char) 10);
-
+      this.help.setListDelimiter(DELIMITER);
       //this.help.setAutoSave(true);
-
     } catch (ConfigurationException e1) {
-      logger.warn("Error loading help file: " + e1.getMessage());
+      LOGGER.warn("Error loading help file: " + e1.getMessage());
     }
-
   }
 
-
+  /**
+   * Load wiki topics.
+   *
+   * @param sourceUrlString source url
+   * @throws IOException failed to read from source
+   */
   @SuppressWarnings("unused")
-  private void loadWikiTopics(String sourceUrlString) throws IOException {
+  private void loadWikiTopics(final String sourceUrlString)
+      throws IOException {
     Source source = new Source(new URL(sourceUrlString));
-    source.getRenderer().setMaxLineLength(32);
+    source.getRenderer().setMaxLineLength(MAX_LINE_LENGTH);
     String renderedText = source.getRenderer().toString();
-
     String[] lines = renderedText.split("\n");
-
     String curkey = null;
     int blanks = 0;
-
     for (int i = 0; i < lines.length; i++) {
       lines[i] = lines[i].trim();
-
-
       if (this.hasTopic(lines[i])) {
         curkey = lines[i];
         this.clearTopic(lines[i]);
@@ -89,116 +113,166 @@ public class DWHelp {
         } else {
           blanks = 0;
         }
-
         if ((blanks < 2) && (curkey != null)) {
           System.out.println("Line: " + lines[i]);
-
-          this.help.addProperty("topics." + this.spaceToDot(curkey) + ".text", lines[i]);
+          this.help.addProperty(
+              packageTopic(this.spaceToDot(curkey)),
+              lines[i]
+          );
         }
-
-        if (blanks == 3) {
+        if (blanks == KEY_TERMINATOR_LEN) {
           curkey = null;
         }
       }
-
     }
-
   }
 
-
-  private void clearTopic(String topic) {
-    this.help.clearTree("topics." + this.spaceToDot(topic) + ".text");
+  /**
+   * Remove topic.
+   *
+   * @param topic topic name
+   */
+  private void clearTopic(final String topic) {
+    this.help.clearTree(packageTopic(topic));
   }
 
-  public boolean hasTopic(String topic) {
-    if (this.help != null)
-      return (this.help.containsKey("topics." + this.spaceToDot(topic) + ".text"));
+  /**
+   * Test if topic is known.
+   *
+   * @param topic topic name
+   * @return true if topic is known
+   */
+  public boolean hasTopic(final String topic) {
+    if (this.help != null) {
+      return (this.help.containsKey(packageTopic(topic)));
+    }
     return false;
   }
 
-
-  public String getTopicText(String topic) throws DWHelpTopicNotFoundException {
+  /**
+   * Get topic text.
+   *
+   * @param topic topic name
+   * @return topic text
+   * @throws DWHelpTopicNotFoundException topic name not found
+   */
+  public String getTopicText(final String topic)
+      throws DWHelpTopicNotFoundException {
+    String topicName;
     if (this.hasTopic(topic)) {
-      String text = new String();
-
-      topic = this.spaceToDot(topic);
-
-
-      String[] txts = help.getStringArray("topics." + topic + ".text");
-
-      for (int i = 0; i < txts.length; i++) {
-        text += txts[i] + "\r\n";
+      StringBuilder text = new StringBuilder();
+      topicName = this.spaceToDot(topic);
+      String[] txts = help.getStringArray(packageTopic(topicName));
+      for (String txt : txts) {
+        text.append(txt).append("\r\n");
       }
-
-      return (text);
+      return (text.toString());
     } else {
-      throw new DWHelpTopicNotFoundException("There is no help available for the topic '" + topic + "'.");
+      throw new DWHelpTopicNotFoundException(
+          "There is no help available for the topic '" + topic + "'."
+      );
     }
   }
 
+  private String packageTopic(final String topicName) {
+    return TOPICS_PREFIX + topicName + TEXT_SUFFIX;
+  }
+
+  /**
+   * Get (all) topics.
+   *
+   * @param topic topic name (not used)
+   * @return list of topics
+   */
   @SuppressWarnings("unchecked")
-  public ArrayList<String> getTopics(String topic) {
-    ArrayList<String> res = new ArrayList<String>();
-
+  public ArrayList<String> getTopics(final String topic) {
+    ArrayList<String> res = new ArrayList<>();
     if (this.help != null) {
-      for (Iterator<String> itk = help.configurationAt("topics").getKeys(); itk.hasNext(); ) {
+      Iterator<String> itk = help.configurationAt("topics").getKeys();
+      while (itk.hasNext()) {
         String key = itk.next();
-        if (key.endsWith(".text"))
-          res.add(this.dotToSpace(key.substring(0, key.length() - 5)));
-
+        if (key.endsWith(TEXT_SUFFIX)) {
+          res.add(
+              this.dotToSpace(
+                  key.substring(0, key.length() - TEXT_SUFFIX.length())
+              )
+          );
+        }
       }
     }
-
     return (res);
   }
 
-
-  private String spaceToDot(String topic) {
+  /**
+   * Substitute spaces with dots.
+   *
+   * @param topic topic
+   * @return revised topic
+   */
+  private String spaceToDot(final String topic) {
     return topic.replaceAll(" ", "\\.");
   }
 
-  private String dotToSpace(String topic) {
+  /**
+   * Substitute dots with spaces.
+   *
+   * @param topic topic
+   * @return revised topic
+   */
+  private String dotToSpace(final String topic) {
     return topic.replaceAll("\\.", " ");
   }
 
-
-  private void addAllTopics(DWCommand dwc, String prefix) {
-    String key = "topics.";
-
-    if (!prefix.equals(""))
+  /**
+   * Add all topics.
+   *
+   * @param dwc    drivewire command
+   * @param prefix help prefix
+   */
+  private void addAllTopics(final DWCommand dwc, final String prefix) {
+    String key = TOPICS_PREFIX;
+    if (!prefix.equals("")) {
       key += spaceToDot(prefix) + ".";
-
-    key += spaceToDot(dwc.getCommand()) + ".text";
-
+    }
+    key += spaceToDot(dwc.getCommand()) + TEXT_SUFFIX;
     help.addProperty(key, dwc.getUsage());
     help.addProperty(key, "");
     help.addProperty(key, dwc.getShortHelp());
-
     if (dwc.getCommandList() != null) {
       for (DWCommand dwsc : dwc.getCommandList().getCommands()) {
-        if (!prefix.equals(""))
+        if (!prefix.equals("")) {
           addAllTopics(dwsc, prefix + " " + dwc.getCommand());
-        else
+        } else {
           addAllTopics(dwsc, dwc.getCommand());
+        }
       }
     }
-
   }
 
-
+  /**
+   * Get help section topics.
+   *
+   * @param section section name
+   * @return list of topics
+   */
   @SuppressWarnings("unchecked")
-  public ArrayList<String> getSectionTopics(String section) {
-    ArrayList<String> res = new ArrayList<String>();
+  public ArrayList<String> getSectionTopics(final String section) {
+    ArrayList<String> res = new ArrayList<>();
     if (this.help != null) {
-      for (Iterator<String> itk = help.configurationAt("topics." + section).getKeys(); itk.hasNext(); ) {
+      Iterator<String> itk = help
+          .configurationAt(TOPICS_PREFIX + section)
+          .getKeys();
+      while (itk.hasNext()) {
         String key = itk.next();
-        if (key.endsWith(".text"))
-          res.add(this.dotToSpace(key.substring(0, key.length() - 5)));
-
+        if (key.endsWith(TEXT_SUFFIX)) {
+          res.add(
+              this.dotToSpace(
+                  key.substring(0, key.length() - TEXT_SUFFIX.length())
+              )
+          );
+        }
       }
     }
-    return (res);
+    return res;
   }
-
-
 }
