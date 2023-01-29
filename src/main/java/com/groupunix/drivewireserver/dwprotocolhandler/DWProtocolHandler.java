@@ -30,6 +30,8 @@ import com.groupunix.drivewireserver.virtualprinter.DWVPrinter;
 import com.groupunix.drivewireserver.virtualserial.DWVPortTermThread;
 import com.groupunix.drivewireserver.virtualserial.DWVSerialPorts;
 
+import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
+
 public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
   private final Logger logger = Logger.getLogger("DWServer.DWProtocolHandler");
 
@@ -1104,217 +1106,371 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     return lastError;
   }
 
+  /**
+   * Get last logical sector number.
+   *
+   * @return last LSN
+   */
   public byte[] getLastLSN() {
     return lastLSN;
   }
 
+  /**
+   * Get initialisation time.
+   *
+   * @return init. time
+   */
   public GregorianCalendar getInitTime() {
-    return (dwinitTime);
+    return dwinitTime;
   }
 
+  /**
+   * Get disk drives.
+   *
+   * @return disk drives
+   */
   public DWDiskDrives getDiskDrives() {
     return this.diskDrives;
   }
 
+  /**
+   * Get virt. serial ports.
+   *
+   * @return serial ports
+   */
   public DWVSerialPorts getVPorts() {
     return this.dwVSerialPorts;
   }
 
+  /**
+   * Is device shutting down.
+   *
+   * @return true if shutting down
+   */
   public boolean isDying() {
     return this.wanttodie;
   }
 
+  /**
+   * Get protocol device.
+   *
+   * @return protocol device
+   */
   public DWProtocolDevice getProtoDev() {
-    return (this.protodev);
+    return this.protodev;
   }
 
+  /**
+   * Reset protocol device.
+   */
   public void resetProtocolDevice() {
     if (!this.wanttodie) {
       logger.info("requesting protocol device reset");
-
       // flag that we want a reset
       this.resetPending = true;
-
       if (this.protodev != null) {
         this.protodev.close();
       }
     }
   }
 
+  /**
+   * Setup protocol device.
+   */
   private void setupProtocolDevice() {
-    if ((protodev != null) && (!resetPending))
+    if ((protodev != null) && (!resetPending)) {
       protodev.shutdown();
-
-    if (config.getString("DeviceType", "dummy").equalsIgnoreCase("dummy")) {
+    }
+    if (config.getString("DeviceType", "dummy")
+        .equalsIgnoreCase("dummy")
+    ) {
       this.resetPending = false;
-    } else if (config.getString("DeviceType").equalsIgnoreCase("serial")) {
+    } else if (config.getString("DeviceType")
+        .equalsIgnoreCase("serial")
+    ) {
       // create serial device
-      if ((config.containsKey("SerialDevice") && config.containsKey("SerialRate"))) {
+      if ((config.containsKey("SerialDevice")
+          && config.containsKey("SerialRate"))
+      ) {
         try {
           protodev = new DWSerialDevice(this);
           this.resetPending = false;
         } catch (NoSuchPortException e1) {
           //wanttodie = true; lets keep on living and see how that goes
-          logger.error("handler #" + handlerno + ": Serial device '" + config.getString("SerialDevice") + "' not found");
+          logger.error("handler #" + handlerno + ": Serial device '"
+              + config.getString("SerialDevice") + "' not found");
         } catch (PortInUseException e2) {
           //wanttodie = true;
-          logger.error("handler #" + handlerno + ": Serial device '" + config.getString("SerialDevice") + "' in use");
+          logger.error("handler #" + handlerno + ": Serial device '"
+              + config.getString("SerialDevice") + "' in use");
         } catch (UnsupportedCommOperationException e3) {
           //wanttodie = true;
-          logger.error("handler #" + handlerno + ": Unsupported comm operation while opening serial port '" + config.getString("SerialDevice") + "'");
+          logger.error("handler #" + handlerno + ": Unsupported comm "
+              + "operation while opening serial port '"
+              + config.getString("SerialDevice") + "'");
         } catch (IOException e) {
           //wanttodie = true;
-          logger.error("handler #" + handlerno + ": IO exception while opening serial port '" + config.getString("SerialDevice") + "'");
+          logger.error("handler #" + handlerno + ": IO exception while "
+              + "opening serial port '"
+              + config.getString("SerialDevice") + "'");
         } catch (TooManyListenersException e) {
           //wanttodie = true;
-          logger.error("handler #" + handlerno + ": Too many listeneres while opening serial port '" + config.getString("SerialDevice") + "'");
+          logger.error("handler #" + handlerno + ": Too many listeners "
+              + "while opening serial port '"
+              + config.getString("SerialDevice") + "'");
         }
       } else {
-        logger.error("Serial mode requires both SerialDevice and SerialRate to be set, please configure this instance.");
+        logger.error("Serial mode requires both SerialDevice and SerialRate "
+            + "to be set, please configure this instance.");
         //wanttodie = true;
       }
-    } else if (config.getString("DeviceType").equalsIgnoreCase("tcp") || config.getString("DeviceType").equalsIgnoreCase("tcp-server")) {
+    } else if (config.getString("DeviceType").equalsIgnoreCase("tcp")
+        || config.getString("DeviceType").equalsIgnoreCase("tcp-server")) {
       // create TCP device
       if (config.containsKey("TCPServerPort")) {
         try {
-          protodev = new DWTCPDevice(this.handlerno, config.getInt("TCPServerPort"));
+          protodev = new DWTCPDevice(
+              this.handlerno, config.getInt("TCPServerPort")
+          );
         } catch (IOException e) {
           //wanttodie = true;
           logger.error("handler #" + handlerno + ": " + e.getMessage());
         }
       } else {
-        logger.error("TCP server mode requires TCPServerPort to be set, cannot use this configuration");
+        logger.error("TCP server mode requires TCPServerPort "
+            + "to be set, cannot use this configuration");
         //wanttodie = true;
       }
-    } else if (config.getString("DeviceType").equalsIgnoreCase("tcp-client")) {
+    } else if (config.getString("DeviceType")
+        .equalsIgnoreCase("tcp-client")) {
       // create TCP device
-      if (config.containsKey("TCPClientPort") && config.containsKey("TCPClientHost")) {
+      if (config.containsKey("TCPClientPort")
+          && config.containsKey("TCPClientHost")) {
         try {
-          protodev = new DWTCPClientDevice(this.handlerno, config.getString("TCPClientHost"), config.getInt("TCPClientPort"));
+          protodev = new DWTCPClientDevice(
+              this.handlerno,
+              config.getString("TCPClientHost"),
+              config.getInt("TCPClientPort")
+          );
         } catch (IOException e) {
           //wanttodie = true;
           logger.error("handler #" + handlerno + ": " + e.getMessage());
         }
       } else {
-        logger.error("TCP client mode requires TCPClientPort and TCPClientHost to be set, cannot use this configuration");
+        logger.error("TCP client mode requires TCPClientPort and "
+            + "TCPClientHost to be set, cannot use this configuration");
         //wanttodie = true;
       }
     }
   }
 
+  /**
+   * Get status text (pretty).
+   *
+   * @return status text
+   */
   @Override
   public String getStatusText() {
-    String text = new String();
-
+    String text = "";
     text += "Last OpCode:   " + DWUtils.prettyOP(getLastOpcode()) + "\r\n";
     text += "Last GetStat:  " + DWUtils.prettySS(getLastGetStat()) + "\r\n";
     text += "Last SetStat:  " + DWUtils.prettySS(getLastSetStat()) + "\r\n";
     text += "Last Drive:    " + getLastDrive() + "\r\n";
     text += "Last LSN:      " + DWUtils.int3(getLastLSN()) + "\r\n";
-    text += "Last Error:    " + ((int) getLastError() & 0xFF) + "\r\n";
+    text += "Last Error:    " + ((int) getLastError() & BYTE_MASK) + "\r\n";
     text += "\r\n";
-
-    // TODO:  include read and write retries per disk
-    // text += "Total Read Sectors:  " + String.format("%6d",DriveWireServer.getHandler(handlerno).getSectorsRead()) + "  (" + DriveWireServer.getHandler(handlerno).getReadRetries() + " retries)\r\n";
-    //text += "Total Write Sectors: " + String.format("%6d",DriveWireServer.getHandler(handlerno).getSectorsWritten()) + "  (" + DriveWireServer.getHandler(handlerno).getWriteRetries() + " retries)\r\n";
-
-    return (text);
+    return text;
   }
 
+  /**
+   * Get name.
+   *
+   * @return name
+   */
   public String getName() {
-    return (this.config.getString("[@name]", "Unnamed #" + this.handlerno));
+    return this.config.getString("[@name]", "Unnamed #" + this.handlerno);
   }
 
+  /**
+   * Get handler id.
+   *
+   * @return handler id
+   */
   public int getHandlerNo() {
     return this.handlerno;
   }
 
+  /**
+   * Synchronize storage.
+   */
   @Override
   public void syncStorage() {
     if ((this.isInOp()) && (this.syncSkipped < DWDefs.DISK_MAX_SYNC_SKIPS)) {
-      logger.debug("Ignoring sync request because we are processing a protocol operation (" + (this.syncSkipped + 1) + " of " + DWDefs.DISK_MAX_SYNC_SKIPS + ")");
+      logger.debug("Ignoring sync request because we are processing a "
+          + "protocol operation (" + (this.syncSkipped + 1)
+          + " of " + DWDefs.DISK_MAX_SYNC_SKIPS + ")");
       this.syncSkipped++;
     } else if (this.diskDrives != null) {
       this.diskDrives.sync();
       this.syncSkipped = 0;
     } else {
-      logger.debug("handler is alive, but disk drive object is null, probably startup taking a while.. skipping");
+      logger.debug("handler is alive, but disk drive object is null, "
+          + "probably startup taking a while... skipping");
     }
   }
 
+  /**
+   * Get virt. printer.
+   *
+   * @return printer
+   */
   public DWVPrinter getVPrinter() {
     return (this.vprinter);
   }
 
+  /**
+   * Get log appender.
+   *
+   * @return logger
+   */
   public Logger getLogger() {
     return this.logger;
   }
 
+  /**
+   * Get cmd columns.
+   *
+   * @return command output width (columns)
+   */
   public int getCMDCols() {
-    return getConfig().getInt("DWCommandOutputWidth", DWDefs.DWCMD_DEFAULT_COLS);
+    return getConfig()
+        .getInt("DWCommandOutputWidth", DWDefs.DWCMD_DEFAULT_COLS);
   }
 
+  /**
+   * Get help.
+   *
+   * @return help
+   */
   public DWHelp getHelp() {
     return dwhelp;
   }
 
+  /**
+   * Is handler device ready.
+   *
+   * @return ready
+   */
   @Override
   public boolean isReady() {
     return this.ready;
   }
 
+  /**
+   * Submit config event.
+   *
+   * @param key property
+   * @param val value
+   */
   @Override
-  public void submitConfigEvent(String key, String val) {
+  public void submitConfigEvent(final String key, final String val) {
     DriveWireServer.submitInstanceConfigEvent(this.handlerno, key, val);
   }
 
+  /**
+   * Get total ops count.
+   *
+   * @return total op count
+   */
   @Override
   public long getNumOps() {
-    // TODO Auto-generated method stub
     return this.total_ops;
   }
 
+  /**
+   * Get count of disk ops.
+   *
+   * @return disk op count
+   */
   @Override
   public long getNumDiskOps() {
-    // TODO Auto-generated method stub
     return this.disk_ops;
   }
 
+  /**
+   * Get count of virt. serial ops.
+   *
+   * @return vserial op count
+   */
   @Override
   public long getNumVSerialOps() {
-    // TODO Auto-generated method stub
     return this.vserial_ops;
   }
 
+  /**
+   * Is in operation.
+   *
+   * @return true if is in operation
+   */
   public boolean isInOp() {
     return this.inOp;
   }
 
+  /**
+   * Get timers.
+   *
+   * @return protocol timers
+   */
   @Override
   public DWProtocolTimers getTimers() {
     return this.timers;
   }
 
+  /**
+   * Is handler's device started.
+   *
+   * @return true if started
+   */
   @Override
   public boolean isStarted() {
     return this.started;
   }
 
+  /**
+   * Handler has printers.
+   *
+   * @return true if printers available
+   */
   @Override
   public boolean hasPrinters() {
     return true;
   }
 
+  /**
+   * Handler has disks.
+   *
+   * @return true if disks available
+   */
   @Override
   public boolean hasDisks() {
     return true;
   }
 
+  /**
+   * Handler has MIDI.
+   *
+   * @return true if MIDI available
+   */
   @Override
   public boolean hasMIDI() {
     return true;
   }
 
+  /**
+   * Handler has virt. serial.
+   *
+   * @return true if available
+   */
   @Override
   public boolean hasVSerial() {
     return true;
