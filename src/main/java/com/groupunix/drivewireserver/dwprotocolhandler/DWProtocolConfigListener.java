@@ -4,29 +4,41 @@ import org.apache.commons.configuration.event.ConfigurationEvent;
 import org.apache.commons.configuration.event.ConfigurationListener;
 
 public class DWProtocolConfigListener implements ConfigurationListener {
+  /**
+   * Host protocol.
+   */
+  private final DWProtocol dwProtocol;
 
-
-  private DWProtocol dwProto;
-
-  public DWProtocolConfigListener(DWProtocol dwProto) {
+  /**
+   * Protocol configuration listener.
+   *
+   * @param protocol host protocol
+   */
+  public DWProtocolConfigListener(final DWProtocol protocol) {
     super();
-    this.dwProto = dwProto;
+    this.dwProtocol = protocol;
   }
 
+  /**
+   * Updated configuration event.
+   * <p>
+   * Propagates event to host protocol
+   * </p>
+   *
+   * @param event new event
+   */
   @Override
-  public void configurationChanged(ConfigurationEvent event) {
+  public void configurationChanged(final ConfigurationEvent event) {
     if (!event.isBeforeUpdate()) {
       if (event.getPropertyName() != null) {
         if (event.getPropertyValue() == null) {
-          this.dwProto.submitConfigEvent(event.getPropertyName(), "");
+          this.dwProtocol.submitConfigEvent(event.getPropertyName(), "");
         } else {
-          this.dwProto.submitConfigEvent(event.getPropertyName(), event.getPropertyValue().toString());
+          this.dwProtocol.submitConfigEvent(
+              event.getPropertyName(), event.getPropertyValue().toString()
+          );
         }
-
       }
     }
-
-
   }
-
 }
