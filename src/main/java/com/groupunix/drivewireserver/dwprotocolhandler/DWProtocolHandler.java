@@ -95,6 +95,30 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
    * Bytes needed for LSN.
    */
   public static final int LSN_SIZE = 3;
+  /**
+   * Version number max for DW3.
+   */
+  public static final int VERSION_DW3_MAX = 0x3F;
+  /**
+   * Version number max for nitros9.
+   */
+  public static final int VERSION_NITROS_MAX = 0x4F;
+  /**
+   * Version number min for nitros9.
+   */
+  public static final int VERSION_NITROS_MIN = 0x40;
+  /**
+   * Version number min for LWOS/LWBASIC.
+   */
+  public static final int VERSION_LWOS_MIN = 0x60;
+  /**
+   * Version number max for LWOS/LWBASIC.
+   */
+  public static final int VERSION_LWOS_MAX = 0x6F;
+  /**
+   * Version number max.
+   */
+  public static final int VERSION_MAX = 0x80;
 
   // record keeping portion of dwTransferData
   /**
@@ -309,7 +333,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
    * </p>
    */
   public void run() {
-    int opcodeint = -1;
     this.started = true;
     this.timers = new DWProtocolTimers();
     this.timers.resetTimer(DWDefs.TIMER_START);
@@ -320,139 +343,15 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
       setupProtocolDevice();
     }
     if (!wanttodie) {
-      diskDrives = new DWDiskDrives(this);
-      this.dwVSerialPorts = new DWVSerialPorts(this);
-      dwVSerialPorts.resetAllPorts();
-      if (this.config.getBoolean("RestartClientsOnOpen", false)) {
-        dwVSerialPorts.setRebootRequested(true);
-      }
-      vprinter = new DWVPrinter(this);
-      rfmhandler = new DWRFMHandler(handlerno);
-      if (config.containsKey("TermPort")) {
-        LOGGER.debug("handler #" + handlerno
-            + ": starting term device listener thread");
-        this.termHandler = new DWVPortTermThread(
-            this, config.getInt("TermPort")
-        );
-        this.termT = new Thread(termHandler);
-        this.termT.setDaemon(true);
-        this.termT.start();
-      }
-      if (config.containsKey("HelpFile")) {
-        this.dwhelp = new DWHelp(config.getString("HelpFile"));
-      } else {
-        this.dwhelp = new DWHelp(this);
-      }
+      setupHandlerOnRun();
     }
     this.ready = true;
-    long optime = 0;
-    long optook = 0;
     LOGGER.debug("handler #" + handlerno + " is ready");
     // protocol loop
     try {
-      while (!wanttodie) {
-        opcodeint = -1;
-        // try to get an opcode
-        if (!(protodev == null) && !resetPending) {
-          try {
-            opcodeint = protodev.comRead1(false) & BYTE_MASK;
-          } catch (IOException e) {
-            LOGGER.error("Strange result in proto read loop: "
-                + e.getMessage());
-          } catch (DWCommTimeOutException e) {
-            // this should not actually ever get thrown, since we call
-            // comRead1 with timeout = false..
-            LOGGER.error("Timeout in proto read loop: " + e.getMessage());
-          }
-        }
-        if ((opcodeint > -1) && (this.protodev != null)) {
-          if (this.protodev.getClass().getCanonicalName()
-              .equals("com.groupunix.drivewireserver."
-                  + "dwprotocolhandler.DWSerialDevice")
-          ) {
-            ((DWSerialDevice) this.protodev).resetReadtime();
-          }
-          optime = System.currentTimeMillis();
-          this.inOp = true;
-          lastOpcode = (byte) opcodeint;
-          totalOps++;
-          try {
-            // fast writes
-            // *BIG BUG* handling opcode with byte means everything is "greater"
-            // than OP_FASTWRITE_BASE (-128) - need to handle bytes as ints
-            // to cope with the sign-bit being msb...
-            if ((lastOpcode >= DWDefs.OP_FASTWRITE_BASE)
-//            if ((lastOpcode < 0)
-                && (lastOpcode <= (
-                    DWDefs.OP_FASTWRITE_BASE
-                        + this.dwVSerialPorts.getMaxPorts() - 1)
-                  )
-            ) {
-              doOpFastSerialWrite(lastOpcode);
-              this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
-              vserialOps++;
-            } else {
-              // regular OP decode
-              decodeOp(lastOpcode, optime, opcodeint);
-            }
-          } catch (IOException e) {
-            LOGGER.error("IOError in proto op: " + e.getMessage());
-          } catch (DWCommTimeOutException e) {
-            LOGGER.warn("Timed out reading from CoCo in "
-                + DWUtils.prettyOP(lastOpcode));
-          } catch (DWPortNotValidException e) {
-            LOGGER.warn("Invalid port # from CoCo in "
-                + DWUtils.prettyOP(lastOpcode) + ": " + e.getMessage());
-          }
-          this.inOp = false;
-          optook = System.currentTimeMillis() - optime;
-          if (optook > DWDefs.SERVER_SLOW_OP) {
-            LOGGER.warn(DWUtils.prettyOP(lastOpcode) + " took " + optook
-                + "ms.");
-          } else if (config.getBoolean("LogTiming", false)) {
-            LOGGER.debug(DWUtils.prettyOP(lastOpcode) + " took " + optook
-                + "ms, serial read delay was "
-                + ((DWSerialDevice) this.protodev).getReadtime());
-          }
-        } else {
-          if (!this.wanttodie) {
-            if (this.resetPending) {
-              LOGGER.debug("device is resetting...");
-              if (protodev != null) {
-                this.protodev.shutdown();
-              }
-              this.resetPending = false;
-            } else if (
-                !config.getString("DeviceType", "").equals("dummy")
-            ) {
-              LOGGER.debug("device unavailable, will retry in "
-                  + config.getInt("DeviceFailRetryTime", DEVICE_RETRY_MILLIS)
-                  + "ms");
-            }
-            try {
-              Thread.sleep(
-                  config.getInt("DeviceFailRetryTime", DEVICE_RETRY_MILLIS)
-              );
-              setupProtocolDevice();
-            } catch (InterruptedException e) {
-              LOGGER.error("Interrupted during failed port delay.. "
-                  + "giving up on this crazy situation");
-              wanttodie = true;
-            }
-          }
-        }
-      }
+      runLoop();
       LOGGER.debug("handler #" + handlerno + ": shutting down");
-      if (this.dwVSerialPorts != null) {
-        this.dwVSerialPorts.shutdown();
-      }
-      if (this.diskDrives != null) {
-        this.diskDrives.shutdown();
-      }
-      if (this.termT != null) {
-        termHandler.shutdown();
-        termT.interrupt();
-      }
+      shutdownAfterRun();
     } catch (Exception e) {
       System.out.println("\n\n");
       e.printStackTrace();
@@ -464,6 +363,143 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
       }
     }
     LOGGER.debug("handler #" + handlerno + ": exiting");
+  }
+
+  private void runLoop() {
+    int opcodeint;
+    long optime;
+    long optook;
+    while (!wanttodie) {
+      opcodeint = -1;
+      // try to get an opcode
+      if (!(protodev == null) && !resetPending) {
+        try {
+          opcodeint = protodev.comRead1(false) & BYTE_MASK;
+        } catch (IOException e) {
+          LOGGER.error("Strange result in proto read loop: "
+              + e.getMessage());
+        } catch (DWCommTimeOutException e) {
+          // this should not actually ever get thrown, since we call
+          // comRead1 with timeout = false..
+          LOGGER.error("Timeout in proto read loop: " + e.getMessage());
+        }
+      }
+      if ((opcodeint > -1) && (this.protodev != null)) {
+        if (this.protodev.getClass().getCanonicalName()
+            .equals("com.groupunix.drivewireserver."
+                + "dwprotocolhandler.DWSerialDevice")
+        ) {
+          ((DWSerialDevice) this.protodev).resetReadtime();
+        }
+        optime = System.currentTimeMillis();
+        this.inOp = true;
+        lastOpcode = (byte) opcodeint;
+        totalOps++;
+        try {
+          // fast writes
+          // *BIG BUG* handling opcode with byte means everything is "greater"
+          // than OP_FASTWRITE_BASE (-128) - need to handle bytes as ints
+          // to cope with the sign-bit being msb...
+          if ((lastOpcode >= DWDefs.OP_FASTWRITE_BASE)
+//            if ((lastOpcode < 0)
+              && (lastOpcode <= (
+              DWDefs.OP_FASTWRITE_BASE
+                  + this.dwVSerialPorts.getMaxPorts() - 1)
+          )
+          ) {
+            doOpFastSerialWrite(lastOpcode);
+            this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
+            vserialOps++;
+          } else {
+            // regular OP decode
+            decodeOp(lastOpcode, optime, opcodeint);
+          }
+        } catch (IOException e) {
+          LOGGER.error("IOError in proto op: " + e.getMessage());
+        } catch (DWCommTimeOutException e) {
+          LOGGER.warn("Timed out reading from CoCo in "
+              + DWUtils.prettyOP(lastOpcode));
+        } catch (DWPortNotValidException e) {
+          LOGGER.warn("Invalid port # from CoCo in "
+              + DWUtils.prettyOP(lastOpcode) + ": " + e.getMessage());
+        }
+        this.inOp = false;
+        optook = System.currentTimeMillis() - optime;
+        if (optook > DWDefs.SERVER_SLOW_OP) {
+          LOGGER.warn(DWUtils.prettyOP(lastOpcode) + " took " + optook
+              + "ms.");
+        } else if (config.getBoolean("LogTiming", false)) {
+          LOGGER.debug(DWUtils.prettyOP(lastOpcode) + " took " + optook
+              + "ms, serial read delay was "
+              + ((DWSerialDevice) this.protodev).getReadtime());
+        }
+      } else {
+        if (!this.wanttodie) {
+          if (this.resetPending) {
+            LOGGER.debug("device is resetting...");
+            if (protodev != null) {
+              this.protodev.shutdown();
+            }
+            this.resetPending = false;
+          } else if (
+              !config.getString("DeviceType", "").equals("dummy")
+          ) {
+            LOGGER.debug("device unavailable, will retry in "
+                + config.getInt("DeviceFailRetryTime", DEVICE_RETRY_MILLIS)
+                + "ms");
+          }
+          try {
+            Thread.sleep(
+                config.getInt("DeviceFailRetryTime", DEVICE_RETRY_MILLIS)
+            );
+            setupProtocolDevice();
+          } catch (InterruptedException e) {
+            LOGGER.error("Interrupted during failed port delay.. "
+                + "giving up on this crazy situation");
+            wanttodie = true;
+          }
+        }
+      }
+    }
+  }
+
+  private void shutdownAfterRun() {
+    if (this.dwVSerialPorts != null) {
+      this.dwVSerialPorts.shutdown();
+    }
+    if (this.diskDrives != null) {
+      this.diskDrives.shutdown();
+    }
+    if (this.termT != null) {
+      termHandler.shutdown();
+      termT.interrupt();
+    }
+  }
+
+  private void setupHandlerOnRun() {
+    diskDrives = new DWDiskDrives(this);
+    this.dwVSerialPorts = new DWVSerialPorts(this);
+    dwVSerialPorts.resetAllPorts();
+    if (this.config.getBoolean("RestartClientsOnOpen", false)) {
+      dwVSerialPorts.setRebootRequested(true);
+    }
+    vprinter = new DWVPrinter(this);
+    rfmhandler = new DWRFMHandler(handlerno);
+    if (config.containsKey("TermPort")) {
+      LOGGER.debug("handler #" + handlerno
+          + ": starting term device listener thread");
+      this.termHandler = new DWVPortTermThread(
+          this, config.getInt("TermPort")
+      );
+      this.termT = new Thread(termHandler);
+      this.termT.setDaemon(true);
+      this.termT.start();
+    }
+    if (config.containsKey("HelpFile")) {
+      this.dwhelp = new DWHelp(config.getString("HelpFile"));
+    } else {
+      this.dwhelp = new DWHelp(this);
+    }
   }
 
   /**
@@ -696,20 +732,21 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     if (!config.getBoolean("DW3Only", false)) {
       // send response
       protodev.comWrite1(DWDefs.DW_PROTOCOL_VERSION, true);
-      if (drvVersion <= 0x3F) {
+      if (drvVersion <= VERSION_DW3_MAX) {
         LOGGER.debug("DWINIT from NitrOS9! Implementation variety type # "
             + drvVersion);
-      } else if ((drvVersion <= 0x4F)) {
+      } else if ((drvVersion <= VERSION_NITROS_MAX)) {
         LOGGER.debug("DWINIT from CoCoBoot! Implementation variety type # "
-            + (drvVersion - 0x40));
-      } else if ((drvVersion >= 0x60) && (drvVersion <= 0x6F)) {
+            + (drvVersion - VERSION_NITROS_MIN));
+      } else if ((drvVersion >= VERSION_LWOS_MIN)
+          && (drvVersion <= VERSION_LWOS_MAX)) {
         LOGGER.debug("DWINIT from LWOS/LWBASIC! Implementation variety type # "
-            + (drvVersion - 0x60));
+            + (drvVersion - VERSION_LWOS_MIN));
       } else {
         LOGGER.info("DWINIT got unknown driver version # " + drvVersion);
       }
       // possibly extend this to all DWINITs..
-      if (drvVersion < 0x80) {
+      if (drvVersion < VERSION_MAX) {
         if (this.config.getBoolean("HDBDOSMode", false)) {
           LOGGER.warn("Disabling HDBDOS mode due to non HDBDOS DWINIT");
           this.config.setProperty("HDBDOSMode", false);
