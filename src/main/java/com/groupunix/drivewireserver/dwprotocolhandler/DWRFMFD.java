@@ -92,13 +92,16 @@ public class DWRFMFD {
       }
       setAttributes(tmpmode);
       // date and time modified
-      setLastModifiedDate(timeToBytes(fileobj.getContent().getLastModifiedTime()));
+      setLastModifiedDate(
+          timeToBytes(fileobj.getContent().getLastModifiedTime())
+      );
       // size
       setSize(lengthToBytes(fileobj.getContent().getSize()));
       // date created (java doesn't know)
       setCreat(new byte[]{0, 0, 0});
     } else {
-      LOGGER.error("attempt to read FD for non existent file '" + this.pathstr + "'");
+      LOGGER.error("attempt to read FD for non existent file '"
+          + this.pathstr + "'");
     }
   }
 
@@ -113,9 +116,15 @@ public class DWRFMFD {
     for (int i = 0; i < 4; i++) {
       b[3 - i] = (byte) (length >>> (i * 8));
     }
-    return (b);
+    return b;
   }
 
+  /**
+   * Convert long (time) to byte array.
+   *
+   * @param time (long) time
+   * @return byte array
+   */
   private byte[] timeToBytes(final long time) {
     GregorianCalendar c = new GregorianCalendar();
 
@@ -126,9 +135,15 @@ public class DWRFMFD {
     b[2] = (byte) (c.get(Calendar.DAY_OF_MONTH));
     b[3] = (byte) (c.get(Calendar.HOUR_OF_DAY));
     b[4] = (byte) (c.get(Calendar.MINUTE));
-    return (b);
+    return b;
   }
 
+  /**
+   * Convert byte array to long (time).
+   *
+   * @param b byte array
+   * @return long time
+   */
   @SuppressWarnings("unused")
   private long bytesToTime(final byte[] b) {
     GregorianCalendar c = new GregorianCalendar();
