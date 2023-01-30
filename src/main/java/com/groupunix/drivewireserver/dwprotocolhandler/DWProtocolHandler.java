@@ -240,30 +240,30 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
                   break;
                 case DWDefs.OP_PRINT:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
-                  DoOP_PRINT();
+                  doOpPrint();
                   break;
                 case DWDefs.OP_PRINTFLUSH:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
-                  DoOP_PRINTFLUSH();
+                  doOpPrintFlush();
                   break;
                 case DWDefs.OP_SERREADM:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
-                  DoOP_SERREADM();
+                  doOpSerialReadM();
                   vserial_ops++;
                   break;
                 case DWDefs.OP_SERREAD:
                   this.timers.resetTimer(DWDefs.TIMER_POLL, optime);
-                  DoOP_SERREAD();
+                  doOpSerialRead();
                   vserial_ops++;
                   break;
                 case DWDefs.OP_SERWRITE:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
-                  DoOP_SERWRITE();
+                  doOpSerialWrite();
                   vserial_ops++;
                   break;
                 case DWDefs.OP_SERWRITEM:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
-                  DoOP_SERWRITEM();
+                  doOpSerialWriteM();
                   vserial_ops++;
                   break;
                 case DWDefs.OP_SERSETSTAT:
@@ -278,12 +278,12 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
                   break;
                 case DWDefs.OP_SERINIT:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
-                  DoOP_SERINIT();
+                  doOpSerialInit();
                   vserial_ops++;
                   break;
                 case DWDefs.OP_SERTERM:
                   this.timers.resetTimer(DWDefs.TIMER_NP_OP, optime);
-                  DoOP_SERTERM();
+                  doOpSerialTerm();
                   vserial_ops++;
                   break;
                 case DWDefs.OP_NOP:
@@ -933,175 +933,272 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     }
   }
 
-  private void DoOP_SERINIT() throws IOException, DWCommTimeOutException, DWPortNotValidException {
-    byte[] responsebuf = new byte[2];
-
+  /**
+   * Initialise serial port.
+   * <p>
+   *   Functionality is removed. Just
+   *   fetches the port number and
+   *   exits
+   * </p>
+   * @throws IOException failed to read
+   * @throws DWCommTimeOutException serial port timeout
+   * @throws DWPortNotValidException invalid port
+   */
+  private void doOpSerialInit()
+      throws IOException, DWCommTimeOutException, DWPortNotValidException {
+    byte[] responseBuffer;
     // get packet args
     // port # (mode no longer sent)
-    responsebuf = protodev.comRead(1);
-    int portnum = responsebuf[0];
-    //dwVSerialPorts.openPort(portnum);
+    responseBuffer = protodev.comRead(1);
+    int portNumber = responseBuffer[0];
+    //dwVSerialPorts.openPort(portNumber);
     if (config.getBoolean("LogOpCode", false)) {
-      logger.info("DoOP_SERINIT for port " + dwVSerialPorts.prettyPort(portnum));
+      logger.info("DoOP_SERINIT for port "
+          + dwVSerialPorts.prettyPort(portNumber));
     }
   }
 
-  private void DoOP_SERTERM() throws IOException, DWCommTimeOutException, DWPortNotValidException {
-    int portnum;
+  /**
+   * Terminate serial port.
+   * <p>
+   *   Functionality is removed. Just
+   *   fetches the port number and
+   *   exits
+   * </p>
+   * @throws IOException failed to read from port
+   * @throws DWCommTimeOutException serial timeout
+   * @throws DWPortNotValidException invalid port
+   */
+  private void doOpSerialTerm()
+      throws IOException, DWCommTimeOutException, DWPortNotValidException {
+    int portNumber;
 
     // get packet args
     // just port #
-    portnum = protodev.comRead1(true);
-    //dwVSerialPorts.closePort(portnum);
+    portNumber = protodev.comRead1(true);
+    //dwVSerialPorts.closePort(portNumber);
     if (config.getBoolean("LogOpCode", false)) {
-      logger.info("DoOP_SERTERM for port " + portnum);
+      logger.info("DoOP_SERTERM for port " + portNumber);
     }
   }
 
-  private void DoOP_SERREAD() {
-    byte[] result = new byte[2];
-
+  /**
+   * Read a single byte from serial.
+   */
+  private void doOpSerialRead() {
+    byte[] result;
     result = dwVSerialPorts.serRead();
-
     protodev.comWrite(result, 2, true);
-
     //if (result[0] != 0)
     if (config.getBoolean("LogOpCodePolls", false)) {
-      logger.info("DoOP_SERREAD response " + (int) (result[0] & 0xFF) + ":" + (int) (result[1] & 0xFF));
+      logger.info("DoOP_SERREAD response " + (int) (result[0] & BYTE_MASK)
+          + ":" + (int) (result[1] & BYTE_MASK));
     }
   }
 
-  private void DoOP_SERWRITE() throws IOException, DWCommTimeOutException {
-    byte[] cmdpacket = new byte[2];
-
+  /**
+   * Write a single byte to serial.
+   *
+   * @throws IOException failed to read/write
+   * @throws DWCommTimeOutException comm port timeout
+   */
+  private void doOpSerialWrite() throws IOException, DWCommTimeOutException {
+    byte[] cmdPacket;
     try {
-      cmdpacket = protodev.comRead(2);
-
-      dwVSerialPorts.serWrite(cmdpacket[0], cmdpacket[1]);
-
+      cmdPacket = protodev.comRead(2);
+      dwVSerialPorts.serWrite(cmdPacket[0], cmdPacket[1]);
       if (config.getBoolean("LogOpCode", false)) {
-        logger.debug("DoOP_SERWRITE to port " + cmdpacket[0]);
+        logger.debug("DoOP_SERWRITE to port " + cmdPacket[0]);
       }
-
-    } catch (DWPortNotOpenException e1) {
+    } catch (DWPortNotOpenException | DWPortNotValidException e1) {
       logger.error(e1.getMessage());
-    } catch (DWPortNotValidException e2) {
-      logger.error(e2.getMessage());
     }
   }
 
-  private void DoOP_SERREADM() throws IOException, DWCommTimeOutException {
-    byte[] cmdpacket = new byte[2];
-    byte[] data = new byte[256];
-
+  /**
+   * Read multiple bytes from serial port.
+   *
+   * @throws IOException failed read/write
+   * @throws DWCommTimeOutException comm port time out
+   */
+  private void doOpSerialReadM()
+      throws IOException, DWCommTimeOutException {
+    byte[] cmdPacket;
+    byte[] data;
     try {
-      cmdpacket = protodev.comRead(2);
-
+      cmdPacket = protodev.comRead(2);
       if (config.getBoolean("LogOpCode", false)) {
-        logger.info("DoOP_SERREADM for " + (cmdpacket[1] & 0xFF) + " bytes on port " + cmdpacket[0]);
+        logger.info("DoOP_SERREADM for " + (cmdPacket[1] & BYTE_MASK)
+            + " bytes on port " + cmdPacket[0]);
       }
-
-      data = dwVSerialPorts.serReadM((int) cmdpacket[0], (cmdpacket[1] & 0xFF));
-
-      protodev.comWrite(data, (int) (cmdpacket[1] & 0xFF), true);
-
-    } catch (DWPortNotOpenException e1) {
+      data = dwVSerialPorts.serReadM(cmdPacket[0], (cmdPacket[1] & BYTE_MASK));
+      protodev.comWrite(data, cmdPacket[1] & BYTE_MASK, true);
+    } catch (DWPortNotOpenException | DWPortNotValidException e1) {
       logger.error(e1.getMessage());
-    } catch (DWPortNotValidException e2) {
-      logger.error(e2.getMessage());
     }
   }
 
-  private void DoOP_SERWRITEM() throws IOException, DWCommTimeOutException {
-    byte[] cmdpacket = new byte[2];
-
+  /**
+   * Write multiple bytes  to serial port.
+   *
+   * @throws IOException failed read/write
+   * @throws DWCommTimeOutException port time out
+   */
+  private void doOpSerialWriteM()
+      throws IOException, DWCommTimeOutException {
+    byte[] cmdPacket;
     try {
-      cmdpacket = protodev.comRead(2);
-
-      byte[] data = new byte[(0xff & cmdpacket[1])];
-
-      data = protodev.comRead(0xff & cmdpacket[1]);
-
-      dwVSerialPorts.serWriteM(cmdpacket[0], data);
-
+      cmdPacket = protodev.comRead(2);
+      byte[] data;
+      data = protodev.comRead(BYTE_MASK & cmdPacket[1]);
+      dwVSerialPorts.serWriteM(cmdPacket[0], data);
       if (config.getBoolean("LogOpCode", false)) {
-        logger.debug("DoOP_SERWRITEM to port " + cmdpacket[0] + ", " + (0xff & cmdpacket[1]) + " bytes");
+        logger.debug("DoOP_SERWRITEM to port " + cmdPacket[0] + ", "
+            + (BYTE_MASK & cmdPacket[1]) + " bytes");
       }
-
-    } catch (DWPortNotOpenException e1) {
+    } catch (DWPortNotOpenException | DWPortNotValidException e1) {
       logger.error(e1.getMessage());
-    } catch (DWPortNotValidException e2) {
-      logger.error(e2.getMessage());
     }
   }
 
   // printing
-
-  private void DoOP_PRINT() throws IOException, DWCommTimeOutException {
-    int tmpint;
-
-    tmpint = protodev.comRead1(true);
-
+  /**
+   * Print single byte.
+   *
+   * @throws IOException failed to write to print stream
+   * @throws DWCommTimeOutException printer time out
+   */
+  private void doOpPrint()
+      throws IOException, DWCommTimeOutException {
+    int printByte = protodev.comRead1(true);
     if (config.getBoolean("LogOpCode", false)) {
-      logger.info("DoOP_PRINT: byte " + tmpint);
+      logger.info("DoOP_PRINT: byte " + printByte);
     }
-    vprinter.addByte((byte) tmpint);
+    vprinter.addByte((byte) printByte);
   }
 
-  private void DoOP_PRINTFLUSH() {
+  /**
+   * Flush printer buffer.
+   */
+  private void doOpPrintFlush() {
     if (config.getBoolean("LogOpCode", false)) {
       logger.info("DoOP_PRINTFLUSH");
     }
     vprinter.flush();
   }
 
-  private int computeChecksum(byte[] data, int numbytes) {
-    int lastChecksum = 0;
-
-    /* Check to see if numbytes is odd or even */
-    while (numbytes > 0) {
-      numbytes--;
-      lastChecksum += (int) (data[numbytes] & 0xFF);
+  /**
+   * Calculate checksum for supplied byte array.
+   * <p>
+   *   Operates on the first N bytes of the
+   *   array, not the full length. No check
+   *   for N being greater than the array length
+   * </p>
+   * @param data byte array
+   * @param numBytes number of bytes to work on
+   * @return checksum
+   */
+  private int computeChecksum(final byte[] data, final int numBytes) {
+    lastChecksum = 0;
+    int counter = numBytes;
+    /* Check to see if numBytes is odd or even */
+    while (counter > 0) {
+      counter--;
+      lastChecksum += data[counter] & BYTE_MASK;
     }
-    return (lastChecksum);
+    return lastChecksum;
   }
 
+  /**
+   * Get last drive used.
+   *
+   * @return last drive
+   */
   public int getLastDrive() {
     return lastDrive;
   }
 
+  /**
+   * Get read retry count.
+   *
+   * @return read retries
+   */
+  @SuppressWarnings("unused")
   public int getReadRetries() {
     return readRetries;
   }
 
+  /**
+   * Get write retry count.
+   *
+   * @return write retries
+   */
+  @SuppressWarnings("unused")
   public int getWriteRetries() {
     return writeRetries;
   }
 
+  /**
+   * Get sectors read count.
+   *
+   * @return sectors read
+   */
+  @SuppressWarnings("unused")
   public int getSectorsRead() {
     return sectorsRead;
   }
 
+  /**
+   * Get sectors written count.
+   *
+   * @return sectors written
+   */
+  @SuppressWarnings("unused")
   public int getSectorsWritten() {
     return sectorsWritten;
   }
 
+  /**
+   * Get last operation code.
+   *
+   * @return last op code
+   */
   public byte getLastOpcode() {
     return lastOpcode;
   }
 
+  /**
+   * Get last get statistic.
+   *
+   * @return last get stat.
+   */
   public byte getLastGetStat() {
     return lastGetStat;
   }
 
+  /**
+   * Get last set statistic.
+   *
+   * @return last set stat.
+   */
   public byte getLastSetStat() {
     return lastSetStat;
   }
 
+  /**
+   * Get last checksum.
+   *
+   * @return checksum
+   */
   public int getLastChecksum() {
     return lastChecksum;
   }
 
+  /**
+   * Get last error recorded.
+   *
+   * @return last error id
+   */
   public int getLastError() {
     return lastError;
   }
