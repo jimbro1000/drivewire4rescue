@@ -15,8 +15,8 @@ import com.groupunix.drivewireserver.OS9Defs;
 
 public class DWRFMFD {
 
-	/*
-	 * ************************
+/*
+* ************************
 * File Descriptor Format
 *
 * The file descriptor is a sector that is present for every file
@@ -39,7 +39,7 @@ FDSL.S         EQU       .                   Segment list entry size
 FD.LS1         EQU       FD.SEG+((256-FD.SEG)/FDSL.S-1)*FDSL.S
 FD.LS2         EQU       (256/FDSL.S-1)*FDSL.S
 MINSEC         SET       16
-	 */
+*/
 
 
 	private static final Logger logger = Logger.getLogger("DWServer.DWRFMFD");
@@ -254,7 +254,7 @@ MINSEC         SET       16
 		return ATT;
 	}
 
-	public void setATT(byte aTT) {
+	public void setATT(final byte aTT) {
 		ATT = aTT;
 	}
 
@@ -262,7 +262,7 @@ MINSEC         SET       16
 		return OWN;
 	}
 
-	public void setOWN(byte[] oWN) {
+	public void setOWN(final byte[] oWN) {
 		OWN = oWN;
 	}
 
@@ -270,7 +270,7 @@ MINSEC         SET       16
 		return DAT;
 	}
 
-	public void setDAT(byte[] dAT) {
+	public void setDAT(final byte[] dAT) {
 		DAT = dAT;
 	}
 
@@ -278,7 +278,7 @@ MINSEC         SET       16
 		return LNK;
 	}
 
-	public void setLNK(byte lNK) {
+	public void setLNK(final byte lNK) {
 		LNK = lNK;
 	}
 
@@ -286,7 +286,7 @@ MINSEC         SET       16
 		return SIZ;
 	}
 
-	public void setSIZ(byte[] sIZ) {
+	public void setSIZ(final byte[] sIZ) {
 		SIZ = sIZ;
 	}
 
@@ -294,8 +294,7 @@ MINSEC         SET       16
 		return Creat;
 	}
 
-	public void setCreat(byte[] creat) {
+	public void setCreat(final byte[] creat) {
 		Creat = creat;
 	}
-
 }
