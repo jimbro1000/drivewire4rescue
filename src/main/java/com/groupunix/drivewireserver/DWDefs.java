@@ -928,6 +928,10 @@ public final class DWDefs {
    */
   public static final int BYTE_SHIFT = 256;
   /**
+   * Number of bits to shift for a byte.
+   */
+  public static final int BYTE_BITS = 8;
+  /**
    * Multiplier for word.
    */
   public static final int WORD_SHIFT = 65536;
@@ -942,4 +946,12 @@ public final class DWDefs {
    * Bytes in a kilobyte.
    */
   public static final int KILOBYTE = 1024;
+  /**
+   * PD.INT offset in protocol device description.
+   */
+  public static final int PD_INT_OFFSET = 16;
+  /**
+   * PD.QUT offset in protocol device description.
+   */
+  public static final int PD_QUT_OFFSET = 17;
 }

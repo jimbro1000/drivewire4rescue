@@ -118,6 +118,18 @@ public final class OS9Defs {
    * Status DIR ENT (directory entry).
    */
   public static final byte SS_DIR_ENT = 0x21;
+  /**
+   * Status COMST.
+   */
+  public static final byte SS_COMST = 0x28;
+  /**
+   * Stat open serial port.
+   */
+  public static final byte SS_S_OPEN = 0x29;
+  /**
+   * Stat close serial port.
+   */
+  public static final byte SS_S_CLOSE = 0x2A;
   // General commands
   /**
    * Command ESCAPE.
