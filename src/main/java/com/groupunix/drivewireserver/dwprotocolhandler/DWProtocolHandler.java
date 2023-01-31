@@ -31,6 +31,7 @@ import com.groupunix.drivewireserver.virtualserial.DWVSerialPorts;
 
 import static com.groupunix.drivewireserver.DWDefs.BYTE_BITS;
 import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
+import static com.groupunix.drivewireserver.DWDefs.GREGORIAN_YEAR_OFFSET;
 import static com.groupunix.drivewireserver.DWDefs.PD_INT_OFFSET;
 import static com.groupunix.drivewireserver.DWDefs.PD_QUT_OFFSET;
 import static com.groupunix.drivewireserver.OS9Defs.SS_COMST;
@@ -55,10 +56,6 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
    * Full time and date array length.
    */
   public static final int FULL_TIME = 6;
-  /**
-   * Offset to Gregorian years to standard.
-   */
-  public static final int GREGORIAN_YEAR_OFFSET = 108;
   /**
    * Read packet length.
    */

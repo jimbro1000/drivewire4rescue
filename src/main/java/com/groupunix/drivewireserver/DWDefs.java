@@ -954,4 +954,9 @@ public final class DWDefs {
    * PD.QUT offset in protocol device description.
    */
   public static final int PD_QUT_OFFSET = 17;
+  // General purpose "universal" defs
+  /**
+   * Offset to Gregorian years to standard.
+   */
+  public static final int GREGORIAN_YEAR_OFFSET = 108;
 }

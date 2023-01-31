@@ -13,64 +13,174 @@ import org.apache.log4j.Logger;
 
 import com.groupunix.drivewireserver.OS9Defs;
 
-public class DWRFMFD {
+import static com.groupunix.drivewireserver.DWDefs.BYTE_BITS;
+import static com.groupunix.drivewireserver.DWDefs.GREGORIAN_YEAR_OFFSET;
 
+public class DWRFMFD {
+  /**
+   * Log appender.
+   */
   private static final Logger LOGGER
       = Logger.getLogger("DWServer.DWRFMFD");
+  /**
+   * Length of datetime fields (bytes).
+   */
+  public static final int DATE_TIME_LEN = 5;
+  /**
+   * Sector size (assumed).
+   */
+  public static final int SECTOR_SIZE = 256;
+  /**
+   * Offset to attributes byte.
+   */
+  public static final int OFFSET_ATTRIBUTES = 0;
+  /**
+   * Offset to owner field.
+   */
+  public static final int OFFSET_OWNER = 1;
+  /**
+   * Offset to date field.
+   */
+  public static final int OFFSET_DATE = 3;
+  /**
+   * Offset to link byte.
+   */
+  public static final int OFFSET_LINK = 8;
+  /**
+   * Offset to size field.
+   */
+  public static final int OFFSET_SIZE = 9;
+  /**
+   * Offset to CREAT field.
+   */
+  public static final int OFFSET_CREAT = 13;
+  /**
+   * Length of owner field size (bytes).
+   */
+  public static final int OWNER_SIZE = 2;
+  /**
+   * Length of date field (bytes).
+   */
+  public static final int DATE_LENGTH = 5;
+  /**
+   * Length of size field (bytes).
+   */
+  public static final int SIZE_LENGTH = 4;
+  /**
+   * Length of creat field (bytes).
+   */
+  public static final int CREAT_LENGTH = 3;
+  /**
+   * Source file path.
+   */
   private final String pathstr;
+  /**
+   * File system manager.
+   */
   private final FileSystemManager fsManager;
+  /**
+   * Source file object.
+   */
   private final FileObject fileobj;
+  /**
+   * Attributes byte.
+   */
   private byte attributes;
+  /**
+   * Owner bytes.
+   */
   private byte[] owner;
+  /**
+   * Last modified bytes.
+   */
   private byte[] dateLastModified;
+  /**
+   * Link byte.
+   */
   private byte link;
+  /**
+   * File size bytes.
+   */
   private byte[] fileSize;
+  /**
+   * Segment list extension.
+   * <p>
+   *   See DWRFMFD.md
+   * </p>
+   */
   private byte[] segmentListExtension;
 
-
-  public DWRFMFD(final String pathstr) throws FileSystemException {
-    this.pathstr = pathstr;
+  /**
+   * RFM File Descriptor.
+   *
+   * @param pathString file path
+   * @throws FileSystemException failed to read from source
+   */
+  public DWRFMFD(final String pathString) throws FileSystemException {
+    this.pathstr = pathString;
     this.fsManager = VFS.getManager();
-    this.fileobj = this.fsManager.resolveFile(pathstr);
-    LOGGER.info("New FD for '" + pathstr + "'");
+    this.fileobj = this.fsManager.resolveFile(pathString);
+    LOGGER.info("New FD for '" + pathString + "'");
   }
 
+  /**
+   * Read file descriptor parameters.
+   *
+   * @return byte array
+   */
   public byte[] getFD() {
-    byte[] b = new byte[256];
+    byte[] b = new byte[SECTOR_SIZE];
 
-    for (int i = 0; i < 256; i++) {
+    for (int i = 0; i < SECTOR_SIZE; i++) {
       b[i] = 0;
     }
-    b[0] = getAttributes();
-    System.arraycopy(getOwner(), 0, b, 1, 2);
-    System.arraycopy(getLastModifiedDate(), 0, b, 3, 5);
-    b[8] = getLink();
-    System.arraycopy(getSize(), 0, b, 9, 4);
-    System.arraycopy(getCreat(), 0, b, 13, 3);
+    b[OFFSET_ATTRIBUTES] = getAttributes();
+    System.arraycopy(getOwner(), 0, b, OFFSET_OWNER, OWNER_SIZE);
+    System.arraycopy(getLastModifiedDate(), 0, b, OFFSET_DATE, DATE_LENGTH);
+    b[OFFSET_LINK] = getLink();
+    System.arraycopy(getSize(), 0, b, OFFSET_SIZE, SIZE_LENGTH);
+    System.arraycopy(getCreat(), 0, b, OFFSET_CREAT, CREAT_LENGTH);
     return (b);
   }
 
+  /**
+   * Set file descriptor parameters.
+   *
+   * @param fd file descriptor
+   */
   public void setFD(final byte[] fd) {
-    byte[] b = new byte[5];
+    byte[] b;
 
-    setAttributes(fd[0]);
-    System.arraycopy(fd, 1, b, 0, 2);
+    setAttributes(fd[OFFSET_ATTRIBUTES]);
+    b = new byte[OWNER_SIZE];
+    System.arraycopy(fd, OFFSET_OWNER, b, 0, OWNER_SIZE);
     setOwner(b);
-    System.arraycopy(fd, 3, b, 0, 5);
+    b = new byte[DATE_LENGTH];
+    System.arraycopy(fd, OFFSET_DATE, b, 0, DATE_LENGTH);
     setLastModifiedDate(b);
-    setLink(fd[8]);
-    System.arraycopy(fd, 9, b, 0, 4);
+    setLink(fd[OFFSET_LINK]);
+    b = new byte[SIZE_LENGTH];
+    System.arraycopy(fd, OFFSET_SIZE, b, 0, SIZE_LENGTH);
     setSize(b);
-    System.arraycopy(fd, 13, b, 0, 3);
+    b = new byte[CREAT_LENGTH];
+    System.arraycopy(fd, OFFSET_CREAT, b, 0, CREAT_LENGTH);
     setCreat(b);
   }
 
-
+  /**
+   * Write file descriptor.
+   * <p>
+   *   Not implemented
+   * </p>
+   */
   public void writeFD() {
-    // no implementation
   }
 
-
+  /**
+   * Read file descriptor.
+   *
+   * @throws FileSystemException failed to read from source
+   */
   public void readFD() throws FileSystemException {
     setOwner(new byte[]{0, 0});
     setLink((byte) 1);
@@ -106,15 +216,16 @@ public class DWRFMFD {
   }
 
   private byte[] lengthToBytes(final long length) {
-    double maxlen = Math.pow(256, 4) / 2;
+    double maxLen = Math.pow(SECTOR_SIZE, SIZE_LENGTH) / 2;
 
-    if (length > maxlen) {
-      LOGGER.error("File too big: " + length + " bytes in '" + this.pathstr + "' (max " + maxlen + ")");
+    if (length > maxLen) {
+      LOGGER.error("File too big: " + length + " bytes in '"
+          + this.pathstr + "' (max " + maxLen + ")");
       return (new byte[]{0, 0, 0, 0});
     }
-    byte[] b = new byte[4];
-    for (int i = 0; i < 4; i++) {
-      b[3 - i] = (byte) (length >>> (i * 8));
+    byte[] b = new byte[SIZE_LENGTH];
+    for (int i = 0; i < SIZE_LENGTH; i++) {
+      b[SIZE_LENGTH - 1 - i] = (byte) (length >>> (i * BYTE_BITS));
     }
     return b;
   }
@@ -127,14 +238,14 @@ public class DWRFMFD {
    */
   private byte[] timeToBytes(final long time) {
     GregorianCalendar c = new GregorianCalendar();
-
+    int index = 0;
     c.setTime(new Date(time));
-    byte[] b = new byte[5];
-    b[0] = (byte) (c.get(Calendar.YEAR) - 108);
-    b[1] = (byte) (c.get(Calendar.MONTH) + 1);
-    b[2] = (byte) (c.get(Calendar.DAY_OF_MONTH));
-    b[3] = (byte) (c.get(Calendar.HOUR_OF_DAY));
-    b[4] = (byte) (c.get(Calendar.MINUTE));
+    byte[] b = new byte[DATE_TIME_LEN];
+    b[index++] = (byte) (c.get(Calendar.YEAR) - GREGORIAN_YEAR_OFFSET);
+    b[index++] = (byte) (c.get(Calendar.MONTH) + 1);
+    b[index++] = (byte) (c.get(Calendar.DAY_OF_MONTH));
+    b[index++] = (byte) (c.get(Calendar.HOUR_OF_DAY));
+    b[index] = (byte) (c.get(Calendar.MINUTE));
     return b;
   }
 
@@ -147,12 +258,12 @@ public class DWRFMFD {
   @SuppressWarnings("unused")
   private long bytesToTime(final byte[] b) {
     GregorianCalendar c = new GregorianCalendar();
-
-    c.set(Calendar.YEAR, b[0] + 108);
-    c.set(Calendar.MONTH, b[1] - 1);
-    c.set(Calendar.DAY_OF_MONTH, b[2]);
-    c.set(Calendar.HOUR_OF_DAY, b[3]);
-    c.set(Calendar.MINUTE, b[4]);
+    int index = 0;
+    c.set(Calendar.YEAR, b[index++] + GREGORIAN_YEAR_OFFSET);
+    c.set(Calendar.MONTH, b[index++] - 1);
+    c.set(Calendar.DAY_OF_MONTH, b[index++]);
+    c.set(Calendar.HOUR_OF_DAY, b[index++]);
+    c.set(Calendar.MINUTE, b[index]);
     return c.getTimeInMillis();
   }
 
