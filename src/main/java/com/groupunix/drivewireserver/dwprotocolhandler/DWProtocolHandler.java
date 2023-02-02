@@ -386,7 +386,7 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
             .equals("com.groupunix.drivewireserver."
                 + "dwprotocolhandler.DWSerialDevice")
         ) {
-          ((DWSerialDevice) this.protodev).resetReadtime();
+          ((DWSerialDevice) this.protodev).resetReadTime();
         }
         optime = System.currentTimeMillis();
         this.inOp = true;
@@ -428,7 +428,7 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
         } else if (config.getBoolean("LogTiming", false)) {
           LOGGER.debug(DWUtils.prettyOP(lastOpcode) + " took " + optook
               + "ms, serial read delay was "
-              + ((DWSerialDevice) this.protodev).getReadtime());
+              + ((DWSerialDevice) this.protodev).getReadTime());
         }
       } else {
         if (!this.wanttodie) {
