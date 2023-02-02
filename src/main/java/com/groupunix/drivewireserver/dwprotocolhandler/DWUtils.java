@@ -12,7 +12,12 @@ import java.util.Date;
 import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwexceptions.DWFileSystemInvalidFilenameException;
 
+import static com.groupunix.drivewireserver.DWDefs.*;
+
 public class DWUtils {
+
+  public static final int COCO_STRING_TERMINATOR = 128;
+
   // this appears to be a bug - the MSB should be shifted by 24 places, not 32
   public static int int4(byte[] data) {
     return ((data[0] & 0xFF) << 32) + ((data[1] & 0xFF) << 16) + ((data[2] & 0xFF) << 8) + (data[3] & 0xFF);
@@ -642,8 +647,13 @@ public class DWUtils {
     }
   }
 
-
-  public static String shortenLocalURI(String df) {
+  /**
+   * Shorten local uri.
+   *
+   * @param df
+   * @return short uri
+   */
+  public static String shortenLocalURI(final String df) {
     if (df.startsWith("file:///")) {
       if (df.charAt(9) == ':') {
         return df.substring(8);
@@ -654,9 +664,14 @@ public class DWUtils {
     return (df);
   }
 
-  public static String getFileDescriptor(File f) {
+  /**
+   * Get file descriptor.
+   *
+   * @param f file
+   * @return descriptor string
+   */
+  public static String getFileDescriptor(final File f) {
     String res = "";
-
     try {
       res = File.separator;
       res += "|" + f.getCanonicalPath();
@@ -668,45 +683,44 @@ public class DWUtils {
         res += "|" + f.isDirectory();
       } else
         res += "|0|0|true";
-
-
     } catch (IOException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
-
-    return (res);
+    return res;
   }
 
-
+  /**
+   * Get file XDir descriptor.
+   *
+   * @param f file
+   * @return descriptor string
+   * @throws DWFileSystemInvalidFilenameException invalid filename
+   */
   @SuppressWarnings("deprecation")
-  public static String getFileXDescriptor(File f) throws DWFileSystemInvalidFilenameException {
-
+  public static String getFileXDescriptor(final File f)
+      throws DWFileSystemInvalidFilenameException {
     if (f.length() > 4294967295L) {
-      throw new DWFileSystemInvalidFilenameException("File too large for XDir");
+      throw new DWFileSystemInvalidFilenameException(
+          "File too large for XDir"
+      );
     }
-
     if (f.getName().length() > 255) {
-      throw new DWFileSystemInvalidFilenameException("Filename too long for XDir");
+      throw new DWFileSystemInvalidFilenameException(
+          "Filename too long for XDir"
+      );
     }
-
     byte[] res = new byte[12 + f.getName().length()];
-
     int pos = 0;
-
-
     long l = f.length();
 
     // 4 byte file size
-
-    res[pos++] = (byte) (l >>> 24);
-    res[pos++] = (byte) (l >>> 16);
-    res[pos++] = (byte) (l >>> 8);
+    res[pos++] = (byte) (l >>> BYTE_BITS * 3);
+    res[pos++] = (byte) (l >>> BYTE_BITS * 2);
+    res[pos++] = (byte) (l >>> BYTE_BITS);
     res[pos++] = (byte) (l);
 
     // 5 byte OS9 style modified date - Y M D Hr Min
     Date moddate = new Date(f.lastModified());
-
     res[pos++] = (byte) (moddate.getYear());
     res[pos++] = (byte) (moddate.getMonth());
     res[pos++] = (byte) (moddate.getDate());
@@ -714,134 +728,143 @@ public class DWUtils {
     res[pos++] = (byte) (moddate.getMinutes());
 
     // is directory
-
-    if (f.isDirectory())
+    if (f.isDirectory()) {
       res[pos++] = (byte) 1;
-    else
+    } else {
       res[pos++] = (byte) 0;
-
+    }
     // is readonly
-
-    if (f.canWrite())
+    if (f.canWrite()) {
       res[pos++] = (byte) 0;
-    else
+    } else {
       res[pos++] = (byte) 1;
-
+    }
     // name length
-
     res[pos++] = (byte) f.getName().length();
-
-    for (int i = 0; i < f.getName().length(); i++)
+    for (int i = 0; i < f.getName().length(); i++) {
       res[pos++] = f.getName().getBytes()[i];
-
-
+    }
     //System.out.println(f.getName() + "\t" + f.length());
-
-
     return (new String(res));
   }
 
+  /**
+   * Pretty disk format.
+   *
+   * @param diskFormat format id
+   * @return format string
+   */
+  @SuppressWarnings("unused")
   public static String prettyFormat(int diskFormat) {
-    String res = "unknown";
-
-    switch (diskFormat) {
-      case DWDefs.DISK_FORMAT_DMK:
-        res = "DMK";
-        break;
-      case DWDefs.DISK_FORMAT_JVC:
-        res = "JVC";
-        break;
-      case DWDefs.DISK_FORMAT_RAW:
-        res = "DSK (raw)";
-        break;
-      case DWDefs.DISK_FORMAT_VDK:
-        res = "VDK";
-        break;
-      case DWDefs.DISK_FORMAT_NONE:
-        res = "none";
-        break;
-    }
-
-
-    return res;
+    return switch (diskFormat) {
+      case DWDefs.DISK_FORMAT_DMK -> "DMK";
+      case DWDefs.DISK_FORMAT_JVC -> "JVC";
+      case DWDefs.DISK_FORMAT_RAW -> "DSK (raw)";
+      case DWDefs.DISK_FORMAT_VDK -> "VDK";
+      case DWDefs.DISK_FORMAT_NONE -> "none";
+      default -> "unknown";
+    };
   }
 
+  /**
+   * Pretty format file system.
+   *
+   * @param format format id
+   * @return format string
+   */
   public static String prettyFileSystem(int format) {
-    String res = "unknown";
-
-    switch (format) {
-      case DWDefs.DISK_FILESYSTEM_OS9:
-        res = "OS9";
-        break;
-      case DWDefs.DISK_FILESYSTEM_DECB:
-        res = "DECB";
-        break;
-      case DWDefs.DISK_FILESYSTEM_LWFS:
-        res = "LWFS";
-        break;
-      case DWDefs.DISK_FILESYSTEM_CCB:
-        res = "CCB";
-        break;
-
-    }
-
-
-    return res;
+    return switch (format) {
+      case DWDefs.DISK_FILESYSTEM_OS9 -> "OS9";
+      case DWDefs.DISK_FILESYSTEM_DECB -> "DECB";
+      case DWDefs.DISK_FILESYSTEM_LWFS -> "LWFS";
+      case DWDefs.DISK_FILESYSTEM_CCB -> "CCB";
+      default -> "unknown";
+    };
   }
 
+  /**
+   * Get root thread group.
+   * <p>
+   * Follows thread parent to the top
+   * </p>
+   *
+   * @return thread group
+   */
   public static ThreadGroup getRootThreadGroup() {
-
     ThreadGroup tg = Thread.currentThread().getThreadGroup();
     ThreadGroup ptg;
-    while ((ptg = tg.getParent()) != null)
+    while ((ptg = tg.getParent()) != null) {
       tg = ptg;
+    }
     return tg;
   }
 
-  public static String OS9String(byte[] buf) {
-    String res = "";
-
+  /**
+   * Format coco style string to OS9 style.
+   *
+   * @param buf byte array
+   * @return os9 formatted string
+   */
+  public static String OS9String(final byte[] buf) {
+    StringBuilder res = new StringBuilder();
     int pos = 0;
-
-    while ((pos < buf.length) && ((buf[pos] & 0xFF) < 128)) {
-      res += (char) (buf[pos] & 0xff);
+    while (
+        (pos < buf.length)
+            && ((buf[pos] & BYTE_MASK) < COCO_STRING_TERMINATOR)
+    ) {
+      res.append((char) (buf[pos] & BYTE_MASK));
       pos++;
     }
-
-    if (pos < buf.length)
-      res += (char) ((buf[pos] & 0xff) - 128);
-
-    return res;
+    if (pos < buf.length) {
+      res.append((char) ((buf[pos] & BYTE_MASK) - COCO_STRING_TERMINATOR));
+    }
+    return res.toString();
   }
 
-  public static String pretty5ByteDateTime(byte[] data) {
-    String res = String.format("%02d:%02d %02d/%02d/%04d", (data[3] & 0xff), (data[4] & 0xff), (data[1] & 0xff), (data[2] & 0xff), (1900 + (data[0] & 0xff)));
-
-    return res;
+  /**
+   * Format 5 byte date and time.
+   *
+   * @param data date time
+   * @return date time string
+   */
+  public static String pretty5ByteDateTime(final byte[] data) {
+    return String.format("%02d:%02d ",
+        (data[3] & BYTE_MASK),
+        (data[4] & BYTE_MASK)
+    ) + pretty3ByteDate(data);
   }
 
-  public static String pretty3ByteDate(byte[] data) {
-    String res = String.format("%02d/%02d/%04d", (data[1] & 0xff), (data[2] & 0xff), (1900 + (data[0] & 0xff)));
-
-    return res;
+  /**
+   * Format 3 byte date.
+   *
+   * @param data date
+   * @return date string
+   */
+  public static String pretty3ByteDate(final byte[] data) {
+    return String.format(
+        "%02d/%02d/%04d",
+        (data[1] & BYTE_MASK),
+        (data[2] & BYTE_MASK),
+        (1900 + (data[0] & BYTE_MASK))
+    );
   }
 
-  public String cocoString(byte[] bytes) {
-    // return string from 6809 style string
-    String ret = new String();
-
+  /**
+   * Convert native 6809 style string to coco format.
+   *
+   * @param bytes byte array
+   * @return coco formatted string
+   */
+  @SuppressWarnings("unused")
+  public String cocoString(final byte[] bytes) {
+    StringBuilder ret = new StringBuilder();
     int i = 0;
-
-    // thanks Christopher Hawks
+    // thanks to Christopher Hawks
     while ((i < bytes.length - 1) && (bytes[i] > 0)) {
-      ret += Character.toString((char) bytes[i]);
+      ret.append((char) bytes[i]);
       i++;
     }
-
-    ret += Character.toString((char) (bytes[i] + 128));
-
-    return (ret);
+    ret.append((char) (bytes[i] + COCO_STRING_TERMINATOR));
+    return ret.toString();
   }
-
-
 }
