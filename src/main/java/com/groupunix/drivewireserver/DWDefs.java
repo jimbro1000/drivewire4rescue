@@ -959,4 +959,12 @@ public final class DWDefs {
    * Offset to Gregorian years to standard.
    */
   public static final int GREGORIAN_YEAR_OFFSET = 108;
+  /**
+   * ASCII NL.
+   */
+  public static final int NEWLINE = 10;
+  /**
+   * ASCII CR.
+   */
+  public static final int CARRIAGE_RETURN = 13;
 }

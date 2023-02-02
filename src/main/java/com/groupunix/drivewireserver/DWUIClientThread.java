@@ -15,6 +15,8 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.uicommands.UICmd;
 
 import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
+import static com.groupunix.drivewireserver.DWDefs.CARRIAGE_RETURN;
+import static com.groupunix.drivewireserver.DWDefs.NEWLINE;
 
 public class DWUIClientThread implements Runnable {
   /**
@@ -22,14 +24,6 @@ public class DWUIClientThread implements Runnable {
    */
   private static final Logger LOGGER
       = Logger.getLogger("DWUIClientThread");
-  /**
-   * ASCII NL.
-   */
-  private static final int NEWLINE = 10;
-  /**
-   * ASCII CR.
-   */
-  private static final int CARRIAGE_RETURN = 13;
   /**
    * Socket.
    */

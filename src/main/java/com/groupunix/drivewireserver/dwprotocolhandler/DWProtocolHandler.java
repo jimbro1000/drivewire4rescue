@@ -776,7 +776,7 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
   private void doOpRfm() throws DWCommTimeOutException, IOException {
     int rfmOp = protodev.comRead1(true);
     LOGGER.info("DoOP_RFM call " + rfmOp);
-    rfmhandler.DoRFMOP(protodev, rfmOp);
+    rfmhandler.doRfmOp(protodev, rfmOp);
   }
 
   /**
