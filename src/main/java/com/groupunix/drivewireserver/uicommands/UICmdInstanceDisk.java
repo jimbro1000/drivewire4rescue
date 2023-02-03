@@ -6,28 +6,51 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class UICmdInstanceDisk extends DWCommand {
-  public UICmdInstanceDisk(DWUIClientThread dwuiClientThread) {
-    this.getCommandList().addCommand(new UICmdInstanceDiskShow(dwuiClientThread));
-    // commands.addcommand(new UICmdInstanceDiskSerial(dwuiClientThread));
-    // commands.addcommand(new UICmdInstanceDiskStatus(dwuiClientThread));
+  /**
+   * UI Command Instance Disk.
+   *
+   * @param clientThread client thread ref.
+   */
+  public UICmdInstanceDisk(final DWUIClientThread clientThread) {
+    this.getCommandList()
+        .addCommand(new UICmdInstanceDiskShow(clientThread));
+    setHelp();
+  }
+
+  /**
+   * UI Command Instance Disk.
+   *
+   * @param protocolHandler protocol handler
+   */
+  public UICmdInstanceDisk(final DWProtocolHandler protocolHandler) {
+    this.getCommandList()
+        .addCommand(new UICmdInstanceDiskShow(protocolHandler));
+    setHelp();
+  }
+
+  private void setHelp() {
     this.setCommand("disk");
     this.setShortHelp("Instance disk commands");
     this.setUsage("ui instance disk [command]");
   }
 
-  public UICmdInstanceDisk(DWProtocolHandler dwProto) {
-    this.getCommandList().addCommand(new UICmdInstanceDiskShow(dwProto));
-    // commands.addcommand(new UICmdInstanceDiskSerial(dwProto));
-    // commands.addcommand(new UICmdInstanceDiskStatus(dwProto));
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return this.getCommandList().parse(cmdline);
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (this.getCommandList().parse(cmdline));
-  }
-
-
-  public boolean validate(String cmdline) {
-    return (this.getCommandList().validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
 }
