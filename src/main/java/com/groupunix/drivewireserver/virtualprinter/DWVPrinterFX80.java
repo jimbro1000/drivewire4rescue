@@ -690,7 +690,7 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
   public File getPrinterFile()
       throws IOException, DWPrinterFileError {
     if (configuration.containsKey("OutputFile")) {
-      if (DWUtils.FileExistsOrCreate(configuration.getString("OutputFile"))) {
+      if (DWUtils.fileExistsOrCreate(configuration.getString("OutputFile"))) {
         return (new File(configuration.getString("OutputFile")));
       } else {
         throw new DWPrinterFileError(
@@ -700,7 +700,7 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
       }
 
     } else if (configuration.containsKey("OutputDir")) {
-      if (DWUtils.DirExistsOrCreate(configuration.getString("OutputDir"))) {
+      if (DWUtils.dirExistsOrCreate(configuration.getString("OutputDir"))) {
         return File.createTempFile(
             "dw_fx80_",
             getFileExtension(

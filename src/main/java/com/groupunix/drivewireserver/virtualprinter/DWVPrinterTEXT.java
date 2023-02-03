@@ -147,7 +147,7 @@ public class DWVPrinterTEXT implements DWVPrinterDriver {
   public File getPrinterFile()
       throws IOException, DWPrinterFileError {
     if (this.hierarchicalConfiguration.containsKey("OutputFile")) {
-      if (DWUtils.FileExistsOrCreate(
+      if (DWUtils.fileExistsOrCreate(
           this.hierarchicalConfiguration.getString("OutputFile")
       )) {
         return (new File(
@@ -160,7 +160,7 @@ public class DWVPrinterTEXT implements DWVPrinterDriver {
         );
       }
     } else if (this.hierarchicalConfiguration.containsKey("OutputDir")) {
-      if (DWUtils.DirExistsOrCreate(
+      if (DWUtils.dirExistsOrCreate(
           this.hierarchicalConfiguration.getString("OutputDir")
       )) {
         return File.createTempFile(

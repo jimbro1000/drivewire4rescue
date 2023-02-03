@@ -17,6 +17,8 @@ import static com.groupunix.drivewireserver.DWDefs.*;
 public class DWUtils {
 
   public static final int COCO_STRING_TERMINATOR = 128;
+  public static final long MAX_FILE_LENGTH = 4294967295L;
+  public static final int COPY_CHUNK_SIZE = 4096;
 
   // this appears to be a bug - the MSB should be shifted by 24 places, not 32
   public static int int4(byte[] data) {
@@ -524,126 +526,160 @@ public class DWUtils {
     return (rest);
   }
 
-
-  public static String convertStarToBang(String txt) {
-
-    txt = txt.replaceAll("\\*", "!");
-
-    return txt;
+  /**
+   * Convert asterisk to exclamation mark.
+   * <p>
+   * Replaces all asterisks with bangs
+   * </p>
+   *
+   * @param txt string
+   * @return banged up string
+   */
+  public static String convertStarToBang(final String txt) {
+    return txt.replaceAll("\\*", "!");
   }
 
-  public static boolean isStringFalse(String tf) {
-    if (tf.equalsIgnoreCase("false"))
+  /**
+   * Test if string evaluates to falsy.
+   * <p>
+   * True if string is false or off.
+   * Ignores case
+   * </p>
+   *
+   * @param tf string
+   * @return boolean
+   */
+  @SuppressWarnings("unused")
+  public static boolean isStringFalse(final String tf) {
+    if (tf.equalsIgnoreCase("false")) {
       return true;
-
-    if (tf.equalsIgnoreCase("off"))
-      return true;
-
-    return false;
+    }
+    return tf.equalsIgnoreCase("off");
   }
 
-  public static boolean isStringTrue(String tf) {
-    if (tf.equalsIgnoreCase("true"))
+  /**
+   * Test if string evaluates to truthy.
+   * <p>
+   * True if string is true or on.
+   * Ignores case
+   * </p>
+   *
+   * @param tf string
+   * @return boolean
+   */
+  @SuppressWarnings("unused")
+  public static boolean isStringTrue(final String tf) {
+    if (tf.equalsIgnoreCase("true")) {
       return true;
-
-    if (tf.equalsIgnoreCase("on"))
-      return true;
-
-    return false;
+    }
+    return tf.equalsIgnoreCase("on");
   }
 
-  public static boolean testClassPath(String fullClassName) {
+  /**
+   * Test if class path exists.
+   *
+   * @param fullClassName fully qualified class name
+   * @return true if class exists
+   */
+  public static boolean testClassPath(final String fullClassName) {
     boolean result = false;
     try {
       Class.forName(fullClassName);
       result = true;
-    } catch (Throwable e) {
-      //  e.printStackTrace();
+    } catch (Throwable ignored) {
     }
-
     return result;
   }
 
-
-  public static boolean DirExistsOrCreate(String directoryName) {
+  /**
+   * Create directory if it doesn't exist.
+   *
+   * @param directoryName directory name
+   * @return true
+   */
+  public static boolean dirExistsOrCreate(final String directoryName) {
     File theDir = new File(directoryName);
-
     // if the directory does not exist, create it
-    if (!theDir.exists()) {
-      return (theDir.mkdir());
-    } else {
-      return (true);
+    if (theDir.exists()) {
+      return true;
     }
+    return theDir.mkdir();
   }
 
-  public static boolean FileExistsOrCreate(String fileName) throws IOException {
+  /**
+   * Create file if it doesn't exist.
+   *
+   * @param fileName file name
+   * @return true
+   * @throws IOException write failure
+   */
+  public static boolean fileExistsOrCreate(final String fileName)
+      throws IOException {
     File theFile = new File(fileName);
-
-    // if the directory does not exist, create it
-    if (!theFile.exists()) {
-      return (theFile.createNewFile());
-    } else {
-      return (true);
+    // if the file does not exist, create it
+    if (theFile.exists()) {
+      return true;
     }
+    return theFile.createNewFile();
   }
 
-
-  public static void copyFile(String fromFileName, String toFileName) throws IOException {
-
+  /**
+   * Copy file contents.
+   *
+   * @param fromFileName source file name
+   * @param toFileName   target file name
+   * @throws IOException read/write failure
+   */
+  public static void copyFile(
+      final String fromFileName,
+      final String toFileName
+  ) throws IOException {
     File fromFile = new File(fromFileName);
     File toFile = new File(toFileName);
 
-    if (!fromFile.exists())
+    if (!fromFile.exists()) {
       throw new IOException("no source file: " + fromFileName);
-    if (!fromFile.isFile())
-      throw new IOException("can't copy directory: " + fromFileName);
-    if (!fromFile.canRead())
-      throw new IOException("source file is unreadable: " + fromFileName);
-
-    if (toFile.isDirectory())
-      toFile = new File(toFile, fromFile.getName());
-
-    if (toFile.exists()) {
-      if (!toFile.canWrite())
-        throw new IOException("destination file is unwriteable: " + toFileName);
-
-      String parent = toFile.getParent();
-      if (parent == null)
-        parent = System.getProperty("user.dir");
-
-      File dir = new File(parent);
-      if (!dir.exists())
-        throw new IOException("destination directory doesn't exist: " + parent);
-
-      if (dir.isFile())
-        throw new IOException("destination is not a directory: " + parent);
-      if (!dir.canWrite())
-        throw new IOException("destination directory is unwriteable: " + parent);
     }
-
-    FileInputStream from = null;
-    FileOutputStream to = null;
-    try {
-      from = new FileInputStream(fromFile);
-      to = new FileOutputStream(toFile);
-      byte[] buffer = new byte[4096];
+    if (!fromFile.isFile()) {
+      throw new IOException("can't copy directory: " + fromFileName);
+    }
+    if (!fromFile.canRead()) {
+      throw new IOException("source file is unreadable: " + fromFileName);
+    }
+    if (toFile.isDirectory()) {
+      toFile = new File(toFile, fromFile.getName());
+    }
+    if (toFile.exists()) {
+      if (!toFile.canWrite()) {
+        throw new IOException("destination file is unwriteable: " + toFileName);
+      }
+      String parent = toFile.getParent();
+      if (parent == null) {
+        parent = System.getProperty("user.dir");
+      }
+      File dir = new File(parent);
+      if (!dir.exists()) {
+        throw new IOException("destination directory doesn't exist: "
+            + parent);
+      }
+      if (dir.isFile()) {
+        throw new IOException("destination is not a directory: "
+            + parent);
+      }
+      if (!dir.canWrite()) {
+        throw new IOException("destination directory is unwriteable: "
+            + parent);
+      }
+    }
+    try (
+        FileInputStream from = new FileInputStream(fromFile);
+        FileOutputStream to = new FileOutputStream(toFile)
+    ) {
+      byte[] buffer = new byte[COPY_CHUNK_SIZE];
       int bytesRead;
-
-      while ((bytesRead = from.read(buffer)) != -1)
-        to.write(buffer, 0, bytesRead); // write
-    } finally {
-      if (from != null)
-        try {
-          from.close();
-        } catch (IOException e) {
-          ;
-        }
-      if (to != null)
-        try {
-          to.close();
-        } catch (IOException e) {
-          ;
-        }
+      while ((bytesRead = from.read(buffer)) != -1) {
+        to.write(buffer, 0, bytesRead);
+      }
     }
   }
 
@@ -677,12 +713,14 @@ public class DWUtils {
       res += "|" + f.getCanonicalPath();
       res += "|" + f.getParent();
       if (f.getParent() != null) {
-        // these checks take a long time on removable media with no disk in the drive
+        // these checks take a long time on removable media
+        // with no disk in the drive
         res += "|" + f.length();
         res += "|" + f.lastModified();
         res += "|" + f.isDirectory();
-      } else
+      } else {
         res += "|0|0|true";
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -699,7 +737,7 @@ public class DWUtils {
   @SuppressWarnings("deprecation")
   public static String getFileXDescriptor(final File f)
       throws DWFileSystemInvalidFilenameException {
-    if (f.length() > 4294967295L) {
+    if (f.length() > MAX_FILE_LENGTH) {
       throw new DWFileSystemInvalidFilenameException(
           "File too large for XDir"
       );
@@ -755,7 +793,7 @@ public class DWUtils {
    * @return format string
    */
   @SuppressWarnings("unused")
-  public static String prettyFormat(int diskFormat) {
+  public static String prettyFormat(final int diskFormat) {
     return switch (diskFormat) {
       case DWDefs.DISK_FORMAT_DMK -> "DMK";
       case DWDefs.DISK_FORMAT_JVC -> "JVC";
@@ -772,7 +810,7 @@ public class DWUtils {
    * @param format format id
    * @return format string
    */
-  public static String prettyFileSystem(int format) {
+  public static String prettyFileSystem(final int format) {
     return switch (format) {
       case DWDefs.DISK_FILESYSTEM_OS9 -> "OS9";
       case DWDefs.DISK_FILESYSTEM_DECB -> "DECB";
@@ -805,7 +843,7 @@ public class DWUtils {
    * @param buf byte array
    * @return os9 formatted string
    */
-  public static String OS9String(final byte[] buf) {
+  public static String os9String(final byte[] buf) {
     StringBuilder res = new StringBuilder();
     int pos = 0;
     while (

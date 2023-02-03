@@ -370,7 +370,7 @@ public class DWRBFFileSystem extends DWFileSystem {
         DWRBFFileDescriptor fd = new DWRBFFileDescriptor(
             this.getDisk().getSector(lsn).getData()
         );
-        res.add(new DWRBFFileSystemDirEntry(DWUtils.OS9String(entry), lsn, fd));
+        res.add(new DWRBFFileSystemDirEntry(DWUtils.os9String(entry), lsn, fd));
       }
     }
     return res;
