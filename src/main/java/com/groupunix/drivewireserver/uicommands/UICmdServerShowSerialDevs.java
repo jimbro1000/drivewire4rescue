@@ -8,39 +8,38 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowSerialDevs extends DWCommand {
 
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "serialdevs";
+  /**
+   * UI Command Server Show Serial Devices.
+   */
+  public UICmdServerShowSerialDevs() {
+    setCommand("serialdevs");
+    setShortHelp("show available serial devices");
+    setUsage("ui server show serialdevs");
   }
 
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show available serial devices";
-  }
-
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show serialdevs";
-  }
-
-  @Override
-  public DWCommandResponse parse(String cmdline) {
-    String txt = new String();
-
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder txt = new StringBuilder();
     ArrayList<String> ports = DriveWireServer.getAvailableSerialPorts();
-
-    for (int i = 0; i < ports.size(); i++)
-      txt += ports.get(i) + "\n";
-
-    return (new DWCommandResponse(txt));
+    for (String port : ports) {
+      txt.append(port).append("\n");
+    }
+    return new DWCommandResponse(txt.toString());
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

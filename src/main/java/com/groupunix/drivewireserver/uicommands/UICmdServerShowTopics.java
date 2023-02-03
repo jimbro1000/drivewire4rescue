@@ -1,7 +1,6 @@
 package com.groupunix.drivewireserver.uicommands;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import com.groupunix.drivewireserver.DWUIClientThread;
 import com.groupunix.drivewireserver.DriveWireServer;
@@ -11,57 +10,70 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdServerShowTopics extends DWCommand {
 
+  /**
+   * Protocol.
+   */
+  private DWProtocol dwProtocol;
+  /**
+   * Client thread ref.
+   */
+  private final DWUIClientThread clientThreadRef;
 
-  private DWProtocol dwProto;
-  private DWUIClientThread dwuiClientThread;
-
-  public UICmdServerShowTopics(DWUIClientThread dwuiClientThread) {
-    this.dwuiClientThread = dwuiClientThread;
+  /**
+   * UI Command Server Show Topics.
+   * @param clientThread client thread ref
+   */
+  public UICmdServerShowTopics(final DWUIClientThread clientThread) {
+    this.clientThreadRef = clientThread;
+    this.dwProtocol = null;
+    setHelp();
   }
 
-
-  public UICmdServerShowTopics(DWProtocol dwProto) {
-    this.dwProto = dwProto;
+  /**
+   * UI Command Server Show Topics.
+   *
+   * @param protocol protocol
+   */
+  public UICmdServerShowTopics(final DWProtocol protocol) {
+    this.dwProtocol = protocol;
+    clientThreadRef = null;
+    setHelp();
   }
 
+  private void setHelp() {
+    setCommand("topics");
+    setShortHelp("show available help topics");
+    setUsage("ui server show topics");
+  }
 
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "topics";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show available help topics";
-  }
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show topics";
-  }
-
-  @Override
-  public DWCommandResponse parse(String cmdline) {
-    String txt = new String();
-
-    if (this.dwProto == null)
-      this.dwProto = DriveWireServer.getHandler(dwuiClientThread.getInstance());
-
-    ArrayList<String> tops = dwProto.getHelp().getTopics(null);
-
-    Iterator<String> t = tops.iterator();
-    while (t.hasNext()) {
-      txt += t.next() + "\n";
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder txt = new StringBuilder();
+    if (this.dwProtocol == null) {
+      this.dwProtocol = DriveWireServer.getHandler(
+          clientThreadRef.getInstance()
+      );
     }
-
-    return (new DWCommandResponse(txt));
+    ArrayList<String> tops = dwProtocol.getHelp().getTopics(null);
+    for (String top : tops) {
+      txt.append(top).append("\n");
+    }
+    return new DWCommandResponse(txt.toString());
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }
