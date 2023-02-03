@@ -5,20 +5,35 @@ import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdTest extends DWCommand {
-
-  public UICmdTest(DWUIClientThread dwuiClientThread) {
-    this.getCommandList().addCommand(new UICmdTestDGraph(dwuiClientThread));
+  /**
+   * UI Command Test.
+   *
+   * @param clientThread client thread reference
+   */
+  public UICmdTest(final DWUIClientThread clientThread) {
+    this.getCommandList().addCommand(new UICmdTestDGraph(clientThread));
     this.setCommand("test");
     this.setShortHelp("Test commands");
     this.setUsage("ui test [command]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (this.getCommandList().parse(cmdline));
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return this.getCommandList().parse(cmdline);
   }
 
-  public boolean validate(String cmdline) {
-    return (this.getCommandList().validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
-
 }

@@ -1,21 +1,33 @@
 package com.groupunix.drivewireserver.uicommands;
 
 import com.groupunix.drivewireserver.DWUIClientThread;
-import com.groupunix.drivewireserver.dwcommands.*;
+import com.groupunix.drivewireserver.dwcommands.DWCommand;
+import com.groupunix.drivewireserver.dwcommands.DWCommandList;
+import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdInstanceTimer extends DWCommand {
-  public UICmdInstanceTimer(DWProtocol dwProtocol) {
+  /**
+   * UI Command Instance Timer.
+   *
+   * @param protocol protocol
+   */
+  public UICmdInstanceTimer(final DWProtocol protocol) {
     DWCommandList commands = this.getCommandList();
-    commands.addCommand(new UICmdInstanceTimerShow(dwProtocol));
-    commands.addCommand(new UICmdInstanceTimerReset(dwProtocol));
+    commands.addCommand(new UICmdInstanceTimerShow(protocol));
+    commands.addCommand(new UICmdInstanceTimerReset(protocol));
     setHelp();
   }
 
-  public UICmdInstanceTimer(DWUIClientThread dwuiClientThread) {
+  /**
+   * UI Command Instance Timer.
+   *
+   * @param clientThread client thread reference
+   */
+  public UICmdInstanceTimer(final DWUIClientThread clientThread) {
     DWCommandList commands = this.getCommandList();
-    commands.addCommand(new UICmdInstanceTimerShow(dwuiClientThread));
-    commands.addCommand(new UICmdInstanceTimerReset(dwuiClientThread));
+    commands.addCommand(new UICmdInstanceTimerShow(clientThread));
+    commands.addCommand(new UICmdInstanceTimerReset(clientThread));
     setHelp();
   }
 
@@ -25,11 +37,23 @@ public class UICmdInstanceTimer extends DWCommand {
     this.setUsage("ui instance timer [command]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (this.getCommandList().parse(cmdline));
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return this.getCommandList().parse(cmdline);
   }
 
-  public boolean validate(String cmdline) {
-    return (this.getCommandList().validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
 }
