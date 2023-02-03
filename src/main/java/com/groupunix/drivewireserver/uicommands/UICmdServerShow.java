@@ -1,14 +1,18 @@
 package com.groupunix.drivewireserver.uicommands;
 
 import com.groupunix.drivewireserver.DWUIClientThread;
-import com.groupunix.drivewireserver.dwcommands.*;
+import com.groupunix.drivewireserver.dwcommands.DWCommand;
+import com.groupunix.drivewireserver.dwcommands.DWCommandList;
+import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdServerShow extends DWCommand {
-
-  static final String command = "show";
-
-  public UICmdServerShow(DWUIClientThread dwuiClientThread) {
+  /**
+   * UI Command Server Show.
+   *
+   * @param clientThread UI client thread
+   */
+  public UICmdServerShow(final DWUIClientThread clientThread) {
     DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdServerShowVersion());
     commands.addCommand(new UICmdServerShowInstances());
@@ -19,13 +23,18 @@ public class UICmdServerShow extends DWCommand {
     commands.addCommand(new UICmdServerShowStatus());
     commands.addCommand(new UICmdServerShowNet());
     commands.addCommand(new UICmdServerShowLog());
-    commands.addCommand(new UICmdServerShowTopics(dwuiClientThread));
-    commands.addCommand(new UICmdServerShowHelp(dwuiClientThread));
-    commands.addCommand(new UICmdServerShowErrors(dwuiClientThread));
+    commands.addCommand(new UICmdServerShowTopics(clientThread));
+    commands.addCommand(new UICmdServerShowHelp(clientThread));
+    commands.addCommand(new UICmdServerShowErrors(clientThread));
     setHelp();
   }
 
-  public UICmdServerShow(DWProtocol dwProto) {
+  /**
+   * UI Command Server Show.
+   *
+   * @param protocol protocol
+   */
+  public UICmdServerShow(final DWProtocol protocol) {
     DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdServerShowVersion());
     commands.addCommand(new UICmdServerShowInstances());
@@ -36,9 +45,9 @@ public class UICmdServerShow extends DWCommand {
     commands.addCommand(new UICmdServerShowStatus());
     commands.addCommand(new UICmdServerShowNet());
     commands.addCommand(new UICmdServerShowLog());
-    commands.addCommand(new UICmdServerShowTopics(dwProto));
-    commands.addCommand(new UICmdServerShowHelp(dwProto));
-    commands.addCommand(new UICmdServerShowErrors(dwProto));
+    commands.addCommand(new UICmdServerShowTopics(protocol));
+    commands.addCommand(new UICmdServerShowHelp(protocol));
+    commands.addCommand(new UICmdServerShowErrors(protocol));
     setHelp();
   }
 
@@ -48,11 +57,23 @@ public class UICmdServerShow extends DWCommand {
     this.setUsage("ui server show [item]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (this.getCommandList().parse(cmdline));
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return this.getCommandList().parse(cmdline);
   }
 
-  public boolean validate(String cmdline) {
-    return (this.getCommandList().validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
 }

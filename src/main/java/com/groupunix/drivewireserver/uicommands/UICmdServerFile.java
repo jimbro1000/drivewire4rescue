@@ -1,8 +1,13 @@
 package com.groupunix.drivewireserver.uicommands;
 
-import com.groupunix.drivewireserver.dwcommands.*;
+import com.groupunix.drivewireserver.dwcommands.DWCommand;
+import com.groupunix.drivewireserver.dwcommands.DWCommandList;
+import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerFile extends DWCommand {
+  /**
+   * UI Command Server File.
+   */
   public UICmdServerFile() {
     DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdServerFileRoots());
@@ -14,11 +19,24 @@ public class UICmdServerFile extends DWCommand {
     this.setShortHelp("File commands");
     this.setUsage("ui server file [command]");
   }
-  public DWCommandResponse parse(String cmdline) {
-    return (this.getCommandList().parse(cmdline));
+
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return this.getCommandList().parse(cmdline);
   }
 
-  public boolean validate(String cmdline) {
-    return (this.getCommandList().validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
 }
