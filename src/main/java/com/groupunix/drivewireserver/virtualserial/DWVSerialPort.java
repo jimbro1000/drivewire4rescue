@@ -259,7 +259,7 @@ public class DWVSerialPort {
 
     if (log_midi_bytes) {
 
-      logger.info("midimsg: " + DWUtils.midimsgToText(statusbyte, data1, data2));
+      logger.info("midimsg: " + DWUtils.midiMsgToText(statusbyte, data1, data2));
     }
 
   }

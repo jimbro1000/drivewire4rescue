@@ -12,13 +12,44 @@ import java.util.Date;
 import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwexceptions.DWFileSystemInvalidFilenameException;
 
-import static com.groupunix.drivewireserver.DWDefs.*;
+import static com.groupunix.drivewireserver.DWDefs.BYTE_BITS;
+import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
+import static com.groupunix.drivewireserver.DWDefs.DOUBLE_WORD_LEN;
+import static com.groupunix.drivewireserver.DWDefs.HIGH_NIBBLE_MASK;
+import static com.groupunix.drivewireserver.DWDefs.LOW_NIBBLE_MASK;
+import static com.groupunix.drivewireserver.DWDefs.NIBBLE_BITS;
+import static com.groupunix.drivewireserver.DWDefs.OP_FASTWRITE_BASE_MAX;
 
 public class DWUtils {
 
   public static final int COCO_STRING_TERMINATOR = 128;
   public static final long MAX_FILE_LENGTH = 4294967295L;
   public static final int COPY_CHUNK_SIZE = 4096;
+  public static final int MIDI_NOTE_CHANNEL = 128;
+  public static final int MIDI_NOTE_CHANNEL_MAX = 143;
+  public static final int MIDI_NOTE_ON_CHANNEL = 144;
+  public static final int MIDI_NOTE_ON_CHANNEL_MAX = 159;
+  public static final int MIDI_KEY_PRESS = 160;
+  public static final int MIDI_KEY_PRESS_MAX = 175;
+  public static final int MIDI_CTR_CHANGE = 176;
+  public static final int MIDI_CTR_CHANGE_MAX = 191;
+  public static final int MIDI_PRG_CHANGE = 192;
+  public static final int MIDI_PRG_CHANGE_MAX = 207;
+  public static final int MIDI_CHAN_PRESS = 208;
+  public static final int MIDI_CHAN_PRESS_MAX = 223;
+  public static final int MIDI_PITCH_BEND_CHANNEL = 224;
+  public static final int MIDI_PITCH_BEND_CHANNEL_MAX = 239;
+  public static final int MIDI_TIMING_TICK = 248;
+  public static final int CENTURY_OFFSET = 1900;
+  public static final int HOURS = 3;
+  public static final int MINUTES = 4;
+  public static final int YEAR = 0;
+  public static final int MONTH = 1;
+  public static final int DAY = 2;
+  public static final int FXD_HEADER_LEN = 12;
+  public static final int FILENAME_LEN_MAX = 255;
+  public static final String FILE_URI_PREFIX = "file:///";
+  public static final int NOTES_PER_OCTAVE = 12;
 
   // this appears to be a bug - the MSB should be shifted by 24 places, not 32
   public static int int4(byte[] data) {
@@ -60,470 +91,307 @@ public class DWUtils {
     return null;
   }
 
-  public static String byteArrayToHexString(byte in[]) {
+  /**
+   * Format byte array as hex string.
+   *
+   * @param in byte array
+   * @return formatted string
+   */
+  public static String byteArrayToHexString(byte[] in) {
     return byteArrayToHexString(in, in.length);
   }
 
-  public static String byteArrayToHexString(byte in[], int len) {
-    byte ch = 0x00;
+  /**
+   * Format byte array as hex string.
+   *
+   * @param in  byte array
+   * @param len array length
+   * @return formatted string
+   */
+  public static String byteArrayToHexString(byte[] in, int len) {
+    byte ch;
     int i = 0;
 
-    if (in == null || in.length <= 0)
+    if (in == null || in.length == 0) {
       return null;
+    }
 
-    String pseudo[] = {"0", "1", "2",
+    String[] pseudo = {"0", "1", "2",
         "3", "4", "5", "6", "7", "8",
         "9", "A", "B", "C", "D", "E",
         "F"};
 
-    StringBuffer out = new StringBuffer(in.length * 2);
-
-
+    StringBuilder out = new StringBuilder();
     while (i < len) {
-      ch = (byte) (in[i] & 0xF0);
-      ch = (byte) (ch >>> 4);
+      ch = (byte) (in[i] & HIGH_NIBBLE_MASK);
+      ch = (byte) (ch >>> NIBBLE_BITS);
       // shift the bits down
-      ch = (byte) (ch & 0x0F);
+      ch = (byte) (ch & LOW_NIBBLE_MASK);
       // must do this is high order bit is on!
-      out.append(pseudo[(int) ch]); // convert the
-      ch = (byte) (in[i] & 0x0F); // Strip off
-      out.append(pseudo[(int) ch]); // convert the
+      out.append(pseudo[ch]); // convert the
+      ch = (byte) (in[i] & LOW_NIBBLE_MASK); // Strip off
+      out.append(pseudo[ch]); // convert the
       i++;
     }
-    String rslt = new String(out);
-    return rslt;
+    return out.toString();
   }
 
-  public static String prettyTimer(byte tno) {
-    String result = "unknown " + (tno & 0xff);
-
-    switch (tno) {
-      case DWDefs.TIMER_BAD_DATA:
-        result = "invalid protocol data";
-        break;
-
-      case DWDefs.TIMER_DWINIT:
-        result = "DWINIT operation";
-        break;
-
-      case DWDefs.TIMER_IO:
-        result = "I/O operation";
-        break;
-
-      case DWDefs.TIMER_NP_OP:
-        result = "protocol operation (non poll)";
-        break;
-
-      case DWDefs.TIMER_OP:
-        result = "protocol operation";
-        break;
-
-      case DWDefs.TIMER_READ:
-        result = "read operation";
-        break;
-
-      case DWDefs.TIMER_RESET:
-        result = "instance reset";
-        break;
-
-      case DWDefs.TIMER_START:
-        result = "server start";
-        break;
-
-      case DWDefs.TIMER_WRITE:
-        result = "write operation";
-        break;
-
-      case DWDefs.TIMER_POLL:
-        result = "poll operation";
-        break;
-
-      default:
-        if ((tno & 0xff) >= (DWDefs.TIMER_USER & 0xff)) {
-          result = "user " + ((tno & 0xff) - (DWDefs.TIMER_USER & 0xff));
-        }
+  /**
+   * Prettify timer.
+   *
+   * @param timer timer number
+   * @return formatted string
+   */
+  public static String prettyTimer(byte timer) {
+    if ((timer & BYTE_MASK) >= (DWDefs.TIMER_USER & BYTE_MASK)) {
+      return "user " + ((timer & BYTE_MASK) - (DWDefs.TIMER_USER & BYTE_MASK));
     }
-    return (result);
+    return switch (timer) {
+      case DWDefs.TIMER_BAD_DATA -> "invalid protocol data";
+      case DWDefs.TIMER_DWINIT -> "DWINIT operation";
+      case DWDefs.TIMER_IO -> "I/O operation";
+      case DWDefs.TIMER_NP_OP -> "protocol operation (non poll)";
+      case DWDefs.TIMER_OP -> "protocol operation";
+      case DWDefs.TIMER_READ -> "read operation";
+      case DWDefs.TIMER_RESET -> "instance reset";
+      case DWDefs.TIMER_START -> "server start";
+      case DWDefs.TIMER_WRITE -> "write operation";
+      case DWDefs.TIMER_POLL -> "poll operation";
+      default -> "unknown " + (timer & BYTE_MASK);
+    };
   }
 
-
-  public static String prettySS(byte statcode) {
-    String result = "unknown";
-
-    switch (statcode) {
-      case 0x00:
-        result = "SS.Opt";
-        break;
-
-      case 0x02:
-        result = "SS.Size";
-        break;
-
-      case 0x03:
-        result = "SS.Reset";
-        break;
-
-      case 0x04:
-        result = "SS.WTrk";
-        break;
-
-      case 0x05:
-        result = "SS.Pos";
-        break;
-
-      case 0x06:
-        result = "SS.EOF";
-        break;
-
-      case 0x0A:
-        result = "SS.Frz";
-        break;
-
-      case 0x0B:
-        result = "SS.SPT";
-        break;
-
-      case 0x0C:
-        result = "SS.SQD";
-        break;
-
-      case 0x0D:
-        result = "SS.DCmd";
-        break;
-
-      case 0x0E:
-        result = "SS.DevNm";
-        break;
-
-      case 0x0F:
-        result = "SS.FD";
-        break;
-
-      case 0x10:
-        result = "SS.Ticks";
-        break;
-
-      case 0x11:
-        result = "SS.Lock";
-        break;
-
-      case 0x12:
-        result = "SS.VarSect";
-        break;
-
-      case 0x14:
-        result = "SS.BlkRd";
-        break;
-
-      case 0x15:
-        result = "SS.BlkWr";
-        break;
-
-      case 0x16:
-        result = "SS.Reten";
-        break;
-
-      case 0x17:
-        result = "SS.WFM";
-        break;
-
-      case 0x18:
-        result = "SS.RFM";
-        break;
-
-      case 0x1A:
-        result = "SS.SSig";
-        break;
-
-      case 0x1B:
-        result = "SS.Relea";
-        break;
-
-      case 0x1C:
-        result = "SS.Attr";
-        break;
-
-      case 0x1E:
-        result = "SS.RsBit";
-        break;
-
-      case 0x20:
-        result = "SS.FDInf";
-        break;
-
-      case 0x26:
-        result = "SS.DSize";
-        break;
-
-      case 0x27:
-        result = "SS.KySns";
-        break;
-
+  /**
+   * Prettify set status code.
+   *
+   * @param statCode set stat code
+   * @return formatted string
+   */
+  public static String prettySS(final byte statCode) {
+    return switch (statCode) {
+      case 0x00 -> "SS.Opt";
+      case 0x02 -> "SS.Size";
+      case 0x03 -> "SS.Reset";
+      case 0x04 -> "SS.WTrk";
+      case 0x05 -> "SS.Pos";
+      case 0x06 -> "SS.EOF";
+      case 0x0A -> "SS.Frz";
+      case 0x0B -> "SS.SPT";
+      case 0x0C -> "SS.SQD";
+      case 0x0D -> "SS.DCmd";
+      case 0x0E -> "SS.DevNm";
+      case 0x0F -> "SS.FD";
+      case 0x10 -> "SS.Ticks";
+      case 0x11 -> "SS.Lock";
+      case 0x12 -> "SS.VarSect";
+      case 0x14 -> "SS.BlkRd";
+      case 0x15 -> "SS.BlkWr";
+      case 0x16 -> "SS.Reten";
+      case 0x17 -> "SS.WFM";
+      case 0x18 -> "SS.RFM";
+      case 0x1A -> "SS.SSig";
+      case 0x1B -> "SS.Relea";
+      case 0x1C -> "SS.Attr";
+      case 0x1E -> "SS.RsBit";
+      case 0x20 -> "SS.FDInf";
+      case 0x26 -> "SS.DSize";
+      case 0x27 -> "SS.KySns";
       // added for SCF/Ns
-      case 0x28:
-        result = "SS.ComSt";
-        break;
-
-      case 0x29:
-        result = "SS.Open";
-        break;
-
-      case 0x2A:
-        result = "SS.Close";
-        break;
-
-      case 0x30:
-        result = "SS.HngUp";
-        break;
-
-      case (byte) 255:
-        result = "None";
-        break;
-
-      default:
-        result = "Unknown: " + statcode;
-    }
-
-    return (result);
+      case 0x28 -> "SS.ComSt";
+      case 0x29 -> "SS.Open";
+      case 0x2A -> "SS.Close";
+      case 0x30 -> "SS.HngUp";
+      case (byte) 255 -> "None";
+      default -> "Unknown: " + statCode;
+    };
   }
 
-
-  public static String prettyUtilMode(int mode) {
-    String res = "unset";
-
-    switch (mode) {
-      case DWDefs.UTILMODE_URL:
-        res = "url";
-        break;
-
-      case DWDefs.UTILMODE_DWCMD:
-        res = "dw cmd";
-        break;
-      case DWDefs.UTILMODE_TCPOUT:
-        res = "tcp out";
-        break;
-      case DWDefs.UTILMODE_VMODEMOUT:
-        res = "vmodem out";
-        break;
-      case DWDefs.UTILMODE_TCPIN:
-        res = "tcp in";
-        break;
-      case DWDefs.UTILMODE_VMODEMIN:
-        res = "vmodem in";
-        break;
-      case DWDefs.UTILMODE_TCPLISTEN:
-        res = "tcp listen";
-        break;
-      case DWDefs.UTILMODE_NINESERVER:
-        res = "nineserver";
-
-    }
-
-    return (res);
+  /**
+   * Prettify utility mode.
+   *
+   * @param mode mode
+   * @return formatted string
+   */
+  public static String prettyUtilMode(final int mode) {
+    return switch (mode) {
+      case DWDefs.UTILMODE_URL -> "url";
+      case DWDefs.UTILMODE_DWCMD -> "dw cmd";
+      case DWDefs.UTILMODE_TCPOUT -> "tcp out";
+      case DWDefs.UTILMODE_VMODEMOUT -> "vmodem out";
+      case DWDefs.UTILMODE_TCPIN -> "tcp in";
+      case DWDefs.UTILMODE_VMODEMIN -> "vmodem in";
+      case DWDefs.UTILMODE_TCPLISTEN -> "tcp listen";
+      case DWDefs.UTILMODE_NINESERVER -> "nineserver";
+      default -> "unset";
+    };
   }
 
-  public static String prettyOP(byte opcode) {
-    String res = "Unknown";
-
-    if ((opcode >= DWDefs.OP_FASTWRITE_BASE) && (opcode <= (DWDefs.OP_FASTWRITE_BASE + 31))) {
-      res = "OP_FASTWRITE_" + (opcode - DWDefs.OP_FASTWRITE_BASE);
-    } else {
-      switch (opcode) {
-        case DWDefs.OP_NOP:
-          res = "OP_NOP";
-          break;
-
-        case DWDefs.OP_INIT:
-          res = "OP_INIT";
-          break;
-
-        case DWDefs.OP_READ:
-          res = "OP_READ";
-          break;
-
-        case DWDefs.OP_READEX:
-          res = "OP_READEX";
-          break;
-
-        case DWDefs.OP_WRITE:
-          res = "OP_WRITE";
-          break;
-
-        case DWDefs.OP_REREAD:
-          res = "OP_REREAD";
-          break;
-
-        case DWDefs.OP_REREADEX:
-          res = "OP_REREADEX";
-          break;
-
-        case DWDefs.OP_REWRITE:
-          res = "OP_REWRITE";
-          break;
-
-        case DWDefs.OP_TERM:
-          res = "OP_TERM";
-          break;
-
-        case DWDefs.OP_RESET1:
-        case DWDefs.OP_RESET2:
-        case DWDefs.OP_RESET3:
-          res = "OP_RESET";
-          break;
-
-        case DWDefs.OP_GETSTAT:
-          res = "OP_GETSTAT";
-          break;
-
-        case DWDefs.OP_SETSTAT:
-          res = "OP_SETSTAT";
-          break;
-
-        case DWDefs.OP_TIME:
-          res = "OP_TIME";
-          break;
-
-        case DWDefs.OP_PRINT:
-          res = "OP_PRINT";
-          break;
-
-        case DWDefs.OP_PRINTFLUSH:
-          res = "OP_PRINTFLUSH";
-          break;
-
-        case DWDefs.OP_SERREADM:
-          res = "OP_SERREADM";
-          break;
-
-        case DWDefs.OP_SERREAD:
-          res = "OP_SERREAD";
-          break;
-
-        case DWDefs.OP_SERWRITE:
-          res = "OP_SERWRITE";
-          break;
-
-        case DWDefs.OP_SERSETSTAT:
-          res = "OP_SERSETSTAT";
-          break;
-
-        case DWDefs.OP_SERGETSTAT:
-          res = "OP_SERGETSTAT";
-          break;
-
-        case DWDefs.OP_SERINIT:
-          res = "OP_SERINIT";
-          break;
-
-        case DWDefs.OP_SERTERM:
-          res = "OP_SERTERM";
-          break;
-
-        case DWDefs.OP_DWINIT:
-          res = "OP_DWINIT";
-          break;
-
-        default:
-          res = "Unknown: " + opcode;
-      }
+  /**
+   * Prettify op code.
+   *
+   * @param opcode opcode
+   * @return formatted string
+   */
+  public static String prettyOP(final byte opcode) {
+    if ((opcode >= DWDefs.OP_FASTWRITE_BASE)
+        && (opcode <= OP_FASTWRITE_BASE_MAX)) {
+      return "OP_FASTWRITE_" + (opcode - DWDefs.OP_FASTWRITE_BASE);
     }
-
-    return (res);
+    return switch (opcode) {
+      case DWDefs.OP_NOP -> "OP_NOP";
+      case DWDefs.OP_INIT -> "OP_INIT";
+      case DWDefs.OP_READ -> "OP_READ";
+      case DWDefs.OP_READEX -> "OP_READEX";
+      case DWDefs.OP_WRITE -> "OP_WRITE";
+      case DWDefs.OP_REREAD -> "OP_REREAD";
+      case DWDefs.OP_REREADEX -> "OP_REREADEX";
+      case DWDefs.OP_REWRITE -> "OP_REWRITE";
+      case DWDefs.OP_TERM -> "OP_TERM";
+      case DWDefs.OP_RESET1,
+          DWDefs.OP_RESET2,
+          DWDefs.OP_RESET3 -> "OP_RESET";
+      case DWDefs.OP_GETSTAT -> "OP_GETSTAT";
+      case DWDefs.OP_SETSTAT -> "OP_SETSTAT";
+      case DWDefs.OP_TIME -> "OP_TIME";
+      case DWDefs.OP_PRINT -> "OP_PRINT";
+      case DWDefs.OP_PRINTFLUSH -> "OP_PRINTFLUSH";
+      case DWDefs.OP_SERREADM -> "OP_SERREADM";
+      case DWDefs.OP_SERREAD -> "OP_SERREAD";
+      case DWDefs.OP_SERWRITE -> "OP_SERWRITE";
+      case DWDefs.OP_SERSETSTAT -> "OP_SERSETSTAT";
+      case DWDefs.OP_SERGETSTAT -> "OP_SERGETSTAT";
+      case DWDefs.OP_SERINIT -> "OP_SERINIT";
+      case DWDefs.OP_SERTERM -> "OP_SERTERM";
+      case DWDefs.OP_DWINIT -> "OP_DWINIT";
+      default -> "Unknown: " + opcode;
+    };
   }
 
-
-  @SuppressWarnings("unchecked")
+  /**
+   * Get port names.
+   *
+   * @return list of port names
+   */
+  @SuppressWarnings({"unchecked", "unused"})
   public static ArrayList<String> getPortNames() {
-    ArrayList<String> ports = new ArrayList<String>();
-
-    java.util.Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
+    ArrayList<String> ports = new ArrayList<>();
+    java.util.Enumeration<CommPortIdentifier> portEnum
+        = CommPortIdentifier.getPortIdentifiers();
     while (portEnum.hasMoreElements()) {
       CommPortIdentifier portIdentifier = portEnum.nextElement();
       if (portIdentifier.getPortType() == 1) {
         ports.add(portIdentifier.getName());
       }
-
     }
-
-    return (ports);
+    return ports;
   }
 
-  public static String midimsgToText(int statusbyte, int data1, int data2) {
-    // make midi messages into something humans can read..
-    String action = new String();
-    String chan = new String();
-    String d1 = new String();
-    String d2 = new String();
+  /**
+   * Midi message to text.
+   *
+   * @param statusByte message status byte
+   * @param data1      message data 1
+   * @param data2      message data 2
+   * @return formatted string
+   */
+  public static String midiMsgToText(
+      final int statusByte, final int data1, final int data2
+  ) {
+    // make midi messages into something humans can read...
+    String action;
+    String chan = "";
+    String d1 = "";
+    String d2 = "";
 
-    if ((statusbyte >= 128) && (statusbyte <= 143)) {
+    if ((statusByte >= MIDI_NOTE_CHANNEL)
+        && (statusByte <= MIDI_NOTE_CHANNEL_MAX)) {
       action = "Note off";
-      chan = "Chan: " + (statusbyte - 128);
+      chan = "Chan: " + (statusByte - MIDI_NOTE_CHANNEL);
       d1 = "Pitch: " + prettyMidiPitch(data1);
       d2 = "Vel: " + data2;
-    } else if ((statusbyte >= 144) && (statusbyte <= 159)) {
+    } else if ((statusByte >= MIDI_NOTE_ON_CHANNEL)
+        && (statusByte <= MIDI_NOTE_ON_CHANNEL_MAX)) {
       action = "Note on";
-      chan = "Chan: " + (statusbyte - 144);
+      chan = "Chan: " + (statusByte - MIDI_NOTE_ON_CHANNEL);
       d1 = "Pitch: " + prettyMidiPitch(data1);
       d2 = "Vel: " + data2;
-    } else if ((statusbyte >= 160) && (statusbyte <= 175)) {
+    } else if ((statusByte >= MIDI_KEY_PRESS)
+        && (statusByte <= MIDI_KEY_PRESS_MAX)) {
       action = "Key press";
-      chan = "Chan: " + (statusbyte - 160);
+      chan = "Chan: " + (statusByte - MIDI_KEY_PRESS);
       d1 = "Key: " + data1;
       d2 = "Pressure: " + data2;
-    } else if ((statusbyte >= 176) && (statusbyte <= 191)) {
+    } else if ((statusByte >= MIDI_CTR_CHANGE)
+        && (statusByte <= MIDI_CTR_CHANGE_MAX)) {
       action = "Ctr change";
-      chan = "Chan: " + (statusbyte - 176);
+      chan = "Chan: " + (statusByte - MIDI_CTR_CHANGE);
       d1 = "Controller: " + data1;
       d2 = "Value: " + data2;
-    } else if ((statusbyte >= 192) && (statusbyte <= 207)) {
+    } else if ((statusByte >= MIDI_PRG_CHANGE)
+        && (statusByte <= MIDI_PRG_CHANGE_MAX)) {
       action = "Prg change";
-      chan = "Chan: " + (statusbyte - 192);
+      chan = "Chan: " + (statusByte - MIDI_PRG_CHANGE);
       d1 = "Preset: " + data1;
-    } else if ((statusbyte >= 208) && (statusbyte <= 223)) {
+    } else if ((statusByte >= MIDI_CHAN_PRESS)
+        && (statusByte <= MIDI_CHAN_PRESS_MAX)) {
       action = "Chan press";
-      chan = "Chan: " + (statusbyte - 208);
+      chan = "Chan: " + (statusByte - MIDI_CHAN_PRESS);
       d1 = "Pressure: " + data1;
-    } else if ((statusbyte >= 224) && (statusbyte <= 239)) {
+    } else if ((statusByte >= MIDI_PITCH_BEND_CHANNEL)
+        && (statusByte <= MIDI_PITCH_BEND_CHANNEL_MAX)) {
       action = "Pitch bend";
-      chan = "Chan: " + (statusbyte - 224);
+      chan = "Chan: " + (statusByte - MIDI_PITCH_BEND_CHANNEL);
       d1 = "LSB: " + data1;
       d2 = "MSB: " + data2;
-    } else if (statusbyte == 248) {
+    } else if (statusByte == MIDI_TIMING_TICK) {
       action = "Timing tick";
     } else {
-      action = "Unknown: " + statusbyte;
+      action = "Unknown: " + statusByte;
       d1 = "Data1: " + data1;
       d2 = "Data2: " + data2;
     }
-
-
-    return (String.format("%-10s %-10s %-20s %-20s", action, chan, d1, d2));
+    return String.format("%-10s %-10s %-20s %-20s", action, chan, d1, d2);
   }
 
-  private static String prettyMidiPitch(int pitch) {
-    String[] notes = new String[]{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
-
-    return (String.format("%-3d %-2s %d", pitch, notes[pitch % 12], (pitch / 12) - 1));
+  /**
+   * Prettify pitch value as note.
+   *
+   * @param pitch pitch
+   * @return formatted note string
+   */
+  private static String prettyMidiPitch(final int pitch) {
+    String[] notes = new String[]{
+        "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+    };
+    return String.format(
+        "%-3d %-2s %d",
+        pitch,
+        notes[pitch % NOTES_PER_OCTAVE],
+        (pitch / NOTES_PER_OCTAVE) - 1
+    );
   }
 
-
-  public static String dropFirstToken(String txt) {
+  /**
+   * Strip first token from string.
+   * <p>
+   * Splits string on space and
+   * removes the first element
+   * </p>
+   *
+   * @param txt source string
+   * @return modified string
+   */
+  public static String dropFirstToken(final String txt) {
     // drop first token in string
-
-    String rest = new String();
-
+    StringBuilder rest = new StringBuilder();
     String[] tokens = txt.split(" ");
-
     for (int x = 1; x < tokens.length; x++) {
       if (rest.length() > 0) {
-        rest = rest + " " + tokens[x];
-      } else {
-        rest = tokens[x];
+        rest.append(" ");
       }
-
+      rest.append(tokens[x]);
     }
-
-    return (rest);
+    return rest.toString();
   }
 
   /**
@@ -690,11 +558,11 @@ public class DWUtils {
    * @return short uri
    */
   public static String shortenLocalURI(final String df) {
-    if (df.startsWith("file:///")) {
+    if (df.startsWith(FILE_URI_PREFIX)) {
       if (df.charAt(9) == ':') {
-        return df.substring(8);
+        return df.substring(FILE_URI_PREFIX.length());
       } else {
-        return df.substring(7);
+        return df.substring(FILE_URI_PREFIX.length() - 1);
       }
     }
     return (df);
@@ -742,20 +610,24 @@ public class DWUtils {
           "File too large for XDir"
       );
     }
-    if (f.getName().length() > 255) {
+    if (f.getName().length() > FILENAME_LEN_MAX) {
       throw new DWFileSystemInvalidFilenameException(
           "Filename too long for XDir"
       );
     }
-    byte[] res = new byte[12 + f.getName().length()];
+    byte[] res = new byte[FXD_HEADER_LEN + f.getName().length()];
     int pos = 0;
     long l = f.length();
 
-    // 4 byte file size
-    res[pos++] = (byte) (l >>> BYTE_BITS * 3);
-    res[pos++] = (byte) (l >>> BYTE_BITS * 2);
-    res[pos++] = (byte) (l >>> BYTE_BITS);
-    res[pos++] = (byte) (l);
+    int bytePos = DOUBLE_WORD_LEN;
+    while (bytePos > 0) {
+      res[pos++] = (byte) (l >>> BYTE_BITS * --bytePos);
+    }
+//    // 4 byte file size
+//    res[pos++] = (byte) (l >>> BYTE_BITS * --bytePos);
+//    res[pos++] = (byte) (l >>> BYTE_BITS * --bytePos);
+//    res[pos++] = (byte) (l >>> BYTE_BITS * --bytePos);
+//    res[pos++] = (byte) (l);
 
     // 5 byte OS9 style modified date - Y M D Hr Min
     Date moddate = new Date(f.lastModified());
@@ -782,8 +654,7 @@ public class DWUtils {
     for (int i = 0; i < f.getName().length(); i++) {
       res[pos++] = f.getName().getBytes()[i];
     }
-    //System.out.println(f.getName() + "\t" + f.length());
-    return (new String(res));
+    return new String(res);
   }
 
   /**
@@ -867,8 +738,8 @@ public class DWUtils {
    */
   public static String pretty5ByteDateTime(final byte[] data) {
     return String.format("%02d:%02d ",
-        (data[3] & BYTE_MASK),
-        (data[4] & BYTE_MASK)
+        (data[HOURS] & BYTE_MASK),
+        (data[MINUTES] & BYTE_MASK)
     ) + pretty3ByteDate(data);
   }
 
@@ -881,9 +752,9 @@ public class DWUtils {
   public static String pretty3ByteDate(final byte[] data) {
     return String.format(
         "%02d/%02d/%04d",
-        (data[1] & BYTE_MASK),
-        (data[2] & BYTE_MASK),
-        (1900 + (data[0] & BYTE_MASK))
+        (data[MONTH] & BYTE_MASK),
+        (data[DAY] & BYTE_MASK),
+        (CENTURY_OFFSET + (data[YEAR] & BYTE_MASK))
     );
   }
 

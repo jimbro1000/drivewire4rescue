@@ -129,6 +129,10 @@ public final class DWDefs {
    */
   public static final byte OP_FASTWRITE_BASE = (byte) 128;  // 0x80
   /**
+   * Maximum fast write op code.
+   */
+  public static final byte OP_FASTWRITE_BASE_MAX = OP_FASTWRITE_BASE + 31;
+  /**
    * Fast Write Port N1.
    */
   public static final byte OP_FASTWRITE_N1 = (byte) 129;  // 0x81
@@ -932,13 +936,21 @@ public final class DWDefs {
    */
   public static final int BYTE_BITS = 8;
   /**
+   * Number of bits to shift for a nibble.
+   */
+  public static final int NIBBLE_BITS = 4;
+  /**
    * Multiplier for word.
    */
   public static final int WORD_SHIFT = 65536;
   /**
+   * Bytes in a double word.
+   */
+  public static final int DOUBLE_WORD_LEN = 4;
+  /**
    * Bit mask for low six bits.
    * <p>
-   *   Used for masking off bit 15 and 16 from IDAM record
+   * Used for masking off bit 15 and 16 from IDAM record
    * </p>
    */
   public static final int LOW_SIX_BITS = 0x3F;
