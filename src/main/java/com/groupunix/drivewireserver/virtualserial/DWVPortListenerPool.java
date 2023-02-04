@@ -9,158 +9,269 @@ import org.apache.log4j.Logger;
 import com.groupunix.drivewireserver.dwexceptions.DWConnectionNotValidException;
 
 public class DWVPortListenerPool {
-
+  /**
+   * Max connections.
+   */
   public static final int MAX_CONN = 256;
+  /**
+   * Max listeners.
+   */
   public static final int MAX_LISTEN = 64;
-  private static final Logger logger = Logger.getLogger("DWServer.DWVPortListenerPool");
-  private SocketChannel[] sockets = new SocketChannel[MAX_CONN];
-  private ServerSocketChannel[] server_sockets = new ServerSocketChannel[MAX_LISTEN];
-  private int[] serversocket_ports = new int[MAX_LISTEN];
-  private int[] socket_ports = new int[MAX_CONN];
-  private int[] modes = new int[MAX_CONN];
+  /**
+   * Log appender.
+   */
+  private static final Logger LOGGER
+      = Logger.getLogger("DWServer.DWVPortListenerPool");
+  /**
+   * Listener sockets.
+   */
+  private final SocketChannel[] sockets
+      = new SocketChannel[MAX_CONN];
+  /**
+   * Listener sockets channels.
+   */
+  private final ServerSocketChannel[] serverSockets
+      = new ServerSocketChannel[MAX_LISTEN];
+  /**
+   * Listener socket ports.
+   */
+  private final int[] serverSocketPorts = new int[MAX_LISTEN];
+  /**
+   * Connection sockets.
+   */
+  private final int[] socketPorts = new int[MAX_CONN];
+  /**
+   * Connection modes.
+   */
+  private final int[] modes = new int[MAX_CONN];
 
-  public int addConn(int port, SocketChannel sktchan, int mode) {
-
-    logger.debug("add connection entry for port " + port + " mode " + mode);
-
+  /**
+   * Add connection.
+   *
+   * @param port    port number
+   * @param sktchan socket channel
+   * @param mode    mode
+   * @return index
+   */
+  public int addConn(final int port, final SocketChannel sktchan,
+                     final int mode) {
+    LOGGER.debug("add connection entry for port " + port + " mode " + mode);
     for (int i = 0; i < MAX_CONN; i++) {
       if (sockets[i] == null) {
         sockets[i] = sktchan;
         modes[i] = mode;
-        socket_ports[i] = port;
-        return (i);
+        socketPorts[i] = port;
+        return i;
       }
     }
-
-    return (-1);
+    return -1;
   }
 
-  public SocketChannel getConn(int conno) throws DWConnectionNotValidException {
-    validateConn(conno);
-    return (sockets[conno]);
+  /**
+   * Get connection socket at index.
+   *
+   * @param connectionNo index
+   * @return socket channel
+   * @throws DWConnectionNotValidException invalid exception
+   */
+  public SocketChannel getConn(final int connectionNo)
+      throws DWConnectionNotValidException {
+    validateConn(connectionNo);
+    return sockets[connectionNo];
   }
 
-  public void validateConn(int conno) throws DWConnectionNotValidException {
-    if ((conno < 0) || (conno > DWVPortListenerPool.MAX_CONN) || (this.sockets[conno] == null)) {
-      throw (new DWConnectionNotValidException("Invalid connection #" + conno));
+  /**
+   * Validate connection at index.
+   *
+   * @param connectionNo index
+   * @throws DWConnectionNotValidException invalid connection
+   */
+  public void validateConn(final int connectionNo)
+      throws DWConnectionNotValidException {
+    if (
+        (connectionNo < 0)
+            || (connectionNo > DWVPortListenerPool.MAX_CONN)
+            || (this.sockets[connectionNo] == null)
+    ) {
+      throw (new DWConnectionNotValidException(
+          "Invalid connection #" + connectionNo)
+      );
     }
   }
 
-  public void setConnPort(int conno, int port) throws DWConnectionNotValidException {
-    validateConn(conno);
-    socket_ports[conno] = port;
+  /**
+   * Set connection port at index.
+   *
+   * @param connectionNo index
+   * @param port         port number
+   * @throws DWConnectionNotValidException invalid connection
+   */
+  public void setConnPort(final int connectionNo, final int port)
+      throws DWConnectionNotValidException {
+    validateConn(connectionNo);
+    socketPorts[connectionNo] = port;
   }
 
-  public int addListener(int port, ServerSocketChannel srvr) {
-
-
+  /**
+   * Add listener.
+   *
+   * @param port port
+   * @param srvr server socket channel
+   * @return outcome
+   */
+  public int addListener(final int port, final ServerSocketChannel srvr) {
     for (int i = 0; i < MAX_LISTEN; i++) {
-      if (server_sockets[i] == null) {
-
-        serversocket_ports[i] = port;
-        server_sockets[i] = srvr;
-        logger.debug("add listener entry for port " + port + " id " + i);
-
-        return (i);
-
+      if (serverSockets[i] == null) {
+        serverSocketPorts[i] = port;
+        serverSockets[i] = srvr;
+        LOGGER.debug("add listener entry for port " + port + " id " + i);
+        return i;
       }
     }
-
-    return (-1);
+    return -1;
   }
 
-  public ServerSocketChannel getListener(int conno) {
-    return (server_sockets[conno]);
+  /**
+   * Get listener at index.
+   *
+   * @param connectionNo index
+   * @return server socket
+   */
+  public ServerSocketChannel getListener(final int connectionNo) {
+    return serverSockets[connectionNo];
   }
 
-
-  public void closePortServerSockets(int port) {
-
+  /**
+   * Close server socket with given port.
+   *
+   * @param port port number
+   */
+  public void closePortServerSockets(final int port) {
     for (int i = 0; i < MAX_LISTEN; i++) {
-      if (this.getListener(i) != null) {
-        if (serversocket_ports[i] == port) {
-          try {
-            logger.debug("closing listener sockets for port " + port + "...");
-            this.killListener(i);
-          } catch (DWConnectionNotValidException e) {
-            logger.error(e.getMessage());
-          }
+      if (this.getListener(i) != null && serverSocketPorts[i] == port) {
+        try {
+          LOGGER.debug("closing listener sockets for port " + port + "...");
+          this.killListener(i);
+        } catch (DWConnectionNotValidException e) {
+          LOGGER.error(e.getMessage());
         }
       }
     }
   }
 
-  public void closePortConnectionSockets(int port) {
-
+  /**
+   * Close all open listener sockets.
+   * <p>
+   * Ignores terminals.
+   * </p>
+   *
+   * @param port port number (not used)
+   */
+  public void closePortConnectionSockets(final int port) {
     for (int i = 0; i < DWVPortListenerPool.MAX_CONN; i++) {
-
       try {
-        if (this.sockets[i] != null) {
-          // don't reset term
-          if (this.getMode(i) != DWVSerialPorts.MODE_TERM) {
-
-            this.killConn(i);
-          }
+        if (this.sockets[i] != null
+            && this.getMode(i) != DWVSerialPorts.MODE_TERM) {
+          this.killConn(i);
         }
       } catch (DWConnectionNotValidException e) {
-        logger.error("close sockets: " + e.getMessage());
+        LOGGER.error("close sockets: " + e.getMessage());
       }
     }
-
-
   }
 
-  // temporary crap to make telnetd work
-  public int getMode(int conno) throws DWConnectionNotValidException {
-    validateConn(conno);
-    return (modes[conno]);
+  /**
+   * Get connection mode at index.
+   *
+   * @param connectionNo index
+   * @return connection mode
+   * @throws DWConnectionNotValidException invalid connection
+   */
+  public int getMode(final int connectionNo)
+      throws DWConnectionNotValidException {
+    validateConn(connectionNo);
+    return modes[connectionNo];
   }
 
-  public void clearConn(int conno) throws DWConnectionNotValidException {
-    validateConn(conno);
-    sockets[conno] = null;
-    socket_ports[conno] = -1;
+  /**
+   * Clear connection at index.
+   *
+   * @param connectionNo index
+   * @throws DWConnectionNotValidException invalid connection
+   */
+  public void clearConn(final int connectionNo)
+      throws DWConnectionNotValidException {
+    validateConn(connectionNo);
+    sockets[connectionNo] = null;
+    socketPorts[connectionNo] = -1;
   }
 
-  public void clearListener(int conno) {
-    server_sockets[conno] = null;
-    serversocket_ports[conno] = -1;
+  /**
+   * Clear listener at index.
+   *
+   * @param connectionNo index
+   */
+  public void clearListener(final int connectionNo) {
+    serverSockets[connectionNo] = null;
+    serverSocketPorts[connectionNo] = -1;
   }
 
-  public void killConn(int conno) throws DWConnectionNotValidException {
-    validateConn(conno);
-
+  /**
+   * Kill connection at index.
+   *
+   * @param connectionNo index
+   * @throws DWConnectionNotValidException invalid connection
+   */
+  public void killConn(final int connectionNo)
+      throws DWConnectionNotValidException {
+    validateConn(connectionNo);
     try {
-      sockets[conno].close();
-      logger.debug("killed conn #" + conno);
+      sockets[connectionNo].close();
+      LOGGER.debug("killed conn #" + connectionNo);
     } catch (IOException e) {
-      logger.debug("IO error closing conn #" + conno + ": " + e.getMessage());
+      LOGGER.debug(
+          "IO error closing conn #" + connectionNo + ": " + e.getMessage()
+      );
     }
-
-    clearConn(conno);
-
+    clearConn(connectionNo);
   }
 
-
-  public void killListener(int conno) throws DWConnectionNotValidException {
-
+  /**
+   * Kill listener at index.
+   *
+   * @param connectionNo index
+   * @throws DWConnectionNotValidException invalid connection
+   */
+  public void killListener(final int connectionNo)
+      throws DWConnectionNotValidException {
     try {
-      server_sockets[conno].close();
-      logger.debug("killed listener #" + conno);
+      serverSockets[connectionNo].close();
+      LOGGER.debug("killed listener #" + connectionNo);
     } catch (IOException e) {
-      logger.debug("IO error closing listener #" + conno + ": " + e.getMessage());
+      LOGGER.debug(
+          "IO error closing listener #" + connectionNo + ": " + e.getMessage()
+      );
     }
-
-    clearListener(conno);
-
+    clearListener(connectionNo);
   }
 
-  public int getListenerPort(int i) {
-    return serversocket_ports[i];
+  /**
+   * Get listener port at index.
+   *
+   * @param i index
+   * @return server port
+   */
+  public int getListenerPort(final int i) {
+    return serverSocketPorts[i];
   }
 
-  public int getConnPort(int i) {
-    return socket_ports[i];
+  /**
+   * Get connection port at index.
+   *
+   * @param i index
+   * @return port
+   */
+  public int getConnPort(final int i) {
+    return socketPorts[i];
   }
-
 }
