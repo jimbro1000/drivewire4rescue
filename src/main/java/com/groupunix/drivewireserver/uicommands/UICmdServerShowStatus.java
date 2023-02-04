@@ -4,31 +4,44 @@ import com.groupunix.drivewireserver.DriveWireServer;
 import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
-public class UICmdServerShowStatus extends DWCommand {
+import static com.groupunix.drivewireserver.DWDefs.KILOBYTE;
 
+public class UICmdServerShowStatus extends DWCommand {
+  /**
+   * UI Command Server Show Status.
+   */
   public UICmdServerShowStatus() {
     setCommand("status");
     setShortHelp("show server status");
     setUsage("ui server show status");
   }
 
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public DWCommandResponse parse(String cmdline) {
-    String text = new String();
-
+  public DWCommandResponse parse(final String cmdline) {
+    String text = "";
     text += "version|" + DriveWireServer.DW_SERVER_VERSION + "\n";
     text += "versiondate|" + DriveWireServer.DW_SERVER_VERSION_DATE + "\n";
-
-    text += "totmem|" + Runtime.getRuntime().totalMemory() / 1024 + "\n";
-    text += "freemem|" + Runtime.getRuntime().freeMemory() / 1024 + "\n";
-
+    text += "totmem|" + Runtime.getRuntime().totalMemory() / KILOBYTE + "\n";
+    text += "freemem|" + Runtime.getRuntime().freeMemory() / KILOBYTE + "\n";
     text += "instances|" + DriveWireServer.getNumHandlers() + "\n";
-    text += "configpath|" + DriveWireServer.getServerConfiguration().getBasePath() + "\n";
-
-    return (new DWCommandResponse(text));
+    text += "configpath|" + DriveWireServer.getServerConfiguration()
+        .getBasePath() + "\n";
+    return new DWCommandResponse(text);
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }
