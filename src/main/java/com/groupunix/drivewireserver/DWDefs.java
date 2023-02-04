@@ -983,4 +983,8 @@ public final class DWDefs {
    * ASCII CR.
    */
   public static final int CARRIAGE_RETURN = 13;
+  /**
+   * ASCII BS.
+   */
+  public static final int BACKSPACE = 8;
 }
