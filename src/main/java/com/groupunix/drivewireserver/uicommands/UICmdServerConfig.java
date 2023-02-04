@@ -1,11 +1,18 @@
 package com.groupunix.drivewireserver.uicommands;
 
 import com.groupunix.drivewireserver.DWUIClientThread;
-import com.groupunix.drivewireserver.dwcommands.*;
+import com.groupunix.drivewireserver.dwcommands.DWCommand;
+import com.groupunix.drivewireserver.dwcommands.DWCommandList;
+import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdServerConfig extends DWCommand {
-  public UICmdServerConfig(DWUIClientThread dwuiClientThread) {
+  /**
+   * UI Command Server Configuration.
+   *
+   * @param ignoredClientThread not used
+   */
+  public UICmdServerConfig(final DWUIClientThread ignoredClientThread) {
     DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdServerConfigShow());
     commands.addCommand(new UICmdServerConfigSet());
@@ -15,7 +22,12 @@ public class UICmdServerConfig extends DWCommand {
     setHelp();
   }
 
-  public UICmdServerConfig(DWProtocol dwProto) {
+  /**
+   * UI Command Server Configuration.
+   *
+   * @param ignoredProtocol not used
+   */
+  public UICmdServerConfig(final DWProtocol ignoredProtocol) {
     DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdServerConfigShow());
     commands.addCommand(new UICmdServerConfigSet());
@@ -29,12 +41,23 @@ public class UICmdServerConfig extends DWCommand {
     this.setUsage("ui server config [command]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (this.getCommandList().parse(cmdline));
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return this.getCommandList().parse(cmdline);
   }
 
-  public boolean validate(String cmdline) {
-    return (this.getCommandList().validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
-
 }
