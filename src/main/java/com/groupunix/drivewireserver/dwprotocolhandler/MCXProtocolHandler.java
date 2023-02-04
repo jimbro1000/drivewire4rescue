@@ -61,7 +61,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
   /**
    * Log appender.
    */
-  private static final Logger LOGGER
+  private final Logger logger
       = Logger.getLogger("DWServer.MCXProtocolHandler");
 
   // record keeping portion of dwTransferData
@@ -179,7 +179,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
    * Gracefully halt handler.
    */
   public void shutdown() {
-    LOGGER.info("handler #" + handlerNo + ": shutdown requested");
+    logger.info("handler #" + handlerNo + ": shutdown requested");
     this.wanttodie = true;
     this.dwProtocolDevice.shutdown();
   }
@@ -199,11 +199,11 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
 
     // setup environment and get started
     if (!wanttodie) {
-      LOGGER.info("handler #" + handlerNo + ": starting...");
+      logger.info("handler #" + handlerNo + ": starting...");
       // setup printer
       vprinter = new DWVPrinter(this);
     }
-    LOGGER.info("handler #" + handlerNo + ": ready");
+    logger.info("handler #" + handlerNo + ": ready");
     // protocol loop
     while (!wanttodie) {
       // try to get an opcode
@@ -223,22 +223,22 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
               case MCXDefs.OP_SAVEFILE -> doOpSaveFile();
               case MCXDefs.OP_SETCURRENTDIR -> doOpSetCurrentDir();
               case MCXDefs.OP_WRITEBLOCK -> doOpWriteBlock();
-              default -> LOGGER.warn("UNKNOWN OPCODE: " + opcodeint);
+              default -> logger.warn("UNKNOWN OPCODE: " + opcodeint);
             }
           } else {
-            LOGGER.warn("Got non alert code when expected alert code: "
+            logger.warn("Got non alert code when expected alert code: "
                 + alertcodeint);
           }
         } catch (IOException e) {
           // this should not actually ever get thrown,
           // since we call comRead1 with timeout = false..
-          LOGGER.error(e.getMessage());
+          logger.error(e.getMessage());
           opcodeint = -1;
         } catch (DWCommTimeOutException e) {
           e.printStackTrace();
         }
       } else {
-        LOGGER.debug("cannot access the device.. maybe it has not been "
+        logger.debug("cannot access the device.. maybe it has not been "
             + "configured or maybe it does not exist");
 
         // take a break, reset, hope things work themselves out
@@ -249,14 +249,14 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
           resetProtocolDevice();
 
         } catch (InterruptedException e) {
-          LOGGER.error("Interrupted during failed port delay.. "
+          logger.error("Interrupted during failed port delay.. "
               + "giving up on this situation");
           wanttodie = true;
         }
       }
     }
 
-    LOGGER.info("handler #" + handlerNo + ": exiting");
+    logger.info("handler #" + handlerNo + ": exiting");
 
     if (this.diskDrives != null) {
       this.diskDrives.shutdown();
@@ -271,43 +271,43 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
 
   private void doOpLoadFile() {
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_LOADFILE");
+      logger.info("DoOP_LOADFILE");
     }
   }
 
   private void doOpGetDataBlock() {
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_GETDATABLOCK");
+      logger.info("DoOP_GETDATABLOCK");
     }
   }
 
   private void doOpPrepareNextBlock() {
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_PREPARENEXTBLOCK");
+      logger.info("DoOP_PREPARENEXTBLOCK");
     }
   }
 
   private void doOpSaveFile() {
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_SAVEFILE");
+      logger.info("DoOP_SAVEFILE");
     }
   }
 
   private void doOpWriteBlock() {
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_WRITEBLOCK");
+      logger.info("DoOP_WRITEBLOCK");
     }
   }
 
   private void doOpOpenDataFile() {
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_OPENDATAFILE");
+      logger.info("DoOP_OPENDATAFILE");
     }
   }
 
   private void doOpDirFileRequest() {
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_DIRFILEREQUEST");
+      logger.info("DoOP_DIRFILEREQUEST");
     }
     try {
       // read flag byte
@@ -319,7 +319,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
       // read arg
       byte[] buf = new byte[arglen];
       buf = dwProtocolDevice.comRead(arglen);
-      LOGGER.debug("DIRFILEREQUEST fl: " + flag + "  arg: " + new String(buf));
+      logger.debug("DIRFILEREQUEST fl: " + flag + "  arg: " + new String(buf));
 
       //respond
       if (flag == 0) {
@@ -330,7 +330,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
         dwProtocolDevice.comWrite1(0, false);
       }
     } catch (IOException e) {
-      LOGGER.warn(e.getMessage());
+      logger.warn(e.getMessage());
     } catch (DWCommTimeOutException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -339,7 +339,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
 
   private void doOpRetrieveName() {
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_RETRIEVENAME");
+      logger.info("DoOP_RETRIEVENAME");
     }
     try {
       int arglen = dwProtocolDevice.comRead1(true);
@@ -350,7 +350,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
         dwProtocolDevice.comWrite1('2', false);
       }
     } catch (IOException e) {
-      LOGGER.warn(e.getMessage());
+      logger.warn(e.getMessage());
     } catch (DWCommTimeOutException e) {
       e.printStackTrace();
     }
@@ -358,13 +358,13 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
 
   private void doOpDirNameRequest() {
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_DIRNAMEREQUEST");
+      logger.info("DoOP_DIRNAMEREQUEST");
     }
   }
 
   private void doOpSetCurrentDir() {
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_SETCURRENTDIR");
+      logger.info("DoOP_SETCURRENTDIR");
     }
   }
 
@@ -384,7 +384,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
 
     // Sync disks??
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_RESET");
+      logger.info("DoOP_RESET");
     }
   }
 
@@ -407,7 +407,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
       lastChecksum = computeChecksum(sector, SECTOR_SIZE);
     } catch (IOException e1) {
       // Timed out reading data from Coco
-      LOGGER.error("DoOP_WRITE error: " + e1.getMessage());
+      logger.error("DoOP_WRITE error: " + e1.getMessage());
       // reset, abort
       return;
     } catch (DWCommTimeOutException e) {
@@ -417,7 +417,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
     if (lastChecksum != DWUtils.int2(cocosum)) {
       // checksums do not match, tell Coco
       dwProtocolDevice.comWrite1(DWDefs.DWERROR_CRC, false);
-      LOGGER.warn("DoOP_WRITE: Bad checksum, drive: " + lastDrive + " LSN: "
+      logger.warn("DoOP_WRITE: Bad checksum, drive: " + lastDrive + " LSN: "
           + DWUtils.int3(lastLSN) + " CocoSum: " + DWUtils.int2(cocosum)
           + " ServerSum: " + lastChecksum);
       return;
@@ -432,22 +432,22 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
     } catch (DWDriveNotLoadedException e1) {
       // send drive not ready response
       response = DWDefs.DWERROR_NOTREADY;
-      LOGGER.warn(e1.getMessage());
+      logger.warn(e1.getMessage());
     } catch (DWDriveNotValidException e2) {
       // basically the same as not ready
       response = DWDefs.DWERROR_NOTREADY;
-      LOGGER.warn(e2.getMessage());
+      logger.warn(e2.getMessage());
     } catch (DWDriveWriteProtectedException e3) {
       // hopefully this is appropriate
       response = DWDefs.DWERROR_WP;
-      LOGGER.warn(e3.getMessage());
+      logger.warn(e3.getMessage());
     } catch (IOException e4) {
       // error on our end doing the write
       response = DWDefs.DWERROR_WRITE;
-      LOGGER.error(e4.getMessage());
+      logger.error(e4.getMessage());
     } catch (DWInvalidSectorException | DWSeekPastEndOfDeviceException e5) {
       response = DWDefs.DWERROR_WRITE;
-      LOGGER.warn(e5.getMessage());
+      logger.warn(e5.getMessage());
     }
     // record error
     if (response != DWDefs.DWOK) {
@@ -462,12 +462,12 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
     if (opcode == DWDefs.OP_REWRITE) {
       writeRetries++;
       if (config.getBoolean("LogOpCode", false)) {
-        LOGGER.info("DoOP_REWRITE lastDrive: " + (int) lastDrive + " LSN: "
+        logger.info("DoOP_REWRITE lastDrive: " + (int) lastDrive + " LSN: "
             + DWUtils.int3(lastLSN));
       }
     } else {
       if (config.getBoolean("LogOpCode", false)) {
-        LOGGER.info("DoOP_WRITE lastDrive: " + (int) lastDrive + " LSN: "
+        logger.info("DoOP_WRITE lastDrive: " + (int) lastDrive + " LSN: "
             + DWUtils.int3(lastLSN));
       }
     }
@@ -480,11 +480,11 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
     try {
       tmpint = dwProtocolDevice.comRead1(true);
       if (config.getBoolean("LogOpCode", false)) {
-        LOGGER.info("DoOP_PRINT: byte " + tmpint);
+        logger.info("DoOP_PRINT: byte " + tmpint);
       }
       vprinter.addByte((byte) tmpint);
     } catch (IOException e) {
-      LOGGER.error("IO exception reading print byte: " + e.getMessage());
+      logger.error("IO exception reading print byte: " + e.getMessage());
     } catch (DWCommTimeOutException e) {
       e.printStackTrace();
     }
@@ -493,7 +493,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
   @SuppressWarnings("unused")
   private void doOpPrintFlush() {
     if (config.getBoolean("LogOpCode", false)) {
-      LOGGER.info("DoOP_PRINTFLUSH");
+      logger.info("DoOP_PRINTFLUSH");
     }
     vprinter.flush();
   }
@@ -634,7 +634,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
    */
   public void resetProtocolDevice() {
     if (!this.wanttodie) {
-      LOGGER.warn("resetting protocol device");
+      logger.warn("resetting protocol device");
       // do we need to do anything else here?
       setupProtocolDevice();
     }
@@ -655,22 +655,22 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
           dwProtocolDevice = new DWSerialDevice(this);
         } catch (NoSuchPortException e1) {
           //wanttodie = true; lets keep on living and see how that goes
-          LOGGER.error("handler #" + handlerNo + ": Serial device '"
+          logger.error("handler #" + handlerNo + ": Serial device '"
               + config.getString("SerialDevice") + "' not found");
         } catch (PortInUseException e2) {
           //wanttodie = true;
-          LOGGER.error("handler #" + handlerNo + ": Serial device '"
+          logger.error("handler #" + handlerNo + ": Serial device '"
               + config.getString("SerialDevice") + "' in use");
         } catch (UnsupportedCommOperationException e3) {
           //wanttodie = true;
-          LOGGER.error("handler #" + handlerNo
+          logger.error("handler #" + handlerNo
               + ": Unsupported comm operation while opening serial port '"
               + config.getString("SerialDevice") + "'");
         } catch (IOException | TooManyListenersException e) {
           e.printStackTrace();
         }
       } else {
-        LOGGER.error("Serial mode requires SerialDevice to be set, "
+        logger.error("Serial mode requires SerialDevice to be set, "
             + "cannot use this configuration");
         //wanttodie = true;
       }
@@ -684,10 +684,10 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
           );
         } catch (IOException e) {
           //wanttodie = true;
-          LOGGER.error("handler #" + handlerNo + ": " + e.getMessage());
+          logger.error("handler #" + handlerNo + ": " + e.getMessage());
         }
       } else {
-        LOGGER.error("TCP mode requires TCPDevicePort to be set, "
+        logger.error("TCP mode requires TCPDevicePort to be set, "
             + "cannot use this configuration");
         //wanttodie = true;
       }
@@ -704,10 +704,10 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
           );
         } catch (IOException e) {
           //wanttodie = true;
-          LOGGER.error("handler #" + handlerNo + ": " + e.getMessage());
+          logger.error("handler #" + handlerNo + ": " + e.getMessage());
         }
       } else {
-        LOGGER.error("TCP mode requires TCPClientPort and TCPClientHost "
+        logger.error("TCP mode requires TCPClientPort and TCPClientHost "
             + "to be set, cannot use this configuration");
         //wanttodie = true;
       }
@@ -753,7 +753,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
    */
   @Override
   public Logger getLogger() {
-    return this.LOGGER;
+    return this.logger;
   }
 
   /**
