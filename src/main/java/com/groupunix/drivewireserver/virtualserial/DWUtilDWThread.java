@@ -14,8 +14,8 @@ public class DWUtilDWThread implements Runnable {
 
   private static final Logger logger = Logger.getLogger("DWServer.DWUtilDWThread");
 
-  private int vport = -1;
-  private String strargs = null;
+  private int vport;
+  private String strargs;
   private DWVSerialPorts dwVSerialPorts;
   private boolean protect = false;
 
@@ -29,29 +29,21 @@ public class DWUtilDWThread implements Runnable {
     if (vport <= this.dwVSerialPorts.getMaxPorts()) {
       this.protect = dwProto.getConfig().getBoolean("ProtectedMode", false);
     }
-
-
     commands = new DWCommandList(dwProto, dwProto.getCMDCols());
     commands.addCommand(new DWCmd(dwProto));
     commands.addCommand(new UICmd(dwProto));
-
     logger.debug("init dw util thread (protected mode: " + this.protect + ")");
   }
 
 
   public void run() {
-
     Thread.currentThread().setName("dwutil-" + Thread.currentThread().getId());
     Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
-
     logger.debug("run for port " + vport);
-
     try {
       this.dwVSerialPorts.markConnected(vport);
       this.dwVSerialPorts.setUtilMode(this.vport, DWDefs.UTILMODE_DWCMD);
-
       DWCommandResponse resp = commands.parse(this.strargs);
-
       if (resp.getSuccess()) {
         if (resp.isUseBytes()) {
           dwVSerialPorts.sendUtilityOKResponse(this.vport, resp.getResponseBytes());
@@ -61,27 +53,17 @@ public class DWUtilDWThread implements Runnable {
       } else {
         dwVSerialPorts.sendUtilityFailResponse(this.vport, resp.getResponseCode(), resp.getResponseText());
       }
-
       // wait for output to flush
       while ((dwVSerialPorts.bytesWaiting(this.vport) > 0) && (dwVSerialPorts.isOpen(this.vport))) {
         logger.debug("pause for the cause: " + dwVSerialPorts.bytesWaiting(this.vport) + " bytes left");
         Thread.sleep(100);
       }
-
       if (this.vport < this.dwVSerialPorts.getMaxPorts()) {
         dwVSerialPorts.closePort(this.vport);
       }
-
-    } catch (InterruptedException e) {
-      logger.error(e.getMessage());
-    } catch (DWPortNotValidException e) {
+    } catch (InterruptedException | DWPortNotValidException e) {
       logger.error(e.getMessage());
     }
-
-
     logger.debug("exiting");
-
   }
-
-
 }
