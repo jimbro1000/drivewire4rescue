@@ -10,17 +10,34 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
 public class UICmdInstanceStatus extends DWCommand {
+  /**
+   * Client thread ref.
+   */
+  private final DWUIClientThread clientRef;
+  /**
+   * Protocol.
+   */
+  private DWProtocol dwProtocol;
 
-  private DWUIClientThread clientref = null;
-  private DWProtocol gproto = null;
-
-  public UICmdInstanceStatus(DWUIClientThread dwuiClientThread) {
-    clientref = dwuiClientThread;
+  /**
+   * UI Command Instance Status.
+   *
+   * @param clientThread client thread ref
+   */
+  public UICmdInstanceStatus(final DWUIClientThread clientThread) {
+    this.clientRef = clientThread;
+    this.dwProtocol = null;
     setHelp();
   }
 
-  public UICmdInstanceStatus(DWProtocol dwProto) {
-    this.gproto = dwProto;
+  /**
+   * UI Command Instance Status.
+   *
+   * @param protocol protocol
+   */
+  public UICmdInstanceStatus(final DWProtocol protocol) {
+    this.dwProtocol = protocol;
+    this.clientRef = null;
     setHelp();
   }
 
@@ -30,59 +47,72 @@ public class UICmdInstanceStatus extends DWCommand {
     setUsage("ui instance status");
   }
 
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public DWCommandResponse parse(String cmdline) {
+  public DWCommandResponse parse(final String cmdline) {
     String txt = "";
     int hno = 0;
 
     if (cmdline.length() > 0) {
       try {
         hno = Integer.parseInt(cmdline);
-
-        if (DriveWireServer.isValidHandlerNo(hno))
-          gproto = DriveWireServer.getHandler(hno);
-        else
-          return (new DWCommandResponse(false, DWDefs.RC_INVALID_HANDLER, "Invalid handler number"));
+        if (DriveWireServer.isValidHandlerNo(hno)) {
+          dwProtocol = DriveWireServer.getHandler(hno);
+        } else {
+          return new DWCommandResponse(
+              false,
+              DWDefs.RC_INVALID_HANDLER,
+              "Invalid handler number"
+          );
+        }
       } catch (NumberFormatException ne) {
-        return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error: non numeric instance #"));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_SYNTAX_ERROR,
+            "Syntax error: non numeric instance #"
+        );
       }
     } else {
-      if (this.clientref != null) {
-        gproto = DriveWireServer.getHandler(clientref.getInstance());
-        hno = this.clientref.getInstance();
+      if (this.clientRef != null) {
+        dwProtocol = DriveWireServer.getHandler(clientRef.getInstance());
+        hno = this.clientRef.getInstance();
       }
     }
-
-
     txt = "num|" + hno + "\n";
-    txt += "name|" + gproto.getConfig().getString("[@name]", "not set") + "\n";
-    txt += "desc|" + gproto.getConfig().getString("[@desc]", "not set") + "\n";
-
-    txt += "proto|" + gproto.getConfig().getString("Protocol", "DriveWire") + "\n";
-
-    txt += "autostart|" + gproto.getConfig().getBoolean("AutoStart", true) + "\n";
-    txt += "dying|" + gproto.isDying() + "\n";
-    txt += "started|" + gproto.isStarted() + "\n";
-    txt += "ready|" + gproto.isReady() + "\n";
-    txt += "connected|" + gproto.isConnected() + "\n";
-
-    if (gproto.getProtoDev() != null) {
-      txt += "devicetype|" + gproto.getProtoDev().getDeviceType() + "\n";
-
-      txt += "devicename|" + gproto.getProtoDev().getDeviceName() + "\n";
-      txt += "deviceconnected|" + gproto.getProtoDev().connected() + "\n";
-
-      if (gproto.getProtoDev().getRate() > -1)
-        txt += "devicerate|" + gproto.getProtoDev().getRate() + "\n";
-
-      if (gproto.getProtoDev().getClient() != null)
-        txt += "deviceclient|" + gproto.getProtoDev().getClient() + "\n";
-
+    txt += "name|" + dwProtocol.getConfig()
+        .getString("[@name]", "not set") + "\n";
+    txt += "desc|" + dwProtocol.getConfig()
+        .getString("[@desc]", "not set") + "\n";
+    txt += "proto|" + dwProtocol.getConfig()
+        .getString("Protocol", "DriveWire") + "\n";
+    txt += "autostart|" + dwProtocol.getConfig()
+        .getBoolean("AutoStart", true) + "\n";
+    txt += "dying|" + dwProtocol.isDying() + "\n";
+    txt += "started|" + dwProtocol.isStarted() + "\n";
+    txt += "ready|" + dwProtocol.isReady() + "\n";
+    txt += "connected|" + dwProtocol.isConnected() + "\n";
+    if (dwProtocol.getProtoDev() != null) {
+      txt += "devicetype|" + dwProtocol.getProtoDev().getDeviceType() + "\n";
+      txt += "devicename|" + dwProtocol.getProtoDev().getDeviceName() + "\n";
+      txt += "deviceconnected|" + dwProtocol.getProtoDev().connected() + "\n";
+      if (dwProtocol.getProtoDev().getRate() > -1) {
+        txt += "devicerate|" + dwProtocol.getProtoDev().getRate() + "\n";
+      }
+      if (dwProtocol.getProtoDev().getClient() != null) {
+        txt += "deviceclient|" + dwProtocol.getProtoDev().getClient() + "\n";
+      }
     }
-
-    if (gproto.getConfig().getString("Protocol", "DriveWire").equals("DriveWire")) {
-
-      DWProtocolHandler dwProto = (DWProtocolHandler) gproto;
+    if (
+        dwProtocol.getConfig()
+            .getString("Protocol", "DriveWire")
+            .equals("DriveWire")
+    ) {
+      DWProtocolHandler dwProto = (DWProtocolHandler) dwProtocol;
       txt += "lastopcode|" + DWUtils.prettyOP(dwProto.getLastOpcode()) + "\n";
       txt += "lastgetstat|" + DWUtils.prettySS(dwProto.getLastGetStat()) + "\n";
       txt += "lastsetstat|" + DWUtils.prettySS(dwProto.getLastSetStat()) + "\n";
@@ -90,14 +120,17 @@ public class UICmdInstanceStatus extends DWCommand {
       txt += "lastdrive|" + dwProto.getLastDrive() + "\n";
       txt += "lasterror|" + dwProto.getLastError() + "\n";
       txt += "lastchecksum|" + dwProto.getLastChecksum() + "\n";
-
     }
-
-    return (new DWCommandResponse(txt));
-
+    return new DWCommandResponse(txt);
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

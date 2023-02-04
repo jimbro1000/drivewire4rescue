@@ -7,37 +7,60 @@ import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdInstanceAttach extends DWCommand {
+  /**
+   * Client thread ref.
+   */
+  private final DWUIClientThread clientRef;
 
-  private DWUIClientThread clientref;
-
-  public UICmdInstanceAttach(DWUIClientThread dwuiClientThread) {
-    clientref = dwuiClientThread;
+  /**
+   * UI Command Instance Attach.
+   *
+   * @param clientThread client thread ref
+   */
+  public UICmdInstanceAttach(final DWUIClientThread clientThread) {
+    clientRef = clientThread;
     setCommand("attach");
     setShortHelp("attach to instance #");
     setUsage("ui instance attach #");
   }
 
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public DWCommandResponse parse(String cmdline) {
+  public DWCommandResponse parse(final String cmdline) {
     try {
       int handler = Integer.parseInt(cmdline);
-
       if (DriveWireServer.isValidHandlerNo(handler)) {
         // set this connection's instance
-        clientref.setInstance(handler);
-        return (new DWCommandResponse("Attached to instance " + handler));
-
+        clientRef.setInstance(handler);
+        return new DWCommandResponse("Attached to instance " + handler);
       } else {
-        return (new DWCommandResponse(false, DWDefs.RC_INVALID_HANDLER, "Invalid handler number"));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_INVALID_HANDLER,
+            "Invalid handler number"
+        );
       }
     } catch (NumberFormatException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error: non numeric instance #"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "Syntax error: non numeric instance #"
+      );
     }
-
-
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

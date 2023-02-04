@@ -8,37 +8,48 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
 public class UICmdServerFileDir extends DWCommand {
 
+  /**
+   * UI Command Server File Dir.
+   */
   public UICmdServerFileDir() {
     setCommand("dir");
     setShortHelp("List directory contents");
     setUsage("ui server file dir [path]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     File dir = new File(cmdline);
-
-    String text = "";
-
+    StringBuilder text = new StringBuilder();
     File[] contents = dir.listFiles();
 
     if (contents != null) {
       for (File f : contents) {
-        if (f.isDirectory())
-          text += DWUtils.getFileDescriptor(f) + "|false\n";
+        if (f.isDirectory()) {
+          text.append(DWUtils.getFileDescriptor(f)).append("|false\n");
+        }
       }
-
       for (File f : contents) {
-        if (!f.isDirectory())
-          text += DWUtils.getFileDescriptor(f) + "|false\n";
+        if (!f.isDirectory()) {
+          text.append(DWUtils.getFileDescriptor(f)).append("|false\n");
+        }
       }
-
     }
-
-    return (new DWCommandResponse(text));
+    return new DWCommandResponse(text.toString());
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
 }

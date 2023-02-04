@@ -6,13 +6,25 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdInstanceReset extends DWCommand {
-  public UICmdInstanceReset(DWUIClientThread dwuiClientThread) {
-    this.getCommandList().addCommand(new UICmdInstanceResetProtodev(dwuiClientThread));
+  /**
+   * UI Command Instance Reset.
+   *
+   * @param clientThread client thread ref
+   */
+  public UICmdInstanceReset(final DWUIClientThread clientThread) {
+    this.getCommandList()
+        .addCommand(new UICmdInstanceResetProtodev(clientThread));
     setHelp();
   }
 
-  public UICmdInstanceReset(DWProtocol dwProto) {
-    this.getCommandList().addCommand(new UICmdInstanceResetProtodev(dwProto));
+  /**
+   * UI Command Instance Reset.
+   *
+   * @param protocol protocol
+   */
+  public UICmdInstanceReset(final DWProtocol protocol) {
+    this.getCommandList()
+        .addCommand(new UICmdInstanceResetProtodev(protocol));
     setHelp();
   }
 
@@ -22,12 +34,23 @@ public class UICmdInstanceReset extends DWCommand {
     this.setUsage("ui instance reset [command]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (this.getCommandList().parse(cmdline));
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return this.getCommandList().parse(cmdline);
   }
 
-  public boolean validate(String cmdline) {
-    return (this.getCommandList().validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
-
 }
