@@ -23,8 +23,10 @@ public class UICmdInstanceResetProtodev extends DWCommand {
     this.dwProto = dwProto;
   }
 
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    setCommand("protodev");
+    setShortHelp("Reset protocol device");
+    setUsage("ui instance reset protodev");
   }
 
   public DWCommandResponse parse(String cmdline) {
@@ -43,15 +45,6 @@ public class UICmdInstanceResetProtodev extends DWCommand {
     return (new DWCommandResponse(res));
   }
 
-
-  public String getShortHelp() {
-    return "Reset protocol device";
-  }
-
-
-  public String getUsage() {
-    return "ui instance reset protodev";
-  }
 
   public boolean validate(String cmdline) {
     return (true);

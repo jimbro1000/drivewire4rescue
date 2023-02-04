@@ -17,31 +17,19 @@ public class UICmdServerShowErrors extends DWCommand {
 
   public UICmdServerShowErrors(DWUIClientThread dwuiClientThread) {
     this.dwProto = DriveWireServer.getHandler(dwuiClientThread.getInstance());
+    setHelp();
   }
 
 
   public UICmdServerShowErrors(DWProtocol dwProto) {
     this.dwProto = dwProto;
+    setHelp();
   }
 
-
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "errors";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show error descriptions";
-  }
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show errors";
+  private void setHelp() {
+    setCommand("errors");
+    setShortHelp("show error descriptions");
+    setUsage("ui server show errors");
   }
 
   @Override

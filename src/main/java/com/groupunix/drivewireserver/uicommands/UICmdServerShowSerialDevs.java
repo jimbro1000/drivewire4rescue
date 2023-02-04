@@ -8,24 +8,10 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowSerialDevs extends DWCommand {
 
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "serialdevs";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show available serial devices";
-  }
-
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show serialdevs";
+  public UICmdServerShowSerialDevs() {
+    setCommand("serialdevs");
+    setShortHelp("show available serial devices");
+    setUsage("ui server show serialdevs");
   }
 
   @Override

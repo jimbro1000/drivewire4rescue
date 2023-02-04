@@ -10,13 +10,11 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerConfigWrite extends DWCommand {
 
-  static final String command = "write";
-
-
-  public String getCommand() {
-    return command;
+  public UICmdServerConfigWrite() {
+    setCommand("write");
+    setShortHelp("Write config xml");
+    setUsage("ui server config write");
   }
-
 
   public DWCommandResponse parse(String cmdline) {
     String res = new String();
@@ -24,7 +22,7 @@ public class UICmdServerConfigWrite extends DWCommand {
     StringWriter sw = new StringWriter();
 
     try {
-      DriveWireServer.serverConfiguration.save(sw);
+      DriveWireServer.getServerConfiguration().save(sw);
     } catch (ConfigurationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -33,16 +31,6 @@ public class UICmdServerConfigWrite extends DWCommand {
     res = sw.getBuffer().toString();
 
     return (new DWCommandResponse(res));
-  }
-
-
-  public String getShortHelp() {
-    return "Write config xml";
-  }
-
-
-  public String getUsage() {
-    return "ui server config write";
   }
 
   public boolean validate(String cmdline) {

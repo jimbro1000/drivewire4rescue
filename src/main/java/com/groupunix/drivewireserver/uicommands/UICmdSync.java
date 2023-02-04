@@ -13,8 +13,6 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdSync extends DWCommand {
 
-  static final String command = "sync";
-
   private static final Logger logger = Logger.getLogger("DWServer.DWUtilUIThread");
 
   private DWUIClientThread dwuiref;
@@ -22,10 +20,9 @@ public class UICmdSync extends DWCommand {
 
   public UICmdSync(DWUIClientThread dwuiClientThread) {
     this.dwuiref = dwuiClientThread;
-  }
-
-  public String getCommand() {
-    return command;
+    setCommand("sync");
+    setShortHelp("Sync status (real time)");
+    setUsage("ui sync");
   }
 
   public DWCommandResponse parse(String cmdline) {
@@ -86,16 +83,6 @@ public class UICmdSync extends DWCommand {
     dwuiref.getOutputStream().write(msg.getEventType());
     dwuiref.getOutputStream().write(13);
     dwuiref.getOutputStream().flush();
-  }
-
-
-  public String getShortHelp() {
-    return "Sync status (real time)";
-  }
-
-
-  public String getUsage() {
-    return "ui sync";
   }
 
   public boolean validate(String cmdline) {

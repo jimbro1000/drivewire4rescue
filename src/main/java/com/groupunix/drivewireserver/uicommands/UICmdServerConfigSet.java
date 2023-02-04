@@ -7,11 +7,10 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerConfigSet extends DWCommand {
 
-  static final String command = "set";
-
-
-  public String getCommand() {
-    return command;
+  public UICmdServerConfigSet() {
+    setCommand("set");
+    setShortHelp("Set server configuration item");
+    setUsage("ui server config set [item] [value]");
   }
 
   public DWCommandResponse parse(String cmdline) {
@@ -32,14 +31,6 @@ public class UICmdServerConfigSet extends DWCommand {
 
   }
 
-  public String getShortHelp() {
-    return "Set server configuration item";
-  }
-
-
-  public String getUsage() {
-    return "ui server config set [item] [value]";
-  }
 
   public boolean validate(String cmdline) {
     return (true);
@@ -48,9 +39,9 @@ public class UICmdServerConfigSet extends DWCommand {
 
   private DWCommandResponse doSetConfig(String item) {
 
-    if (DriveWireServer.serverConfiguration.containsKey(item)) {
-      synchronized (DriveWireServer.serverConfiguration) {
-        DriveWireServer.serverConfiguration.setProperty(item, null);
+    if (DriveWireServer.getServerConfiguration().containsKey(item)) {
+      synchronized (DriveWireServer.getServerConfiguration()) {
+        DriveWireServer.getServerConfiguration().setProperty(item, null);
       }
 
     }
@@ -61,12 +52,12 @@ public class UICmdServerConfigSet extends DWCommand {
 
 
   private DWCommandResponse doSetConfig(String item, String value) {
-    synchronized (DriveWireServer.serverConfiguration) {
-      if (DriveWireServer.serverConfiguration.containsKey(item)) {
-        if (!DriveWireServer.serverConfiguration.getProperty(item).equals(value))
-          DriveWireServer.serverConfiguration.setProperty(item, value);
+    synchronized (DriveWireServer.getServerConfiguration()) {
+      if (DriveWireServer.getServerConfiguration().containsKey(item)) {
+        if (!DriveWireServer.getServerConfiguration().getProperty(item).equals(value))
+          DriveWireServer.getServerConfiguration().setProperty(item, value);
       } else {
-        DriveWireServer.serverConfiguration.setProperty(item, value);
+        DriveWireServer.getServerConfiguration().setProperty(item, value);
       }
     }
     return (new DWCommandResponse(item + " set."));

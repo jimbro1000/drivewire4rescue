@@ -15,23 +15,24 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class UICmdInstanceDiskShow extends DWCommand {
 
-  static final String command = "show";
-
   private DWUIClientThread uiref = null;
 
   private DWProtocolHandler dwProto = null;
 
   public UICmdInstanceDiskShow(DWUIClientThread dwuiClientThread) {
-
     this.uiref = dwuiClientThread;
+    setHelp();
   }
 
   public UICmdInstanceDiskShow(DWProtocolHandler dwProto) {
     this.dwProto = dwProto;
+    setHelp();
   }
 
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    setCommand("show");
+    setShortHelp("Show current disks");
+    setUsage("ui instance disk show");
   }
 
   @SuppressWarnings("unchecked")
@@ -99,14 +100,6 @@ public class UICmdInstanceDiskShow extends DWCommand {
   }
 
 
-  public String getShortHelp() {
-    return "Show current disks";
-  }
-
-
-  public String getUsage() {
-    return "ui instance disk show";
-  }
 
   public boolean validate(String cmdline) {
     return (true);

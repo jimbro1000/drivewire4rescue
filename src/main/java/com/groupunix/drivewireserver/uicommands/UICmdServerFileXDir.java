@@ -9,11 +9,10 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
 public class UICmdServerFileXDir extends DWCommand {
 
-  static final String command = "xdir";
-
-
-  public String getCommand() {
-    return command;
+  public UICmdServerFileXDir() {
+    setCommand("xdir");
+    setShortHelp("List directory contents (short form)");
+    setUsage("ui server file xdir [path]");
   }
 
   public DWCommandResponse parse(String cmdline) {
@@ -44,16 +43,6 @@ public class UICmdServerFileXDir extends DWCommand {
     }
 
     return (new DWCommandResponse(text));
-  }
-
-
-  public String getShortHelp() {
-    return "List directory contents (short form)";
-  }
-
-
-  public String getUsage() {
-    return "ui server file xdir [path]";
   }
 
   public boolean validate(String cmdline) {

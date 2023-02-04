@@ -8,8 +8,6 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdServerTerminate extends DWCommand {
 
-  static final String command = "terminate";
-
   @SuppressWarnings("unused")
   private DWUIClientThread dwuiref;
 
@@ -18,31 +16,23 @@ public class UICmdServerTerminate extends DWCommand {
 
   public UICmdServerTerminate(DWUIClientThread dwuiClientThread) {
     this.dwuiref = dwuiClientThread;
+    setHelp();
   }
-
 
   public UICmdServerTerminate(DWProtocol dwProto) {
     this.dwProto = dwProto;
+    setHelp();
   }
 
-
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    setCommand("terminate");
+    setShortHelp("Terminate the server");
+    setUsage("ui server terminate");
   }
 
   public DWCommandResponse parse(String cmdline) {
     DriveWireServer.shutdown();
     return (new DWCommandResponse("Server shutdown requested."));
-  }
-
-
-  public String getShortHelp() {
-    return "Terminate the server";
-  }
-
-
-  public String getUsage() {
-    return "ui server terminate";
   }
 
   public boolean validate(String cmdline) {

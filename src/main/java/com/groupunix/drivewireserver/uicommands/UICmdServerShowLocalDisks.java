@@ -14,46 +14,33 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowLocalDisks extends DWCommand {
 
-	@Override
-	public String getCommand() {
-		// TODO Auto-generated method stub
-		return "localdisks";
-	}
+  public UICmdServerShowLocalDisks() {
+    setCommand("localdisks");
+    setShortHelp("show server local disks");
+    setUsage("ui server show localdisks");
+  }
 
+  @Override
+  public DWCommandResponse parse(String cmdline) {
 
-	@Override
-	public String getShortHelp() {
-		// TODO Auto-generated method stub
-		return "show server local disks";
-	}
+    String res = new String();
 
-	@Override
-	public String getUsage() {
-		// TODO Auto-generated method stub
-		return "ui server show localdisks";
-	}
+    try {
+      if (!DriveWireServer.getServerConfiguration().containsKey("LocalDiskDir"))
+        return (new DWCommandResponse(false, DWDefs.RC_CONFIG_KEY_NOT_SET, "LocalDiskDir must be defined in configuration"));
 
+      String path = DriveWireServer.getServerConfiguration().getString(
+          "LocalDiskDir");
 
-	@Override
-	public DWCommandResponse parse(String cmdline) {
+      FileSystemManager fsManager;
 
-		String res = new String();
+      fsManager = VFS.getManager();
 
-		try {
-			if (!DriveWireServer.serverConfiguration.containsKey("LocalDiskDir"))
-				return (new DWCommandResponse(false, DWDefs.RC_CONFIG_KEY_NOT_SET, "LocalDiskDir must be defined in configuration"));
+      FileObject dirobj = fsManager.resolveFile(path);
 
-			String path = DriveWireServer.serverConfiguration.getString("LocalDiskDir");
+      FileObject[] children = dirobj.getChildren();
 
-			FileSystemManager fsManager;
-
-			fsManager = VFS.getManager();
-
-			FileObject dirobj = fsManager.resolveFile(path);
-
-			FileObject[] children = dirobj.getChildren();
-
-			for (int i = 0; i < children.length; i++) {
+      for (int i = 0; i < children.length; i++) {
 				if (children[i].getType() == FileType.FILE)
 					res += children[i].getName() + "\n";
 			}

@@ -7,12 +7,10 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
 public class UICmdServerFileRoots extends DWCommand {
-
-  static final String command = "roots";
-
-
-  public String getCommand() {
-    return command;
+  public UICmdServerFileRoots() {
+    setCommand("roots");
+    setShortHelp("List filesystem roots");
+    setUsage("ui server file roots");
   }
 
   public DWCommandResponse parse(String cmdline) {
@@ -28,15 +26,6 @@ public class UICmdServerFileRoots extends DWCommand {
     return (new DWCommandResponse(text));
   }
 
-
-  public String getShortHelp() {
-    return "List filesystem roots";
-  }
-
-
-  public String getUsage() {
-    return "ui server file roots";
-  }
 
   public boolean validate(String cmdline) {
     return (true);

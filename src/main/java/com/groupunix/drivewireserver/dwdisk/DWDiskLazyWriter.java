@@ -37,7 +37,7 @@ public class DWDiskLazyWriter implements Runnable {
     );
     LOGGER.debug(
         "started, write interval is "
-            + DriveWireServer.serverConfiguration.getLong(
+            + DriveWireServer.getServerConfiguration().getLong(
             "DiskLazyWriteInterval",
             WRITE_INTERVAL
         )
@@ -46,13 +46,13 @@ public class DWDiskLazyWriter implements Runnable {
       try {
         LOGGER.debug(
             "sleeping for "
-                + DriveWireServer.serverConfiguration.getLong(
+                + DriveWireServer.getServerConfiguration().getLong(
                 "DiskLazyWriteInterval",
                 DISK_LAZY_WRITE_SLEEP_INTERVAL
             ) + " ms..."
         );
         Thread.sleep(
-            DriveWireServer.serverConfiguration.getLong(
+            DriveWireServer.getServerConfiguration().getLong(
                 "DiskLazyWriteInterval",
                 DISK_LAZY_WRITE_SLEEP_INTERVAL
             )

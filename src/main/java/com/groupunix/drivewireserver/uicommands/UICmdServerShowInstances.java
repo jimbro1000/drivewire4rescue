@@ -6,23 +6,10 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowInstances extends DWCommand {
 
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "instances";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show available instances";
-  }
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show instances";
+  public UICmdServerShowInstances() {
+    setCommand("instances");
+    setShortHelp("show available instances");
+    setUsage("ui server show instances");
   }
 
   @Override

@@ -52,7 +52,7 @@ public final class DWCmdConfigSet extends DWCommand {
 
   private DWCommandResponse doSetConfig(final String item) {
     if (dwProtocol.getConfig().containsKey(item)) {
-      synchronized (DriveWireServer.serverConfiguration) {
+      synchronized (DriveWireServer.getServerConfiguration()) {
         dwProtocol.getConfig().clearProperty(item);
       }
     }
@@ -64,7 +64,7 @@ public final class DWCmdConfigSet extends DWCommand {
   private DWCommandResponse doSetConfig(
       final String item, final String value
   ) {
-    synchronized (DriveWireServer.serverConfiguration) {
+    synchronized (DriveWireServer.getServerConfiguration()) {
       dwProtocol.getConfig().setProperty(item, value);
     }
     return new DWCommandResponse(

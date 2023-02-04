@@ -33,7 +33,7 @@ public class DWCmdMidiSynthShowProfiles extends DWCommand {
     text.append("\r\nAvailable sound translation profiles:\r\n\n");
 
     List<HierarchicalConfiguration> profiles = DriveWireServer
-        .serverConfiguration
+        .getServerConfiguration()
         .configurationsAt("midisynthprofile");
 
     for (HierarchicalConfiguration midiProfile : profiles) {

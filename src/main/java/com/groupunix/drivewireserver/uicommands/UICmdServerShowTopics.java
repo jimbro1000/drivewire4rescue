@@ -17,31 +17,18 @@ public class UICmdServerShowTopics extends DWCommand {
 
   public UICmdServerShowTopics(DWUIClientThread dwuiClientThread) {
     this.dwuiClientThread = dwuiClientThread;
+    setHelp();
   }
-
 
   public UICmdServerShowTopics(DWProtocol dwProto) {
     this.dwProto = dwProto;
+    setHelp();
   }
 
-
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "topics";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show available help topics";
-  }
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show topics";
+  private void setHelp() {
+    setCommand("topics");
+    setShortHelp("show available help topics");
+    setUsage("ui server show topics");
   }
 
   @Override

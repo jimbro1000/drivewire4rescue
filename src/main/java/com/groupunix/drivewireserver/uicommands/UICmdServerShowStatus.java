@@ -6,23 +6,10 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowStatus extends DWCommand {
 
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "status";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show server status";
-  }
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show status";
+  public UICmdServerShowStatus() {
+    setCommand("status");
+    setShortHelp("show server status");
+    setUsage("ui server show status");
   }
 
   @Override
@@ -36,7 +23,7 @@ public class UICmdServerShowStatus extends DWCommand {
     text += "freemem|" + Runtime.getRuntime().freeMemory() / 1024 + "\n";
 
     text += "instances|" + DriveWireServer.getNumHandlers() + "\n";
-    text += "configpath|" + DriveWireServer.serverConfiguration.getBasePath() + "\n";
+    text += "configpath|" + DriveWireServer.getServerConfiguration().getBasePath() + "\n";
 
     return (new DWCommandResponse(text));
   }

@@ -11,20 +11,10 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowMIDIDevs extends DWCommand {
 
-  @Override
-  public String getCommand() {
-    return "mididevs";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    return "show available MIDI devices";
-  }
-
-  @Override
-  public String getUsage() {
-    return "ui server show mididevs";
+  public UICmdServerShowMIDIDevs() {
+    setCommand("mididevs");
+    setShortHelp("show available MIDI devices");
+    setUsage("ui server show mididevs");
   }
 
   @Override

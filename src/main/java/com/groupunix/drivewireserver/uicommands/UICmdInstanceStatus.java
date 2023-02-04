@@ -16,25 +16,18 @@ public class UICmdInstanceStatus extends DWCommand {
 
   public UICmdInstanceStatus(DWUIClientThread dwuiClientThread) {
     clientref = dwuiClientThread;
+    setHelp();
   }
 
   public UICmdInstanceStatus(DWProtocol dwProto) {
     this.gproto = dwProto;
+    setHelp();
   }
 
-  @Override
-  public String getCommand() {
-    return "status";
-  }
-
-  @Override
-  public String getShortHelp() {
-    return "show instance status";
-  }
-
-  @Override
-  public String getUsage() {
-    return "ui instance status";
+  private void setHelp() {
+    setCommand("status");
+    setShortHelp("show instance status");
+    setUsage("ui instance status");
   }
 
   @Override

@@ -8,24 +8,10 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowLog extends DWCommand {
 
-
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "log";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show log buffer";
-  }
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show log";
+  public UICmdServerShowLog() {
+    setCommand("log");
+    setShortHelp("show log buffer");
+    setUsage("ui server show log");
   }
 
   @Override

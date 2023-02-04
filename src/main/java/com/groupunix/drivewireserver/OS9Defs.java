@@ -111,13 +111,61 @@ public final class OS9Defs {
    */
   public static final byte SS_LOCK = 17;
   /**
-   * Status KY SNS.
+   * Status var sect.
    */
-  public static final byte SS_KY_SNS = 0x27;
+  public static final byte SS_VAR_SECT = 0x12;
+  /**
+   * Status block read.
+   */
+  public static final byte SS_BLK_RD = 0x14;
+  /**
+   * Status block read.
+   */
+  public static final byte SS_BLK_WR = 0x15;
+  /**
+   * Status reten.
+   */
+  public static final byte SS_RETEN = 0x16;
+  /**
+   * Status W FM.
+   */
+  public static final byte SS_WFM = 0x17;
+  /**
+   * Status R FM.
+   */
+  public static final byte SS_RFM = 0x18;
+  /**
+   * Status S Sig.
+   */
+  public static final byte SS_S_SIG = 0x1A;
+  /**
+   * Status RELEA.
+   */
+  public static final byte SS_RELEA = 0x1B;
+  /**
+   * Status Attr.
+   */
+  public static final byte SS_ATTR = 0x1C;
+  /**
+   * Status RS bit.
+   */
+  public static final byte SS_RS_BIT = 0x1E;
+  /**
+   * Status FD Inf.
+   */
+  public static final byte SS_FD_INF = 0x20;
   /**
    * Status DIR ENT (directory entry).
    */
   public static final byte SS_DIR_ENT = 0x21;
+  /**
+   * Status D size.
+   */
+  public static final byte SS_D_SIZE = 0x26;
+  /**
+   * Status KY SNS.
+   */
+  public static final byte SS_KY_SNS = 0x27;
   /**
    * Status COMST.
    */
@@ -130,6 +178,14 @@ public final class OS9Defs {
    * Stat close serial port.
    */
   public static final byte SS_S_CLOSE = 0x2A;
+  /**
+   * Status hangup.
+   */
+  public static final byte SS_HNGUP = 0x30;
+  /**
+   * Status none.
+   */
+  public static final byte SS_NONE = (byte) 0xFF;
   // General commands
   /**
    * Command ESCAPE.

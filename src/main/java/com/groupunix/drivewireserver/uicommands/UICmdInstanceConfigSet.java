@@ -8,21 +8,23 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdInstanceConfigSet extends DWCommand {
-
-  static final String command = "set";
   private DWUIClientThread uiref = null;
   private DWProtocol dwProto = null;
 
   public UICmdInstanceConfigSet(DWUIClientThread dwuiClientThread) {
     this.uiref = dwuiClientThread;
+    setHelp();
   }
 
   public UICmdInstanceConfigSet(DWProtocol dwProto) {
     this.dwProto = dwProto;
+    setHelp();
   }
 
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    setCommand("set");
+    setShortHelp("Set instance configuration item");
+    setUsage("ui instance config set [item] [value]");
   }
 
   public DWCommandResponse parse(String cmdline) {
@@ -44,14 +46,7 @@ public class UICmdInstanceConfigSet extends DWCommand {
   }
 
 
-  public String getShortHelp() {
-    return "Set instance configuration item";
-  }
 
-
-  public String getUsage() {
-    return "ui instance config set [item] [value]";
-  }
 
   public boolean validate(String cmdline) {
     return (true);
@@ -62,7 +57,7 @@ public class UICmdInstanceConfigSet extends DWCommand {
 
     if (this.uiref != null) {
       if (DriveWireServer.getHandler(this.uiref.getInstance()).getConfig().containsKey(item)) {
-        synchronized (DriveWireServer.serverConfiguration) {
+        synchronized (DriveWireServer.getServerConfiguration()) {
           DriveWireServer.getHandler(this.uiref.getInstance()).getConfig().clearProperty(item);
         }
         return (new DWCommandResponse("Item '" + item + "' removed from config."));
@@ -72,7 +67,7 @@ public class UICmdInstanceConfigSet extends DWCommand {
 
     } else {
       if (dwProto.getConfig().containsKey(item)) {
-        synchronized (DriveWireServer.serverConfiguration) {
+        synchronized (DriveWireServer.getServerConfiguration()) {
           dwProto.getConfig().clearProperty(item);
         }
         return (new DWCommandResponse("Item '" + item + "' removed from config."));
@@ -85,7 +80,7 @@ public class UICmdInstanceConfigSet extends DWCommand {
 
 
   private DWCommandResponse doSetConfig(String item, String value) {
-    synchronized (DriveWireServer.serverConfiguration) {
+    synchronized (DriveWireServer.getServerConfiguration()) {
       if (this.uiref != null)
         DriveWireServer.getHandler(this.uiref.getInstance()).getConfig().setProperty(item, value);
       else

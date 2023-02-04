@@ -1,5 +1,6 @@
 package com.groupunix.drivewireserver.dwprotocolhandler;
 
+import com.groupunix.drivewireserver.OS9Defs;
 import gnu.io.CommPortIdentifier;
 
 import java.io.File;
@@ -19,76 +20,220 @@ import static com.groupunix.drivewireserver.DWDefs.HIGH_NIBBLE_MASK;
 import static com.groupunix.drivewireserver.DWDefs.LOW_NIBBLE_MASK;
 import static com.groupunix.drivewireserver.DWDefs.NIBBLE_BITS;
 import static com.groupunix.drivewireserver.DWDefs.OP_FASTWRITE_BASE_MAX;
+import static com.groupunix.drivewireserver.DWDefs.WORD_BITS;
 
 public class DWUtils {
-
+  /**
+   * COCO string terminator (bit flag).
+   */
   public static final int COCO_STRING_TERMINATOR = 128;
+  /**
+   * Maximum possible file length.
+   */
   public static final long MAX_FILE_LENGTH = 4294967295L;
+  /**
+   * Chunk size for file copy.
+   */
   public static final int COPY_CHUNK_SIZE = 4096;
+  /**
+   * Midi note channel base.
+   */
   public static final int MIDI_NOTE_CHANNEL = 128;
+  /**
+   * Midi note channel max.
+   */
   public static final int MIDI_NOTE_CHANNEL_MAX = 143;
+  /**
+   * Mini note on channel base.
+   */
   public static final int MIDI_NOTE_ON_CHANNEL = 144;
+  /**
+   * Midi note on channel max.
+   */
   public static final int MIDI_NOTE_ON_CHANNEL_MAX = 159;
+  /**
+   * Midi key press base.
+   */
   public static final int MIDI_KEY_PRESS = 160;
+  /**
+   * Midi key press max.
+   */
   public static final int MIDI_KEY_PRESS_MAX = 175;
+  /**
+   * Midi ctr change base.
+   */
   public static final int MIDI_CTR_CHANGE = 176;
+  /**
+   * Midi ctr change max.
+   */
   public static final int MIDI_CTR_CHANGE_MAX = 191;
+  /**
+   * Midi prg change base.
+   */
   public static final int MIDI_PRG_CHANGE = 192;
+  /**
+   * Midi prg change max.
+   */
   public static final int MIDI_PRG_CHANGE_MAX = 207;
+  /**
+   * Midi Channel press base.
+   */
   public static final int MIDI_CHAN_PRESS = 208;
+  /**
+   * Midi channel press max.
+   */
   public static final int MIDI_CHAN_PRESS_MAX = 223;
+  /**
+   * Midi pitch bend channel base.
+   */
   public static final int MIDI_PITCH_BEND_CHANNEL = 224;
+  /**
+   * Midi pitch bend channel max.
+   */
   public static final int MIDI_PITCH_BEND_CHANNEL_MAX = 239;
+  /**
+   * Midi timing tick.
+   */
   public static final int MIDI_TIMING_TICK = 248;
+  /**
+   * Offset to 2 digit century (y2k bug).
+   */
   public static final int CENTURY_OFFSET = 1900;
+  /**
+   * Hours byte offset.
+   */
   public static final int HOURS = 3;
+  /**
+   * Minutes byte offset.
+   */
   public static final int MINUTES = 4;
+  /**
+   * Year byte offset.
+   */
   public static final int YEAR = 0;
+  /**
+   * Month byte offset.
+   */
   public static final int MONTH = 1;
+  /**
+   * Day byte offset.
+   */
   public static final int DAY = 2;
+  /**
+   * FXD header length.
+   */
   public static final int FXD_HEADER_LEN = 12;
+  /**
+   * Filename max length.
+   */
   public static final int FILENAME_LEN_MAX = 255;
+  /**
+   * File URI prefix.
+   */
   public static final String FILE_URI_PREFIX = "file:///";
+  /**
+   * Notes per octave.
+   */
   public static final int NOTES_PER_OCTAVE = 12;
+  /**
+   * Hexadecimal radix.
+   */
+  public static final int HEX_RADIX = 16;
+  /**
+   * Position of extraneous : when a drive letter is used (for windoze).
+   */
+  public static final int DRIVE_LETTER_MARKER = 9;
 
-  // this appears to be a bug - the MSB should be shifted by 24 places, not 32
-  public static int int4(byte[] data) {
-    return ((data[0] & 0xFF) << 32) + ((data[1] & 0xFF) << 16) + ((data[2] & 0xFF) << 8) + (data[3] & 0xFF);
+  /**
+   * Convert double word to int.
+   * <p>
+   * Only converts first four bytes
+   * </p>
+   *
+   * @param data byte array
+   * @return double word int
+   */
+  public static int int4(final byte[] data) {
+    int result = 0;
+    for (int i = 0; i < DOUBLE_WORD_LEN; ++i) {
+      result += (data[i] & BYTE_MASK) << BYTE_BITS * (DOUBLE_WORD_LEN - i - 1);
+    }
+    return result;
   }
 
-  public static int int3(byte[] data) {
-    return ((data[0] & 0xFF) << 16) + ((data[1] & 0xFF) << 8) + (data[2] & 0xFF);
+  /**
+   * Convert word and a half (24 bits) to int.
+   * <p>
+   * Only converts first three bytes of array
+   * </p>
+   *
+   * @param data byte array
+   * @return 24bit int
+   */
+  public static int int3(final byte[] data) {
+    return ((data[0] & BYTE_MASK) << WORD_BITS)
+        + ((data[1] & BYTE_MASK) << BYTE_BITS)
+        + (data[2] & BYTE_MASK);
   }
 
-  public static int int2(byte[] data) {
-    return ((data[0] & 0xFF) << 8) + (data[1] & 0xFF);
+  /**
+   * Convert word to int.
+   * <p>
+   * Only converts first two bytes of array
+   * </p>
+   *
+   * @param data byte array
+   * @return word value
+   */
+  public static int int2(final byte[] data) {
+    return ((data[0] & BYTE_MASK) << BYTE_BITS) + (data[1] & BYTE_MASK);
   }
 
-  public static byte reverseByte(int b) {
+  /**
+   * Twos complement of byte value.
+   *
+   * @param b byte
+   * @return reversed byte
+   */
+  public static byte reverseByte(final int b) {
     return (byte) Integer.reverseBytes(Integer.reverse(b));
   }
 
-  public static byte[] reverseByteArray(byte[] data) {
-    byte[] revdata = new byte[data.length];
-
-    for (int i = 0; i < data.length; i++)
-      revdata[i] = reverseByte(data[i]);
-
-    return (revdata);
+  /**
+   * Reverse the order of a byte array.
+   *
+   * @param data byte array
+   * @return reversed byte array
+   */
+  public static byte[] reverseByteArray(final byte[] data) {
+    byte[] reverseData = new byte[data.length];
+    for (int i = 0; i < data.length; i++) {
+      reverseData[i] = reverseByte(data[i]);
+    }
+    return reverseData;
   }
 
-  public static byte[] hexStringToByteArray(String hexs) {
-    if (hexs.length() > 0) {
-      if ((hexs.length() % 2) == 0) {
-        byte[] res = new byte[hexs.length() / 2];
-        for (int i = 0; i < (hexs.length() / 2); i++) {
-          res[i] = (byte) Integer.parseInt(hexs.substring(i * 2, i * 2 + 1), 16);
-        }
-
-        return (res);
-      }
+  /**
+   * Convert hex string to a byte array.
+   * <p>
+   * String must have an even number of digits
+   * </p>
+   *
+   * @param hexString hexadecimal string
+   * @return byte array
+   */
+  @SuppressWarnings("unused")
+  public static byte[] hexStringToByteArray(final String hexString) {
+    if (hexString.length() <= 0 || (hexString.length() % 2) != 0) {
+      return null;
     }
-    return null;
+    byte[] res = new byte[hexString.length() / 2];
+    for (int i = 0; i < (hexString.length() / 2); i++) {
+      res[i] = (byte) Integer.parseInt(
+          hexString.substring(i * 2, i * 2 + 1), HEX_RADIX
+      );
+    }
+    return res;
   }
 
   /**
@@ -97,7 +242,7 @@ public class DWUtils {
    * @param in byte array
    * @return formatted string
    */
-  public static String byteArrayToHexString(byte[] in) {
+  public static String byteArrayToHexString(final byte[] in) {
     return byteArrayToHexString(in, in.length);
   }
 
@@ -108,7 +253,7 @@ public class DWUtils {
    * @param len array length
    * @return formatted string
    */
-  public static String byteArrayToHexString(byte[] in, int len) {
+  public static String byteArrayToHexString(final byte[] in, final int len) {
     byte ch;
     int i = 0;
 
@@ -142,7 +287,7 @@ public class DWUtils {
    * @param timer timer number
    * @return formatted string
    */
-  public static String prettyTimer(byte timer) {
+  public static String prettyTimer(final byte timer) {
     if ((timer & BYTE_MASK) >= (DWDefs.TIMER_USER & BYTE_MASK)) {
       return "user " + ((timer & BYTE_MASK) - (DWDefs.TIMER_USER & BYTE_MASK));
     }
@@ -169,39 +314,39 @@ public class DWUtils {
    */
   public static String prettySS(final byte statCode) {
     return switch (statCode) {
-      case 0x00 -> "SS.Opt";
-      case 0x02 -> "SS.Size";
-      case 0x03 -> "SS.Reset";
-      case 0x04 -> "SS.WTrk";
-      case 0x05 -> "SS.Pos";
-      case 0x06 -> "SS.EOF";
-      case 0x0A -> "SS.Frz";
-      case 0x0B -> "SS.SPT";
-      case 0x0C -> "SS.SQD";
-      case 0x0D -> "SS.DCmd";
-      case 0x0E -> "SS.DevNm";
-      case 0x0F -> "SS.FD";
-      case 0x10 -> "SS.Ticks";
-      case 0x11 -> "SS.Lock";
-      case 0x12 -> "SS.VarSect";
-      case 0x14 -> "SS.BlkRd";
-      case 0x15 -> "SS.BlkWr";
-      case 0x16 -> "SS.Reten";
-      case 0x17 -> "SS.WFM";
-      case 0x18 -> "SS.RFM";
-      case 0x1A -> "SS.SSig";
-      case 0x1B -> "SS.Relea";
-      case 0x1C -> "SS.Attr";
-      case 0x1E -> "SS.RsBit";
-      case 0x20 -> "SS.FDInf";
-      case 0x26 -> "SS.DSize";
-      case 0x27 -> "SS.KySns";
+      case OS9Defs.SS_OPT -> "SS.Opt";
+      case OS9Defs.SS_SIZE -> "SS.Size";
+      case OS9Defs.SS_RESET -> "SS.Reset";
+      case OS9Defs.SS_W_TRK -> "SS.WTrk";
+      case OS9Defs.SS_POS -> "SS.Pos";
+      case OS9Defs.SS_EOF -> "SS.EOF";
+      case OS9Defs.SS_FRZ -> "SS.Frz";
+      case OS9Defs.SS_SPT -> "SS.SPT";
+      case OS9Defs.SS_SQD -> "SS.SQD";
+      case OS9Defs.SS_D_CMD -> "SS.DCmd";
+      case OS9Defs.SS_DEV_NM -> "SS.DevNm";
+      case OS9Defs.SS_FD -> "SS.FD";
+      case OS9Defs.SS_TICKS -> "SS.Ticks";
+      case OS9Defs.SS_LOCK -> "SS.Lock";
+      case OS9Defs.SS_VAR_SECT -> "SS.VarSect";
+      case OS9Defs.SS_BLK_RD -> "SS.BlkRd";
+      case OS9Defs.SS_BLK_WR -> "SS.BlkWr";
+      case OS9Defs.SS_RETEN -> "SS.Reten";
+      case OS9Defs.SS_WFM -> "SS.WFM";
+      case OS9Defs.SS_RFM -> "SS.RFM";
+      case OS9Defs.SS_S_SIG -> "SS.SSig";
+      case OS9Defs.SS_RELEA -> "SS.Relea";
+      case OS9Defs.SS_ATTR -> "SS.Attr";
+      case OS9Defs.SS_RS_BIT -> "SS.RsBit";
+      case OS9Defs.SS_FD_INF -> "SS.FDInf";
+      case OS9Defs.SS_D_SIZE -> "SS.DSize";
+      case OS9Defs.SS_KY_SNS -> "SS.KySns";
       // added for SCF/Ns
-      case 0x28 -> "SS.ComSt";
-      case 0x29 -> "SS.Open";
-      case 0x2A -> "SS.Close";
-      case 0x30 -> "SS.HngUp";
-      case (byte) 255 -> "None";
+      case OS9Defs.SS_COMST -> "SS.ComSt";
+      case OS9Defs.SS_S_OPEN -> "SS.Open";
+      case OS9Defs.SS_S_CLOSE -> "SS.Close";
+      case OS9Defs.SS_HNGUP -> "SS.HngUp";
+      case OS9Defs.SS_NONE -> "None";
       default -> "Unknown: " + statCode;
     };
   }
@@ -559,7 +704,7 @@ public class DWUtils {
    */
   public static String shortenLocalURI(final String df) {
     if (df.startsWith(FILE_URI_PREFIX)) {
-      if (df.charAt(9) == ':') {
+      if (df.charAt(DRIVE_LETTER_MARKER) == ':') {
         return df.substring(FILE_URI_PREFIX.length());
       } else {
         return df.substring(FILE_URI_PREFIX.length() - 1);

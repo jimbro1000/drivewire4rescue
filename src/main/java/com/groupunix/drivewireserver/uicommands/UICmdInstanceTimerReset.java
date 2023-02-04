@@ -16,25 +16,18 @@ public class UICmdInstanceTimerReset extends DWCommand {
 
   public UICmdInstanceTimerReset(DWProtocol dwProtocol) {
     this.dwProto = dwProtocol;
+    setHelp();
   }
 
   public UICmdInstanceTimerReset(DWUIClientThread dwuiClientThread) {
     this.uiref = dwuiClientThread;
+    setHelp();
   }
 
-  @Override
-  public String getCommand() {
-    return "reset";
-  }
-
-  @Override
-  public String getShortHelp() {
-    return "reset instance timer";
-  }
-
-  @Override
-  public String getUsage() {
-    return "ui instance timer reset [#]";
+  private void setHelp() {
+    setCommand("reset");
+    setShortHelp("reset instance timer");
+    setUsage("ui instance timer reset [#]");
   }
 
   @Override

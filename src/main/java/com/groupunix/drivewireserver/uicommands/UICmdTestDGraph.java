@@ -7,15 +7,13 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdTestDGraph extends DWCommand {
 
-  static final String command = "dgraph";
   DWUIClientThread clientref;
 
   public UICmdTestDGraph(DWUIClientThread dwuiClientThread) {
     this.clientref = dwuiClientThread;
-  }
-
-  public String getCommand() {
-    return command;
+    setCommand("dgraph");
+    setShortHelp("Test disk graphics");
+    setUsage("ui test dgraph");
   }
 
   public DWCommandResponse parse(String cmdline) {
@@ -54,16 +52,6 @@ public class UICmdTestDGraph extends DWCommand {
 
 
     return (new DWCommandResponse("Test data submitted at: " + System.currentTimeMillis()));
-  }
-
-
-  public String getShortHelp() {
-    return "Test disk graphics";
-  }
-
-
-  public String getUsage() {
-    return "ui test dgraph";
   }
 
   public boolean validate(String cmdline) {

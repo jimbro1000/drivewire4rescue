@@ -18,28 +18,19 @@ public class UICmdInstancePortStatus extends DWCommand {
 
   public UICmdInstancePortStatus(DWUIClientThread dwuiClientThread) {
     this.dwuithread = dwuiClientThread;
+    setHelp();
   }
 
 
   public UICmdInstancePortStatus(DWVSerialProtocol dwProto) {
     this.gproto = dwProto;
+    setHelp();
   }
 
-
-  @Override
-  public String getCommand() {
-    return "portstatus";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    return "show port status";
-  }
-
-  @Override
-  public String getUsage() {
-    return "ui instance portstatus";
+  private void setHelp() {
+    setCommand("portstatus");
+    setShortHelp("show port status");
+    setUsage("ui instance portstatus");
   }
 
   @Override

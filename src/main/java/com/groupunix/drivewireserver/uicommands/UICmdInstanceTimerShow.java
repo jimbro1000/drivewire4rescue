@@ -16,25 +16,18 @@ public class UICmdInstanceTimerShow extends DWCommand {
 
   public UICmdInstanceTimerShow(DWProtocol dwProtocol) {
     this.dwProto = dwProtocol;
+    setHelp();
   }
 
   public UICmdInstanceTimerShow(DWUIClientThread dwuiClientThread) {
     this.uiref = dwuiClientThread;
+    setHelp();
   }
 
-  @Override
-  public String getCommand() {
-    return "show";
-  }
-
-  @Override
-  public String getShortHelp() {
-    return "show instance timer(s)";
-  }
-
-  @Override
-  public String getUsage() {
-    return "ui instance timer show {#}";
+  private void setHelp() {
+    setCommand("show");
+    setShortHelp("show instance timer(s)");
+    setUsage("ui instance timer show {#}");
   }
 
   @Override

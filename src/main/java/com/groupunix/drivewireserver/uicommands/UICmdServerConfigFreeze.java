@@ -7,11 +7,10 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerConfigFreeze extends DWCommand {
 
-  static final String command = "freeze";
-
-
-  public String getCommand() {
-    return command;
+  public UICmdServerConfigFreeze() {
+    setCommand("freeze");
+    setShortHelp("Set server configuration item");
+    setUsage("ui server config freeze [boolean]");
   }
 
   public DWCommandResponse parse(String cmdline) {
@@ -26,15 +25,6 @@ public class UICmdServerConfigFreeze extends DWCommand {
 
     }
 
-  }
-
-  public String getShortHelp() {
-    return "Set server configuration item";
-  }
-
-
-  public String getUsage() {
-    return "ui server config freeze [boolean]";
   }
 
   public boolean validate(String cmdline) {

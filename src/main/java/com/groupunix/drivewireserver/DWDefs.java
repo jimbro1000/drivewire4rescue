@@ -932,6 +932,10 @@ public final class DWDefs {
    */
   public static final int BYTE_SHIFT = 256;
   /**
+   * Number of bits to shift for a word.
+   */
+  public static final int WORD_BITS = 16;
+  /**
    * Number of bits to shift for a byte.
    */
   public static final int BYTE_BITS = 8;

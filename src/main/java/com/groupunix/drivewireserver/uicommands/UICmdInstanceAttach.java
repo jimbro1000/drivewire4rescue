@@ -12,26 +12,9 @@ public class UICmdInstanceAttach extends DWCommand {
 
   public UICmdInstanceAttach(DWUIClientThread dwuiClientThread) {
     clientref = dwuiClientThread;
-  }
-
-
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "attach";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "attach to instance #";
-  }
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui instance attach #";
+    setCommand("attach");
+    setShortHelp("attach to instance #");
+    setUsage("ui instance attach #");
   }
 
   @Override

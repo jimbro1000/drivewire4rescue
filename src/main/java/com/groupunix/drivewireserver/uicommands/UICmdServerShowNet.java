@@ -12,20 +12,10 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowNet extends DWCommand {
 
-  @Override
-  public String getCommand() {
-    return "net";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    return "show available network interfaces";
-  }
-
-  @Override
-  public String getUsage() {
-    return "ui server show net";
+  public UICmdServerShowNet() {
+    setCommand("net");
+    setShortHelp("show available network interfaces");
+    setUsage("ui server show net");
   }
 
   @Override

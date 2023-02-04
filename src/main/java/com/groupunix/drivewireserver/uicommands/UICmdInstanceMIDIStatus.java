@@ -23,29 +23,19 @@ public class UICmdInstanceMIDIStatus extends DWCommand {
 
   public UICmdInstanceMIDIStatus(DWUIClientThread dwuiClientThread) {
     this.dwuithread = dwuiClientThread;
-
+    setHelp();
   }
 
 
   public UICmdInstanceMIDIStatus(DWProtocol dwProto) {
     this.gproto = dwProto;
+    setHelp();
   }
 
-
-  @Override
-  public String getCommand() {
-    return "midistatus";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    return "show MIDI status";
-  }
-
-  @Override
-  public String getUsage() {
-    return "ui instance midistatus";
+  private void setHelp() {
+    setCommand("midistatus");
+    setShortHelp("show MIDI status");
+    setUsage("ui instance midistatus");
   }
 
   @Override
@@ -82,7 +72,9 @@ public class UICmdInstanceMIDIStatus extends DWCommand {
           }
 
           @SuppressWarnings("unchecked")
-          List<HierarchicalConfiguration> profiles = DriveWireServer.serverConfiguration.configurationsAt("midisynthprofile");
+          List<HierarchicalConfiguration> profiles =
+              DriveWireServer.getServerConfiguration().configurationsAt(
+                  "midisynthprofile");
 
           for (Iterator<HierarchicalConfiguration> it = profiles.iterator(); it.hasNext(); ) {
             HierarchicalConfiguration mprof = it.next();
