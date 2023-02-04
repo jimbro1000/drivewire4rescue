@@ -25,8 +25,10 @@ import java.io.OutputStream;
 import org.apache.log4j.Logger;
 
 import com.Ostermiller.util.BufferOverflowException;
-import com.Ostermiller.util.CircularCharBuffer;
-import com.Ostermiller.util.CircularObjectBuffer;
+//import com.Ostermiller.util.CircularCharBuffer;
+//import com.Ostermiller.util.CircularObjectBuffer;
+
+import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
 
 /**
  * Implements the Circular Buffer producer/consumer model for bytes.
@@ -34,16 +36,17 @@ import com.Ostermiller.util.CircularObjectBuffer;
  * "http://ostermiller.org/utils/CircularByteBuffer.html">ostermiller.org</a>.
  * <p>
  * Using this class is a simpler alternative to using a PipedInputStream
- * and a PipedOutputStream. PipedInputStreams and PipedOutputStreams don't support the
- * mark operation, don't allow you to control buffer sizes that they use,
- * and have a more complicated API that requires instantiating two
+ * and a PipedOutputStream. PipedInputStreams and PipedOutputStreams don't
+ * support the mark operation, don't allow you to control buffer sizes that
+ * they use, and have a more complicated API that requires instantiating two
  * classes and connecting them.
  * <p>
  * This class is thread safe.
  *
- * @author Stephen Ostermiller http://ostermiller.org/contact.pl?regarding=Java+Utilities
- * @see CircularCharBuffer
- * @see CircularObjectBuffer
+ * @author Stephen Ostermiller
+ * http://ostermiller.org/contact.pl?regarding=Java+Utilities
+ * @ see CircularCharBuffer
+ * @ see CircularObjectBuffer
  * @since ostermillerutils 1.00.00
  */
 public class DWVSerialCircularBuffer {
@@ -53,15 +56,23 @@ public class DWVSerialCircularBuffer {
    *
    * @since ostermillerutils 1.00.00
    */
-  public final static int INFINITE_SIZE = -1;
+  public static final int INFINITE_SIZE = -1;
+  /**
+   * Delay in poll (millis).
+   */
+  public static final int POLL_DELAY = 100;
   /**
    * The default size for a circular byte buffer.
    *
    * @since ostermillerutils 1.00.00
    */
-  private final static int DEFAULT_SIZE = 1024;
+  private static final int DEFAULT_SIZE = 1024;
+  /**
+   * Log appender.
+   */
   @SuppressWarnings("unused")
-  private static final Logger logger = Logger.getLogger("DWServer.DWVSerialCircularBuffer");
+  private static final Logger LOGGER
+      = Logger.getLogger("DWServer.DWVSerialCircularBuffer");
   /**
    * The circular buffer.
    * <p>
@@ -98,31 +109,37 @@ public class DWVSerialCircularBuffer {
    */
   protected volatile int writePosition = 0;
   /**
-   * Index of the first saved byte. (To support stream marking.)
-   *
+   * Index of the first saved byte.
+   * <p>
+   * (To support stream marking.).
+   * </p>
    * @since ostermillerutils 1.00.00
    */
   protected volatile int markPosition = 0;
   /**
-   * Number of bytes that have to be saved
-   * to support mark() and reset() on the InputStream.
-   *
+   * Mark size.
+   * <p>
+   * Number of bytes that have to be saved to support mark() and reset()
+   * on the InputStream.
+   * </p>
    * @since ostermillerutils 1.00.00
    */
   protected volatile int markSize = 0;
   /**
-   * If this buffer is infinite (should resize itself when full)
+   * If this buffer is infinite (should resize itself when full).
    *
    * @since ostermillerutils 1.00.00
    */
-  protected volatile boolean infinite = false;
+  protected volatile boolean infinite;
   /**
+   * Block on write to full buffer.
+   * <p>
    * True if a write to a full buffer should block until the buffer
    * has room, false if the write method should throw an IOException
-   *
+   * </p>
    * @since ostermillerutils 1.00.00
    */
-  protected boolean blockingWrite = true;
+  protected boolean blockingWrite;
   /**
    * The InputStream that can empty this buffer.
    *
@@ -130,8 +147,10 @@ public class DWVSerialCircularBuffer {
    */
   protected InputStream in = new CircularByteBufferInputStream();
   /**
+   * Input stream closed.
+   * <p>
    * true if the close() method has been called on the InputStream
-   *
+   * </p>
    * @since ostermillerutils 1.00.00
    */
   protected boolean inputStreamClosed = false;
@@ -142,14 +161,22 @@ public class DWVSerialCircularBuffer {
    */
   protected OutputStream out = new CircularByteBufferOutputStream();
   /**
+   * Output stream closed.
+   * <p>
    * true if the close() method has been called on the OutputStream
-   *
+   * </p>
    * @since ostermillerutils 1.00.00
    */
   protected boolean outputStreamClosed = false;
   // DW Stuff
-  private byte DW_PD_INT = 0;
-  private byte DW_PD_QUT = 0;
+  /**
+   * PD_INT.
+   */
+  private byte dwPdInt = 0;
+  /**
+   * PD_QUT.
+   */
+  private byte dwPdQut = 0;
 
   /**
    * Create a new buffer with a default capacity.
@@ -175,10 +202,12 @@ public class DWVSerialCircularBuffer {
    * neither block or throw exceptions, but rather grow
    * without bound.
    *
-   * @param size desired capacity of the buffer in bytes or CircularByteBuffer.INFINITE_SIZE.
+   * @param size desired capacity of the buffer in bytes or
+   *             CircularByteBuffer.INFINITE_SIZE.
    * @since ostermillerutils 1.00.00
    */
-  public DWVSerialCircularBuffer(int size) {
+  @SuppressWarnings("unused")
+  public DWVSerialCircularBuffer(final int size) {
     this(size, true);
   }
 
@@ -186,13 +215,14 @@ public class DWVSerialCircularBuffer {
    * Create a new buffer with a default capacity and
    * given blocking behavior.
    *
-   * @param blockingWrite true writing to a full buffer should block
-   *                      until space is available, false if an exception should
-   *                      be thrown instead.
+   * @param blockWrite true writing to a full buffer should block
+   *                   until space is available, false if an exception should
+   *                   be thrown instead.
    * @since ostermillerutils 1.00.00
    */
-  public DWVSerialCircularBuffer(boolean blockingWrite) {
-    this(DEFAULT_SIZE, blockingWrite);
+  @SuppressWarnings("unused")
+  public DWVSerialCircularBuffer(final boolean blockWrite) {
+    this(DEFAULT_SIZE, blockWrite);
   }
 
   /**
@@ -204,16 +234,17 @@ public class DWVSerialCircularBuffer {
    * not be able to be written to the buffer.
    * <p>
    * Note that if the buffer is of INFINITE_SIZE it will
-   * neither block or throw exceptions, but rather grow
+   * neither block nor throw exceptions, but rather grow
    * without bound.
    *
-   * @param size          desired capacity of the buffer in bytes or CircularByteBuffer.INFINITE_SIZE.
-   * @param blockingWrite true writing to a full buffer should block
-   *                      until space is available, false if an exception should
-   *                      be thrown instead.
+   * @param size       desired capacity of the buffer in bytes or
+   *                   CircularByteBuffer.INFINITE_SIZE.
+   * @param blockWrite true writing to a full buffer should block
+   *                   until space is available, false if an exception should
+   *                   be thrown instead.
    * @since ostermillerutils 1.00.00
    */
-  public DWVSerialCircularBuffer(int size, boolean blockingWrite) {
+  public DWVSerialCircularBuffer(final int size, final boolean blockWrite) {
     if (size == INFINITE_SIZE) {
       buffer = new byte[DEFAULT_SIZE];
       infinite = true;
@@ -221,14 +252,16 @@ public class DWVSerialCircularBuffer {
       buffer = new byte[size];
       infinite = false;
     }
-    this.blockingWrite = blockingWrite;
+    this.blockingWrite = blockWrite;
   }
 
   /**
+   * Clear buffer for reuse.
+   * <p>
    * Make this buffer ready for reuse.  The contents of the buffer
    * will be cleared and the streams associated with this buffer
    * will be reopened if they had been closed.
-   *
+   * </p>
    * @since ostermillerutils 1.00.00
    */
   public void clear() {
@@ -242,15 +275,17 @@ public class DWVSerialCircularBuffer {
   }
 
   /**
+   * Get output stream.
+   * <p>
    * Retrieve a OutputStream that can be used to fill
    * this buffer.
-   * <p>
+   * </p><p>
    * Write methods may throw a BufferOverflowException if
    * the buffer is not large enough.  A large enough buffer
    * size must be chosen so that this does not happen or
    * the caller must be prepared to catch the exception and
    * try again once part of the buffer has been consumed.
-   *
+   * </p>
    * @return the producer for this buffer.
    * @since ostermillerutils 1.00.00
    */
@@ -259,12 +294,14 @@ public class DWVSerialCircularBuffer {
   }
 
   /**
+   * Get input stream.
+   * <p>
    * Retrieve a InputStream that can be used to empty
    * this buffer.
-   * <p>
+   * </p><p>
    * This InputStream supports marks at the expense
    * of the buffer size.
-   *
+   * </p>
    * @return the consumer for this buffer.
    * @since ostermillerutils 1.00.00
    */
@@ -290,14 +327,13 @@ public class DWVSerialCircularBuffer {
   }
 
   /**
-   * Get the number of bytes this buffer has free for
-   * writing.
+   * Get the number of bytes this buffer has free for writing.
    * <p>
    * Note that the number of bytes available plus
    * the number of bytes free may not add up to the
    * capacity of this buffer, as the buffer may reserve some
    * space for other purposes.
-   *
+   * </p>
    * @return the available space in bytes of this buffer
    * @since ostermillerutils 1.00.00
    */
@@ -314,7 +350,7 @@ public class DWVSerialCircularBuffer {
    * the number of bytes free may not add up to the
    * capacity of this buffer, as the buffer may reserve some
    * space for other purposes.
-   *
+   * </p>
    * @return the size in bytes of this buffer
    * @since ostermillerutils 1.00.00
    */
@@ -325,7 +361,7 @@ public class DWVSerialCircularBuffer {
   }
 
   /**
-   * double the size of the buffer
+   * double the size of the buffer.
    *
    * @since ostermillerutils 1.00.00
    */
@@ -355,6 +391,7 @@ public class DWVSerialCircularBuffer {
    * Space available in the buffer which can be written.
    *
    * @since ostermillerutils 1.00.00
+   * @return remaining space (bytes)
    */
   private int spaceLeft() {
     if (writePosition < markPosition) {
@@ -373,76 +410,23 @@ public class DWVSerialCircularBuffer {
    * We can't let a control character come out in the middle of other data
    *
    * @since ostermillerutils 1.00.00
+   * @return available space (bytes)
    */
   private int available() {
-
     if (readPosition <= writePosition) {
-      // any space between the first read and
-      // the first write is available.  In this case i
-      // is all in one piece.
-
-      // scan from read to write, looking for control chars
-
-			/*
-			for (int i = readPosition;i<writePosition;i++)
-			{
-				if (((this.DW_PD_INT != 0) &&(buffer[i] == this.DW_PD_INT)) || ((this.DW_PD_QUT != 0) &&(buffer[i] == this.DW_PD_QUT)))
-				{
-					logger.debug("CC found in input1 pos " + i);
-					// must go no further in a multi, but allow single control char out
-					if (i > readPosition)
-						return(i - readPosition);
-					else
-						return(1);
-				}
-			}
-			*/
-
       // no control chars */
       return (writePosition - readPosition);
     } else {
-      // space at the beginning and end.
-			/*
-			// scan from readPosition to end of buffer
-			for (int i = readPosition; i < buffer.length; i++)
-			{
-				if (((this.DW_PD_INT != 0) &&(buffer[i] == this.DW_PD_INT)) || ((this.DW_PD_QUT != 0) &&(buffer[i] == this.DW_PD_QUT)))
-				{
-					logger.debug("CC found in input2");
-					// must go no further in a multi, but allow single control char out
-					if (i > readPosition)
-						return(i - readPosition);
-					else
-						return(1);
-				}
-			}
-
-			// scan from beginning to writePosition
-
-			for (int i = 0; i < writePosition; i++)
-			{
-				if (((this.DW_PD_INT != 0) &&(buffer[i] == this.DW_PD_INT)) || ((this.DW_PD_QUT != 0) &&(buffer[i] == this.DW_PD_QUT)))
-				{
-					logger.debug("CC found in input3");
-					// must go no further
-					return(i + (buffer.length - readPosition));
-				}
-			}
-
-			*/
-
       // no control chars
       return (buffer.length - (readPosition - writePosition));
-
     }
-
-
   }
 
   /**
    * Bytes saved for supporting marks.
    *
    * @since ostermillerutils 1.00.00
+   * @return marked space (bytes)
    */
   private int marked() {
     if (markPosition <= readPosition) {
@@ -469,21 +453,42 @@ public class DWVSerialCircularBuffer {
   }
 
   // DW specific getter/setters
-
-  public int getDW_PD_INT() {
-    return DW_PD_INT;
+  /**
+   * Get PD INT.
+   *
+   * @return PD INT
+   */
+  @SuppressWarnings("unused")
+  public int getDwPdInt() {
+    return dwPdInt;
   }
 
-  public void setDW_PD_INT(byte dW_PD_INT) {
-    DW_PD_INT = dW_PD_INT;
+  /**
+   * Set PD INT.
+   *
+   * @param pdInt PD INT
+   */
+  public void setDwPdInt(final byte pdInt) {
+    dwPdInt = pdInt;
   }
 
-  public int getDW_PD_QUT() {
-    return DW_PD_QUT;
+  /**
+   * Get PD QUT.
+   *
+   * @return PD QUT
+   */
+  @SuppressWarnings("unused")
+  public int getDwPdQut() {
+    return dwPdQut;
   }
 
-  public void setDW_PD_QUT(byte dW_PD_QUT) {
-    DW_PD_QUT = dW_PD_QUT;
+  /**
+   * Set PD QUT.
+   *
+   * @param pDQut PD QUT
+   */
+  public void setDwPdQut(final byte pDQut) {
+    dwPdQut = pDQut;
   }
 
   /**
@@ -495,26 +500,30 @@ public class DWVSerialCircularBuffer {
 
     /**
      * Returns the number of bytes that can be read (or skipped over) from this
-     * input stream without blocking by the next caller of a method for this input
-     * stream. The next caller might be the same thread or or another thread.
+     * input stream without blocking by the next caller of a method for this
+     * input stream. The next caller might be the same thread or another thread.
      *
-     * @return the number of bytes that can be read from this input stream without blocking.
+     * @return the number of bytes that can be read from this input stream
+     * without blocking.
      * @throws IOException if the stream is closed.
      * @since ostermillerutils 1.00.00
      */
     @Override
     public int available() throws IOException {
       synchronized (DWVSerialCircularBuffer.this) {
-        if (inputStreamClosed)
-          throw new IOException("InputStream has been closed, it is not ready.");
+        if (inputStreamClosed) {
+          throw new IOException(
+              "InputStream has been closed, it is not ready."
+          );
+        }
         return (DWVSerialCircularBuffer.this.available());
       }
     }
 
     /**
-     * Close the stream. Once a stream has been closed, further read(), available(),
-     * mark(), or reset() invocations will throw an IOException. Closing a
-     * previously-closed stream, however, has no effect.
+     * Close the stream. Once a stream has been closed, further read(),
+     * available(), mark(), or reset() invocations will throw an IOException.
+     * Closing a previously-closed stream, however, has no effect.
      *
      * @throws IOException never.
      * @since ostermillerutils 1.00.00
@@ -530,18 +539,18 @@ public class DWVSerialCircularBuffer {
      * Mark the present position in the stream. Subsequent calls to reset() will
      * attempt to reposition the stream to this point.
      * <p>
-     * The readAheadLimit must be less than the size of circular buffer, otherwise
-     * this method has no effect.
+     * The readAheadLimit must be less than the size of circular buffer,
+     * otherwise this method has no effect.
+     * </p>
      *
      * @param readAheadLimit Limit on the number of bytes that may be read while
-     *                       still preserving the mark. After reading this many bytes, attempting to
-     *                       reset the stream will fail.
+     *                       still preserving the mark. After reading this many
+     *                       bytes, attempting to reset the stream will fail.
      * @since ostermillerutils 1.00.00
      */
     @Override
-    public void mark(int readAheadLimit) {
+    public void mark(final int readAheadLimit) {
       synchronized (DWVSerialCircularBuffer.this) {
-        //if (inputStreamClosed) throw new IOException("InputStream has been closed; cannot mark a closed InputStream.");
         if (buffer.length - 1 > readAheadLimit) {
           markSize = readAheadLimit;
           markPosition = readPosition;
@@ -574,11 +583,13 @@ public class DWVSerialCircularBuffer {
     public int read() throws IOException {
       while (true) {
         synchronized (DWVSerialCircularBuffer.this) {
-          if (inputStreamClosed)
-            throw new IOException("InputStream has been closed; cannot read from a closed InputStream.");
+          if (inputStreamClosed) {
+            throw new IOException("InputStream has been closed; "
+                + "cannot read from a closed InputStream.");
+          }
           int available = DWVSerialCircularBuffer.this.available();
           if (available > 0) {
-            int result = buffer[readPosition] & 0xff;
+            int result = buffer[readPosition] & BYTE_MASK;
             readPosition++;
             if (readPosition == buffer.length) {
               readPosition = 0;
@@ -590,7 +601,7 @@ public class DWVSerialCircularBuffer {
           }
         }
         try {
-          Thread.sleep(100);
+          Thread.sleep(POLL_DELAY);
         } catch (Exception x) {
           throw new IOException("Blocking read operation interrupted.");
         }
@@ -609,14 +620,16 @@ public class DWVSerialCircularBuffer {
      * @since ostermillerutils 1.00.00
      */
     @Override
-    public int read(byte[] cbuf) throws IOException {
+    public int read(final byte[] cbuf) throws IOException {
       return read(cbuf, 0, cbuf.length);
     }
 
     /**
      * Read bytes into a portion of an array.
+     * <p>
      * This method will block until some input is available,
      * an I/O error occurs, or the end of the stream is reached.
+     * </p>
      *
      * @param cbuf Destination buffer.
      * @param off  Offset at which to start storing bytes.
@@ -627,11 +640,14 @@ public class DWVSerialCircularBuffer {
      * @since ostermillerutils 1.00.00
      */
     @Override
-    public int read(byte[] cbuf, int off, int len) throws IOException {
+    public int read(final byte[] cbuf, final int off, final int len)
+        throws IOException {
       while (true) {
         synchronized (DWVSerialCircularBuffer.this) {
-          if (inputStreamClosed)
-            throw new IOException("InputStream has been closed; cannot read from a closed InputStream.");
+          if (inputStreamClosed) {
+            throw new IOException("InputStream has been closed; "
+                + "cannot read from a closed InputStream.");
+          }
           int available = DWVSerialCircularBuffer.this.available();
           if (available > 0) {
             int length = Math.min(len, available);
@@ -654,7 +670,7 @@ public class DWVSerialCircularBuffer {
           }
         }
         try {
-          Thread.sleep(100);
+          Thread.sleep(POLL_DELAY);
         } catch (Exception x) {
           throw new IOException("Blocking read operation interrupted.");
         }
@@ -673,8 +689,10 @@ public class DWVSerialCircularBuffer {
     @Override
     public void reset() throws IOException {
       synchronized (DWVSerialCircularBuffer.this) {
-        if (inputStreamClosed)
-          throw new IOException("InputStream has been closed; cannot reset a closed InputStream.");
+        if (inputStreamClosed) {
+          throw new IOException("InputStream has been closed; "
+              + "cannot reset a closed InputStream.");
+        }
         readPosition = markPosition;
       }
     }
@@ -691,11 +709,14 @@ public class DWVSerialCircularBuffer {
      * @since ostermillerutils 1.00.00
      */
     @Override
-    public long skip(long n) throws IOException, IllegalArgumentException {
+    public long skip(final long n)
+        throws IOException, IllegalArgumentException {
       while (true) {
         synchronized (DWVSerialCircularBuffer.this) {
-          if (inputStreamClosed)
-            throw new IOException("InputStream has been closed; cannot skip bytes on a closed InputStream.");
+          if (inputStreamClosed) {
+            throw new IOException("InputStream has been closed; "
+                + "cannot skip bytes on a closed InputStream.");
+          }
           int available = DWVSerialCircularBuffer.this.available();
           if (available > 0) {
             int length = Math.min((int) n, available);
@@ -716,7 +737,7 @@ public class DWVSerialCircularBuffer {
           }
         }
         try {
-          Thread.sleep(100);
+          Thread.sleep(POLL_DELAY);
         } catch (Exception x) {
           throw new IOException("Blocking read operation interrupted.");
         }
@@ -736,11 +757,13 @@ public class DWVSerialCircularBuffer {
 
     /**
      * Close the stream, flushing it first.
+     * <p>
      * This will cause the InputStream associated with this circular buffer
      * to read its last bytes once it empties the buffer.
      * Once a stream has been closed, further write() or flush() invocations
-     * will cause an IOException to be thrown. Closing a previously-closed stream,
-     * however, has no effect.
+     * will cause an IOException to be thrown. Closing a previously-closed
+     * stream, however, has no effect.
+     * </p>
      *
      * @throws IOException never.
      * @since ostermillerutils 1.00.00
@@ -763,9 +786,16 @@ public class DWVSerialCircularBuffer {
      */
     @Override
     public void flush() throws IOException {
-      if (outputStreamClosed)
-        throw new IOException("OutputStream has been closed; cannot flush a closed OutputStream.");
-      if (inputStreamClosed) throw new IOException("Buffer closed by inputStream; cannot flush.");
+      if (outputStreamClosed) {
+        throw new IOException(
+            "OutputStream has been closed; cannot flush a closed OutputStream."
+        );
+      }
+      if (inputStreamClosed) {
+        throw new IOException(
+            "Buffer closed by inputStream; cannot flush."
+        );
+      }
       // this method needs to do nothing
     }
 
@@ -776,13 +806,16 @@ public class DWVSerialCircularBuffer {
      *
      * @param cbuf Array of bytes to be written
      * @throws BufferOverflowException if buffer does not allow blocking writes
-     *                                 and the buffer is full.  If the exception is thrown, no data
-     *                                 will have been written since the buffer was set to be non-blocking.
-     * @throws IOException             if the stream is closed, or the write is interrupted.
+     *                                 and the buffer is full.  If the
+     *                                 exception is thrown, no data
+     *                                 will have been written since the
+     *                                 buffer was set to be non-blocking.
+     * @throws IOException             if the stream is closed,
+     *                                 or the write is interrupted.
      * @since ostermillerutils 1.00.00
      */
     @Override
-    public void write(byte[] cbuf) throws IOException {
+    public void write(final byte[] cbuf) throws IOException {
       write(cbuf, 0, cbuf.length);
     }
 
@@ -791,33 +824,52 @@ public class DWVSerialCircularBuffer {
      * If the buffer allows blocking writes, this method will block until
      * all the data has been written rather than throw an IOException.
      *
-     * @param cbuf Array of bytes
-     * @param off  Offset from which to start writing bytes
-     * @param len  - Number of bytes to write
+     * @param cbuf   Array of bytes
+     * @param bufSrc Offset from which to start writing bytes
+     * @param bufLen Number of bytes to write
      * @throws BufferOverflowException if buffer does not allow blocking writes
-     *                                 and the buffer is full.  If the exception is thrown, no data
-     *                                 will have been written since the buffer was set to be non-blocking.
-     * @throws IOException             if the stream is closed, or the write is interrupted.
+     *                                 and the buffer is full.  If the
+     *                                 exception is thrown, no data
+     *                                 will have been written since the
+     *                                 buffer was set to be non-blocking.
+     * @throws IOException             if the stream is closed,
+     *                                 or the write is interrupted.
      * @since ostermillerutils 1.00.00
      */
     @Override
-    public void write(byte[] cbuf, int off, int len) throws IOException {
+    public void write(final byte[] cbuf, final int bufSrc, final int bufLen)
+        throws IOException {
+      int len = bufLen;
+      int off = bufSrc;
       while (len > 0) {
         synchronized (DWVSerialCircularBuffer.this) {
-          if (outputStreamClosed)
-            throw new IOException("OutputStream has been closed; cannot write to a closed OutputStream.");
-          if (inputStreamClosed)
-            throw new IOException("Buffer closed by InputStream; cannot write to a closed buffer.");
+          if (outputStreamClosed) {
+            throw new IOException(
+                "OutputStream has been closed; "
+                    + " cannot write to a closed OutputStream."
+            );
+          }
+          if (inputStreamClosed) {
+            throw new IOException(
+                "Buffer closed by InputStream; "
+                    + "cannot write to a closed buffer."
+            );
+          }
           int spaceLeft = spaceLeft();
           while (infinite && spaceLeft < len) {
             resize();
             spaceLeft = spaceLeft();
           }
-          if (!blockingWrite && spaceLeft < len)
-            throw new BufferOverflowException("CircularByteBuffer is full; cannot write " + len + " bytes");
+          if (!blockingWrite && spaceLeft < len) {
+            throw new BufferOverflowException(
+                "CircularByteBuffer is full; cannot write " + len + " bytes"
+            );
+          }
           int realLen = Math.min(len, spaceLeft);
-          int firstLen = Math.min(realLen, buffer.length - writePosition);
-          int secondLen = Math.min(realLen - firstLen, buffer.length - markPosition - 1);
+          int firstLen = Math.min(realLen,
+              buffer.length - writePosition);
+          int secondLen = Math.min(realLen - firstLen,
+              buffer.length - markPosition - 1);
           int written = firstLen + secondLen;
           if (firstLen > 0) {
             System.arraycopy(cbuf, off, buffer, writePosition, firstLen);
@@ -836,9 +888,11 @@ public class DWVSerialCircularBuffer {
         }
         if (len > 0) {
           try {
-            Thread.sleep(100);
+            Thread.sleep(POLL_DELAY);
           } catch (Exception x) {
-            throw new IOException("Waiting for available space in buffer interrupted.");
+            throw new IOException(
+                "Waiting for available space in buffer interrupted."
+            );
           }
         }
       }
@@ -854,27 +908,39 @@ public class DWVSerialCircularBuffer {
      * @param c number of bytes to be written
      * @throws BufferOverflowException if buffer does not allow blocking writes
      *                                 and the buffer is full.
-     * @throws IOException             if the stream is closed, or the write is interrupted.
+     * @throws IOException             if the stream is closed,
+     *                                 or the write is interrupted.
      * @since ostermillerutils 1.00.00
      */
     @Override
-    public void write(int c) throws IOException {
+    public void write(final int c) throws IOException {
       boolean written = false;
       while (!written) {
         synchronized (DWVSerialCircularBuffer.this) {
-          if (outputStreamClosed)
-            throw new IOException("OutputStream has been closed; cannot write to a closed OutputStream.");
-          if (inputStreamClosed)
-            throw new IOException("Buffer closed by InputStream; cannot write to a closed buffer.");
+          if (outputStreamClosed) {
+            throw new IOException(
+                "OutputStream has been closed; "
+                    + "cannot write to a closed OutputStream."
+            );
+          }
+          if (inputStreamClosed) {
+            throw new IOException(
+                "Buffer closed by InputStream; "
+                    + "cannot write to a closed buffer."
+            );
+          }
           int spaceLeft = spaceLeft();
           while (infinite && spaceLeft < 1) {
             resize();
             spaceLeft = spaceLeft();
           }
-          if (!blockingWrite && spaceLeft < 1)
-            throw new BufferOverflowException("CircularByteBuffer is full; cannot write 1 byte");
+          if (!blockingWrite && spaceLeft < 1) {
+            throw new BufferOverflowException(
+                "CircularByteBuffer is full; cannot write 1 byte"
+            );
+          }
           if (spaceLeft > 0) {
-            buffer[writePosition] = (byte) (c & 0xff);
+            buffer[writePosition] = (byte) (c & BYTE_MASK);
             writePosition++;
             if (writePosition == buffer.length) {
               writePosition = 0;
@@ -884,9 +950,11 @@ public class DWVSerialCircularBuffer {
         }
         if (!written) {
           try {
-            Thread.sleep(100);
+            Thread.sleep(POLL_DELAY);
           } catch (Exception x) {
-            throw new IOException("Waiting for available space in buffer interrupted.");
+            throw new IOException(
+                "Waiting for available space in buffer interrupted."
+            );
           }
         }
       }

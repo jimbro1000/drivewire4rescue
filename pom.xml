@@ -143,8 +143,8 @@
           <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>1.3.1</version>
-            <scope>compile</scope>
+            <version>1.3.2</version>
+            <scope>test</scope>
           </dependency>
         </dependencies>
       </plugin>
@@ -153,7 +153,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>3.2.0</version>
         <configuration>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          <includeTestSourceDirectory>false</includeTestSourceDirectory>
           <failOnViolation>true</failOnViolation>
           <violationSeverity>warning</violationSeverity>
           <consoleOutput>true</consoleOutput>

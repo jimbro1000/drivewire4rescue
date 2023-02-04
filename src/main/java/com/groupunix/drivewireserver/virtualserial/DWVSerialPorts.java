@@ -440,25 +440,25 @@ public class DWVSerialPorts {
 
   public void setPD_INT(int port, byte pD_INT) throws DWPortNotValidException {
     validateport(port);
-    vserialPorts[port].setPD_INT(pD_INT);
+    vserialPorts[port].setPdInt(pD_INT);
   }
 
 
   public byte getPD_INT(int port) throws DWPortNotValidException {
     validateport(port);
-    return (vserialPorts[port].getPD_INT());
+    return (vserialPorts[port].getPdInt());
   }
 
 
   public void setPD_QUT(int port, byte pD_QUT) throws DWPortNotValidException {
     validateport(port);
-    vserialPorts[port].setPD_QUT(pD_QUT);
+    vserialPorts[port].setPdQut(pD_QUT);
   }
 
 
   public byte getPD_QUT(int port) throws DWPortNotValidException {
     validateport(port);
-    return (vserialPorts[port].getPD_QUT());
+    return (vserialPorts[port].getPdQut());
   }
 
 

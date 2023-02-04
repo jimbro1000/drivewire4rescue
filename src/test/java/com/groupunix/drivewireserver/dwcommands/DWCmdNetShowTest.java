@@ -11,24 +11,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 public class DWCmdNetShowTest {
-  DWCmdNetShow cmdNetShow;
+  private DWCmdNetShow cmdNetShow;
   @Mock
-  DWVSerialProtocol protocol;
+  private DWVSerialProtocol protocol;
   @Mock
-  DWCommand parent;
+  private DWCommand parent;
 
   @BeforeEach
   public void setup() {
     cmdNetShow = new DWCmdNetShow(protocol, parent);
   }
+
   @Test
   public void getCommandTakesChildDetails() {
     assertEquals(cmdNetShow.getCommand(), "show");
   }
+
   @Test
   public void getUsageTakesChildDetails() {
     assertEquals(cmdNetShow.getUsage(), "dw net show");
   }
+
   @Test
   public void getShortHelpTakesChildDetails() {
     assertEquals(cmdNetShow.getShortHelp(), "Show networking status");
