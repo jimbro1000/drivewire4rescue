@@ -36,6 +36,9 @@ public class DWVPortTermThread implements Runnable {
 
   }
 
+  /**
+   * Run threads.
+   */
   public void run() {
 
     Thread.currentThread().setName("termdev-" + Thread.currentThread().getId());
@@ -54,26 +57,11 @@ public class DWVPortTermThread implements Runnable {
 
     try {
       dwVSerialPorts.openPort(TERM_PORT);
-			
-			
-			/* check for listen address
-			
-			if (dwProto.getConfig().containsKey("ListenAddress"))
-			{
-				srvr = new ServerSocket(this.tcpport, BACKLOG, InetAddress.getByName(dwProto.getConfig().getString("ListenAddress")) );
-			}
-			else
-			{
-				srvr = new ServerSocket(this.tcpport, BACKLOG);
-			}
-			*/
-
 
       InetSocketAddress sktaddr = new InetSocketAddress(this.tcpport);
 
       srvr.socket().setReuseAddress(true);
       srvr.socket().bind(sktaddr, BACKLOG);
-
 
       logger.info("listening on port " + srvr.socket().getLocalPort());
     } catch (IOException e2) {
@@ -84,10 +72,8 @@ public class DWVPortTermThread implements Runnable {
       return;
     }
 
-    while ((wanttodie == false) && (srvr.isOpen())) {
+    while ((!wanttodie) && (srvr.isOpen())) {
       logger.debug("waiting for connection");
-
-
       SocketChannel skt;
       try {
         skt = srvr.accept();
@@ -96,10 +82,7 @@ public class DWVPortTermThread implements Runnable {
         wanttodie = true;
         return;
       }
-
-
       logger.info("new connection from " + skt.socket().getInetAddress().getHostAddress());
-
       if (this.connthread != null) {
         if (this.connthread.isAlive()) {
           // no room at the inn
@@ -133,19 +116,7 @@ public class DWVPortTermThread implements Runnable {
 
   private void startConn(SocketChannel skt) {
     // do telnet init stuff
-    byte[] buf = new byte[9];
-
-    buf[0] = (byte) 255;
-    buf[1] = (byte) 251;
-    buf[2] = (byte) 1;
-    buf[3] = (byte) 255;
-    buf[4] = (byte) 251;
-    buf[5] = (byte) 3;
-    buf[6] = (byte) 255;
-    buf[7] = (byte) 253;
-    buf[8] = (byte) 243;
-
-
+    byte[] buf = DWVPortTelnetPreflightThread.prepTelnet();
     try {
       skt.socket().getOutputStream().write(buf, 0, 9);
       for (int i = 0; i < 9; i++) {
@@ -154,21 +125,15 @@ public class DWVPortTermThread implements Runnable {
     } catch (IOException e) {
       logger.error(e.getMessage());
     }
-
-
     try {
       conno = this.dwVSerialPorts.getListenerPool().addConn(this.vport, skt, MODE_TERM);
       connobj = new DWVPortTCPServerThread(dwProto, TERM_PORT, conno);
       connthread = new Thread(connobj);
       connthread.start();
-
     } catch (DWConnectionNotValidException e) {
       logger.error(e.getMessage());
     }
-
-
   }
-
 
   public void shutdown() {
     logger.debug("shutting down");
