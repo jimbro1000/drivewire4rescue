@@ -7,32 +7,45 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerConfigFreeze extends DWCommand {
 
+  /**
+   * UI Command Server Configuration freeze.
+   */
   public UICmdServerConfigFreeze() {
     setCommand("freeze");
     setShortHelp("Set server configuration item");
     setUsage("ui server config freeze [boolean]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     String[] args = cmdline.split(" ");
-
     if (args.length == 1) {
-      return (doSetFreeze(args[0]));
+      return doSetFreeze(args[0]);
     } else {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Must specify freeze state"));
-
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "Must specify freeze state"
+      );
     }
-
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 
-
-  private DWCommandResponse doSetFreeze(String state) {
+  private DWCommandResponse doSetFreeze(final String state) {
     if (state.equalsIgnoreCase("true")) {
       DriveWireServer.setConfigFreeze(true);
       return (new DWCommandResponse("Config freeze set."));
@@ -40,9 +53,5 @@ public class UICmdServerConfigFreeze extends DWCommand {
       DriveWireServer.setConfigFreeze(false);
       return (new DWCommandResponse("Config freeze unset."));
     }
-
-
   }
-
-
 }
