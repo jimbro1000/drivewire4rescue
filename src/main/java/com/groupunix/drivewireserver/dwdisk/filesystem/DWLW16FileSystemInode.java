@@ -1,161 +1,396 @@
 package com.groupunix.drivewireserver.dwdisk.filesystem;
 
+import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
+import static com.groupunix.drivewireserver.DWDefs.BYTE_SHIFT;
+
 public class DWLW16FileSystemInode {
+  /**
+   * Change time offset.
+   */
+  private static final int CHANGE_TIME_OFFSET = 20;
+  /**
+   * Modified time offset.
+   */
+  private static final int MODIFY_TIME_OFFSET = 16;
+  /**
+   * Accessed time offset.
+   */
+  private static final int ACCESS_TIME_OFFSET = 12;
+  /**
+   * File size offset.
+   */
+  private static final int FILE_SIZE_OFFSET = 8;
+  /**
+   * Gid offset.
+   */
+  private static final int GID_OFFSET = 6;
+  /**
+   * Uid offset.
+   */
+  private static final int USERID_OFFSET = 4;
+  /**
+   * Link count offset.
+   */
+  private static final int LINKS_OFFSET = 2;
+  /**
+   * Mode offset.
+   */
+  private static final int MODE_OFFSET = 0;
+  /**
+   * Number of bytes in double word.
+   */
+  public static final int DOUBLE_WORD = 4;
+  /**
+   * File type property.
+   */
+  private int fileType;
+  /**
+   * Permissions property.
+   */
+  private int filePermissions;
+  /**
+   * Mode property.
+   */
+  private int fileMode;
+  /**
+   * Number of links.
+   */
+  private int linksCount;
+  /**
+   * User id of owner.
+   */
+  private int userId;
+  /**
+   * gId of the owner.
+   */
+  private int gid;
+  /**
+   * File size (bytes).
+   */
+  private int fileSize;
+  /**
+   * Last access timestamp.
+   */
+  private int accessTime;
+  /**
+   * Last modified timestamp.
+   */
+  private int modifyTime;
+  /**
+   * Last status change timestamp.
+   */
+  private int changeTime;
+//  /**
+//   * direct blocks.
+//   */
+//  private final int[] directBlocks = new int[14];
+//  /**
+//   * indirect blocks.
+//   */
+//  private final int[] indirectBlocks = new int[2];
+//  /**
+//   * double indirection blocks.
+//   */
+//  private final int[] doubleIndirectBlocks = new int[4];
+  /**
+   * iNodeNum.
+   */
+  private int iNodeNum;
 
-  private int filetype;
-  private int permissions;
-
-  private int mode;
-  private int links;        // number of links
-  private int uid;        // uid of the owner
-  private int gid;        // gid of the owner
-  private int filesize;      // size of the file in bytes
-  private int atime;        // last access time - updates optional
-  private int mtime;        // last modify tim
-  private int ctime;        // last status change time
-  private int[] dblocks = new int[14];    // direct blocks
-  private int[] indirblocks = new int[2];    // indirect blocks
-  private int[] dblindirblocks = new int[4];  // double indirect blocks
-  private int inodenum;
-
-  public DWLW16FileSystemInode(int inodenum, byte[] data) {
-    this.setInodenum(inodenum);
-
-    this.setMode(get2(0, data));
-    this.setLinks(get2(2, data));
-    this.setUid(get2(4, data));
-    this.setGid(get2(6, data));
-    this.setFilesize(get4(8, data));
-    this.setAtime(get4(12, data));
-    this.setMtime(get4(16, data));
-    this.setCtime(get4(20, data));
-
-    for (int i = 0; i < 14; i++)
-      dblocks[i] = get2(24 + i * 2, data);
-
-    for (int i = 0; i < 2; i++)
-      indirblocks[i] = get2(52 + i * 2, data);
-
-    for (int i = 0; i < 4; i++)
-      dblindirblocks[i] = get2(56 + i * 2, data);
-
+  /**
+   * LWL16 File System iNode constructor.
+   *
+   * @param iNode iNode number
+   * @param data byte array
+   */
+  public DWLW16FileSystemInode(final int iNode, final byte[] data) {
+    this.setInodeNum(iNode);
+    this.setFileMode(get2(MODE_OFFSET, data));
+    this.setLinksCount(get2(LINKS_OFFSET, data));
+    this.setUserId(get2(USERID_OFFSET, data));
+    this.setGid(get2(GID_OFFSET, data));
+    this.setFileSize(get4(FILE_SIZE_OFFSET, data));
+    this.setAccessTime(get4(ACCESS_TIME_OFFSET, data));
+    this.setModifyTime(get4(MODIFY_TIME_OFFSET, data));
+    this.setChangeTime(get4(CHANGE_TIME_OFFSET, data));
+//    for (int i = 0; i < 14; i++) {
+//      directBlocks[i] = get2(24 + i * 2, data);
+//    }
+//    for (int i = 0; i < 2; i++) {
+//      indirectBlocks[i] = get2(52 + i * 2, data);
+//    }
+//    for (int i = 0; i < 4; i++) {
+//      doubleIndirectBlocks[i] = get2(56 + i * 2, data);
+//    }
   }
 
-
+  /**
+   * toString implementation.
+   *
+   * @return readable string of content
+   */
   @Override
   public String toString() {
-    String res = new String();
-
-    res += "inode " + this.getInodenum() + System.getProperty("line.separator");
-    res += "mode  " + this.getMode() + System.getProperty("line.separator");
-    res += "links " + this.getLinks() + System.getProperty("line.separator");
-    res += "uid   " + this.getUid() + System.getProperty("line.separator");
-    res += "gid   " + this.getGid() + System.getProperty("line.separator");
-
-    res += "size  " + this.getFilesize() + System.getProperty("line.separator");
-
-    res += "atime " + this.getAtime() + System.getProperty("line.separator");
-    res += "mtime " + this.getMtime() + System.getProperty("line.separator");
-    res += "ctime " + this.getCtime() + System.getProperty("line.separator");
-
+    String res = "";
+    res += "inode " + this.getInodeNum()
+        + System.getProperty("line.separator");
+    res += "mode  " + this.getFileMode()
+        + System.getProperty("line.separator");
+    res += "links " + this.getLinksCount()
+        + System.getProperty("line.separator");
+    res += "uid   " + this.getUserId()
+        + System.getProperty("line.separator");
+    res += "gid   " + this.getGid()
+        + System.getProperty("line.separator");
+    res += "size  " + this.getFileSize()
+        + System.getProperty("line.separator");
+    res += "atime " + this.getAccessTime()
+        + System.getProperty("line.separator");
+    res += "mtime " + this.getModifyTime()
+        + System.getProperty("line.separator");
+    res += "ctime " + this.getChangeTime()
+        + System.getProperty("line.separator");
     return res;
   }
 
-
-  private int get4(int i, byte[] data) {
-    return ((0xff & data[i]) * 256 * 256 * 256) + ((0xff & data[i + 1]) * 256 * 256) + ((0xff & data[i + 2]) * 256) + (0xff & data[i + 3]);
+  /**
+   * Get 4 bytes (double word) from array at index.
+   * <p>
+   *   Assumes big endian representation.
+   *   Only extracts bytes in range, otherwise assumes a 0
+   *   for each out of range byte
+   * </p>
+   * @param index start index
+   * @param data byte array
+   * @return double word value
+   */
+  private int get4(final int index, final byte[] data) {
+    int result = 0;
+    for (int i = 0; i < DOUBLE_WORD; ++i) {
+      result *= BYTE_SHIFT;
+      if (index + i >= 0 && index + i < data.length) {
+        result += (BYTE_MASK & data[index + i]);
+      }
+    }
+    return result;
   }
 
-  private int get2(int i, byte[] data) {
-    return ((0xff & data[i]) * 256) + (0xff & data[i + 1]);
+  /**
+   * Get 2 bytes (word) from array at index.
+   * <p>
+   *   Assumes big endian representation
+   * </p>
+   * @param index index
+   * @param data byte array
+   * @return word value
+   */
+  private int get2(final int index, final byte[] data) {
+    if (index == data.length - 1) {
+      return (BYTE_MASK & data[index]) * BYTE_SHIFT;
+    }
+    return ((BYTE_MASK & data[index]) * BYTE_SHIFT)
+        + (BYTE_MASK & data[index + 1]);
   }
 
-  public int getFiletype() {
-    return filetype;
+  /**
+   * Get filetype.
+   *
+   * @return file type
+   */
+  @SuppressWarnings("unused")
+  public int getFileType() {
+    return fileType;
   }
 
-  public void setFiletype(int filetype) {
-    this.filetype = filetype;
+  /**
+   * Set filetype.
+   *
+   * @param filetype filetype
+   */
+  @SuppressWarnings("unused")
+  public void setFileType(final int filetype) {
+    this.fileType = filetype;
   }
 
-  public int getPermissions() {
-    return permissions;
+  /**
+   * Get permissions.
+   *
+   * @return permissions
+   */
+  @SuppressWarnings("unused")
+  public int getFilePermissions() {
+    return filePermissions;
   }
 
-  public void setPermissions(int permissions) {
-    this.permissions = permissions;
+  /**
+   * set permissions.
+   *
+   * @param permissions permissions
+   */
+  @SuppressWarnings("unused")
+  public void setFilePermissions(final int permissions) {
+    this.filePermissions = permissions;
   }
 
-  public int getMode() {
-    return mode;
+  /**
+   * Get mode.
+   *
+   * @return mode
+   */
+  public int getFileMode() {
+    return fileMode;
   }
 
-  public void setMode(int mode) {
-    this.mode = mode;
+  /**
+   * Set mode.
+   *
+   * @param mode mode
+   */
+  public void setFileMode(final int mode) {
+    this.fileMode = mode;
   }
 
-  public int getLinks() {
-    return links;
+  /**
+   * Get links.
+   *
+   * @return number of links
+   */
+  public int getLinksCount() {
+    return linksCount;
   }
 
-  public void setLinks(int links) {
-    this.links = links;
+  /**
+   * Set links.
+   *
+   * @param links number of links
+   */
+  public void setLinksCount(final int links) {
+    this.linksCount = links;
   }
 
-  public int getUid() {
-    return uid;
+  /**
+   * Get uId.
+   *
+   * @return user id
+   */
+  public int getUserId() {
+    return userId;
   }
 
-  public void setUid(int uid) {
-    this.uid = uid;
+  /**
+   * Set uId.
+   *
+   * @param uid user id
+   */
+  public void setUserId(final int uid) {
+    this.userId = uid;
   }
 
+  /**
+   * get gId.
+   *
+   * @return gId
+   */
   public int getGid() {
     return gid;
   }
 
-  public void setGid(int gid) {
-    this.gid = gid;
+  /**
+   * Set gId.
+   *
+   * @param id gId
+   */
+  public void setGid(final int id) {
+    this.gid = id;
   }
 
-  public int getFilesize() {
-    return filesize;
+  /**
+   * Get file size.
+   *
+   * @return file size (bytes)
+   */
+  public int getFileSize() {
+    return fileSize;
   }
 
-  public void setFilesize(int filesize) {
-    this.filesize = filesize;
+  /**
+   * Set File size.
+   *
+   * @param filesize file size (bytes)
+   */
+  public void setFileSize(final int filesize) {
+    this.fileSize = filesize;
   }
 
-  public int getAtime() {
-    return atime;
+  /**
+   * Get aTime.
+   *
+   * @return aTime
+   */
+  public int getAccessTime() {
+    return accessTime;
   }
 
-  public void setAtime(int atime) {
-    this.atime = atime;
+  /**
+   * Set aTime.
+   *
+   * @param atime aTime
+   */
+  public void setAccessTime(final int atime) {
+    this.accessTime = atime;
   }
 
-  public int getMtime() {
-    return mtime;
+  /**
+   * Get mTime.
+   *
+   * @return mTime
+   */
+  public int getModifyTime() {
+    return modifyTime;
   }
 
-  public void setMtime(int mtime) {
-    this.mtime = mtime;
+  /**
+   * Set mTime.
+   *
+   * @param mtime mTime
+   */
+  public void setModifyTime(final int mtime) {
+    this.modifyTime = mtime;
   }
 
-  public int getCtime() {
-    return ctime;
+  /**
+   * Get cTime.
+   *
+   * @return cTime
+   */
+  public int getChangeTime() {
+    return changeTime;
   }
 
-  public void setCtime(int ctime) {
-    this.ctime = ctime;
+  /**
+   * Set cTime.
+   *
+   * @param ctime cTime
+   */
+  public void setChangeTime(final int ctime) {
+    this.changeTime = ctime;
   }
 
-  public int getInodenum() {
-    return inodenum;
+  /**
+   * Get iNode number.
+   *
+   * @return iNode number
+   */
+  public int getInodeNum() {
+    return iNodeNum;
   }
 
-  public void setInodenum(int inodenum) {
-    this.inodenum = inodenum;
+  /**
+   * Set iNode number.
+   *
+   * @param iNode iNode number
+   */
+  public void setInodeNum(final int iNode) {
+    this.iNodeNum = iNode;
   }
-
 }

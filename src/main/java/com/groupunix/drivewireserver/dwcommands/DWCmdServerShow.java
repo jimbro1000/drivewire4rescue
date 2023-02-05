@@ -4,47 +4,53 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 
 public class DWCmdServerShow extends DWCommand {
+  /**
+   * Drivewire protocol.
+   */
+  private DWProtocol dwProtocol;
 
-
-  private DWCommandList commands;
-  private DWProtocol dwProto;
-
-  public DWCmdServerShow(DWProtocol dwProto, DWCommand parent) {
+  /**
+   * Server show command constructor.
+   *
+   * @param protocol protocol
+   * @param parent parent command
+   */
+  public DWCmdServerShow(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdServerShowThreads(this));
-    commands.addcommand(new DWCmdServerShowTimers(this.dwProto, this));
-    commands.addcommand(new DWCmdServerShowSerial(this.dwProto, this));
+    this.dwProtocol = protocol;
+    DWCommandList commands = new DWCommandList(
+        this.dwProtocol, this.dwProtocol.getCMDCols()
+    );
+    this.setCommandList(commands);
+    commands.addCommand(new DWCmdServerShowThreads(this));
+    commands.addCommand(new DWCmdServerShowTimers(this.dwProtocol, this));
+    commands.addCommand(new DWCmdServerShowSerial(this.dwProtocol, this));
+    this.setCommand("show");
+    this.setShortHelp("Show various server information");
+    this.setUsage("dw server show [option]");
   }
 
-  public String getCommand() {
-    return "show";
-  }
-
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-
-  public String getShortHelp() {
-    return "Show various server information";
-  }
-
-
-  public String getUsage() {
-    return "dw server show [option]";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return new DWCommandResponse(this.getCommandList().getShortHelp());
     }
-    return (commands.parse(cmdline));
+    return this.getCommandList().parse(cmdline);
   }
 
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
 
 }

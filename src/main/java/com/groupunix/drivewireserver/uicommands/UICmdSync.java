@@ -11,95 +11,94 @@ import com.groupunix.drivewireserver.DriveWireServer;
 import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
+import static com.groupunix.drivewireserver.DWDefs.CARRIAGE_RETURN;
+
 public class UICmdSync extends DWCommand {
+  /**
+   * Log Appender.
+   */
+  private static final Logger LOGGER
+      = Logger.getLogger("DWServer.DWUtilUIThread");
+  /**
+   * Client thread ref.
+   */
+  private final DWUIClientThread dwuiClientThread;
+  /**
+   * Last event.
+   */
+  private final DWEvent lastevt;
 
-  static final String command = "sync";
-
-  private static final Logger logger = Logger.getLogger("DWServer.DWUtilUIThread");
-
-  private DWUIClientThread dwuiref;
-  private DWEvent lastevt = new DWEvent((byte) 0, -1);
-
-  public UICmdSync(DWUIClientThread dwuiClientThread) {
-    this.dwuiref = dwuiClientThread;
+  /**
+   * UI Command Sync.
+   *
+   * @param clientThread client thread ref.
+   */
+  public UICmdSync(final DWUIClientThread clientThread) {
+    this.dwuiClientThread = clientThread;
+    this.lastevt = new DWEvent((byte) 0, -1);
+    setCommand("sync");
+    setShortHelp("Sync status (real time)");
+    setUsage("ui sync");
   }
 
-  public String getCommand() {
-    return command;
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     boolean wanttodie = false;
-
-    logger.debug("adding status sync client");
-
+    LOGGER.debug("adding status sync client");
     try {
-      dwuiref.getOutputStream().write(13);
-
-      // bring client up to date..
-
+      dwuiClientThread.getOutputStream().write(CARRIAGE_RETURN);
+      // bring client up to date...
       sendEvent(DriveWireServer.getServerStatusEvent());
-			
-			/*
-			for (DWEvent e : DriveWireServer.getLogCache())
-			{
-				sendEvent(e);
-			}
-			*/
-
       // ready for new log events
-      this.dwuiref.setDropLog(false);
+      this.dwuiClientThread.setDropLog(false);
     } catch (IOException e1) {
-      logger.debug("immediate I/O error: " + e1.getMessage());
+      LOGGER.debug("immediate I/O error: " + e1.getMessage());
       wanttodie = true;
     }
-
-
-    while ((wanttodie == false) && (!dwuiref.getSocket().isClosed())) {
+    while ((!wanttodie) && (!dwuiClientThread.getSocket().isClosed())) {
       try {
-        sendEvent(this.dwuiref.getEventQueue().take());
-      } catch (InterruptedException e) {
-        wanttodie = true;
-      } catch (IOException e) {
+        sendEvent(this.dwuiClientThread.getEventQueue().take());
+      } catch (InterruptedException | IOException e) {
         wanttodie = true;
       }
-
     }
-
-    logger.debug("removing status sync client");
-
-    return (new DWCommandResponse(false, DWDefs.RC_FAIL, "Sync closed"));
+    LOGGER.debug("removing status sync client");
+    return new DWCommandResponse(
+        false,
+        DWDefs.RC_FAIL,
+        "Sync closed"
+    );
   }
 
-
-  private void sendEvent(DWEvent msg) throws IOException {
+  private void sendEvent(final DWEvent msg) throws IOException {
     for (String key : msg.getParamKeys()) {
-
       // only send changed params
-      if (!lastevt.hasParam(key) || !lastevt.getParam(key).equals(msg.getParam(key))) {
-        dwuiref.getOutputStream().write((key + ':' + msg.getParam(key)).getBytes());
-        dwuiref.getOutputStream().write(13);
+      if (!lastevt.hasParam(key)
+          || !lastevt.getParam(key).equals(msg.getParam(key))) {
+        dwuiClientThread.getOutputStream().write(
+            (key + ':' + msg.getParam(key)).getBytes()
+        );
+        dwuiClientThread.getOutputStream().write(CARRIAGE_RETURN);
         lastevt.setParam(key, msg.getParam(key));
       }
     }
-
-    dwuiref.getOutputStream().write(msg.getEventType());
-    dwuiref.getOutputStream().write(13);
-    dwuiref.getOutputStream().flush();
+    dwuiClientThread.getOutputStream().write(msg.getEventType());
+    dwuiClientThread.getOutputStream().write(CARRIAGE_RETURN);
+    dwuiClientThread.getOutputStream().flush();
   }
 
-
-  public String getShortHelp() {
-    return "Sync status (real time)";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
-
-  public String getUsage() {
-    return "ui sync";
-  }
-
-  public boolean validate(String cmdline) {
-    return (true);
-  }
-
 }

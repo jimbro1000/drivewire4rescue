@@ -5,39 +5,40 @@ import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowInstances extends DWCommand {
-
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "instances";
+  /**
+   * UI Command Server Show Instances.
+   */
+  public UICmdServerShowInstances() {
+    setCommand("instances");
+    setShortHelp("show available instances");
+    setUsage("ui server show instances");
   }
 
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show available instances";
-  }
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show instances";
-  }
-
-  @Override
-  public DWCommandResponse parse(String cmdline) {
-    String txt = new String();
-
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder txt = new StringBuilder();
     for (int i = 0; i < DriveWireServer.getNumHandlers(); i++) {
-      txt += i + "|" + DriveWireServer.getHandlerName(i) + "\n";
-
+      txt.append(i)
+          .append("|")
+          .append(DriveWireServer.getHandlerName(i))
+          .append("\n");
     }
-
-    return (new DWCommandResponse(txt));
+    return new DWCommandResponse(txt.toString());
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

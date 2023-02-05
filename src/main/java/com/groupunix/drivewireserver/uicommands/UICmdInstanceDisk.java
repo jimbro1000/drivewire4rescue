@@ -6,46 +6,51 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class UICmdInstanceDisk extends DWCommand {
-
-  static final String command = "disk";
-
-
-  public UICmdInstanceDisk(DWUIClientThread dwuiClientThread) {
-
-    commands.addcommand(new UICmdInstanceDiskShow(dwuiClientThread));
-    // commands.addcommand(new UICmdInstanceDiskSerial(dwuiClientThread));
-    // commands.addcommand(new UICmdInstanceDiskStatus(dwuiClientThread));
+  /**
+   * UI Command Instance Disk.
+   *
+   * @param clientThread client thread ref.
+   */
+  public UICmdInstanceDisk(final DWUIClientThread clientThread) {
+    this.getCommandList()
+        .addCommand(new UICmdInstanceDiskShow(clientThread));
+    setHelp();
   }
 
-
-  public UICmdInstanceDisk(DWProtocolHandler dwProto) {
-    commands.addcommand(new UICmdInstanceDiskShow(dwProto));
-    // commands.addcommand(new UICmdInstanceDiskSerial(dwProto));
-    // commands.addcommand(new UICmdInstanceDiskStatus(dwProto));
-
+  /**
+   * UI Command Instance Disk.
+   *
+   * @param protocolHandler protocol handler
+   */
+  public UICmdInstanceDisk(final DWProtocolHandler protocolHandler) {
+    this.getCommandList()
+        .addCommand(new UICmdInstanceDiskShow(protocolHandler));
+    setHelp();
   }
 
-
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    this.setCommand("disk");
+    this.setShortHelp("Instance disk commands");
+    this.setUsage("ui instance disk [command]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (commands.parse(cmdline));
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return this.getCommandList().parse(cmdline);
   }
 
-
-  public String getShortHelp() {
-    return "Instance disk commands";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
-
-
-  public String getUsage() {
-    return "ui instance disk [command]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
-  }
-
 }

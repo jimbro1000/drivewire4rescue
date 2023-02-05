@@ -4,44 +4,44 @@ import com.groupunix.drivewireserver.DriveWireServer;
 import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
+import static com.groupunix.drivewireserver.DWDefs.KILOBYTE;
+
 public class UICmdServerShowStatus extends DWCommand {
-
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "status";
+  /**
+   * UI Command Server Show Status.
+   */
+  public UICmdServerShowStatus() {
+    setCommand("status");
+    setShortHelp("show server status");
+    setUsage("ui server show status");
   }
 
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show server status";
-  }
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show status";
-  }
-
-  @Override
-  public DWCommandResponse parse(String cmdline) {
-    String text = new String();
-
-    text += "version|" + DriveWireServer.DWServerVersion + "\n";
-    text += "versiondate|" + DriveWireServer.DWServerVersionDate + "\n";
-
-    text += "totmem|" + Runtime.getRuntime().totalMemory() / 1024 + "\n";
-    text += "freemem|" + Runtime.getRuntime().freeMemory() / 1024 + "\n";
-
+  public DWCommandResponse parse(final String cmdline) {
+    String text = "";
+    text += "version|" + DriveWireServer.DW_SERVER_VERSION + "\n";
+    text += "versiondate|" + DriveWireServer.DW_SERVER_VERSION_DATE + "\n";
+    text += "totmem|" + Runtime.getRuntime().totalMemory() / KILOBYTE + "\n";
+    text += "freemem|" + Runtime.getRuntime().freeMemory() / KILOBYTE + "\n";
     text += "instances|" + DriveWireServer.getNumHandlers() + "\n";
-    text += "configpath|" + DriveWireServer.serverconfig.getBasePath() + "\n";
-
-    return (new DWCommandResponse(text));
+    text += "configpath|" + DriveWireServer.getServerConfiguration()
+        .getBasePath() + "\n";
+    return new DWCommandResponse(text);
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

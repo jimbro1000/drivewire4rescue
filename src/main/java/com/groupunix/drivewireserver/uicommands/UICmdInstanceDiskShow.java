@@ -14,53 +14,86 @@ import com.groupunix.drivewireserver.dwexceptions.DWDriveNotValidException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class UICmdInstanceDiskShow extends DWCommand {
+  /**
+   * Client thread ref.
+   */
+  private DWUIClientThread dwuiClientThread = null;
 
-  static final String command = "show";
+  /**
+   * Protocol handler.
+   */
+  private DWProtocolHandler dwProtocolHandler = null;
 
-  private DWUIClientThread uiref = null;
-
-  private DWProtocolHandler dwProto = null;
-
-  public UICmdInstanceDiskShow(DWUIClientThread dwuiClientThread) {
-
-    this.uiref = dwuiClientThread;
+  /**
+   * UI Command Instance Disk Show.
+   *
+   * @param clientThread client thread ref
+   */
+  public UICmdInstanceDiskShow(final DWUIClientThread clientThread) {
+    this.dwuiClientThread = clientThread;
+    setHelp();
   }
 
-  public UICmdInstanceDiskShow(DWProtocolHandler dwProto) {
-    this.dwProto = dwProto;
+  /**
+   * UI Command Instance Disk Show.
+   *
+   * @param protocolHandler protocol handler
+   */
+  public UICmdInstanceDiskShow(final DWProtocolHandler protocolHandler) {
+    this.dwProtocolHandler = protocolHandler;
+    setHelp();
   }
 
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    setCommand("show");
+    setShortHelp("Show current disks");
+    setUsage("ui instance disk show");
   }
 
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @SuppressWarnings("unchecked")
-  public DWCommandResponse parse(String cmdline) {
-    String res = new String();
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder res = new StringBuilder();
 
     // TODO hackish!
-    if (this.dwProto == null) {
-      if (DriveWireServer.getHandler(this.uiref.getInstance()).hasDisks())
-        dwProto = (DWProtocolHandler) DriveWireServer.getHandler(this.uiref.getInstance());
-      else
-        return (new DWCommandResponse(false, DWDefs.RC_INSTANCE_WONT, "This operation is not supported on this type of instance"));
-    }
-
-
-    if (cmdline.length() == 0) {
-      if (dwProto.getDiskDrives() == null) {
-        return (new DWCommandResponse(false, DWDefs.RC_NO_SUCH_DISKSET, "Disk drives are null, is server restarting?"));
+    if (this.dwProtocolHandler == null) {
+      if (DriveWireServer.getHandler(this.dwuiClientThread.getInstance())
+          .hasDisks()) {
+        dwProtocolHandler = (DWProtocolHandler) DriveWireServer
+            .getHandler(this.dwuiClientThread.getInstance());
+      } else {
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_INSTANCE_WONT,
+            "This operation is not supported on this type of instance"
+        );
       }
-
-      for (int i = 0; i < dwProto.getDiskDrives().getMaxDrives(); i++) {
-        if (dwProto.getDiskDrives().isLoaded(i)) {
+    }
+    if (cmdline.length() == 0) {
+      if (dwProtocolHandler.getDiskDrives() == null) {
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_NO_SUCH_DISKSET,
+            "Disk drives are null, is server restarting?"
+        );
+      }
+      for (
+          int i = 0; i < dwProtocolHandler.getDiskDrives().getMaxDrives(); i++
+      ) {
+        if (dwProtocolHandler.getDiskDrives().isLoaded(i)) {
           try {
-            res += i + "|" + dwProto.getDiskDrives().getDisk(i).getFilePath() + "\n";
-          } catch (DWDriveNotLoadedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          } catch (DWDriveNotValidException e) {
-            // TODO Auto-generated catch block
+            res.append(i)
+                .append("|")
+                .append(dwProtocolHandler.getDiskDrives()
+                    .getDisk(i)
+                    .getFilePath())
+                .append("\n");
+          } catch (DWDriveNotLoadedException | DWDriveNotValidException e) {
             e.printStackTrace();
           }
         }
@@ -68,48 +101,48 @@ public class UICmdInstanceDiskShow extends DWCommand {
     } else {
       // disk details
       try {
-
         int driveno = Integer.parseInt(cmdline);
-
-        if ((!(dwProto.getDiskDrives() == null)) && (dwProto.getDiskDrives().isLoaded(driveno))) {
-          res += "*loaded|true\n";
-
-          HierarchicalConfiguration disk = dwProto.getDiskDrives().getDisk(driveno).getParams();
-
-          for (Iterator<String> itk = disk.getKeys(); itk.hasNext(); ) {
+        if ((!(dwProtocolHandler.getDiskDrives() == null))
+            && (dwProtocolHandler.getDiskDrives().isLoaded(driveno))) {
+          res.append("*loaded|true\n");
+          HierarchicalConfiguration disk = dwProtocolHandler.getDiskDrives()
+              .getDisk(driveno)
+              .getParams();
+          Iterator<String> itk = disk.getKeys();
+          while (itk.hasNext()) {
             String option = itk.next();
-
-            res += option + "|" + disk.getProperty(option) + "\n";
+            res.append(option)
+                .append("|")
+                .append(disk.getProperty(option))
+                .append("\n");
           }
-
         } else {
-          res += "*loaded|false\n";
+          res.append("*loaded|false\n");
         }
       } catch (NumberFormatException e) {
-        return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Non numeric drive number"));
+        return (new DWCommandResponse(
+            false,
+            DWDefs.RC_SYNTAX_ERROR,
+            "Non numeric drive number")
+        );
       } catch (DWDriveNotLoadedException e) {
-        res += "*loaded|false\n";
+        res.append("*loaded|false\n");
       } catch (DWDriveNotValidException e) {
-        return (new DWCommandResponse(false, DWDefs.RC_INVALID_DRIVE, e.getMessage()));
+        return (new DWCommandResponse(
+            false, DWDefs.RC_INVALID_DRIVE, e.getMessage())
+        );
       }
-
     }
-
-    return (new DWCommandResponse(res));
+    return new DWCommandResponse(res.toString());
   }
 
-
-  public String getShortHelp() {
-    return "Show current disks";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
-
-  public String getUsage() {
-    return "ui instance disk show";
-  }
-
-  public boolean validate(String cmdline) {
-    return (true);
-  }
-
 }

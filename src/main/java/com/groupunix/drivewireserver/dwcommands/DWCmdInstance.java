@@ -2,49 +2,54 @@ package com.groupunix.drivewireserver.dwcommands;
 
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
-public class DWCmdInstance extends DWCommand {
+public final class DWCmdInstance extends DWCommand {
+  /**
+   * Drivewire protocol.
+   */
+  private final DWProtocol dwProtocol;
 
-  static final String command = "instance";
-  private DWCommandList commands;
-  private DWProtocol dwProto;
-
-  public DWCmdInstance(DWProtocol dwProto, DWCommand parent) {
+  /**
+   * Command instance constructor.
+   *
+   * @param protocol protocol
+   * @param parent parent command
+   */
+  public DWCmdInstance(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdInstanceShow(dwProto, this));
-    commands.addcommand(new DWCmdInstanceStart(dwProto, this));
-    commands.addcommand(new DWCmdInstanceStop(dwProto, this));
-    commands.addcommand(new DWCmdInstanceRestart(dwProto, this));
+    this.dwProtocol = protocol;
+    DWCommandList commands = new DWCommandList(
+        this.dwProtocol, this.dwProtocol.getCMDCols()
+    );
+    this.setCommandList(commands);
+    commands.addCommand(new DWCmdInstanceShow(protocol, this));
+    commands.addCommand(new DWCmdInstanceStart(protocol, this));
+    commands.addCommand(new DWCmdInstanceStop(protocol, this));
+    commands.addCommand(new DWCmdInstanceRestart(protocol, this));
+    this.setCommand("instance");
+    this.setShortHelp("Commands to control instances");
+    this.setUsage("dw instance [command]");
   }
 
-
-  public String getCommand() {
-    return command;
-  }
-
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command if present.
+   *
+   * @param cmdline command string
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
+    return (this.getCommandList().parse(cmdline));
   }
 
-  public String getShortHelp() {
-    return "Commands to control instances";
-  }
-
-
-  public String getUsage() {
-    return "dw instance [command]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+  /**
+   * Validate command for start, stop, show and restart.
+   *
+   * @param cmdline command string
+   * @return true if valid for all actions
+   */
+  public boolean validate(final String cmdline) {
+    return (this.getCommandList().validate(cmdline));
   }
 }

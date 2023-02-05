@@ -1,6 +1,5 @@
 package com.groupunix.drivewireserver.uicommands;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -14,64 +13,94 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class UICmdInstancePrinterStatus extends DWCommand {
 
-  private DWUIClientThread dwuithread = null;
-  private DWProtocolHandler dwProto = null;
+  /**
+   * Client thread reference.
+   */
+  private final DWUIClientThread uiClientRef;
+  /**
+   * Protocol handler.
+   */
+  private DWProtocolHandler dwProtocolHandler;
 
-  public UICmdInstancePrinterStatus(DWUIClientThread dwuiClientThread) {
-    this.dwuithread = dwuiClientThread;
+  /**
+   * UI Command Instance Printer Status.
+   *
+   * @param clientThread UI client thread
+   */
+  public UICmdInstancePrinterStatus(final DWUIClientThread clientThread) {
+    this.uiClientRef = clientThread;
+    this.dwProtocolHandler = null;
+    setHelp();
   }
 
-
-  public UICmdInstancePrinterStatus(DWProtocolHandler dwProto) {
-    this.dwProto = dwProto;
+  /**
+   * UI Command Instance Printer Status.
+   *
+   * @param protocol protocol handler
+   */
+  public UICmdInstancePrinterStatus(final DWProtocolHandler protocol) {
+    this.dwProtocolHandler = protocol;
+    this.uiClientRef = null;
+    setHelp();
   }
 
+  private void setHelp() {
+    setCommand("printerstatus");
+    setShortHelp("show printer status");
+    setUsage("ui instance printerstatus");
+  }
 
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public String getCommand() {
-    return "printerstatus";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    return "show printer status";
-  }
-
-  @Override
-  public String getUsage() {
-    return "ui instance printerstatus";
-  }
-
-  @Override
-  public DWCommandResponse parse(String cmdline) {
-    String res = "";
-
-    if (dwProto == null) {
-      if (DriveWireServer.getHandler(this.dwuithread.getInstance()).hasPrinters()) {
-        dwProto = (DWProtocolHandler) DriveWireServer.getHandler(this.dwuithread.getInstance());
+  public DWCommandResponse parse(final String cmdline) {
+    if (dwProtocolHandler == null) {
+      if (
+          DriveWireServer.getHandler(
+              this.uiClientRef.getInstance()
+          ).hasPrinters()
+      ) {
+        dwProtocolHandler = (DWProtocolHandler) DriveWireServer.getHandler(
+            this.uiClientRef.getInstance()
+        );
       } else {
-        return (new DWCommandResponse(false, DWDefs.RC_INSTANCE_WONT, "This operation is not supported on this type of instance"));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_INSTANCE_WONT,
+            "This operation is not supported on this type of instance"
+        );
       }
     }
-
-
-    res = "currentprinter|" + dwProto.getConfig().getString("CurrentPrinter", "none") + "\r\n";
+    StringBuilder res = new StringBuilder();
+    res.append("currentprinter|")
+        .append(dwProtocolHandler.getConfig().getString(
+        "CurrentPrinter", "none"))
+        .append("\r\n");
 
     @SuppressWarnings("unchecked")
-    List<HierarchicalConfiguration> profiles = dwProto.getConfig().configurationsAt("Printer");
-
-    for (Iterator<HierarchicalConfiguration> it = profiles.iterator(); it.hasNext(); ) {
-      HierarchicalConfiguration mprof = it.next();
-
-      res += "printer|" + mprof.getString("[@name]") + "|" + mprof.getString("[@desc]") + "\r\n";
+    List<HierarchicalConfiguration> profiles
+        = dwProtocolHandler.getConfig().configurationsAt("Printer");
+    for (HierarchicalConfiguration mProfile : profiles) {
+      res.append("printer|")
+          .append(mProfile.getString("[@name]"))
+          .append("|")
+          .append(mProfile.getString("[@desc]"))
+          .append("\r\n");
     }
-
-
-    return (new DWCommandResponse(res));
+    return new DWCommandResponse(res.toString());
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

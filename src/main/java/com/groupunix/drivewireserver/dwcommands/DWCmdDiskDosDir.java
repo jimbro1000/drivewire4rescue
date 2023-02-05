@@ -13,75 +13,105 @@ import com.groupunix.drivewireserver.dwexceptions.DWDriveNotValidException;
 import com.groupunix.drivewireserver.dwexceptions.DWFileSystemInvalidDirectoryException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
-public class DWCmdDiskDosDir extends DWCommand {
-  private DWProtocolHandler dwProto;
+public final class DWCmdDiskDosDir extends DWCommand {
+  /**
+   * protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-  public DWCmdDiskDosDir(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Disk Dos Dir command constructor.
+   *
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdDiskDosDir(
+      final DWProtocolHandler protocolHandler,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocolHandler = protocolHandler;
+    this.setCommand("dir");
+    this.setShortHelp("Show DOS directory of disk in drive #");
+    this.setUsage("dw disk dos dir #");
   }
 
-  public String getCommand() {
-    return "dir";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
-
+  /**
+   * parse command.
+   *
+   * @param cmdline command string
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     String[] args = cmdline.split(" ");
 
     if (args.length == 1) {
       try {
-        return (doDiskDosDir(dwProto.getDiskDrives().getDriveNoFromString(args[0])));
+        return doDiskDosDir(
+            dwProtocolHandler.getDiskDrives().getDriveNoFromString(args[0])
+        );
       } catch (DWDriveNotValidException e) {
-        return (new DWCommandResponse(false, DWDefs.RC_INVALID_DRIVE, e.getMessage()));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_INVALID_DRIVE,
+            e.getMessage()
+        );
       } catch (DWDriveNotLoadedException e) {
-        return (new DWCommandResponse(false, DWDefs.RC_DRIVE_NOT_LOADED, e.getMessage()));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_DRIVE_NOT_LOADED,
+            e.getMessage()
+        );
       } catch (IOException e) {
-        return (new DWCommandResponse(false, DWDefs.RC_SERVER_IO_EXCEPTION, e.getMessage()));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_SERVER_IO_EXCEPTION,
+            e.getMessage()
+        );
       } catch (DWFileSystemInvalidDirectoryException e) {
-        return (new DWCommandResponse(false, DWDefs.RC_SERVER_FILESYSTEM_EXCEPTION, e.getMessage()));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_SERVER_FILESYSTEM_EXCEPTION,
+            e.getMessage()
+        );
       }
-
     }
-
-    return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error"));
+    return new DWCommandResponse(
+        false,
+        DWDefs.RC_SYNTAX_ERROR,
+        "Syntax error"
+    );
   }
 
+  private DWCommandResponse doDiskDosDir(
+      final int driveNumber
+  ) throws DWDriveNotLoadedException,
+      DWDriveNotValidException,
+      IOException,
+      DWFileSystemInvalidDirectoryException {
+    String res = "Directory of drive " + driveNumber + "\r\n\r\n";
 
-  private DWCommandResponse doDiskDosDir(int driveno) throws DWDriveNotLoadedException, DWDriveNotValidException, IOException, DWFileSystemInvalidDirectoryException {
-    String res = "Directory of drive " + driveno + "\r\n\r\n";
-
-    DWDECBFileSystem tmp = new DWDECBFileSystem(dwProto.getDiskDrives().getDisk(driveno));
-
-    //res += tmp.dumpFat() + "\r\n";
-
-
-    ArrayList<String> dir = new ArrayList<String>();
-
+    DWDECBFileSystem tmp = new DWDECBFileSystem(
+        dwProtocolHandler.getDiskDrives().getDisk(driveNumber)
+    );
+    ArrayList<String> dir = new ArrayList<>();
     for (DWFileSystemDirEntry e : tmp.getDirectory(null)) {
-      if (((DWDECBFileSystemDirEntry) e).isUsed())
-        dir.add(e.getFileName() + "." + e.getFileExt());  //  + " " + e.getFirstGranule() + " " + e.getBytesInLastSector() + " " + e.getFileFlag() + " " + e.getFileType()
+      if (((DWDECBFileSystemDirEntry) e).isUsed()) {
+        dir.add(e.getFileName() + "." + e.getFileExt());
+      }
     }
-
     Collections.sort(dir);
-
-    res += DWCommandList.colLayout(dir, this.dwProto.getCMDCols());
-
-
-    return (new DWCommandResponse(res));
-
+    res += DWCommandList.colLayout(dir, this.dwProtocolHandler.getCMDCols());
+    return new DWCommandResponse(res);
   }
 
-
-  public String getShortHelp() {
-    return "Show DOS directory of disk in drive #";
-  }
-
-  public String getUsage() {
-    return "dw disk dos dir #";
-  }
-
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * validate command.
+   *
+   * @param cmdline command string
+   * @return true if command valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

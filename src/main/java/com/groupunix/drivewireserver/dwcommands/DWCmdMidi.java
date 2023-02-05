@@ -3,49 +3,54 @@ package com.groupunix.drivewireserver.dwcommands;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class DWCmdMidi extends DWCommand {
+  /**
+   * Drivewire protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-  static final String command = "midi";
-  private DWCommandList commands;
-  private DWProtocolHandler dwProto;
-
-  public DWCmdMidi(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Midi command constructor.
+   *
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdMidi(
+      final DWProtocolHandler protocolHandler, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdMidiStatus(dwProto, this));
-    commands.addcommand(new DWCmdMidiOutput(dwProto, this));
-    commands.addcommand(new DWCmdMidiSynth(dwProto, this));
-
+    this.dwProtocolHandler = protocolHandler;
+    DWCommandList commands = new DWCommandList(
+        this.dwProtocolHandler, this.dwProtocolHandler.getCMDCols()
+    );
+    this.setCommandList(commands);
+    commands.addCommand(new DWCmdMidiStatus(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiOutput(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynth(protocolHandler, this));
+    this.setCommand("midi");
+    this.setShortHelp("Manage the MIDI subsystem");
+    this.setUsage("dw midi [command]");
   }
 
-
-  public String getCommand() {
-    return command;
-  }
-
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return new DWCommandResponse(this.getCommandList().getShortHelp());
     }
-    return (commands.parse(cmdline));
+    return this.getCommandList().parse(cmdline);
   }
 
-
-  public String getShortHelp() {
-    return "Manage the MIDI subsystem";
-  }
-
-
-  public String getUsage() {
-    return "dw midi [command]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
 }

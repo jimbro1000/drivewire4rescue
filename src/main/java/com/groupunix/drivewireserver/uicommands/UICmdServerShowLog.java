@@ -7,40 +7,39 @@ import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowLog extends DWCommand {
-
-
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "log";
+  /**
+   * UI Command Server Show Log.
+   */
+  public UICmdServerShowLog() {
+    setCommand("log");
+    setShortHelp("show log buffer");
+    setUsage("ui server show log");
   }
 
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show log buffer";
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder txt = new StringBuilder();
+    ArrayList<String> log = DriveWireServer
+        .getLogEvents(DriveWireServer.getLogEventsSize());
+    for (String l : log) {
+      txt.append(l);
+    }
+    return new DWCommandResponse(txt.toString());
   }
 
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show log";
-  }
-
-  @Override
-  public DWCommandResponse parse(String cmdline) {
-    String txt = new String();
-
-    ArrayList<String> log = DriveWireServer.getLogEvents(DriveWireServer.getLogEventsSize());
-
-    for (String l : log)
-      txt += l;
-
-    return (new DWCommandResponse(txt));
-  }
-
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

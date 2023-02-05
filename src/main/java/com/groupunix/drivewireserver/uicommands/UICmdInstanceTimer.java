@@ -2,48 +2,58 @@ package com.groupunix.drivewireserver.uicommands;
 
 import com.groupunix.drivewireserver.DWUIClientThread;
 import com.groupunix.drivewireserver.dwcommands.DWCommand;
+import com.groupunix.drivewireserver.dwcommands.DWCommandList;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdInstanceTimer extends DWCommand {
-
-  static final String command = "timer";
-
-
-  public UICmdInstanceTimer(DWProtocol dwProtocol) {
-    commands.addcommand(new UICmdInstanceTimerShow(dwProtocol));
-    commands.addcommand(new UICmdInstanceTimerReset(dwProtocol));
-
+  /**
+   * UI Command Instance Timer.
+   *
+   * @param protocol protocol
+   */
+  public UICmdInstanceTimer(final DWProtocol protocol) {
+    DWCommandList commands = this.getCommandList();
+    commands.addCommand(new UICmdInstanceTimerShow(protocol));
+    commands.addCommand(new UICmdInstanceTimerReset(protocol));
+    setHelp();
   }
 
-
-  public UICmdInstanceTimer(DWUIClientThread dwuiClientThread) {
-    commands.addcommand(new UICmdInstanceTimerShow(dwuiClientThread));
-    commands.addcommand(new UICmdInstanceTimerReset(dwuiClientThread));
-
+  /**
+   * UI Command Instance Timer.
+   *
+   * @param clientThread client thread reference
+   */
+  public UICmdInstanceTimer(final DWUIClientThread clientThread) {
+    DWCommandList commands = this.getCommandList();
+    commands.addCommand(new UICmdInstanceTimerShow(clientThread));
+    commands.addCommand(new UICmdInstanceTimerReset(clientThread));
+    setHelp();
   }
 
-
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    this.setCommand("timer");
+    this.setShortHelp("Timer commands");
+    this.setUsage("ui instance timer [command]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (commands.parse(cmdline));
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return this.getCommandList().parse(cmdline);
   }
 
-
-  public String getShortHelp() {
-    return "Timer commands";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
-
-
-  public String getUsage() {
-    return "ui instance timer [command]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
-  }
-
 }

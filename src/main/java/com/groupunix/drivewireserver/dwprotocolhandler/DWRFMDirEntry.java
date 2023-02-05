@@ -6,55 +6,107 @@ import org.apache.commons.vfs2.FileType;
 
 
 public class DWRFMDirEntry {
-  String fileName; // 0 - 47
+  /**
+   * Length of directory entry byte array.
+   */
+  public static final int ENTRY_LEN = 64;
+  /**
+   * Minimum file name length.
+   */
+  public static final int MIN_FILENAME_LEN = 48;
+  /**
+   * Writeable permissions flag.
+   */
+  public static final byte WRITEABLE = (byte) 0x02;
+  /**
+   * Readable permissions flag.
+   */
+  public static final byte READABLE = (byte) 0x04;
+  /**
+   * Folder flag.
+   */
+  public static final byte FOLDER = (byte) 0x80;
+  /**
+   * Length of date byte array.
+   */
+  public static final int FILE_DATE_LEN = 6;
+  /**
+   * Offset to file name.
+   */
+  private static final int FILE_NAME_OFFSET = 0;
+  /**
+   * Offset to file size.
+   */
+  @SuppressWarnings("unused")
+  private static final int FILE_SIZE_OFFSET = 53;
+  /**
+   * Offset to permissions byte.
+   */
+  private static final int FILE_PERMISSIONS_OFFSET = 57;
+  /**
+   * Offset to file date.
+   */
+  @SuppressWarnings("unused")
+  private static final int FILE_DATE_OFFSET = 58;
+  /**
+   * File name.
+   */
+  private String fileName;
+  /**
+   * File size.
+   */
+  private long fileSize = 0;
 
-  // 48 - 52
+  /**
+   * File permissions.
+   */
+  private byte filePerms = 0;
 
-  long fileSize = 0;  // 53 - 56
+  /**
+   * File date.
+   */
+  @SuppressWarnings("unused")
+  private byte[] fileDate = new byte[FILE_DATE_LEN]; // 58 - 63
 
-  byte filePerms = 0; // 57
-
-  byte[] fileDate = new byte[6]; // 58 - 63
-
-
-  public DWRFMDirEntry(FileObject fo) throws FileSystemException {
-    // TODO sanity checks
-
+  /**
+   * RMF Directory Entry.
+   *
+   * @param fo file object
+   * @throws FileSystemException failed to read from source
+   */
+  public DWRFMDirEntry(final FileObject fo) throws FileSystemException {
     if (fo != null) {
       this.fileName = fo.getName().getBaseName();
-
       if (fo.getType() == FileType.FOLDER) {
-        this.filePerms = (byte) 0x80;
+        this.filePerms = FOLDER;
       }
-
       if (fo.isReadable()) {
-        this.filePerms += (byte) 4;
+        this.filePerms += READABLE;
       }
-
       if (fo.isWriteable()) {
-        this.filePerms += (byte) 2;
+        this.filePerms += WRITEABLE;
       }
-
       this.fileSize = fo.getContent().getSize();
-      //long lmt = fo.getContent().getLastModifiedTime();
-
-      // TODO lat mod time
     }
   }
 
-
+  /**
+   * Get directory entry.
+   *
+   * @return byte array
+   */
   public byte[] getEntry() {
-    byte[] res = new byte[64];
-
+    byte[] res = new byte[ENTRY_LEN];
     if (this.fileName != null) {
-      //TODO  incomplete
-
-      System.arraycopy(this.fileName.getBytes(), 0, res, 0, Math.max(48, this.fileName.length()));
-
-      res[57] = this.filePerms;
-
+      System.arraycopy(
+          this.fileName.getBytes(),
+          FILE_NAME_OFFSET,
+          res,
+          0,
+          Math.max(MIN_FILENAME_LEN, this.fileName.length())
+      );
+      res[FILE_PERMISSIONS_OFFSET] = this.filePerms;
     }
-
     return res;
   }
 }

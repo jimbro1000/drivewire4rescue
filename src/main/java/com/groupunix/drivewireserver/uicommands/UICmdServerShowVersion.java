@@ -5,35 +5,39 @@ import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowVersion extends DWCommand {
-
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "version";
+  /**
+   * UI Command Server Show Version.
+   */
+  public UICmdServerShowVersion() {
+    setCommand("version");
+    setShortHelp("show server version");
+    setUsage("ui server show version");
   }
 
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show server version";
+  public DWCommandResponse parse(final String cmdline) {
+    return new DWCommandResponse(
+        "DriveWire version "
+            + DriveWireServer.DW_SERVER_VERSION
+            + " ("
+            + DriveWireServer.DW_SERVER_VERSION_DATE
+            + ")"
+    );
   }
 
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show version";
-  }
-
-  @Override
-  public DWCommandResponse parse(String cmdline) {
-    String txt = new String();
-
-    txt = "DriveWire version " + DriveWireServer.DWServerVersion + " (" + DriveWireServer.DWServerVersionDate + ")";
-
-    return (new DWCommandResponse(txt));
-  }
-
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

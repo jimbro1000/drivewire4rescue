@@ -16,145 +16,185 @@ import com.groupunix.drivewireserver.dwexceptions.DWPortNotValidException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
 public class DWVPortTelnetPreflightThread implements Runnable {
+  /**
+   * Log appender.
+   */
+  private static final Logger LOGGER
+      = Logger.getLogger("DWServer.DWVPortTelnetPreflightThread");
+  /**
+   * Size of telnet setup/handshake message.
+   */
+  public static final int TELNET_MSG_LEN = 9;
+  /**
+   * Telnet escape code.
+   */
+  public static final int TELNET_ESC = 255;
+  /**
+   * TELNET will command.
+   */
+  public static final int TELNET_WILL = 251;
+  /**
+   * TELNET do command.
+   */
+  public static final int TELNET_DO = 253;
+  /**
+   * TELNET break (end of message) command.
+   */
+  public static final int TELNET_BREAK = 243;
+  /**
+   * Telnet operation echo.
+   */
+  public static final int TELNET_OP_ECHO = 1;
+  /**
+   * Telnet operation suppress go ahead.
+   */
+  public static final int TELNET_OP_SUPPRESS_GO_AHEAD = 3;
+  /**
+   * Port.
+   */
+  private final int vPort;
+  /**
+   * Show banner.
+   */
+  private final boolean banner;
+  /**
+   * Telnet flag.
+   */
+  private final boolean telnet;
+  /**
+   * V.Serial Ports.
+   */
+  private final DWVSerialPorts dwVSerialPorts;
+  /**
+   * V.Serial Protocol.
+   */
+  private final DWVSerialProtocol dwvSerialProtocol;
+  /**
+   * Socket channel.
+   */
+  private final SocketChannel socketChannel;
 
-  private static final Logger logger = Logger.getLogger("DWServer.DWVPortTelnetPreflightThread");
-
-
-  private int vport;
-
-  private boolean banner = false;
-  private boolean telnet = false;
-
-
-  private DWVSerialPorts dwVSerialPorts;
-  private DWVSerialProtocol dwProto;
-
-
-  private SocketChannel sktchan;
-
-  public DWVPortTelnetPreflightThread(DWVSerialProtocol dwProto2, int vport, SocketChannel sktchan, boolean doTelnet, boolean doBanner) {
-    this.vport = vport;
-    this.sktchan = sktchan;
-
+  /**
+   * Virtual Port Telnet Preflight Thread.
+   *
+   * @param serialProtocol Serial Port
+   * @param port V.Port
+   * @param channel Socket Channel
+   * @param doTelnet doTelnet
+   * @param doBanner doBanner
+   */
+  public DWVPortTelnetPreflightThread(final DWVSerialProtocol serialProtocol,
+                                      final int port,
+                                      final SocketChannel channel,
+                                      final boolean doTelnet,
+                                      final boolean doBanner) {
+    this.vPort = port;
+    this.socketChannel = channel;
     this.banner = doBanner;
     this.telnet = doTelnet;
-    this.dwProto = dwProto2;
-    this.dwVSerialPorts = dwProto2.getVPorts();
-
+    this.dwvSerialProtocol = serialProtocol;
+    this.dwVSerialPorts = serialProtocol.getVPorts();
   }
 
+  static byte[] prepTelnet() {
+    int index = 0;
+    byte[] buf = new byte[TELNET_MSG_LEN];
+    buf[index++] = (byte) TELNET_ESC;
+    buf[index++] = (byte) TELNET_WILL;
+    buf[index++] = (byte) TELNET_OP_ECHO;
+    buf[index++] = (byte) TELNET_ESC;
+    buf[index++] = (byte) TELNET_WILL;
+    buf[index++] = (byte) TELNET_OP_SUPPRESS_GO_AHEAD;
+    buf[index++] = (byte) TELNET_ESC;
+    buf[index++] = (byte) TELNET_DO;
+    buf[index] = (byte) TELNET_BREAK;
+    return buf;
+  }
+
+  /**
+   * Run thread.
+   */
   public void run() {
     Thread.currentThread().setName("tcppre-" + Thread.currentThread().getId());
     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-
-    logger.debug("preflight checks for new connection from " + sktchan.socket().getInetAddress().getHostName());
-
+    LOGGER.debug("preflight checks for new connection from "
+        + socketChannel.socket().getInetAddress().getHostName());
     try {
       // hello
-      if (this.telnet)
-        sktchan.socket().getOutputStream().write(("DriveWire Telnet Server " + DriveWireServer.DWServerVersion + "\r\n\n").getBytes());
-
-
-      if (telnet == true) {
-        // ask telnet to turn off echo, should probably be a setting or left to the client
-        byte[] buf = new byte[9];
-
-        buf[0] = (byte) 255;
-        buf[1] = (byte) 251;
-        buf[2] = (byte) 1;
-        buf[3] = (byte) 255;
-        buf[4] = (byte) 251;
-        buf[5] = (byte) 3;
-        buf[6] = (byte) 255;
-        buf[7] = (byte) 253;
-        buf[8] = (byte) 243;
-
-
-        sktchan.socket().getOutputStream().write(buf, 0, 9);
-
-        // 	read back the echoed controls - TODO has issues
-
-        for (int i = 0; i < 9; i++) {
-          sktchan.socket().getInputStream().read();
+      if (this.telnet) {
+        socketChannel.socket().getOutputStream()
+            .write(("DriveWire Telnet Server "
+            + DriveWireServer.DW_SERVER_VERSION + "\r\n\n").getBytes());
+      }
+      if (this.telnet) {
+        // ask telnet to turn off echo, should probably be a setting
+        // or left to the client
+        byte[] buf = prepTelnet();
+        socketChannel.socket().getOutputStream().write(buf, 0, TELNET_MSG_LEN);
+        // read back the echoed controls - TODO has issues
+        for (int i = 0; i < TELNET_MSG_LEN; i++) {
+          socketChannel.socket().getInputStream().read();
         }
       }
-
-
-      if (sktchan.socket().isClosed()) {
+      if (socketChannel.socket().isClosed()) {
         // bail out
-        logger.debug("thread exiting after auth");
+        LOGGER.debug("thread exiting after auth");
         return;
       }
-
-
-      if ((dwProto.getConfig().containsKey("TelnetBannerFile")) && (banner == true)) {
-        displayFile(sktchan.socket().getOutputStream(), dwProto.getConfig().getString("TelnetBannerFile"));
+      if ((dwvSerialProtocol.getConfig().containsKey("TelnetBannerFile"))
+          && (banner)) {
+        displayFile(socketChannel.socket().getOutputStream(),
+            dwvSerialProtocol.getConfig().getString("TelnetBannerFile"));
       }
-
     } catch (IOException e) {
-      logger.warn("IOException: " + e.getMessage());
-
-      if (sktchan.isConnected()) {
-        logger.debug("closing socket");
+      LOGGER.warn("IOException: " + e.getMessage());
+      if (socketChannel.isConnected()) {
+        LOGGER.debug("closing socket");
         try {
-          sktchan.close();
+          socketChannel.close();
         } catch (IOException e1) {
-          logger.warn(e1.getMessage());
+          LOGGER.warn(e1.getMessage());
         }
-
       }
-
     }
-
-
-    if (sktchan.isConnected()) {
-
+    if (socketChannel.isConnected()) {
       //add connection to pool
-      int conno = this.dwVSerialPorts.getListenerPool().addConn(this.vport, sktchan, 1);
-
-
+      int conno = this.dwVSerialPorts
+          .getListenerPool().addConn(this.vPort, socketChannel, 1);
       // announce new connection to listener
       try {
-        dwVSerialPorts.sendConnectionAnnouncement(this.vport, conno, sktchan.socket().getLocalPort(), sktchan.socket().getInetAddress().getHostAddress());
+        dwVSerialPorts.sendConnectionAnnouncement(
+            this.vPort,
+            conno,
+            socketChannel.socket().getLocalPort(),
+            socketChannel.socket().getInetAddress().getHostAddress()
+        );
       } catch (DWPortNotValidException e) {
-        logger.error("in announce: " + e.getMessage());
+        LOGGER.error("in announce: " + e.getMessage());
       }
-
     }
-
-    logger.debug("exiting");
+    LOGGER.debug("exiting");
   }
 
-
-  private void displayFile(OutputStream outputStream, String fname) {
+  private void displayFile(final OutputStream outputStream,
+                           final String fname
+  ) {
     FileInputStream fstream;
-
     try {
       fstream = new FileInputStream(fname);
-
       DataInputStream in = new DataInputStream(fstream);
-
       BufferedReader br = new BufferedReader(new InputStreamReader(in));
-
       String strLine;
-
-      logger.debug("sending file '" + fname + "' to telnet client");
-
+      LOGGER.debug("sending file '" + fname + "' to telnet client");
       while ((strLine = br.readLine()) != null) {
         outputStream.write(strLine.getBytes());
         outputStream.write("\r\n".getBytes());
       }
-
       fstream.close();
-
     } catch (FileNotFoundException e) {
-      logger.warn("File not found: " + fname);
+      LOGGER.warn("File not found: " + fname);
     } catch (IOException e1) {
-      logger.warn(e1.getMessage());
+      LOGGER.warn(e1.getMessage());
     }
-
-
   }
-
-
 }

@@ -11,48 +11,55 @@ import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowNet extends DWCommand {
-
-  @Override
-  public String getCommand() {
-    return "net";
+  /**
+   * UI Command Server Show Net.
+   */
+  public UICmdServerShowNet() {
+    setCommand("net");
+    setShortHelp("show available network interfaces");
+    setUsage("ui server show net");
   }
 
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public String getShortHelp() {
-    return "show available network interfaces";
-  }
-
-  @Override
-  public String getUsage() {
-    return "ui server show net";
-  }
-
-  @Override
-  public DWCommandResponse parse(String cmdline) {
-    String res = new String();
-
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder res = new StringBuilder();
     Enumeration<NetworkInterface> nets;
     try {
       nets = NetworkInterface.getNetworkInterfaces();
       for (NetworkInterface netint : Collections.list(nets)) {
-
         Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
         for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-          res += inetAddress.getHostAddress() + "|" + netint.getName() + "|" + netint.getDisplayName() + "\r\n";
+          res.append(inetAddress.getHostAddress())
+              .append("|")
+              .append(netint.getName())
+              .append("|")
+              .append(netint.getDisplayName())
+              .append("\r\n");
         }
-
       }
-
     } catch (SocketException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_NET_IO_ERROR, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_NET_IO_ERROR,
+          e.getMessage()
+      );
     }
-
-
-    return (new DWCommandResponse(res));
+    return new DWCommandResponse(res.toString());
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

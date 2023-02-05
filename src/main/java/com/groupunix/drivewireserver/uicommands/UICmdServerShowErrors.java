@@ -12,64 +12,76 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdServerShowErrors extends DWCommand {
 
+  /**
+   * Protocol.
+   */
+  private final DWProtocol dwProtocol;
 
-  private DWProtocol dwProto;
-
-  public UICmdServerShowErrors(DWUIClientThread dwuiClientThread) {
-    this.dwProto = DriveWireServer.getHandler(dwuiClientThread.getInstance());
+  /**
+   * UI Command Server Show Errors.
+   *
+   * @param clientThread client thread ref
+   */
+  public UICmdServerShowErrors(final DWUIClientThread clientThread) {
+    this.dwProtocol = DriveWireServer.getHandler(clientThread.getInstance());
+    setHelp();
   }
 
-
-  public UICmdServerShowErrors(DWProtocol dwProto) {
-    this.dwProto = dwProto;
+  /**
+   * UI Command Server Show Errors.
+   *
+   * @param protocol protocol
+   */
+  public UICmdServerShowErrors(final DWProtocol protocol) {
+    this.dwProtocol = protocol;
+    setHelp();
   }
 
+  private void setHelp() {
+    setCommand("errors");
+    setShortHelp("show error descriptions");
+    setUsage("ui server show errors");
+  }
 
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "errors";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show error descriptions";
-  }
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show errors";
-  }
-
-  @Override
-  public DWCommandResponse parse(String cmdline) {
-    String res = "";
-
-    if (dwProto != null) {
-      List<String> rconfs = dwProto.getHelp().getSectionTopics("resultcode");
-
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder res = new StringBuilder();
+    if (dwProtocol != null) {
+      List<String> rconfs = dwProtocol.getHelp().getSectionTopics("resultcode");
       if (rconfs != null) {
         for (String rc : rconfs) {
           try {
-            res += rc.substring(1) + "|" + dwProto.getHelp().getTopicText("resultcode." + rc).trim() + "\r\n";
-          } catch (DWHelpTopicNotFoundException e) {
-            // whatever
+            res.append(rc.substring(1))
+                .append("|")
+                .append(dwProtocol.getHelp()
+                    .getTopicText("resultcode." + rc).trim())
+                .append("\r\n");
+          } catch (DWHelpTopicNotFoundException ignored) {
           }
-
         }
-
-        return (new DWCommandResponse(res));
+        return new DWCommandResponse(res.toString());
       }
     }
-
-    return (new DWCommandResponse(false, DWDefs.RC_HELP_TOPIC_NOT_FOUND, "No error descriptions available from server"));
-
+    return new DWCommandResponse(
+        false,
+        DWDefs.RC_HELP_TOPIC_NOT_FOUND,
+        "No error descriptions available from server"
+    );
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

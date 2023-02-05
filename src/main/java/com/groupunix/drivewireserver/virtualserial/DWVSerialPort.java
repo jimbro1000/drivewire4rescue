@@ -15,532 +15,787 @@ import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
+import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
+import static com.groupunix.drivewireserver.DWDefs.CARRIAGE_RETURN;
+import static com.groupunix.drivewireserver.DWDefs.NEWLINE;
+import static com.groupunix.drivewireserver.dwprotocolhandler.DWUtils.MIDI_CHAN_PRESS;
+import static com.groupunix.drivewireserver.dwprotocolhandler.DWUtils.MIDI_CHAN_PRESS_MAX;
+import static com.groupunix.drivewireserver.dwprotocolhandler.DWUtils.MIDI_NOTE_CHANNEL;
+import static com.groupunix.drivewireserver.dwprotocolhandler.DWUtils.MIDI_PITCH_BEND_CHANNEL_MAX;
+import static com.groupunix.drivewireserver.dwprotocolhandler.DWUtils.MIDI_PRG_CHANGE;
+
 public class DWVSerialPort {
-
-  private static final Logger logger = Logger.getLogger("DWServer.DWVSerialPort");
-
-  private static final int INPUT_BUFFER_SIZE = -1;  //infinite
-  private static final int OUTPUT_BUFFER_SIZE = 10240; // huge
-
-  private int port = -1;
-  private DWVSerialProtocol dwProto;
-
+  /**
+   * Log appender.
+   */
+  private static final Logger LOGGER
+      = Logger.getLogger("DWServer.DWVSerialPort");
+  /**
+   * Input buffer size (-1 = unlimited).
+   */
+  private static final int INPUT_BUFFER_SIZE = -1;
+  /**
+   * Output buffer size.
+   */
+  private static final int OUTPUT_BUFFER_SIZE = 10240;
+  /**
+   * Default port number.
+   */
+  private static final int DEFAULT_PORT_VALUE = 6309;
+  // ASCII codes
+  /**
+   * DEL.
+   */
+  public static final int ASCII_DEL = 0x7f;
+  /**
+   * Start Of Header.
+   */
+  public static final int ASCII_SOH = 0x01;
+  /**
+   * ESC.
+   */
+  public static final int ASCII_ESC = 0x1b;
+  /**
+   * Device command len (bytes).
+   */
+  public static final int DEVICE_CMD_LEN = 8;
+  /**
+   * Device command data offset.
+   */
+  public static final int DEVICE_CMD_OFFSET = 3;
+  /**
+   * Poll delay (millis).
+   */
+  public static final int BUFFER_POLL_DELAY = 100;
+  /**
+   * Midi msg type base value.
+   */
+  public static final int MIDI_MSG_BASE = 192;
+  /**
+   * Midi sysex msg.
+   */
+  public static final int MIDI_SYSEX_MSG = 247;
+  /**
+   * Midi in sysex msg.
+   */
+  public static final int MIDI_IN_SYSEX = 240;
+  /**
+   * Send midi msg.
+   */
+  public static final int SEND_MIDI = 248;
+  /**
+   * DD array length.
+   */
+  public static final int DD_LEN = 26;
+  /**
+   * Port.
+   */
+  private int vPort = -1;
+  /**
+   * Serial protocol.
+   */
+  private final DWVSerialProtocol dwvSerialProtocol;
+  /**
+   * Connected flag.
+   */
   private boolean connected = false;
+  /**
+   * Open count.
+   */
   private int opens = 0;
-
-  private DWVPortHandler porthandler = null;
-  private DWVSerialPorts vports;
-
-  private byte PD_INT = 0;
-  private byte PD_QUT = 0;
-  private byte[] DD = new byte[26];
-
-  private DWVSerialCircularBuffer inputBuffer = new DWVSerialCircularBuffer(INPUT_BUFFER_SIZE, true);
-
-  private byte[] outbuf = new byte[OUTPUT_BUFFER_SIZE];
-  private ByteBuffer outputBuffer = ByteBuffer.wrap(outbuf);
-
+  /**
+   * Port handler.
+   */
+  private DWVPortHandler portHandler = null;
+  /**
+   * Serial ports.
+   */
+  private final DWVSerialPorts vSerialPorts;
+  /**
+   * PD_INT.
+   */
+  private byte pdInt = 0;
+  /**
+   * PD_QUT.
+   */
+  private byte pdQut = 0;
+  /**
+   * DD byte array.
+   */
+  private byte[] dD = new byte[DD_LEN];
+  /**
+   * Input buffer.
+   */
+  private final DWVSerialCircularBuffer inputBuffer
+      = new DWVSerialCircularBuffer(INPUT_BUFFER_SIZE, true);
+  /**
+   * Output buffer byte array.
+   */
+  private final byte[] outBuffer = new byte[OUTPUT_BUFFER_SIZE];
+  /**
+   * Output buffer.
+   */
+  private final ByteBuffer outputBuffer = ByteBuffer.wrap(outBuffer);
+  /**
+   * Shutdown flag.
+   */
   private boolean wanttodie = false;
-
-  private int conno = -1;
+  /**
+   * Connection number.
+   */
+  private int connNo = -1;
 
   // midi message stuff
+  /**
+   * Midi message.
+   */
   @SuppressWarnings("unused")
-  private ShortMessage mmsg;
-  private int mmsg_pos = 0;
-  private int mmsg_data1;
-  private int mmsg_status;
+  private ShortMessage midiMsg;
+  /**
+   * Midi message position.
+   */
+  private int mmsgPos = 0;
+  /**
+   * Midi message data.
+   */
+  private int mmsgData1;
+  /**
+   * Midi message status.
+   */
+  private int mmsgStatus;
+  /**
+   * Last Midi message status.
+   */
   @SuppressWarnings("unused")
-  private int last_mmsg_status;
-  private int mmsg_databytes = 2;
+  private int lastMmsgStatus;
+  /**
+   * Midi message data bytes.
+   */
+  private int mmsgDatabytes = 2;
+  /**
+   * Midi seen.
+   */
+  private boolean midiSeen = false;
+  /**
+   * Log midi bytes.
+   */
+  private boolean logMidiBytes = false;
+  /**
+   * Midi in sysex.
+   */
+  private boolean midiInSysex = false;
+  /**
+   * Midi sysex.
+   */
+  private String midiSysex = "";
+  /**
+   * Utility mode.
+   */
+  private int utilMode = 0;
+  /**
+   * Socket channel.
+   */
+  private SocketChannel socketChannel;
 
-  private boolean midi_seen = false;
-  private boolean log_midi_bytes = false;
-  private boolean midi_in_sysex = false;
-  private String midi_sysex = new String();
+  /**
+   * Virtual Serial Port.
+   *
+   * @param serialPorts virtual serial ports
+   * @param protocol serial protocol
+   * @param port port
+   */
+  public DWVSerialPort(final DWVSerialPorts serialPorts,
+                       final DWVSerialProtocol protocol,
+                       final int port) {
+    LOGGER.debug("New DWVSerialPort for port " + port
+        + " in handler #" + protocol.getHandlerNo());
+    this.vSerialPorts = serialPorts;
+    this.vPort = port;
+    this.dwvSerialProtocol = protocol;
 
-  private int utilmode = 0;
-
-  private SocketChannel sktchan;
-
-  public DWVSerialPort(DWVSerialPorts vps, DWVSerialProtocol dwProto, int port) {
-    logger.debug("New DWVSerialPort for port " + port + " in handler #" + dwProto.getHandlerNo());
-    this.vports = vps;
-    this.port = port;
-    this.dwProto = dwProto;
-
-
-    if ((port != vps.getNTermPort()) && (port < (vps.getMaxPorts()))) {
-      this.porthandler = new DWVPortHandler(dwProto, port);
-
-      if (dwProto.getConfig().getBoolean("LogMIDIBytes", false)) {
-        this.log_midi_bytes = true;
+    if ((port != serialPorts.getNTermPort())
+        && (port < (serialPorts.getMaxPorts()))) {
+      this.portHandler = new DWVPortHandler(protocol, port);
+      if (protocol.getConfig().getBoolean("LogMIDIBytes", false)) {
+        this.logMidiBytes = true;
       }
-
     }
-
-
   }
 
-
+  /**
+   * Bytes waiting in buffer.
+   *
+   * @return bytes waiting to read
+   */
   public int bytesWaiting() {
     int bytes = inputBuffer.getAvailable();
-
     // never admit to having more than 255 bytes
-    if (bytes < 256)
-      return (bytes);
-    else
-      return (255);
+    return Math.min(bytes, BYTE_MASK);
   }
 
-
-  public void write(int databyte) {
-
-    if (this.port == vports.getMIDIPort()) {
-      if (!midi_seen) {
-        logger.debug("MIDI data on port " + this.port);
-        midi_seen = true;
+  /**
+   * Write byte.
+   *
+   * @param data byte data
+   */
+  public void write(final int data) {
+    int databyte = data;
+    if (this.vPort == vSerialPorts.getMIDIPort()) {
+      if (!midiSeen) {
+        LOGGER.debug("MIDI data on port " + this.vPort);
+        midiSeen = true;
       }
-
-
       // incomplete, but enough to make most things work for now
-
-
-      databyte = (int) (databyte & 0xFF);
-
-      if (midi_in_sysex) {
-        if (databyte == 247) {
-          midi_in_sysex = false;
-
-          if (log_midi_bytes) {
-            logger.info("midi sysex: " + midi_sysex);
+      databyte = databyte & BYTE_MASK;
+      if (midiInSysex) {
+        if (databyte == MIDI_SYSEX_MSG) {
+          midiInSysex = false;
+          if (logMidiBytes) {
+            LOGGER.info("midi sysex: " + midiSysex);
           }
-
-          midi_sysex = "";
+          midiSysex = "";
         } else {
-          midi_sysex = midi_sysex + " " + databyte;
+          midiSysex = midiSysex + " " + databyte;
         }
       } else {
-        if (databyte == 240) {
-          midi_in_sysex = true;
-        } else if (databyte == 248)   // We ignore other status stuff for now
-        {
+        if (databyte == MIDI_IN_SYSEX) {
+          midiInSysex = true;
+        } else if (databyte == SEND_MIDI) {
+          // We ignore other status stuff for now
           sendMIDI(databyte);
-        } else if ((databyte >= 192) && (databyte < 224))  // Program change and channel pressure have 1 data byte
-        {
-          mmsg_databytes = 1;
-          last_mmsg_status = mmsg_status;
-          mmsg_status = databyte;
-          mmsg_pos = 0;
-        } else if ((databyte > 127) && (databyte < 240))  // Note on/off, key pressure, controller change, pitch bend have 2 data bytes
-        {
-          mmsg_databytes = 2;
-          last_mmsg_status = mmsg_status;
-          mmsg_status = databyte;
-          mmsg_pos = 0;
+        } else if ((databyte >= MIDI_PRG_CHANGE)
+            && (databyte <= MIDI_CHAN_PRESS_MAX)) {
+          // Program change and channel pressure have 1 data byte
+          mmsgDatabytes = 1;
+          lastMmsgStatus = mmsgStatus;
+          mmsgStatus = databyte;
+          mmsgPos = 0;
+        } else if ((databyte >= MIDI_NOTE_CHANNEL)
+            && (databyte <= MIDI_PITCH_BEND_CHANNEL_MAX)) {
+          // Note on/off, key pressure, controller change,
+          // pitch bend have 2 data bytes
+          mmsgDatabytes = 2;
+          lastMmsgStatus = mmsgStatus;
+          mmsgStatus = databyte;
+          mmsgPos = 0;
         } else {
           // data bytes
-
-          if (mmsg_pos == 0) {
+          if (mmsgPos == 0) {
             //data1
-
-            if (mmsg_databytes == 2) {
+            if (mmsgDatabytes == 2) {
               // store databyte 1
-              mmsg_data1 = databyte;
-              mmsg_pos = 1;
+              mmsgData1 = databyte;
+              mmsgPos = 1;
             } else {
               // send midimsg with 1 data byte
-
-              if ((mmsg_status >= 192) && (databyte < 208)) {
-                if (dwProto.getVPorts().getMidiVoicelock()) {
+              if ((mmsgStatus >= MIDI_MSG_BASE)
+                  && (databyte < MIDI_CHAN_PRESS)) {
+                if (dwvSerialProtocol.getVPorts().getMidiVoicelock()) {
                   // ignore program change
-                  logger.debug("MIDI: ignored program change due to instrument lock.");
+                  LOGGER.debug(
+                      "MIDI: ignored program change due to instrument lock."
+                  );
                 } else {
                   // translate program changes
-                  int xinstr = dwProto.getVPorts().getGMInstrument(databyte);
-                  sendMIDI(mmsg_status, xinstr, 0);
-
-                  // sendMIDI(mmsg_status, databyte, 0);
-
+                  int xinstr = dwvSerialProtocol.getVPorts()
+                      .getGMInstrument(databyte);
+                  sendMIDI(mmsgStatus, xinstr, 0);
                   // set cache
-                  dwProto.getVPorts().setGMInstrumentCache(mmsg_status - 192, databyte);
+                  dwvSerialProtocol.getVPorts().setGMInstrumentCache(
+                      mmsgStatus - MIDI_MSG_BASE,
+                      databyte
+                  );
                 }
               } else {
-                sendMIDI(mmsg_status, databyte, 0);
+                sendMIDI(mmsgStatus, databyte, 0);
               }
-              mmsg_pos = 0;
+              mmsgPos = 0;
             }
           } else {
             //data2
-            sendMIDI(mmsg_status, mmsg_data1, databyte);
-            mmsg_pos = 0;
+            sendMIDI(mmsgStatus, mmsgData1, databyte);
+            mmsgPos = 0;
           }
         }
       }
     } else {
       // if we are connected, pass the data
-      if ((this.connected) || (this.port == vports.getNTermPort()) || ((this.port >= vports.getMaxNPorts()) && (this.port < vports.getMaxPorts()))) {
-        if (sktchan == null) {
-          logger.debug("write to null io channel on port " + this.port);
+      if ((this.connected) || (this.vPort == vSerialPorts.getNTermPort())
+          || ((this.vPort >= vSerialPorts.getMaxNPorts())
+          && (this.vPort < vSerialPorts.getMaxPorts()))) {
+        if (socketChannel == null) {
+          LOGGER.debug("write to null io channel on port " + this.vPort);
         } else {
           try {
-
             while (outputBuffer.remaining() < 1) {
-              System.out.println("FULL buffer " + outputBuffer.position() + " " + outputBuffer.remaining() + " " + outputBuffer.limit() + " " + outputBuffer.capacity());
-
-
+              System.out.println("FULL buffer " + outputBuffer.position()
+                  + " " + outputBuffer.remaining() + " "
+                  + outputBuffer.limit() + " " + outputBuffer.capacity());
               outputBuffer.flip();
-              int wrote = sktchan.write(outputBuffer);
+              int wrote = socketChannel.write(outputBuffer);
               outputBuffer.compact();
-
               System.out.println("full wrote " + wrote);
-
               if (wrote == 0) {
                 try {
-                  Thread.sleep(100);
-                } catch (InterruptedException e) {
-                  // dont care
+                  Thread.sleep(BUFFER_POLL_DELAY);
+                } catch (InterruptedException ignored) {
                 }
               }
-
             }
-
-
             outputBuffer.put((byte) databyte);
             outputBuffer.flip();
-
-
-            sktchan.write(outputBuffer);
-
+            socketChannel.write(outputBuffer);
             outputBuffer.compact();
-
           } catch (IOException e) {
-            logger.error("in write: " + e.getMessage());
+            LOGGER.error("in write: " + e.getMessage());
           }
         }
+      } else {
+        // otherwise process as command
+        this.portHandler.takeInput(databyte);
       }
-      // otherwise process as command
-      else {
-        this.porthandler.takeInput(databyte);
-      }
     }
-
   }
 
-  private void sendMIDI(int statusbyte) {
+  private void sendMIDI(final int statusByte) {
     ShortMessage mmsg = new ShortMessage();
-
     try {
-
-      mmsg.setMessage(statusbyte);
-      dwProto.getVPorts().sendMIDIMsg(mmsg, -1);
+      mmsg.setMessage(statusByte);
+      dwvSerialProtocol.getVPorts().sendMIDIMsg(mmsg, -1);
     } catch (InvalidMidiDataException e) {
-      logger.warn("MIDI: " + e.getMessage());
+      LOGGER.warn("MIDI: " + e.getMessage());
     }
-
-    if (log_midi_bytes) {
-      byte[] tmpb = {(byte) statusbyte};
-      logger.info("midimsg: " + DWUtils.byteArrayToHexString(tmpb));
+    if (logMidiBytes) {
+      byte[] tmpb = {(byte) statusByte};
+      LOGGER.info("midimsg: " + DWUtils.byteArrayToHexString(tmpb));
     }
-
   }
 
-
-  private void sendMIDI(int statusbyte, int data1, int data2) {
+  private void sendMIDI(final int statusByte,
+                        final int data1,
+                        final int data2
+  ) {
     ShortMessage mmsg = new ShortMessage();
-
     try {
-
-      mmsg.setMessage(statusbyte, data1, data2);
-      dwProto.getVPorts().sendMIDIMsg(mmsg, -1);
+      mmsg.setMessage(statusByte, data1, data2);
+      dwvSerialProtocol.getVPorts().sendMIDIMsg(mmsg, -1);
     } catch (InvalidMidiDataException e) {
-      logger.warn("MIDI: " + e.getMessage());
+      LOGGER.warn("MIDI: " + e.getMessage());
     }
-
-    if (log_midi_bytes) {
-
-      logger.info("midimsg: " + DWUtils.midimsgToText(statusbyte, data1, data2));
+    if (logMidiBytes) {
+      LOGGER.info("midimsg: "
+          + DWUtils.midiMsgToText(statusByte, data1, data2));
     }
-
   }
 
-
-  public void writeM(String str) {
+  /**
+   * Write string.
+   *
+   * @param str data string
+   */
+  public void writeM(final String str) {
     for (int i = 0; i < str.length(); i++) {
       write(str.charAt(i));
     }
   }
 
-
-  public void writeToCoco(String str) {
+  /**
+   * Write string to CoCo.
+   *
+   * @param str data string
+   */
+  public void writeToCoco(final String str) {
     try {
       inputBuffer.getOutputStream().write(str.getBytes());
     } catch (IOException e) {
-      logger.warn(e.getMessage());
+      LOGGER.warn(e.getMessage());
     }
   }
 
-
-  public void writeToCoco(byte[] databytes) {
+  /**
+   * Write byte array to CoCo.
+   *
+   * @param dataBytes byte array
+   */
+  public void writeToCoco(final byte[] dataBytes) {
     try {
-      inputBuffer.getOutputStream().write(databytes);
-
-
+      inputBuffer.getOutputStream().write(dataBytes);
     } catch (IOException e) {
-      logger.warn(e.getMessage());
+      LOGGER.warn(e.getMessage());
     }
   }
 
-
-  public void writeToCoco(byte[] databytes, int offset, int length) {
+  /**
+   * Write byte array to CoCo.
+   *
+   * @param dataBytes byte array
+   * @param offset start offset
+   * @param length bytes to send
+   */
+  public void writeToCoco(
+      final byte[] dataBytes,
+      final int offset,
+      final int length
+  ) {
     try {
-      inputBuffer.getOutputStream().write(databytes, offset, length);
-
+      inputBuffer.getOutputStream().write(dataBytes, offset, length);
     } catch (IOException e) {
-      logger.warn(e.getMessage());
+      LOGGER.warn(e.getMessage());
     }
   }
 
-
-  public void writeToCoco(byte databyte) {
+  /**
+   * Write byte to CoCo.
+   *
+   * @param dataByte byte
+   */
+  public void writeToCoco(final byte dataByte) {
     try {
-      inputBuffer.getOutputStream().write(databyte);
+      inputBuffer.getOutputStream().write(dataByte);
     } catch (IOException e) {
-      logger.warn(e.getMessage());
+      LOGGER.warn(e.getMessage());
     }
   }
 
-
+  /**
+   * Get port input.
+   *
+   * @return output stream
+   */
   public OutputStream getPortInput() {
     return (inputBuffer.getOutputStream());
   }
 
+  /**
+   * Get port output.
+   *
+   * @return input stream
+   */
   public InputStream getPortOutput() {
     return (inputBuffer.getInputStream());
   }
 
-
+  /**
+   * Read single byte.
+   *
+   * @return data byte
+   */
   public byte read1() {
-
-    int databyte;
-
     try {
-      databyte = inputBuffer.getInputStream().read();
-      return ((byte) databyte);
+      int dataByte = inputBuffer.getInputStream().read();
+      return (byte) dataByte;
     } catch (IOException e) {
-      logger.error("in read1: " + e.getMessage());
+      LOGGER.error("in read1: " + e.getMessage());
     }
-
-    return (-1);
-
+    return -1;
   }
 
-
-  public byte[] readM(int tmplen) {
+  /**
+   * Read bytes.
+   *
+   * @param tmplen bytes to read
+   * @return byte array
+   */
+  public byte[] readM(final int tmplen) {
     byte[] buf = new byte[tmplen];
-
     try {
       inputBuffer.getInputStream().read(buf, 0, tmplen);
-      return (buf);
-
+      return buf;
     } catch (IOException e) {
       e.printStackTrace();
-      logger.error("Failed to read " + tmplen + " bytes in SERREADM... not good");
+      LOGGER.error("Failed to read " + tmplen
+          + " bytes in SERREADM... not good");
     }
     return null;
   }
 
+  /**
+   * Is connected.
+   *
+   * @return connected flag
+   */
   public boolean isConnected() {
     return connected;
   }
 
-  public void setConnected(boolean connected) {
-    this.connected = connected;
+  /**
+   * Set connected flag.
+   *
+   * @param boolFlag bool
+   */
+  public void setConnected(final boolean boolFlag) {
+    this.connected = boolFlag;
   }
 
+  /**
+   * Is port open.
+   *
+   * @return open state
+   */
   public boolean isOpen() {
-    if ((this.opens > 0) || (this.utilmode == DWDefs.UTILMODE_NINESERVER)) {
-      return (true);
-    } else {
-      return (false);
-    }
+    return (this.opens > 0) || (this.utilMode == DWDefs.UTILMODE_NINESERVER);
   }
 
-
+  /**
+   * Open.
+   */
   public void open() {
     this.opens++;
-    logger.debug("open port " + this.port + ", total opens: " + this.opens);
-
+    LOGGER.debug("open port " + this.vPort + ", total opens: " + this.opens);
     // fire off NineServer thread if we are a window device
-
-    if ((this.port >= vports.getMaxNPorts()) && (this.port < vports.getMaxPorts())) {
-      String tcphost = this.dwProto.getConfig().getString("NineServer" + this.port, this.dwProto.getConfig().getString("NineServer", "127.0.0.1"));
-      int tcpport = this.dwProto.getConfig().getInt("NineServerPort" + this.port, this.dwProto.getConfig().getInt("NineServerPort", 6309));
-
+    if ((this.vPort >= vSerialPorts.getMaxNPorts())
+        && (this.vPort < vSerialPorts.getMaxPorts())) {
+      String tcphost = this.dwvSerialProtocol.getConfig().getString(
+          "NineServer" + this.vPort,
+          this.dwvSerialProtocol.getConfig()
+              .getString("NineServer", "127.0.0.1")
+      );
+      int tcpport = this.dwvSerialProtocol.getConfig().getInt(
+          "NineServerPort" + this.vPort,
+          this.dwvSerialProtocol.getConfig().getInt(
+              "NineServerPort",
+              DEFAULT_PORT_VALUE
+          )
+      );
       this.setUtilMode(DWDefs.UTILMODE_NINESERVER);
-
       // device id cmd
-      byte[] wcdata = new byte[8];
-
-      wcdata[0] = 0x1b;
-      wcdata[1] = 0x7f;
-      wcdata[2] = 0x01;
-
-      String pname = this.dwProto.getVPorts().prettyPort(this.port);
-
-      for (int i = 3; i < wcdata.length; i++) {
-        if (i - 3 < pname.length())
-          wcdata[i] = (byte) pname.charAt(i - 3);
-        else
-          wcdata[i] = 0x20;
+      byte[] wcdata = new byte[DEVICE_CMD_LEN];
+      wcdata[0] = ASCII_ESC;
+      wcdata[1] = ASCII_DEL;
+      wcdata[2] = ASCII_SOH;
+      String pname = this.dwvSerialProtocol.getVPorts().prettyPort(this.vPort);
+      for (int i = DEVICE_CMD_OFFSET; i < wcdata.length; i++) {
+        if (i - DEVICE_CMD_OFFSET < pname.length()) {
+          wcdata[i] = (byte) pname.charAt(i - DEVICE_CMD_OFFSET);
+        } else {
+          wcdata[i] = ' ';
+        }
       }
-
-
       // start TCP thread
-
-      Thread utilthread = new Thread(new DWVPortTCPConnectionThread(this.dwProto, this.port, tcphost, tcpport, false, wcdata));
+      Thread utilthread = new Thread(new DWVPortTCPConnectionThread(
+          this.dwvSerialProtocol, this.vPort, tcphost, tcpport, false, wcdata
+      ));
       utilthread.setDaemon(true);
       utilthread.start();
-
-      logger.debug("Started NineServer comm thread for port " + port);
-
+      LOGGER.debug("Started NineServer comm thread for port " + vPort);
     }
-
   }
 
+  /**
+   * Close.
+   */
   public void close() {
     if (this.opens > 0) {
       this.opens--;
-      logger.debug("close port " + this.port + ", total opens: " + this.opens + " data in buffer: " + this.inputBuffer.getAvailable());
-
+      LOGGER.debug("close port " + this.vPort + ", total opens: "
+          + this.opens + " data in buffer: "
+          + this.inputBuffer.getAvailable());
       // send term if last open and not window
-      if ((this.opens == 0) && (this.getUtilMode() != DWDefs.UTILMODE_NINESERVER)) {
-        logger.debug("setting term on port " + this.port);
+      if ((this.opens == 0)
+          && (this.getUtilMode() != DWDefs.UTILMODE_NINESERVER)) {
+        LOGGER.debug("setting term on port " + this.vPort);
         this.wanttodie = true;
-
         // close socket channel if connected
-        if ((this.sktchan != null) && (this.sktchan.isOpen())) {
-          logger.debug("closing io channel on port " + this.port);
-
+        if ((this.socketChannel != null) && (this.socketChannel.isOpen())) {
+          LOGGER.debug("closing io channel on port " + this.vPort);
           try {
-            this.sktchan.close();
+            this.socketChannel.close();
           } catch (IOException e) {
-            logger.warn(e.getMessage());
+            LOGGER.warn(e.getMessage());
           }
-
-          this.sktchan = null;
+          this.socketChannel = null;
         }
-
         // close listeners if this was their control port
-        this.dwProto.getVPorts().getListenerPool().closePortServerSockets(this.port);
-
+        this.dwvSerialProtocol.getVPorts()
+            .getListenerPool().closePortServerSockets(this.vPort);
       }
-    } else {
-      // this actually happens in normal operation, when both sides have code to
-      // close port on exit.. probably not worth an error message
-
-      // logger.debug("close port " + this.port + " with no opens? might be fine");
     }
-
   }
 
+  /**
+   * Is terminating.
+   *
+   * @return shutdown flag
+   */
   public boolean isTerm() {
     return (wanttodie);
   }
 
-
-  public void setPortChannel(SocketChannel sc) {
-    this.sktchan = sc;
+  /**
+   * Set port channel.
+   *
+   * @param sc socket channel
+   */
+  public void setPortChannel(final SocketChannel sc) {
+    this.socketChannel = sc;
   }
 
+  /**
+   * Get Util Mode.
+   *
+   * @return mode
+   */
   public int getUtilMode() {
-    return (this.utilmode);
+    return (this.utilMode);
   }
 
-  public void setUtilMode(int mode) {
-    this.utilmode = mode;
+  /**
+   * Set Util Mode.
+   *
+   * @param mode mode
+   */
+  public void setUtilMode(final int mode) {
+    this.utilMode = mode;
   }
 
-  public byte getPD_INT() {
-    return PD_INT;
+  /**
+   * Get PD INT.
+   *
+   * @return byte value
+   */
+  public byte getPdInt() {
+    return pdInt;
   }
 
-  public void setPD_INT(byte pD_INT) {
-    PD_INT = pD_INT;
-    this.inputBuffer.setDW_PD_INT(PD_INT);
+  /**
+   * Set PD INT.
+   *
+   * @param value byte value
+   */
+  public void setPdInt(final byte value) {
+    pdInt = value;
+    this.inputBuffer.setDwPdInt(pdInt);
   }
 
-  public byte getPD_QUT() {
-    return PD_QUT;
+  /**
+   * Get PD QUT.
+   *
+   * @return byte value
+   */
+  public byte getPdQut() {
+    return pdQut;
   }
 
-  public void setPD_QUT(byte pD_QUT) {
-    PD_QUT = pD_QUT;
-    this.inputBuffer.setDW_PD_QUT(PD_QUT);
+  /**
+   * Set PD QUT.
+   *
+   * @param value byte value
+   */
+  public void setPdQut(final byte value) {
+    pdQut = value;
+    this.inputBuffer.setDwPdQut(pdQut);
   }
 
-  public void sendUtilityFailResponse(byte errno, String txt) {
-    String perrno = String.format("%03d", (errno & 0xFF));
-    logger.debug("command failed: " + perrno + " " + txt);
+  /**
+   * Send utility fail response.
+   *
+   * @param errno error code
+   * @param txt response message
+   */
+  public void sendUtilityFailResponse(final byte errno, final String txt) {
+    String sErrNo = String.format("%03d", (errno & BYTE_MASK));
+    LOGGER.debug("command failed: " + sErrNo + " " + txt);
     try {
-      inputBuffer.getOutputStream().write(("FAIL " + perrno + " " + txt + (char) 10 + (char) 13).getBytes());
+      inputBuffer.getOutputStream().write(
+          ("FAIL " + sErrNo + " " + txt
+              + (char) NEWLINE + (char) CARRIAGE_RETURN).getBytes()
+      );
     } catch (IOException e) {
-      logger.warn(e.getMessage());
+      LOGGER.warn(e.getMessage());
     }
-    //this.utilhandler.respondFail(code, txt);
   }
 
-  public void sendUtilityOKResponse(String txt) {
+  /**
+   * Send utility OK response.
+   *
+   * @param txt response message
+   */
+  public void sendUtilityOKResponse(final String txt) {
     try {
-      inputBuffer.getOutputStream().write(("OK " + txt + (char) 10 + (char) 13).getBytes());
+      inputBuffer.getOutputStream().write(
+          ("OK " + txt + (char) NEWLINE + (char) CARRIAGE_RETURN).getBytes()
+      );
     } catch (IOException e) {
-      logger.warn(e.getMessage());
+      LOGGER.warn(e.getMessage());
     }
-    //this.utilhandler.respondOk(txt);
   }
 
+  /**
+   * Get device description.
+   *
+   * @return device description bye array
+   */
   public byte[] getDD() {
-    return (this.DD);
+    return (this.dD);
   }
 
-  public void setDD(byte[] devdescr) {
-    this.DD = devdescr;
+  /**
+   * Set device description.
+   *
+   * @param devDescr byte array
+   */
+  public void setDD(final byte[] devDescr) {
+    this.dD = devDescr;
   }
 
+  /**
+   * Get total open.
+   *
+   * @return total open count
+   */
   public int getOpen() {
     return (this.opens);
   }
 
-
-  public void sendConnectionAnnouncement(int conno, int localport, String hostaddr) {
-    this.porthandler.announceConnection(conno, localport, hostaddr);
-
+  /**
+   * Send connection announcement.
+   *
+   * @param conno connection number
+   * @param localport local port
+   * @param hostaddr host address
+   */
+  public void sendConnectionAnnouncement(final int conno,
+                                         final int localport,
+                                         final String hostaddr) {
+    this.portHandler.announceConnection(conno, localport, hostaddr);
   }
 
+  /**
+   * Get connection.
+   *
+   * @return connection number
+   */
   public int getConn() {
-    return (this.conno);
+    return (this.connNo);
   }
 
-  public void setConn(int conno) {
-    this.conno = conno;
+  /**
+   * Set connection.
+   *
+   * @param connectionNo connection number
+   */
+  public void setConn(final int connectionNo) {
+    this.connNo = connectionNo;
   }
 
+  /**
+   * Shutdown port.
+   */
   public void shutdown() {
     // close this port
     this.connected = false;
     this.opens = 0;
-    this.sktchan = null;
-    this.porthandler = null;
+    this.socketChannel = null;
+    this.portHandler = null;
     this.wanttodie = true;
-
-
   }
 
-
+  /**
+   * Get virtual modem.
+   *
+   * @return modem
+   */
   public DWVModem getVModem() {
-    return this.porthandler.getVModem();
+    return this.portHandler.getVModem();
   }
-
-
 }
-

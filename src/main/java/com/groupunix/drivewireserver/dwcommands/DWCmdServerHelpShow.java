@@ -1,76 +1,78 @@
 package com.groupunix.drivewireserver.dwcommands;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwexceptions.DWHelpTopicNotFoundException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
-import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class DWCmdServerHelpShow extends DWCommand {
+  /**
+   * Drivewire protocol.
+   */
+  private final DWProtocol dwProtocol;
 
-
-  private DWProtocol dwProto;
-
-
-  public DWCmdServerHelpShow(DWProtocol dwProtocol, DWCommand parent) {
+  /**
+   * Server help show command constructor.
+   *
+   * @param protocol protocol
+   * @param parent parent command
+   */
+  public DWCmdServerHelpShow(
+      final DWProtocol protocol,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProtocol;
+    this.dwProtocol = protocol;
+    this.setCommand("show");
+    this.setShortHelp("Show help topic");
+    this.setUsage("dw help show [topic]");
   }
 
-
-  public String getCommand() {
-    return "show";
-  }
-
-
-  public String getShortHelp() {
-    return "Show help topic";
-  }
-
-
-  public String getUsage() {
-    return "dw help show [topic]";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (doShowHelp());
+      return doShowHelp();
     }
-    return (doShowHelp(cmdline));
+    return doShowHelp(cmdline);
   }
 
-
-  private DWCommandResponse doShowHelp(String cmdline) {
+  private DWCommandResponse doShowHelp(final String cmdline) {
     String text = "Help for " + cmdline + ":\r\n\r\n";
 
     try {
-      text += ((DWProtocolHandler) dwProto).getHelp().getTopicText(cmdline);
+      text += dwProtocol.getHelp().getTopicText(cmdline);
       return (new DWCommandResponse(text));
     } catch (DWHelpTopicNotFoundException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_CONFIG_KEY_NOT_SET, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_CONFIG_KEY_NOT_SET,
+          e.getMessage()
+      );
     }
-
   }
-
 
   private DWCommandResponse doShowHelp() {
-    String text = new String();
-
-    text = "Help Topics:\r\n\r\n";
-
-    ArrayList<String> tops = ((DWProtocolHandler) dwProto).getHelp().getTopics(null);
-
-    Iterator<String> t = tops.iterator();
-    while (t.hasNext()) {
-      text += t.next() + "\r\n";
+    StringBuilder text = new StringBuilder("Help Topics:\r\n\r\n");
+    ArrayList<String> tops = dwProtocol.getHelp().getTopics(null);
+    for (String top : tops) {
+      text.append(top).append("\r\n");
     }
-    return (new DWCommandResponse(text));
+    return new DWCommandResponse(text.toString());
   }
 
-
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

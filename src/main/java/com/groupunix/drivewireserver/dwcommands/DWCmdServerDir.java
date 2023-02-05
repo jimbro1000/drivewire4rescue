@@ -8,81 +8,96 @@ import org.apache.commons.vfs2.VFS;
 import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
-public class DWCmdServerDir extends DWCommand {
+public final class DWCmdServerDir extends DWCommand {
+  /**
+   * Max screen width.
+   */
+  public static final int SCREEN_WIDTH = 80;
 
-
-  public DWCmdServerDir(DWCommand parent) {
+  /**
+   * Server directory command constructor.
+   *
+   * @param parent parent command
+   */
+  public DWCmdServerDir(final DWCommand parent) {
     setParentCmd(parent);
+    this.setCommand("dir");
+    this.setShortHelp("Show directory of URI or local path");
+    this.setUsage("dw server dir URI/path");
   }
 
-
-  public String getCommand() {
-    return "dir";
-  }
-
-
-  public String getShortHelp() {
-    return "Show directory of URI or local path";
-  }
-
-
-  public String getUsage() {
-    return "dw server dir URI/path";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "dw server dir requires a URI or path as an argument"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "dw server dir requires a URI or path as an argument"
+      );
     }
-    return (doDir(cmdline));
+    return doDir(cmdline);
   }
 
-  private DWCommandResponse doDir(String path) {
+  private DWCommandResponse doDir(final String path) {
     FileSystemManager fsManager;
-
-    String text = new String();
-
-    path = DWUtils.convertStarToBang(path);
+    StringBuilder text = new StringBuilder();
 
     try {
       fsManager = VFS.getManager();
 
-      FileObject dirobj = fsManager.resolveFile(path);
+      FileObject dirobj = fsManager.resolveFile(
+          DWUtils.convertStarToBang(path)
+      );
 
       FileObject[] children = dirobj.getChildren();
 
-      text += "Directory of " + dirobj.getName().getURI() + "\r\n\n";
-
+      text.append("Directory of ")
+          .append(dirobj.getName().getURI())
+          .append("\r\n\n");
 
       int longest = 0;
 
-      for (int i = 0; i < children.length; i++) {
-        if (children[i].getName().getBaseName().length() > longest)
-          longest = children[i].getName().getBaseName().length();
+      for (FileObject child : children) {
+        if (child.getName().getBaseName().length() > longest) {
+          longest = child.getName().getBaseName().length();
+        }
       }
 
       longest++;
       longest++;
-
-      int cols = Math.max(1, 80 / longest);
-
+      int cols = Math.max(1, SCREEN_WIDTH / longest);
       for (int i = 0; i < children.length; i++) {
-        text += String.format("%-" + longest + "s", children[i].getName().getBaseName());
-        if (((i + 1) % cols) == 0)
-          text += "\r\n";
+        text.append(
+            String.format(
+                "%-" + longest + "s", children[i].getName().getBaseName()
+            )
+        );
+        if (((i + 1) % cols) == 0) {
+          text.append("\r\n");
+        }
       }
-
     } catch (FileSystemException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_SERVER_FILESYSTEM_EXCEPTION, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SERVER_FILESYSTEM_EXCEPTION,
+          e.getMessage()
+      );
     }
-
-    return (new DWCommandResponse(text));
+    return new DWCommandResponse(text.toString());
   }
 
-
-  public boolean validate(String cmdline) {
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
     return true;
   }
-
-
 }

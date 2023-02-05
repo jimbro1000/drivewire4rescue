@@ -15,124 +15,180 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 import com.groupunix.drivewireserver.virtualserial.DWVSerialCircularBuffer;
 
 public class DWVPrinterTEXT implements DWVPrinterDriver {
+  /**
+   * Log appender.
+   */
+  private static final Logger LOGGER
+      = Logger.getLogger("DWServer.DWVPrinter.DWVPrinterTEXT");
+  /**
+   * Printer buffer size.
+   */
+  private static final int BUFFER_SIZE = 256;
+  /**
+   * Printer buffer.
+   */
+  private final DWVSerialCircularBuffer printBuffer
+      = new DWVSerialCircularBuffer(-1, true);
+  /**
+   * Configuration.
+   */
+  private final HierarchicalConfiguration hierarchicalConfiguration;
 
-  private static final Logger logger = Logger.getLogger("DWServer.DWVPrinter.DWVPrinterTEXT");
-
-  private DWVSerialCircularBuffer printBuffer = new DWVSerialCircularBuffer(-1, true);
-
-  private HierarchicalConfiguration config;
-
-
-  public DWVPrinterTEXT(HierarchicalConfiguration config) {
-    this.config = config;
+  /**
+   * Text printer constructor.
+   *
+   * @param config configuration set
+   */
+  public DWVPrinterTEXT(final HierarchicalConfiguration config) {
+    this.hierarchicalConfiguration = config;
     this.printBuffer.clear();
   }
 
-
+  /**
+   * Add byte data to printer buffer.
+   *
+   * @param data byte value
+   * @throws IOException
+   */
   @Override
-  public void addByte(byte data) throws IOException {
+  public void addByte(final byte data) throws IOException {
     this.printBuffer.getOutputStream().write(data);
-
   }
 
+  /**
+   * Get driver name.
+   *
+   * @return driver name
+   */
   @Override
   public String getDriverName() {
     return ("TEXT");
   }
 
+  /**
+   * Flush printer buffer.
+   *
+   * @throws IOException
+   * @throws DWPrinterNotDefinedException
+   * @throws DWPrinterFileError
+   */
   @Override
-  public void flush() throws IOException, DWPrinterNotDefinedException, DWPrinterFileError {
-
+  public void flush()
+      throws IOException, DWPrinterNotDefinedException, DWPrinterFileError {
     File file = getPrinterFile();
-
     FileOutputStream fos = new FileOutputStream(file);
-
     while (this.printBuffer.getAvailable() > 0) {
-      byte[] buf = new byte[256];
+      byte[] buf = new byte[BUFFER_SIZE];
       int read = this.printBuffer.getInputStream().read(buf);
       fos.write(buf, 0, read);
     }
-
     fos.flush();
     fos.close();
-
-    logger.info("Flushed print job to " + file.getCanonicalPath());
-
-    // execute cocodw command..
-    if (config.containsKey("FlushCommand")) {
-      doExec(doVarSubst(file, config.getString("FlushCommand")));
+    LOGGER.info("Flushed print job to " + file.getCanonicalPath());
+    // execute coco dw command..
+    if (hierarchicalConfiguration.containsKey("FlushCommand")) {
+      doExec(doVarSubst(
+          file,
+          hierarchicalConfiguration.getString("FlushCommand")
+      ));
     }
-
   }
 
-
-  private void doExec(String cmd) {
-
+  private void doExec(final String cmd) {
     try {
-      logger.info("executing flush command: " + cmd);
+      LOGGER.info("executing flush command: " + cmd);
       Runtime.getRuntime().exec(cmd);
     } catch (IOException e) {
-      logger.warn("Error during flush command: " + e.getMessage());
+      LOGGER.warn("Error during flush command: " + e.getMessage());
     }
   }
 
-
-  private String doVarSubst(File file, String cmd) throws IOException {
+  private String doVarSubst(final File file, final String cmd)
+      throws IOException {
     // substitute vars in cmdline
     // $name - printer name
     // $file - full file path
-
-    HashMap<String, String> vars = new HashMap<String, String>();
-    vars.put("name", config.getString("Name"));
-    // double \ so the replaceall doesnt eat it later
+    String result = cmd;
+    HashMap<String, String> vars = new HashMap<>();
+    vars.put("name", hierarchicalConfiguration.getString("Name"));
+    // double \ so the replaceall doesn't eat it later
     vars.put("file", file.getCanonicalPath().replaceAll("\\\\", "\\\\\\\\"));
-
     for (Map.Entry<String, String> e : vars.entrySet()) {
-      cmd = cmd.replaceAll("\\$" + e.getKey(), e.getValue());
+      result = result.replaceAll("\\$" + e.getKey(), e.getValue());
     }
-
-    return (cmd);
-
+    return result;
   }
 
-
+  /**
+   * Get printer file extension.
+   *
+   * @return file extension
+   */
   public String getFileExtension() {
     return (".txt");
   }
 
-
+  /**
+   * Get printer file prefix.
+   *
+   * @return file prefix
+   */
   public String getFilePrefix() {
     return ("dw_text_");
   }
 
-
-  public File getPrinterFile() throws IOException, DWPrinterNotDefinedException, DWPrinterFileError {
-    if (this.config.containsKey("OutputFile")) {
-      if (DWUtils.FileExistsOrCreate(this.config.getString("OutputFile"))) {
-        return (new File(this.config.getString("OutputFile")));
+  /**
+   * Get printer output file.
+   *
+   * @return file object
+   * @throws IOException
+   * @throws DWPrinterFileError
+   */
+  public File getPrinterFile()
+      throws IOException, DWPrinterFileError {
+    if (this.hierarchicalConfiguration.containsKey("OutputFile")) {
+      if (DWUtils.fileExistsOrCreate(
+          this.hierarchicalConfiguration.getString("OutputFile")
+      )) {
+        return (new File(
+            this.hierarchicalConfiguration.getString("OutputFile")
+        ));
       } else {
-        throw new DWPrinterFileError("Cannot find or create the output file '" + this.config.getString("OutputFile") + "'");
+        throw new DWPrinterFileError(
+            "Cannot find or create the output file '"
+                + this.hierarchicalConfiguration.getString("OutputFile") + "'"
+        );
       }
-
-    } else if (this.config.containsKey("OutputDir")) {
-      if (DWUtils.DirExistsOrCreate(this.config.getString("OutputDir"))) {
-        return (File.createTempFile(getFilePrefix(), getFileExtension(), new File(this.config.getString("OutputDir"))));
-
+    } else if (this.hierarchicalConfiguration.containsKey("OutputDir")) {
+      if (DWUtils.dirExistsOrCreate(
+          this.hierarchicalConfiguration.getString("OutputDir")
+      )) {
+        return File.createTempFile(
+            getFilePrefix(),
+            getFileExtension(),
+            new File(this.hierarchicalConfiguration.getString("OutputDir"))
+        );
       } else {
-        throw new DWPrinterFileError("Cannot find or create the output directory '" + this.config.getString("OutputDir") + "'");
-
+        throw new DWPrinterFileError(
+            "Cannot find or create the output directory '"
+                + this.hierarchicalConfiguration.getString("OutputDir") + "'"
+        );
       }
-
     } else {
-      throw new DWPrinterFileError("No OutputFile or OutputDir defined in printer config, don't know where to send output.");
+      throw new DWPrinterFileError(
+          "No OutputFile or OutputDir defined in printer config, "
+              + "don't know where to send output."
+      );
     }
   }
 
-
+  /**
+   * Get printer name.
+   *
+   * @return printer name
+   */
   @Override
   public String getPrinterName() {
-    return (this.config.getString("[@name]", "?noname?"));
+    return this.hierarchicalConfiguration.getString("[@name]", "?noname?");
   }
-
-
 }

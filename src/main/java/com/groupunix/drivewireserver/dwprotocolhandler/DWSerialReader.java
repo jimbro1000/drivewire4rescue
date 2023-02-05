@@ -8,33 +8,54 @@ import java.io.InputStream;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class DWSerialReader implements SerialPortEventListener {
-  private ArrayBlockingQueue<Byte> queue;
-  private InputStream in;
-  private boolean wanttodie = false;
+  /**
+   * Event queue.
+   */
+  private final ArrayBlockingQueue<Byte> queue;
+  /**
+   * Input stream.
+   */
+  private final InputStream inputStream;
+  /**
+   * Shutdown flag.
+   */
+  private boolean wantToDie = false;
 
-  public DWSerialReader(InputStream in, ArrayBlockingQueue<Byte> q) {
+  /**
+   * Serial Reader.
+   *
+   * @param in input stream
+   * @param q  event queue
+   */
+  public DWSerialReader(
+      final InputStream in, final ArrayBlockingQueue<Byte> q
+  ) {
     this.queue = q;
-    this.in = in;
+    this.inputStream = in;
   }
 
+  /**
+   * Queue serial event.
+   *
+   * @param event serial port event
+   */
   @Override
-  public void serialEvent(SerialPortEvent arg0) {
+  public void serialEvent(final SerialPortEvent event) {
     int data;
 
     try {
-      while (!wanttodie && (data = in.read()) > -1) {
+      while (!wantToDie && (data = inputStream.read()) > -1) {
         queue.add((byte) data);
       }
-
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
+  /**
+   * Shutdown.
+   */
   public void shutdown() {
-    this.wanttodie = true;
-
+    this.wantToDie = true;
   }
-
-
 }

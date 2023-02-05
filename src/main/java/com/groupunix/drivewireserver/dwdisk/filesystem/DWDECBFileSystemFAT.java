@@ -1,212 +1,284 @@
 package com.groupunix.drivewireserver.dwdisk.filesystem;
 
-import com.groupunix.drivewireserver.*;
-import com.groupunix.drivewireserver.dwdisk.*;
-import com.groupunix.drivewireserver.dwexceptions.*;
+import com.groupunix.drivewireserver.DECBDefs;
+import com.groupunix.drivewireserver.dwdisk.DWDiskSector;
+import com.groupunix.drivewireserver.dwexceptions.DWFileSystemFullException;
+import com.groupunix.drivewireserver.dwexceptions.DWFileSystemInvalidFATException;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
+
+import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
+import static com.groupunix.drivewireserver.DWDefs.LOW_NIBBLE_MASK;
 
 public class DWDECBFileSystemFAT {
-	/*
-	FILE ALLOCATION TABLE
+  /**
+   * Bytes per sector.
+   */
+  public static final int BYTES_PER_SECTOR = 256;
+  /**
+   * Sectors per granule.
+   */
+  public static final int SECTORS_PER_GRANULE = 9;
+  /**
+   * Last entry in granule chain.
+   */
+  public static final int LAST_ENTRY = 0xC0;
+  /**
+   * Boundary position.
+   * <p>
+   * After boundary a 2 position offset
+   * is needed
+   * </p>
+   */
+  public static final int GRANULE_BOUNDARY = 34;
+  /**
+   * Source disk sector.
+   */
+  private final DWDiskSector diskSector;
 
-	The  file allocation table (FAT)  is used to  keep track  of  whether or not a granule has been allocated  
-	to  a  file or if it is free. The  FAT is composed of  six control bytes followed by  68   data bytes  �  
-	one   byte for  each granule.  The  FAT is stored on  sector two   of the directory track (17). 
-	A   RAM  image of  the FAT is  kept in the disk RAM   for each of the four possible  drives.  
-	 Keeping  an  image of  the FAT in RAM   helps  speed up  the overall  operation of the DOS by  eliminating 
-	 the need for 	disk  I/O every time the  DOS modifies the FAT.   Saving the  FAT to disk is  done
-	approximately every  19   times that a  new  granule is  pulled from   the free granule reserve. 
-	It is written  to  disk  whenever a  file is closed and   there  are some   DOS operations,  which force  
-	the FAT to be   written to disk when  that DOS operation allocates a  free granule.
-
-	Only   the DOS uses two   of the six  control bytes. The  first FAT control byte keeps track of  how  many  
-	FCBs  are active  on  the drive for a  particular FAT.   This byte is used to preclude the loading in of the 
-	FAT from   disk when  there is any active file  currently  using the FAT.   You  can   imagine the  disaster, 
-	which  would occur if you   were creating  a  file and   had   allocated some   granules to  your new  file 
-	but had   not saved the  new  FAT to disk when  the old FAT was   loaded into  RAM   on  top of the new  FAT.   
-	Your   new  file would  be   hopelessly  gone. For   that  reason the DOS must   not allow the FAT to be   
-	loaded into  RAM   from   disk while an  FCB is active for that FAT.
-
-	The  second FAT control byte is  used to  govern the need to  write  data from   the FAT RAM   image to  the disk.  
-	If  the value of this  byte is  zero it means   that  the FAT RAM   image  is an  exact  copy of  what   is  
-	currently stored on  the disk. If  the value is non�zero,  it indicates  that the data in the FAT RAM   image 
-	has  been changed since the last  time that the FAT was   written to disk.  The  number   stored in this  byte is
-	an  indicator of how  many  granules  have been removed from   the FAT since the last  FAT to disk write. 
-	Some  BASIC  commands, such  as  KILL,   cause an  immediate FAT RAM   image to disk write when  granules are either 
-	freed or allocated.  Other  commands, which allocate  granules, increment the  second FAT control byte. This byte is  
-	then 	compared  to the disk variable WFATVL   and   when  the second control  byte is >=  WFATVL, the FAT is  
-	written to disk.
-
-	The  FAT data bytes  are used to  determine whether or not a  granule is free and if it has been allocated  they are 
-	used to  determine to  which file  the granule belongs. If a  data byte is  $FF, it means   that  the granule is free 
-	and   may  be allocated to any   file. If a  granule has been allocated,  it is part of a  sector chain, which  defines  
-	which granules belong to  a  certain file. The  only information required to be   able to  trace  the granule chain is 
-	the number   of the first  granule 	in the chain. If the first  granule of  the chain is not  known, the  chain  cannot 
-	be traced down  backwards.
-
-	A  granule data byte,  which has been allocated,  will  contain a  value,  which is the number   of the next granule 
-	in the granule chain for that file. If the two   most significant bits (6,7) of a  granule data byte  are set, then 
-	that  granule is the last  granule in a  file�s granule chain.  The  low   order four bits  will  contain the
-	number   of sectors in the last  granule,  which the  file uses. Even   though a  file may not use all  of the sectors 
-	in the last  granule in the chain, no  other file may  use the sectors.  Disk space is  not allocated on  a  sector basis, 
-	it  is allocated on  a granule basis  and   the granule may  not be   broken  down.  The  smallest one-byte  file
-	will still  require a  full granule to be   allocated  in order to store the file.
-*/
-
-
-  private DWDiskSector sector;
-
-  public DWDECBFileSystemFAT(DWDiskSector sector) {
-    this.sector = sector;
+  /**
+   * DECB File system FAT.
+   *
+   * @param sector disk sector
+   */
+  public DWDECBFileSystemFAT(final DWDiskSector sector) {
+    this.diskSector = sector;
   }
 
-  public ArrayList<DWDiskSector> getFileSectors(Vector<DWDiskSector> sectors, byte granule) throws DWFileSystemInvalidFATException, IOException {
-    ArrayList<DWDiskSector> res = new ArrayList<DWDiskSector>();
-
-    byte entry = getEntry(granule);
-
+  /**
+   * Get file sectors covered by granule.
+   *
+   * @param sectors disk sectors
+   * @param granule granule
+   * @return filtered list of sectors
+   * @throws DWFileSystemInvalidFATException invalid FAT descriptor
+   * @throws IOException                     failed to read from source
+   */
+  public ArrayList<DWDiskSector> getFileSectors(
+      final Vector<DWDiskSector> sectors, final byte granule
+  ) throws DWFileSystemInvalidFATException, IOException {
+    ArrayList<DWDiskSector> res = new ArrayList<>();
+    byte index = granule;
+    byte entry = getEntry(index);
     while (!this.isLastEntry(entry)) {
-      res.addAll(this.getGranuleSectors(sectors, granule));
-
-      granule = entry;
-      entry = getEntry(granule);
+      res.addAll(this.getGranuleSectors(sectors, index));
+      index = entry;
+      entry = getEntry(index);
     }
-
     // last granule is partial, first 4 bits say how many sectors to read
-    for (int i = 0; i < (entry & 0x0F); i++) {
-      res.add(sectors.get(getFirstSectorNoForGranule(granule) + i));
+    for (int i = 0; i < (entry & LOW_NIBBLE_MASK); i++) {
+      res.add(sectors.get(getFirstSectorNoForGranule(index) + i));
     }
-
-
     return (res);
   }
 
-
-  public ArrayList<Byte> getFileGranules(byte granule) throws DWFileSystemInvalidFATException, IOException {
-    ArrayList<Byte> res = new ArrayList<Byte>();
-
-    while (!this.isLastEntry(granule)) {
-      res.add(granule);
-      granule = getEntry(granule);
+  /**
+   * Get file bytes covered by granule.
+   *
+   * @param granule granule index
+   * @return byte array of data
+   * @throws DWFileSystemInvalidFATException invalid FAT descriptor
+   * @throws IOException                     failed to read from source
+   */
+  @SuppressWarnings("unused")
+  public ArrayList<Byte> getFileGranules(final byte granule)
+      throws DWFileSystemInvalidFATException, IOException {
+    byte index = granule;
+    ArrayList<Byte> res = new ArrayList<>();
+    while (!this.isLastEntry(index)) {
+      res.add(index);
+      index = getEntry(index);
     }
-
     return (res);
   }
 
-
-  private List<DWDiskSector> getGranuleSectors(Vector<DWDiskSector> sectors, byte granule) {
-    List<DWDiskSector> res = new ArrayList<DWDiskSector>();
-
-    for (int i = 0; i < 9; i++) {
+  /**
+   * Get sectors covered by granule.
+   *
+   * @param sectors disk sectors
+   * @param granule granule index
+   * @return filtered list of sectors
+   */
+  private List<DWDiskSector> getGranuleSectors(
+      final Vector<DWDiskSector> sectors, final byte granule
+  ) {
+    List<DWDiskSector> res = new ArrayList<>();
+    for (int i = 0; i < SECTORS_PER_GRANULE; ++i) {
       res.add(sectors.get(this.getFirstSectorNoForGranule(granule) + i));
     }
-
     return res;
   }
 
-
-  private int getFirstSectorNoForGranule(byte granule) {
-    if ((granule & 0xFF) < 34)
-      return (granule * 9);
-    else
-      // skip track 17 like this?
-      return ((granule + 2) * 9);
-
+  /**
+   * Get first sector number for granule.
+   *
+   * @param granule granule index
+   * @return sector number
+   */
+  private int getFirstSectorNoForGranule(final byte granule) {
+    if ((granule & BYTE_MASK) < GRANULE_BOUNDARY) {
+      return (granule * SECTORS_PER_GRANULE);
+    } else {
+      return ((granule + 2) * SECTORS_PER_GRANULE);
+    }
   }
 
-  public byte getEntry(byte granule) throws DWFileSystemInvalidFATException, IOException {
-
-    if (((granule & 0xFF)) <= DECBDefs.FAT_SIZE)
-      if ((this.sector.getData()[(granule & 0xFF)] & 0xFF) == 0xFF)
-        throw (new DWFileSystemInvalidFATException("Chain links to unused FAT entry #" + granule));
-      else
-        return (this.sector.getData()[(granule & 0xFF)]);
-    else
-      throw (new DWFileSystemInvalidFATException("Invalid granule #" + granule));
+  /**
+   * Get entry at granule.
+   *
+   * @param granule index
+   * @return byte
+   * @throws DWFileSystemInvalidFATException invalid FAT descriptor
+   * @throws IOException                     failed to read from source
+   */
+  public byte getEntry(final byte granule)
+      throws DWFileSystemInvalidFATException, IOException {
+    if (((granule & BYTE_MASK)) <= DECBDefs.FAT_SIZE) {
+      if (
+          (this.diskSector.getData()[(granule & BYTE_MASK)] & BYTE_MASK)
+              == BYTE_MASK
+      ) {
+        throw (new DWFileSystemInvalidFATException(
+            "Chain links to unused FAT entry #" + granule
+        ));
+      } else {
+        return this.diskSector.getData()[(granule & BYTE_MASK)];
+      }
+    } else {
+      throw (
+          new DWFileSystemInvalidFATException("Invalid granule #" + granule)
+      );
+    }
   }
 
-  public byte getGranuleByte(byte granule) throws IOException {
-    return this.sector.getData()[(granule & 0xFF)];
+  /**
+   * Get byte at granule index.
+   *
+   * @param granule granule index
+   * @return data held at granule
+   * @throws IOException failed to read from source
+   */
+  @SuppressWarnings("unused")
+  public byte getGranuleByte(final byte granule) throws IOException {
+    return this.diskSector.getData()[(granule & BYTE_MASK)];
   }
 
-  public boolean isLastEntry(byte entry) {
-    if ((entry & 0xC0) == 0xC0)
-      return true;
-
-    return false;
-
+  /**
+   * Is entry last in chain.
+   *
+   * @param entry byte
+   * @return true if last
+   */
+  public boolean isLastEntry(final byte entry) {
+    return (entry & LAST_ENTRY) == LAST_ENTRY;
   }
 
+  /**
+   * Get total free granules.
+   *
+   * @return granules
+   * @throws IOException failed to read from source
+   */
   public int getFreeGanules() throws IOException {
     int free = 0;
-
-    for (int i = 0; i < (DECBDefs.FAT_SIZE); i++)
-      if ((this.sector.getData()[i] & 0xFF) == 0xFF)
-        free++;
-
+    for (int i = 0; i < (DECBDefs.FAT_SIZE); ++i) {
+      if ((this.diskSector.getData()[i] & BYTE_MASK) == BYTE_MASK) {
+        ++free;
+      }
+    }
     return free;
   }
 
-  public byte allocate(int bytes) throws DWFileSystemFullException, IOException {
+  /**
+   * Allocate space.
+   *
+   * @param bytes number of bytes
+   * @return first granule
+   * @throws DWFileSystemFullException file system full
+   * @throws IOException               failed to write to source
+   */
+  public byte allocate(final int bytes)
+      throws DWFileSystemFullException, IOException {
     int allocated = 0;
-
-    int sectorsneeded = (bytes / 256) + 1;
-
-    int granulesneeded = sectorsneeded / 9;
-
-    if (!(sectorsneeded % 9 == 0))
-      granulesneeded++;
-
+    int sectorsNeeded = (bytes / BYTES_PER_SECTOR) + 1;
+    int granulesNeeded = sectorsNeeded / SECTORS_PER_GRANULE;
+    if (!(sectorsNeeded % SECTORS_PER_GRANULE == 0)) {
+      granulesNeeded++;
+    }
     // check for free space
-
-    if (this.getFreeGanules() < granulesneeded)
-      throw (new DWFileSystemFullException("Need " + granulesneeded + " granules, have only " + this.getFreeGanules() + " free."));
-
-
+    if (this.getFreeGanules() < granulesNeeded) {
+      throw (
+          new DWFileSystemFullException(
+              "Need " + granulesNeeded
+                  + " granules, have only " + this.getFreeGanules() + " free."
+          )
+      );
+    }
     byte lastgran = this.getFreeGranule();
     byte firstgran = lastgran;
     allocated++;
-
-    while (allocated < granulesneeded) {
-      this.setEntry(lastgran, (byte) 0xc0);
+    while (allocated < granulesNeeded) {
+      this.setEntry(lastgran, (byte) LAST_ENTRY);
       byte nextgran = this.getFreeGranule();
       this.setEntry(lastgran, nextgran);
-
       lastgran = nextgran;
       allocated++;
     }
-
-    this.setEntry(lastgran, (byte) ((sectorsneeded % 9) + 0xC0));
-
+    this.setEntry(
+        lastgran,
+        (byte) ((sectorsNeeded % SECTORS_PER_GRANULE) + LAST_ENTRY)
+    );
     return firstgran;
   }
 
-
-  private void setEntry(byte gran, byte nextgran) throws IOException {
-    this.sector.setDataByte((0xFF & gran), nextgran);
-    this.sector.makeDirty();
+  /**
+   * Set entry.
+   *
+   * @param gran     granule
+   * @param nextGran next granule
+   * @throws IOException failed to write to source
+   */
+  private void setEntry(final byte gran, final byte nextGran)
+      throws IOException {
+    this.diskSector.setDataByte((BYTE_MASK & gran), nextGran);
+    this.diskSector.makeDirty();
   }
 
+  /**
+   * Get free granule.
+   *
+   * @return First free granule
+   * @throws IOException failed to read from source
+   */
   private byte getFreeGranule() throws IOException {
     for (byte i = 0; i < (DECBDefs.FAT_SIZE); i++) {
-      if ((this.sector.getData()[i] & 0xFF) == 0xFF)
-        return (i);
+      if ((this.diskSector.getData()[i] & BYTE_MASK) == BYTE_MASK) {
+        return i;
+      }
     }
     return -1;
   }
 
+  /**
+   * Dump FAT to string.
+   *
+   * @return FAT
+   * @throws IOException failed to read from source
+   */
+  @SuppressWarnings("unused")
   public String dumpFat() throws IOException {
-    String res = "";
-
-    for (int i = 0; i < DECBDefs.FAT_SIZE; i++)
-      if (this.sector.getData()[i] != -1)
-        res += i + ": " + this.sector.getData()[i] + "\t\t";
-
-    return (res);
-
+    StringBuilder res = new StringBuilder();
+    for (int i = 0; i < DECBDefs.FAT_SIZE; i++) {
+      if (this.diskSector.getData()[i] != -1) {
+        res.append(i)
+            .append(": ")
+            .append(this.diskSector.getData()[i])
+            .append("\t\t");
+      }
+    }
+    return res.toString();
   }
-
-
 }

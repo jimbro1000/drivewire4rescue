@@ -1,32 +1,78 @@
 package com.groupunix.drivewireserver.dwdisk.filesystem;
 
+import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
+import static com.groupunix.drivewireserver.DWDefs.BYTE_SHIFT;
+
 public class DWRBFFileSegment {
-  private int lsn;
-  private int size;
+  /**
+   * Offset to size bytes.
+   */
+  public static final int SIZE_OFFSET = 3;
+  /**
+   * Segment sector number.
+   */
+  private int sector;
+  /**
+   * Segment size.
+   */
+  private int segmentSize;
 
-  public DWRBFFileSegment(byte[] data, int i) {
-    this.setLsn((data[i] & 0xff) * 256 * 256 + (data[i + 1] & 0xff) * 256 + (data[i + 2] & 0xff));
-    this.setSize((data[i + 3] & 0xff) * 256 + (data[i + 4] & 0xff));
+  /**
+   * RBF File Segment.
+   *
+   * @param data content data
+   * @param i segment offset
+   */
+  public DWRBFFileSegment(final byte[] data, final int i) {
+    this.setLsn((data[i] & BYTE_MASK) * BYTE_SHIFT * BYTE_SHIFT
+        + (data[i + 1] & BYTE_MASK) * BYTE_SHIFT
+        + (data[i + 2] & BYTE_MASK));
+    this.setSize((data[i + SIZE_OFFSET] & BYTE_MASK) * BYTE_SHIFT
+        + (data[i + SIZE_OFFSET + 1] & BYTE_MASK));
   }
 
+  /**
+   * Get logical sector number.
+   *
+   * @return logical sector number
+   */
   public int getLsn() {
-    return lsn;
+    return sector;
   }
 
-  public void setLsn(int lsn) {
-    this.lsn = lsn;
+  /**
+   * Set logical sector number.
+   *
+   * @param lsn logical sector number
+   */
+  public void setLsn(final int lsn) {
+    this.sector = lsn;
   }
 
+  /**
+   * Get size.
+   *
+   * @return size (bytes)
+   */
   public int getSize() {
-    return size;
+    return segmentSize;
   }
 
-  public void setSize(int size) {
-    this.size = size;
+  /**
+   * Set size.
+   *
+   * @param size size (bytes)
+   */
+  public void setSize(final int size) {
+    this.segmentSize = size;
   }
 
+  /**
+   * Is segment used.
+   *
+   * @return bool
+   */
   public boolean isUsed() {
-    return this.lsn + this.size > 0;
+    return this.sector + this.segmentSize > 0;
   }
-
 }

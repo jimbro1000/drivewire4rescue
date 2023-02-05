@@ -3,50 +3,58 @@ package com.groupunix.drivewireserver.dwcommands;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class DWCmdMidiSynth extends DWCommand {
+  /**
+   * protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-  static final String command = "synth";
-  private DWCommandList commands;
-  private DWProtocolHandler dwProto;
-
-  public DWCmdMidiSynth(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Midi synch command constructor.
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdMidiSynth(
+      final DWProtocolHandler protocolHandler,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdMidiSynthStatus(dwProto, this));
-    commands.addcommand(new DWCmdMidiSynthShow(dwProto, this));
-    commands.addcommand(new DWCmdMidiSynthBank(dwProto, this));
-    commands.addcommand(new DWCmdMidiSynthProfile(dwProto, this));
-    commands.addcommand(new DWCmdMidiSynthLock(dwProto, this));
-    commands.addcommand(new DWCmdMidiSynthInstr(dwProto, this));
+    this.dwProtocolHandler = protocolHandler;
+    DWCommandList commands = new DWCommandList(
+        this.dwProtocolHandler,
+        this.dwProtocolHandler.getCMDCols()
+    );
+    this.setCommandList(commands);
+    commands.addCommand(new DWCmdMidiSynthStatus(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthShow(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthBank(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthProfile(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthLock(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthInstr(protocolHandler, this));
+    this.setCommand("synth");
+    this.setShortHelp("Manage the MIDI synth");
+    this.setUsage("dw midi synth [command]");
   }
 
-
-  public String getCommand() {
-    return command;
-  }
-
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * parse command.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
+    return (this.getCommandList().parse(cmdline));
   }
 
 
-  public String getShortHelp() {
-    return "Manage the MIDI synth";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth [command]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+  /**
+   * validate command.
+   * @param cmdline
+   * @return true if command valid
+   */
+  public boolean validate(final String cmdline) {
+    return (this.getCommandList().validate(cmdline));
   }
 }

@@ -6,76 +6,102 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 import com.groupunix.drivewireserver.virtualserial.DWVPortTCPConnectionThread;
 
 public class DWCmdPortOpen extends DWCommand {
+  /**
+   * Drivewire serial protocol.
+   */
+  private final DWVSerialProtocol dwvSerialProtocol;
 
-  private DWVSerialProtocol dwProto;
-
-  public DWCmdPortOpen(DWVSerialProtocol dwProtocol, DWCommand parent) {
+  /**
+   * Port open command constructor.
+   *
+   * @param protocol serial protocol
+   * @param parent parent command
+   */
+  public DWCmdPortOpen(
+      final DWVSerialProtocol protocol,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProtocol;
+    this.dwvSerialProtocol = protocol;
+    this.setCommand("open");
+    this.setShortHelp("Connect port # to tcp host:port");
+    this.setUsage("dw port open port# host:port");
   }
 
-  public String getCommand() {
-    return "open";
-  }
-
-
-  public String getShortHelp() {
-    return "Connect port # to tcp host:port";
-  }
-
-
-  public String getUsage() {
-    return "dw port open port# host:port";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
-
+  /**
+   * parse command.
+   *
+   * @param cmdline command string
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     String[] args = cmdline.split(" ");
-
     if (args.length < 2) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "dw port open requires a port # and tcphost:port as an argument"));
-
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "dw port open requires a port # and tcphost:port as an argument"
+      );
     } else {
-      return (doPortOpen(args[0], args[1]));
+      return doPortOpen(args[0], args[1]);
     }
   }
 
-
-  private DWCommandResponse doPortOpen(String port, String hostport) {
-    int portno = 0;
-    int tcpport = 0;
-    String tcphost = new String();
+  private DWCommandResponse doPortOpen(
+      final String port,
+      final String hostPort
+  ) {
+    int portNumber;
+    int tcpPort;
+    String tcpHostName;
 
     try {
-      portno = Integer.parseInt(port);
+      portNumber = Integer.parseInt(port);
     } catch (NumberFormatException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error: non numeric port #"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "Syntax error: non numeric port #"
+      );
     }
-
-    String[] tcpargs = hostport.split(":");
-
+    String[] tcpArguments = hostPort.split(":");
     try {
-      tcpport = Integer.parseInt(tcpargs[1]);
-      tcphost = tcpargs[0];
-
-      dwProto.getVPorts().openPort(portno);
-
-      Thread cthread = new Thread(new DWVPortTCPConnectionThread(this.dwProto, portno, tcphost, tcpport, false));
+      tcpPort = Integer.parseInt(tcpArguments[1]);
+      tcpHostName = tcpArguments[0];
+      dwvSerialProtocol.getVPorts().openPort(portNumber);
+      Thread cthread = new Thread(
+          new DWVPortTCPConnectionThread(
+              this.dwvSerialProtocol,
+              portNumber,
+              tcpHostName,
+              tcpPort,
+              false
+          )
+      );
       cthread.start();
-
-      return (new DWCommandResponse("Port #" + portno + " open."));
-
-
+      return new DWCommandResponse(
+          "Port #" + portNumber + " open."
+      );
     } catch (NumberFormatException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error: non numeric tcp port"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "Syntax error: non numeric tcp port"
+      );
     } catch (DWPortNotValidException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_INVALID_PORT, e.getMessage()));
+      return new DWCommandResponse(
+          false, DWDefs.RC_INVALID_PORT, e.getMessage()
+      );
     }
-
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command.
+   *
+   * @param cmdline command string
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
 }

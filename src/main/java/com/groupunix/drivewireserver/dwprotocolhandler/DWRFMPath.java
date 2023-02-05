@@ -1,7 +1,6 @@
 package com.groupunix.drivewireserver.dwprotocolhandler;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -17,300 +16,418 @@ import com.groupunix.drivewireserver.DriveWireServer;
 import com.groupunix.drivewireserver.OS9Defs;
 
 public class DWRFMPath {
-	private static final Logger logger = Logger.getLogger("DWServer.DWRFMPath");
-
-	private int pathno;
-	private String pathstr;
-	private String localroot;
-	private int seekpos;
-	private int handlerno;
-
-	private boolean dirmode = false;
-	private byte[] dirbuffer;
-
-	private FileSystemManager fsManager;
-	private FileObject fileobj;
-
-	private int dirEntryNum = 0;
-
-	private ArrayList<DWRFMDirEntry> dirEntries = new ArrayList<DWRFMDirEntry>();
-
-	public DWRFMPath(int handlerno, int pathno) throws FileSystemException {
-		this.setPathno(pathno);
-		this.setSeekpos(0);
-		logger.debug("new path " + pathno);
-
-		this.fsManager = VFS.getManager();
-		this.setLocalroot(DriveWireServer.getHandler(this.handlerno).getConfig().getString("RFMRoot", "/"));
-
-	}
-
-	public int getPathno() {
-		return pathno;
-	}
-
-	public void setPathno(int pathno) {
-		logger.debug("set path to " + pathno);
-		this.pathno = pathno;
-	}
-
-	public String getPathstr() {
-		return pathstr;
-	}
-
-	public void setPathstr(String pathstr) {
-		this.pathstr = "/";
-		logger.debug("set pathstr to " + this.pathstr);
-
-	}
-
-	public void close() {
-		logger.debug("closing path " + this.pathno + " to " + this.pathstr);
-		try {
-			fileobj.close();
-		} catch (FileSystemException e) {
-			logger.warn("error closing file: " + e.getMessage());
-		}
-	}
-
-	public int getSeekpos() {
-		return seekpos;
-	}
-
-	public void setSeekpos(int seekpos) {
-		this.seekpos = seekpos;
-		logger.debug("seek to " + seekpos + " on path " + this.pathno);
-	}
-
-	public int openFile(int modebyte) {
-		// attempt to open local file
-
-		try {
-			fileobj = fsManager.resolveFile(this.localroot + this.pathstr);
-
-			if (((byte) modebyte & OS9Defs.MODE_DIR) == OS9Defs.MODE_DIR) {
-				// Directory
-				if (fileobj.isReadable()) {
-					if (fileobj.getType() == FileType.FOLDER) {
-						this.dirmode = true;
-
-						logger.debug("directory open: modebyte " + modebyte);
-
-						for (int i = 0; i < fileobj.getChildren().length; i++) {
-							this.dirEntries.add(new DWRFMDirEntry(fileobj.getChildren()[i]));
-						}
-
-						return (0);
-
-					} else {
-						fileobj.close();
-						return (214);
-					}
-				} else {
-					fileobj.close();
-					return (216);
-				}
-			} else {
-				// File
-
-				if (fileobj.isReadable()) {
-					return (0);
-				} else {
-					fileobj.close();
-					return (216);
-				}
-			}
-		} catch (FileSystemException e) {
-			logger.warn("open failed: " + e.getMessage());
-			return (216);
-		}
-	}
-
-	public String getLocalroot() {
-		return localroot;
-	}
-
-	public void setLocalroot(String localroot) {
-		this.localroot = localroot;
-	}
-
-	public int createFile() {
-
-		try {
-			// attempt to open local file
-			fileobj = fsManager.resolveFile(this.localroot + this.pathstr);
-
-
-			if (fileobj.exists()) {
-				// file already exists
-				fileobj.close();
-				return (218);
-
-			} else {
-				fileobj.createFile();
-				return (0);
-			}
-		} catch (FileSystemException e) {
-			logger.warn("create failed: " + e.getMessage());
-			return (245);
-		}
-	}
-
-	public int getBytesAvail(int maxbytes) {
-
-		if (this.dirmode) {
-			// Dir mode
-			// return # bytes left in the dirbuffer
-
-			return (this.dirbuffer.length - this.seekpos);
-
-		} else {
-			// File mode
-			// return # bytes left in file from current seek pos, up to maxbytes
-
-			File f = new File(this.localroot + this.pathstr);
-			if (f.exists()) {
-				// we only handle int sized files..
-				int tmpsize = (int) f.length() - this.seekpos;
-
-				// only 256 per call
-				if (tmpsize > 127) {
-					tmpsize = 127;
-				}
-
-				if (tmpsize > maxbytes) {
-					return (maxbytes);
-				}
-				return (tmpsize);
-
-			} else {
-				//TODO wrong!
-				return (0);
-			}
-		}
-	}
-
-	public byte[] getBytes(int availbytes) {
-		// TODO very crappy !
-		// return byte array of next availbytes bytes from file, move seekpos
-		// TODO structure blindly assumes this will work.
-		// like above need to implement exceptions/error handling passed up to caller
-
-		byte[] buf = new byte[availbytes];
-
-		if (this.dirmode) {
-			System.arraycopy(this.dirbuffer, this.seekpos, buf, 0, availbytes);
-			// this.seekpos += availbytes;
-		} else {
-			RandomAccessFile inFile = null;
-
-			File f = new File(this.localroot + this.pathstr);
-			if (f.exists()) {
-				logger.debug("FILE: asked for " + availbytes);
-
-				try {
-					inFile = new RandomAccessFile(f, "r");
-
-					inFile.seek(seekpos);
-
-					//TODO what if we don't get buf.length??
-					//this.seekpos += 
-					inFile.read(buf);
-
-
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} finally {
-					try {
-						inFile.close();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-
-		return (buf);
-
-	}
-
-	public void incSeekpos(int bytes) {
-		this.seekpos += bytes;
-		logger.debug("incSeekpos to " + this.seekpos);
-	}
-
-	public void setFd(byte[] buf) throws FileSystemException {
-		DWRFMFD fd = new DWRFMFD(DriveWireServer.getHandler(this.handlerno).getConfig().getString("RFMRoot", "/") + this.pathstr);
-
-		fd.readFD();
-
-		byte[] fdtmp = fd.getFD();
-
-		System.arraycopy(buf, 0, fdtmp, 0, buf.length);
-
-		fd.setFD(fdtmp);
-
-		fd.writeFD();
-
-	}
-
-	public byte[] getFd(int size) throws FileSystemException {
-		byte[] b = new byte[size];
-
-		DWRFMFD fd = new DWRFMFD(DriveWireServer.getHandler(this.handlerno).getConfig().getString("RFMRoot", "/") + this.pathstr);
-
-		fd.readFD();
-
-		System.arraycopy(fd.getFD(), 0, b, 0, size);
-		return (b);
-	}
-
-	public void writeBytes(byte[] buf, int maxbytes) {
-		// write to file
-		RandomAccessFile inFile = null;
-
-		File f = new File(this.localroot + this.pathstr);
-		if (f.exists()) {
-			try {
-				inFile = new RandomAccessFile(f, "rw");
-
-				inFile.seek(this.seekpos);
-
-				//TODO what if we don't get buf.length??
-				//this.seekpos += 
-				inFile.write(buf);
-
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-
-		} else {
-			logger.error("write to non existent file");
-		}
-	}
-
-
-	public DWRFMDirEntry getNextDirEntry() throws FileSystemException {
-		if (this.dirmode) {
-			if (this.dirEntryNum < this.dirEntries.size()) {
-
-				this.dirEntryNum++;
-			}
-		}
-
-		return new DWRFMDirEntry(null);
-	}
-
-
+  /**
+   * File already exists.
+   */
+  public static final int FILE_ALREADY_EXISTS = 218;
+  /**
+   * Success.
+   */
+  public static final int SUCCESS = 0;
+  /**
+   * Create file failed.
+   */
+  public static final int CREATE_FILE_FAILED = 245;
+  /**
+   * Open file failed.
+   */
+  public static final int OPEN_FILE_FAILED = 216;
+  /**
+   * Open directory failed.
+   */
+  public static final int OPEN_DIR_FAILED = 214;
+  /**
+   * Log appender.
+   */
+  private static final Logger LOGGER
+      = Logger.getLogger("DWServer.DWRFMPath");
+  /**
+   * Cap to bytes available.
+   */
+  private static final int BYTES_AVAILABLE_CAP = 127;
+  /**
+   * Handler id.
+   */
+  private final int handlerId;
+  /**
+   * File system manager instance.
+   */
+  private final FileSystemManager fsManager;
+  /**
+   * List of directory entries.
+   */
+  private final ArrayList<DWRFMDirEntry> dirEntries = new ArrayList<>();
+  /**
+   * Path number.
+   */
+  private int pathNumber;
+  /**
+   * Path string.
+   */
+  private String pathString;
+  /**
+   * Local root path.
+   */
+  private String localRoot;
+  /**
+   * Seek position.
+   */
+  private int seekPosition;
+  /**
+   * Directory mode.
+   */
+  private boolean dirMode = false;
+  /**
+   * Directory byte buffer.
+   */
+  @SuppressWarnings("unused")
+  private byte[] dirBuffer;
+  /**
+   * File object instance.
+   */
+  private FileObject fileObject;
+  /**
+   * Directory entry number.
+   */
+  private int dirEntryNum = 0;
+
+  /**
+   * RFM path.
+   *
+   * @param handler handler id
+   * @param pathNum path number
+   * @throws FileSystemException read/write failure
+   */
+  public DWRFMPath(final int handler, final int pathNum)
+      throws FileSystemException {
+    this.setPathNumber(pathNum);
+    this.setSeekPos(0);
+    LOGGER.debug("new path " + pathNum);
+    this.handlerId = handler;
+    this.fsManager = VFS.getManager();
+    this.setLocalRoot(
+        DriveWireServer
+            .getHandler(this.handlerId)
+            .getConfig()
+            .getString("RFMRoot", "/")
+    );
+  }
+
+  /**
+   * Get path number.
+   *
+   * @return path number
+   */
+  @SuppressWarnings("unused")
+  public int getPathNumber() {
+    return pathNumber;
+  }
+
+  /**
+   * Set path number.
+   *
+   * @param pathNum path number
+   */
+  public void setPathNumber(final int pathNum) {
+    LOGGER.debug("set path to " + pathNum);
+    this.pathNumber = pathNum;
+  }
+
+  /**
+   * Get path string.
+   *
+   * @return path string
+   */
+  public String getPathStr() {
+    return pathString;
+  }
+
+  /**
+   * Set path string.
+   * <p>
+   *   forces path to root regardless
+   * </p>
+   * @param path path string
+   */
+  public void setPathStr(final String path) {
+    this.pathString = "/";
+    LOGGER.debug("set pathstr to " + this.pathString);
+  }
+
+  /**
+   * Close path.
+   */
+  public void close() {
+    LOGGER.debug("closing path " + this.pathNumber + " to " + this.pathString);
+    try {
+      fileObject.close();
+    } catch (FileSystemException e) {
+      LOGGER.warn("error closing file: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Get seek position.
+   *
+   * @return seek position
+   */
+  @SuppressWarnings("unused")
+  public int getSeekPos() {
+    return seekPosition;
+  }
+
+  /**
+   * Set seek position.
+   *
+   * @param position seek position
+   */
+  public void setSeekPos(final int position) {
+    this.seekPosition = position;
+    LOGGER.debug("seek to " + position + " on path " + this.pathNumber);
+  }
+
+  /**
+   * Open file.
+   *
+   * @param modeByte open file mode
+   * @return response code
+   */
+  public int openFile(final int modeByte) {
+    // attempt to open local file
+    try {
+      fileObject = fsManager.resolveFile(this.localRoot + this.pathString);
+      if (((byte) modeByte & OS9Defs.MODE_DIR) == OS9Defs.MODE_DIR) {
+        // Directory
+        if (fileObject.isReadable()) {
+          if (fileObject.getType() == FileType.FOLDER) {
+            this.dirMode = true;
+            LOGGER.debug("directory open: modebyte " + modeByte);
+            for (int i = 0; i < fileObject.getChildren().length; i++) {
+              this.dirEntries.add(
+                  new DWRFMDirEntry(fileObject.getChildren()[i])
+              );
+            }
+            return SUCCESS;
+          } else {
+            fileObject.close();
+            return OPEN_DIR_FAILED;
+          }
+        } else {
+          fileObject.close();
+          return OPEN_FILE_FAILED;
+        }
+      } else {
+        // File
+        if (fileObject.isReadable()) {
+          return SUCCESS;
+        } else {
+          fileObject.close();
+          return OPEN_FILE_FAILED;
+        }
+      }
+    } catch (FileSystemException e) {
+      LOGGER.warn("open failed: " + e.getMessage());
+      return OPEN_FILE_FAILED;
+    }
+  }
+
+  /**
+   * Get local root path.
+   *
+   * @return local root
+   */
+  @SuppressWarnings("unused")
+  public String getLocalRoot() {
+    return localRoot;
+  }
+
+  /**
+   * Set local root path.
+   *
+   * @param rootPath path
+   */
+  public void setLocalRoot(final String rootPath) {
+    this.localRoot = rootPath;
+  }
+
+  /**
+   * Create file.
+   *
+   * @return response code
+   */
+  public int createFile() {
+    try {
+      // attempt to open local file
+      fileObject = fsManager.resolveFile(this.localRoot + this.pathString);
+      if (fileObject.exists()) {
+        // file already exists
+        fileObject.close();
+        return FILE_ALREADY_EXISTS;
+      } else {
+        fileObject.createFile();
+        return SUCCESS;
+      }
+    } catch (FileSystemException e) {
+      LOGGER.warn("create failed: " + e.getMessage());
+      return CREATE_FILE_FAILED;
+    }
+  }
+
+  /**
+   * Get number of bytes available.
+   * <p>
+   * Hard cap of 127 bytes
+   * </p>
+   *
+   * @param maxBytes size cap
+   * @return calculated number of bytes available
+   */
+  public int getBytesAvail(final int maxBytes) {
+    if (this.dirMode) {
+      // Dir mode - return # bytes left in the dirbuffer
+      return this.dirBuffer.length - this.seekPosition;
+    }
+    // File mode
+    // return # bytes left in file from current seek pos, up to maxBytes
+    File f = new File(this.localRoot + this.pathString);
+    if (f.exists()) {
+      // we only handle int sized files...
+      int tmpSize = Math.min(
+          BYTES_AVAILABLE_CAP,
+          (int) f.length() - this.seekPosition
+      );
+      return Math.min(tmpSize, maxBytes);
+    } else {
+      //TODO wrong!
+      return 0;
+    }
+  }
+
+  /**
+   * Get N bytes from path.
+   *
+   * @param availBytes N
+   * @return byte array
+   */
+  public byte[] getBytes(final int availBytes) {
+    // TODO very crappy !
+    // return byte array of next availbytes bytes from file, move seekpos
+    // TODO structure blindly assumes this will work.
+    // like above need to implement exceptions/error handling passed up to
+    // caller
+    byte[] buf = new byte[availBytes];
+    if (this.dirMode) {
+      System.arraycopy(this.dirBuffer, this.seekPosition, buf, 0, availBytes);
+      // this.seekpos += availbytes;
+      return buf;
+    }
+    File f = new File(this.localRoot + this.pathString);
+    if (f.exists()) {
+      LOGGER.debug("FILE: asked for " + availBytes);
+      try (
+          RandomAccessFile inFile = new RandomAccessFile(f, "r")
+      ) {
+        inFile.seek(seekPosition);
+        //TODO what if we don't get buf.length??
+        //this.seekpos +=
+        inFile.read(buf);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    return buf;
+  }
+
+  /**
+   * Increment seek position by N bytes.
+   *
+   * @param bytes N
+   */
+  public void incSeekPos(final int bytes) {
+    this.seekPosition += bytes;
+    LOGGER.debug("incSeekpos to " + this.seekPosition);
+  }
+
+  /**
+   * Set file descriptor bytes.
+   *
+   * @param buf byte array
+   * @throws FileSystemException write failure
+   */
+  public void setFd(final byte[] buf) throws FileSystemException {
+    DWRFMFD fd = new DWRFMFD(
+        DriveWireServer
+            .getHandler(this.handlerId)
+            .getConfig()
+            .getString("RFMRoot", "/")
+            + this.pathString
+    );
+    fd.readFD();
+    byte[] fdTmp = fd.getFD();
+    System.arraycopy(buf, 0, fdTmp, 0, buf.length);
+    fd.setFD(fdTmp);
+    fd.writeFD();
+  }
+
+  /**
+   * Get file descriptor bytes.
+   *
+   * @param size bytes to fetch
+   * @return byte array
+   * @throws FileSystemException read failure
+   */
+  public byte[] getFd(final int size) throws FileSystemException {
+    byte[] b = new byte[size];
+    DWRFMFD fd = new DWRFMFD(
+        DriveWireServer
+            .getHandler(this.handlerId)
+            .getConfig()
+            .getString("RFMRoot", "/")
+            + this.pathString
+    );
+    fd.readFD();
+    System.arraycopy(fd.getFD(), 0, b, 0, size);
+    return b;
+  }
+
+  /**
+   * Write Bytes to path.
+   *
+   * @param buf      byte array
+   * @param maxBytes maximum number of bytes
+   */
+  public void writeBytes(final byte[] buf, final int maxBytes) {
+    // write to file
+    File f = new File(this.localRoot + this.pathString);
+    if (f.exists()) {
+      try (
+          RandomAccessFile inFile = new RandomAccessFile(f, "rw")
+      ) {
+        inFile.seek(this.seekPosition);
+        //TODO what if we don't get buf.length??
+        //this.seekpos +=
+        inFile.write(buf);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    } else {
+      LOGGER.error("write to non existent file");
+    }
+  }
+
+  /**
+   * Get next directory.
+   *
+   * @return directory entry
+   * @throws FileSystemException read/write failure
+   */
+  @SuppressWarnings("unused")
+  public DWRFMDirEntry getNextDirEntry() throws FileSystemException {
+    if (this.dirMode) {
+      if (this.dirEntryNum < this.dirEntries.size()) {
+        this.dirEntryNum++;
+      }
+    }
+    return new DWRFMDirEntry(null);
+  }
 }
-

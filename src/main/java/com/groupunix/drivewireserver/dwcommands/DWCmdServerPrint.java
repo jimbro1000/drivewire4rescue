@@ -1,7 +1,6 @@
 
 package com.groupunix.drivewireserver.dwcommands;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -16,41 +15,47 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
-
 public class DWCmdServerPrint extends DWCommand {
+  /**
+   * Drivewire protocol.
+   */
+  private final DWProtocol dwProtocol;
 
-
-  private DWProtocol dwProto;
-
-  public DWCmdServerPrint(DWProtocol dwProto, DWCommand parent) {
+  /**
+   * Server print command constructor.
+   *
+   * @param protocol protocol
+   * @param parent parent command
+   */
+  public DWCmdServerPrint(
+      final DWProtocol protocol,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocol = protocol;
+    this.setCommand("print");
+    this.setShortHelp("Print contents of file on server");
+    this.setUsage("dw server print URI/path");
   }
 
-
-  public String getCommand() {
-    return "print";
-  }
-
-
-  public String getShortHelp() {
-    return "Print contents of file on server";
-  }
-
-
-  public String getUsage() {
-    return "dw server print URI/path";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * parse command.
+   *
+   * @param cmdline command string
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "dw server print requires a URI or local file path as an argument"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "dw server print requires a URI or local file path as an argument"
+      );
     }
     return (doPrint(cmdline));
   }
 
-
-  private DWCommandResponse doPrint(String path) {
+  private DWCommandResponse doPrint(final String path) {
     FileSystemManager fsManager;
     InputStream ins = null;
     FileObject fileobj = null;
@@ -58,53 +63,54 @@ public class DWCmdServerPrint extends DWCommand {
 
     try {
       fsManager = VFS.getManager();
-
-      path = DWUtils.convertStarToBang(path);
-
-      fileobj = fsManager.resolveFile(path);
-
+      fileobj = fsManager.resolveFile(DWUtils.convertStarToBang(path));
       fc = fileobj.getContent();
-
       ins = fc.getInputStream();
-
       byte data = (byte) ins.read();
-
       while (data >= 0) {
-        ((DWProtocolHandler) dwProto).getVPrinter().addByte(data);
+        ((DWProtocolHandler) dwProtocol).getVPrinter().addByte(data);
         data = (byte) ins.read();
       }
-
       ins.close();
-      ((DWProtocolHandler) dwProto).getVPrinter().flush();
-
-
+      ((DWProtocolHandler) dwProtocol).getVPrinter().flush();
     } catch (FileSystemException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_SERVER_FILESYSTEM_EXCEPTION, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SERVER_FILESYSTEM_EXCEPTION,
+          e.getMessage()
+      );
     } catch (IOException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_SERVER_IO_EXCEPTION, e.getMessage()));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SERVER_IO_EXCEPTION,
+          e.getMessage()
+      );
     } finally {
       try {
-        if (ins != null)
+        if (ins != null) {
           ins.close();
-
-        if (fc != null)
+        }
+        if (fc != null) {
           fc.close();
-
-        if (fileobj != null)
+        }
+        if (fileobj != null) {
           fileobj.close();
-
+        }
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
-
     }
-
-    return (new DWCommandResponse("Sent item to printer"));
+    return new DWCommandResponse("Sent item to printer");
   }
 
-  public boolean validate(String cmdline) {
+  /**
+   * Validate command.
+   *
+   * @param cmdline command string
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
     return true;
   }
-
 }

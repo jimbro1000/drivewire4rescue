@@ -7,58 +7,60 @@ import com.groupunix.drivewireserver.DriveWireServer;
 
 public class DWCmdLogShow extends DWCommand {
 
-
-  public DWCmdLogShow(DWCommand parent) {
+  /**
+   * Commmand log show constructor.
+   * @param parent
+   */
+  public DWCmdLogShow(final DWCommand parent) {
     setParentCmd(parent);
+    this.setCommand("show");
+    this.setShortHelp("Show last 20 (or #) log entries");
+    this.setUsage("dw log show [#]");
   }
-
-  public String getCommand() {
-    return "show";
-  }
-
-
-  public String getShortHelp() {
-    return "Show last 20 (or #) log entries";
-  }
-
-
-  public String getUsage() {
-    return "dw log show [#]";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command.
+   * @param cmdline
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (doShowLog("20"));
+      return doShowLog("20");
     }
-    return (doShowLog(cmdline));
+    return doShowLog(cmdline);
   }
 
-
-  private DWCommandResponse doShowLog(String strlines) {
-    String text = new String();
-
+  /**
+   * Show log output.
+   * @param lineCount lines of log to return
+   * @return log lines
+   */
+  private DWCommandResponse doShowLog(final String lineCount) {
+    StringBuilder text = new StringBuilder();
     try {
-      int lines = Integer.parseInt(strlines);
-
-      text += "\r\nDriveWire Server Log (" + DriveWireServer.getLogEventsSize() + " events in buffer):\r\n\n";
-
-      ArrayList<String> loglines = DriveWireServer.getLogEvents(lines);
-
-      for (int i = 0; i < loglines.size(); i++) {
-        text += loglines.get(i);
-
+      int lines = Integer.parseInt(lineCount);
+      text.append("\r\nDriveWire Server Log (")
+          .append(DriveWireServer.getLogEventsSize())
+          .append(" events in buffer):\r\n\n");
+      ArrayList<String> logLines = DriveWireServer.getLogEvents(lines);
+      for (int i = 0; i < logLines.size(); i++) {
+        text.append(logLines.get(i));
       }
-
-      return (new DWCommandResponse(text));
-
+      return new DWCommandResponse(text.toString());
     } catch (NumberFormatException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error: non numeric # of log lines"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "Syntax error: non numeric # of log lines"
+      );
     }
-
   }
 
-
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command.
+   * @param cmdline
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

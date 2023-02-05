@@ -1,6 +1,5 @@
 package com.groupunix.drivewireserver.uicommands;
 
-
 import com.groupunix.drivewireserver.DWUIClientThread;
 import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandList;
@@ -8,60 +7,56 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmd extends DWCommand {
-
-  static final String command = "ui";
-  private DWCommandList commands;
-
-
-  public UICmd(DWUIClientThread ct) {
-    commands = new DWCommandList(null);
-    commands.addcommand(new UICmdInstance(ct));
-    commands.addcommand(new UICmdServer(ct));
-    commands.addcommand(new UICmdSync(ct));
-    commands.addcommand(new UICmdTest(ct));
+  private void commandHelp() {
+    setCommand("ui");
+    setShortHelp("Management commands with machine parsable output");
+    setUsage("ui [command]");
   }
 
-
-  public UICmd(DWProtocol dwProto) {
-    commands = new DWCommandList(null);
-    commands.addcommand(new UICmdInstance(dwProto));
-    commands.addcommand(new UICmdServer(dwProto));
-    //	commands.addcommand(new UICmdSync(dwProto));
-    //	commands.addcommand(new UICmdTest(dwProto));
+  /**
+   * ui command constructor.
+   * @param clientThread ui client thread
+   */
+  public UICmd(final DWUIClientThread clientThread) {
+    DWCommandList commands = new DWCommandList(null);
+    commands.addCommand(new UICmdInstance(clientThread));
+    commands.addCommand(new UICmdServer(clientThread));
+    commands.addCommand(new UICmdSync(clientThread));
+    commands.addCommand(new UICmdTest(clientThread));
+    this.setCommandList(commands);
+    commandHelp();
   }
 
-
-  public String getCommand() {
-    return command;
+  /**
+   * ui command constructor.
+   * @param protocol protocol
+   */
+  public UICmd(final DWProtocol protocol) {
+    DWCommandList commands = new DWCommandList(null);
+    commands.addCommand(new UICmdInstance(protocol));
+    commands.addCommand(new UICmdServer(protocol));
+    this.setCommandList(commands);
+    commandHelp();
   }
 
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * parse command.
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-
-    return (commands.parse(cmdline));
+    return (getCommandList().parse(cmdline));
   }
 
-
-  public String getShortHelp() {
-    return "Managment commands with machine parsable output";
+  /**
+   * validate command.
+   * @param cmdline command line
+   * @return true if command valid
+   */
+  public boolean validate(final String cmdline) {
+    return getCommandList().validate(cmdline);
   }
-
-
-  public String getUsage() {
-    return "ui [command]";
-  }
-
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
-  }
-
-
 }

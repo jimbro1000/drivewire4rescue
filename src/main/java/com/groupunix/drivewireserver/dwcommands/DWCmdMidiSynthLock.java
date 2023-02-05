@@ -2,45 +2,60 @@ package com.groupunix.drivewireserver.dwcommands;
 
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
-public class DWCmdMidiSynthLock extends DWCommand {
+public final class DWCmdMidiSynthLock extends DWCommand {
+  /**
+   * Drivewire protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-  private DWProtocolHandler dwProto;
-
-  public DWCmdMidiSynthLock(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Midi synth lock command constructor.
+   *
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdMidiSynthLock(
+      final DWProtocolHandler protocolHandler,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocolHandler = protocolHandler;
+    this.setCommand("lock");
+    this.setShortHelp("Toggle instrument lock");
+    this.setUsage("dw midi synth lock");
   }
 
-  public String getCommand() {
-    return "lock";
-  }
-
-
-  public String getShortHelp() {
-    return "Toggle instrument lock";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth lock";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     return (doMidiSynthLock());
   }
 
-
   private DWCommandResponse doMidiSynthLock() {
-    if (dwProto.getVPorts().getMidiVoicelock()) {
-      dwProto.getVPorts().setMidiVoicelock(false);
-      return (new DWCommandResponse("Unlocked MIDI instruments, program changes will be processed"));
+    if (dwProtocolHandler.getVPorts().getMidiVoicelock()) {
+      dwProtocolHandler.getVPorts().setMidiVoicelock(false);
+      return new DWCommandResponse(
+          "Unlocked MIDI instruments, program changes will be processed"
+      );
     } else {
-      dwProto.getVPorts().setMidiVoicelock(true);
-      return (new DWCommandResponse("Locked MIDI instruments, progam changes will be ignored"));
+      dwProtocolHandler.getVPorts().setMidiVoicelock(true);
+      return new DWCommandResponse(
+          "Locked MIDI instruments, progam changes will be ignored"
+      );
     }
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

@@ -2,70 +2,97 @@ package com.groupunix.drivewireserver.dwprotocolhandler;
 
 import com.groupunix.drivewireserver.DWDefs;
 
+import static com.groupunix.drivewireserver.DWDefs.BYTE_BITS;
+import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
+
 public class DWProtocolTimers {
+  /**
+   * Timer byte array length.
+   */
+  public static final int TIMER_LEN = 4;
+  /**
+   * Maximum number of timers.
+   */
+  public static final int MAX_TIMERS = 256;
+  /**
+   * Timers.
+   */
+  private final long[] timers;
 
-  private long[] timers;
-
+  /**
+   * Protocol Timers.
+   */
   public DWProtocolTimers() {
-    this.timers = new long[256];
+    this.timers = new long[MAX_TIMERS];
   }
 
-  public void resetTimer(byte tno) {
+  /**
+   * Reset timer.
+   * <p>
+   * Sets timer to current time
+   * </p>
+   *
+   * @param tno timer id
+   */
+  public void resetTimer(final byte tno) {
     resetTimer(tno, System.currentTimeMillis());
   }
 
-  public void resetTimer(byte tno, long tme) {
-    this.timers[(tno & 0xff)] = tme;
-
+  /**
+   * Reset timer.
+   *
+   * @param tno timer id
+   * @param tme time
+   */
+  public void resetTimer(final byte tno, final long tme) {
+    this.timers[(tno & BYTE_MASK)] = tme;
     // Dependencies
-
     switch (tno) {
       // init and reset are also np ops
-      case DWDefs.TIMER_DWINIT:
-      case DWDefs.TIMER_RESET:
-        resetTimer(DWDefs.TIMER_NP_OP, tme);
-        break;
-
+      case DWDefs.TIMER_DWINIT,
+          DWDefs.TIMER_RESET -> resetTimer(DWDefs.TIMER_NP_OP, tme);
       // read/write is an io op
-      case DWDefs.TIMER_READ:
-      case DWDefs.TIMER_WRITE:
-        resetTimer(DWDefs.TIMER_IO, tme);
-        break;
-
+      case DWDefs.TIMER_READ,
+          DWDefs.TIMER_WRITE -> resetTimer(DWDefs.TIMER_IO, tme);
       // io ops are also np ops
-      case DWDefs.TIMER_IO:
-        resetTimer(DWDefs.TIMER_NP_OP, tme);
-        break;
-
+      case DWDefs.TIMER_IO -> resetTimer(DWDefs.TIMER_NP_OP, tme);
       // poll is an op
-      case DWDefs.TIMER_POLL:
-        resetTimer(DWDefs.TIMER_OP, tme);
-        break;
-
-
+      case DWDefs.TIMER_POLL -> resetTimer(DWDefs.TIMER_OP, tme);
       // np ops are also ops
-      case DWDefs.TIMER_NP_OP:
-        resetTimer(DWDefs.TIMER_OP, tme);
-        break;
+      case DWDefs.TIMER_NP_OP -> resetTimer(DWDefs.TIMER_OP, tme);
+      default -> {
+      }
     }
   }
 
-  public long getTimer(byte tno) {
-    if (this.timers[(tno & 0xff)] > 0)
-      return (System.currentTimeMillis() - this.timers[(tno & 0xff)]) & 0xFFFFFFFF;
-
+  /**
+   * Get timer as long.
+   *
+   * @param tno timer id
+   * @return timer
+   */
+  public long getTimer(final byte tno) {
+    if (this.timers[(tno & BYTE_MASK)] > 0) {
+      return System.currentTimeMillis() - this.timers[(tno & BYTE_MASK)];
+    }
     return 0;
   }
 
-  public byte[] getTimerBytes(byte tno) {
-    byte[] res = new byte[4];
+  /**
+   * Get timer as byte array.
+   *
+   * @param tno timer id
+   * @return byte array
+   */
+  public byte[] getTimerBytes(final byte tno) {
+    byte[] res = new byte[TIMER_LEN];
     long input = getTimer(tno);
-
-    res[0] = (byte) ((input >> 24) & 0xFF);
-    res[1] = (byte) ((input >> 16) & 0xFF);
-    res[2] = (byte) ((input >> 8) & 0xFF);
-    res[3] = (byte) (input & 0xFF);
-
+    int index = 0;
+    res[index++] = (byte) ((input >> (BYTE_BITS + BYTE_BITS + BYTE_BITS))
+        & BYTE_MASK);
+    res[index++] = (byte) ((input >> (BYTE_BITS + BYTE_BITS)) & BYTE_MASK);
+    res[index++] = (byte) ((input >> BYTE_BITS) & BYTE_MASK);
+    res[index] = (byte) (input & BYTE_MASK);
     return res;
   }
 }

@@ -12,92 +12,119 @@ import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class DWCmdMidiSynthStatus extends DWCommand {
+  /**
+   * Drivewire protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-  private DWProtocolHandler dwProto;
-
-  public DWCmdMidiSynthStatus(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Midi synth status command constructor.
+   *
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdMidiSynthStatus(
+      final DWProtocolHandler protocolHandler, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocolHandler = protocolHandler;
+    this.setCommand("status");
+    this.setShortHelp("Show internal synth status");
+    this.setUsage("dw midi synth status");
   }
 
-  public String getCommand() {
-    return "status";
-  }
-
-
-  public String getShortHelp() {
-    return "Show internal synth status";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth status";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
-    return (doSynthStatus());
+  /**
+   * Parse command if present.
+   *
+   * @param cmdline command string
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return doSynthStatus();
   }
 
   private DWCommandResponse doSynthStatus() {
-    String text = new String();
-
+    String text;
     // dw midi synth show
     text = "\r\nInternal synthesizer status:\r\n\n";
-
-    if (dwProto.getVPorts().getMidiSynth() != null) {
-      MidiDevice.Info midiinfo = dwProto.getVPorts().getMidiSynth().getDeviceInfo();
-
+    if (dwProtocolHandler.getVPorts().getMidiSynth() != null) {
+      MidiDevice.Info midiinfo = dwProtocolHandler
+          .getVPorts()
+          .getMidiSynth()
+          .getDeviceInfo();
       text += "Device:\r\n";
-      text += midiinfo.getVendor() + ", " + midiinfo.getName() + ", " + midiinfo.getVersion() + "\r\n";
+      text += midiinfo.getVendor() + ", "
+          + midiinfo.getName() + ", " + midiinfo.getVersion() + "\r\n";
       text += midiinfo.getDescription() + "\r\n";
-
       text += "\r\n";
-
       text += "Soundbank: ";
-
-      if (dwProto.getVPorts().getMidiSoundbankFilename() == null) {
-        Soundbank sbank = dwProto.getVPorts().getMidiSynth().getDefaultSoundbank();
-
-        if (sbank != null) {
+      if (dwProtocolHandler.getVPorts().getMidiSoundbankFilename() == null) {
+        Soundbank soundbank = dwProtocolHandler
+            .getVPorts().getMidiSynth().getDefaultSoundbank();
+        if (soundbank != null) {
           text += " (default)\r\n";
-          text += sbank.getVendor() + ", " + sbank.getName() + ", " + sbank.getVersion() + "\r\n";
-          text += sbank.getDescription() + "\r\n";
+          text += soundbank.getVendor() + ", "
+              + soundbank.getName() + ", " + soundbank.getVersion() + "\r\n";
+          text += soundbank.getDescription() + "\r\n";
         } else {
           text += " none\r\n";
         }
       } else {
-        File file = new File(dwProto.getVPorts().getMidiSoundbankFilename());
+        File file = new File(
+            dwProtocolHandler.getVPorts().getMidiSoundbankFilename()
+        );
         try {
           Soundbank sbank = MidiSystem.getSoundbank(file);
-
-          text += " (" + dwProto.getVPorts().getMidiSoundbankFilename() + ")\r\n";
-          text += sbank.getVendor() + ", " + sbank.getName() + ", " + sbank.getVersion() + "\r\n";
+          text += " (" + dwProtocolHandler
+              .getVPorts()
+              .getMidiSoundbankFilename()
+              + ")\r\n";
+          text += sbank.getVendor() + ", "
+              + sbank.getName() + ", " + sbank.getVersion() + "\r\n";
           text += sbank.getDescription() + "\r\n";
-
         } catch (InvalidMidiDataException e) {
-          return (new DWCommandResponse(false, DWDefs.RC_MIDI_INVALID_DATA, e.getMessage()));
+          return new DWCommandResponse(
+              false,
+              DWDefs.RC_MIDI_INVALID_DATA,
+              e.getMessage()
+          );
         } catch (IOException e) {
-          return (new DWCommandResponse(false, DWDefs.RC_SERVER_IO_EXCEPTION, e.getMessage()));
+          return new DWCommandResponse(
+              false,
+              DWDefs.RC_SERVER_IO_EXCEPTION,
+              e.getMessage());
         }
       }
-
       text += "\r\n";
-
-      text += "Latency:   " + dwProto.getVPorts().getMidiSynth().getLatency() + "\r\n";
-      text += "Polyphony: " + dwProto.getVPorts().getMidiSynth().getMaxPolyphony() + "\r\n";
-      text += "Position:  " + dwProto.getVPorts().getMidiSynth().getMicrosecondPosition() + "\r\n\n";
-      text += "Profile:   " + dwProto.getVPorts().getMidiProfileName() + "\r\n";
-      text += "Instrlock: " + dwProto.getVPorts().getMidiVoicelock() + "\r\n";
-
+      text += "Latency:   "
+          + dwProtocolHandler.getVPorts().getMidiSynth().getLatency()
+          + "\r\n";
+      text += "Polyphony: "
+          + dwProtocolHandler.getVPorts().getMidiSynth().getMaxPolyphony()
+          + "\r\n";
+      text += "Position:  "
+          + dwProtocolHandler
+          .getVPorts()
+          .getMidiSynth()
+          .getMicrosecondPosition()
+          + "\r\n\n";
+      text += "Profile:   "
+          + dwProtocolHandler.getVPorts().getMidiProfileName() + "\r\n";
+      text += "Instrlock: "
+          + dwProtocolHandler.getVPorts().getMidiVoicelock() + "\r\n";
     } else {
       text += "MIDI is disabled.\r\n";
     }
-
-
-    return (new DWCommandResponse(text));
+    return new DWCommandResponse(text);
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command for start, stop, show and restart.
+   *
+   * @param cmdline command string
+   * @return true if valid for all actions
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

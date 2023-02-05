@@ -9,29 +9,37 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
 public class UICmdServerFileDefaultDir extends DWCommand {
 
-  static final String command = "defaultdir";
-
-
-  public String getCommand() {
-    return command;
+  /**
+   * UI Command Server File Default Dir.
+   */
+  public UICmdServerFileDefaultDir() {
+    setCommand("defaultdir");
+    setShortHelp("Show default dir dir");
+    setUsage("ui server file defaultdir");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (new DWCommandResponse(DWUtils.getFileDescriptor(new File(DriveWireServer.serverconfig.getString("LocalDiskDir", "."))) + "|false"));
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return new DWCommandResponse(
+        DWUtils.getFileDescriptor(new File(
+            DriveWireServer.getServerConfiguration()
+                .getString("LocalDiskDir", "."))
+        ) + "|false"
+    );
   }
 
-
-  public String getShortHelp() {
-    return "Show default dir dir";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
-
-  public String getUsage() {
-    return "ui server file defaultdir";
-  }
-
-  public boolean validate(String cmdline) {
-    return (true);
-  }
-
 }

@@ -3,49 +3,66 @@ package com.groupunix.drivewireserver.dwcommands;
 import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
-public class DWCmdMidiSynthProfile extends DWCommand {
+public final class DWCmdMidiSynthProfile extends DWCommand {
+  /**
+   * Drivewire protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-  private DWProtocolHandler dwProto;
-
-  public DWCmdMidiSynthProfile(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Midi synth profile command constructor.
+   *
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdMidiSynthProfile(
+      final DWProtocolHandler protocolHandler, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocolHandler = protocolHandler;
+    this.setCommand("profile");
+    this.setShortHelp("Load synth translation profile");
+    this.setUsage("dw midi synth profile name");
   }
 
-  public String getCommand() {
-    return "profile";
-  }
-
-
-  public String getShortHelp() {
-    return "Load synth translation profile";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth profile name";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command if present.
+   *
+   * @param cmdline command string
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "dw midi synth profile requires a profile name as an argument"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "dw midi synth profile requires a profile name as an argument"
+      );
     }
-
-    return (doMidiSynthProfile(cmdline));
+    return doMidiSynthProfile(cmdline);
   }
 
-
-  private DWCommandResponse doMidiSynthProfile(String path) {
-
-    if (dwProto.getVPorts().setMidiProfile(path)) {
-      return (new DWCommandResponse("Set translation profile to '" + path + "'"));
+  private DWCommandResponse doMidiSynthProfile(final String path) {
+    if (dwProtocolHandler.getVPorts().setMidiProfile(path)) {
+      return new DWCommandResponse(
+          "Set translation profile to '" + path + "'"
+      );
     } else {
-      return (new DWCommandResponse(false, DWDefs.RC_MIDI_INVALID_PROFILE, "Invalid translation profile '" + path + "'"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_MIDI_INVALID_PROFILE,
+          "Invalid translation profile '" + path + "'"
+      );
     }
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command for start, stop, show and restart.
+   *
+   * @param cmdline command string
+   * @return true if valid for all actions
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
 }

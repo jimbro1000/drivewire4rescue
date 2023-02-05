@@ -8,29 +8,34 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
 public class UICmdServerFileInfo extends DWCommand {
 
-  static final String command = "info";
-
-
-  public String getCommand() {
-    return command;
+  /**
+   * UI Command Server File Info.
+   */
+  public UICmdServerFileInfo() {
+    setCommand("info");
+    setShortHelp("Show file details");
+    setUsage("ui server file info");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (new DWCommandResponse(DWUtils.getFileDescriptor(new File(cmdline)) + "|false"));
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return new DWCommandResponse(
+        DWUtils.getFileDescriptor(new File(cmdline)) + "|false"
+    );
   }
 
-
-  public String getShortHelp() {
-    return "Show file details";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
-
-  public String getUsage() {
-    return "ui server file info";
-  }
-
-  public boolean validate(String cmdline) {
-    return (true);
-  }
-
 }

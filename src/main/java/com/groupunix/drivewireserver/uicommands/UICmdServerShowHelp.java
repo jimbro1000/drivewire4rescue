@@ -9,59 +9,82 @@ import com.groupunix.drivewireserver.dwexceptions.DWHelpTopicNotFoundException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdServerShowHelp extends DWCommand {
+  /**
+   * Drivewire protocol.
+   */
+  private DWProtocol dwProtocol;
+  /**
+   * UI client thread reference.
+   */
+  private final DWUIClientThread uiClientThreadRef;
 
-
-  private DWProtocol dwProto;
-  private DWUIClientThread dwuiClientThread;
-
-  public UICmdServerShowHelp(DWUIClientThread dwuiClientThread) {
-    this.dwuiClientThread = dwuiClientThread;
+  /**
+   * UI Command Server Show Help.
+   *
+   * @param clientThread client thread reference
+   */
+  public UICmdServerShowHelp(final DWUIClientThread clientThread) {
+    this.uiClientThreadRef = clientThread;
+    this.dwProtocol = null;
+    setHelp();
   }
 
-
-  public UICmdServerShowHelp(DWProtocol dwProto) {
-    this.dwProto = dwProto;
+  /**
+   * UI Command Server Show Help.
+   *
+   * @param protocol protocol
+   */
+  public UICmdServerShowHelp(final DWProtocol protocol) {
+    this.dwProtocol = protocol;
+    this.uiClientThreadRef = null;
+    setHelp();
   }
 
+  private void setHelp() {
+    setCommand("help");
+    setShortHelp("show help");
+    setUsage("ui server show help topic");
+  }
 
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "help";
-  }
-
-
-  @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show help";
-  }
-
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show help topic";
-  }
-
-  @Override
-  public DWCommandResponse parse(String cmdline) {
-    if (this.dwProto == null)
-      this.dwProto = DriveWireServer.getHandler(dwuiClientThread.getInstance());
-
-
-    if (dwProto.getHelp() == null)
-      return (new DWCommandResponse(false, DWDefs.RC_HELP_TOPIC_NOT_FOUND, "No help available"));
-
-    try {
-      return (new DWCommandResponse(dwProto.getHelp().getTopicText(cmdline)));
-    } catch (DWHelpTopicNotFoundException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_HELP_TOPIC_NOT_FOUND, e.getLocalizedMessage()));
+  public DWCommandResponse parse(final String cmdline) {
+    if (this.dwProtocol == null) {
+      this.dwProtocol = DriveWireServer.getHandler(
+          uiClientThreadRef.getInstance()
+      );
+    }
+    if (dwProtocol.getHelp() == null) {
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_HELP_TOPIC_NOT_FOUND,
+          "No help available"
+      );
     }
 
-
+    try {
+      return new DWCommandResponse(dwProtocol.getHelp().getTopicText(cmdline));
+    } catch (DWHelpTopicNotFoundException e) {
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_HELP_TOPIC_NOT_FOUND,
+          e.getLocalizedMessage()
+      );
+    }
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

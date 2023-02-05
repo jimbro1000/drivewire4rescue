@@ -1,97 +1,192 @@
 package com.groupunix.drivewireserver.dwdisk.filesystem;
 
-import com.groupunix.drivewireserver.dwprotocolhandler.*;
+import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
 
 public class DWRBFFileSystemDirEntry extends DWFileSystemDirEntry {
-
+  /**
+   * Directory type bit mask.
+   */
+  private static final int DIRECTORY_MASK = 0x80;
+  /**
+   * File name.
+   */
   private final String filename;
-  private int fdlsn;
-  private DWRBFFileDescriptor fd;
+  /**
+   * File descriptor logical sector number.
+   */
+  private int fdLsn;
+  /**
+   * File descriptor.
+   */
+  private DWRBFFileDescriptor fileDescriptor;
 
-  public DWRBFFileSystemDirEntry(String fn, int fd_lsn, DWRBFFileDescriptor fd) {
+  /**
+   * RBF file system directory entry.
+   *
+   * @param fn file name
+   * @param lsn file descriptor logical sector number
+   * @param fd file descriptor
+   */
+  public DWRBFFileSystemDirEntry(
+      final String fn, final int lsn, final DWRBFFileDescriptor fd
+  ) {
     super(null);
-
     this.filename = fn;
-    this.setFDLSN(fd_lsn);
-    this.setFD(fd);
+    this.setFdLsn(lsn);
+    this.setFd(fd);
   }
 
+  /**
+   * Get file name.
+   *
+   * @return file name
+   */
   @Override
   public String getFileName() {
     return this.filename;
   }
 
+  /**
+   * Get file extension.
+   *
+   * @return file extension
+   */
   @Override
   public String getFileExt() {
     String res = "";
-
     int dot = this.filename.lastIndexOf(".");
-
     if ((dot > 0) && (dot < this.filename.length() - 1)) {
       res = this.filename.substring(dot + 1);
     }
-
     return res;
   }
 
+  /**
+   * Get file path.
+   * <p>
+   *   Not implemented
+   * </p>
+   * @return null
+   */
   @Override
   public String getFilePath() {
-    // TODO Auto-generated method stub
     return null;
   }
 
+  /**
+   * Get pretty file type.
+   * <p>
+   *   Not implemented
+   * </p>
+   * @return null
+   */
   @Override
   public String getPrettyFileType() {
-    // TODO Auto-generated method stub
     return null;
   }
 
+  /**
+   * Get file type.
+   * <p>
+   *   Not implemented
+   * </p>
+   * @return 0
+   */
   @Override
   public int getFileType() {
-    // TODO Auto-generated method stub
     return 0;
   }
 
+  /**
+   * Get parent directory entry.
+   * <p>
+   *   Not implemented
+   * </p>
+   * @return parent
+   */
   @Override
   public DWFileSystemDirEntry getParentEntry() {
-    // TODO Auto-generated method stub
     return null;
   }
 
+  /**
+   * Is directory.
+   *
+   * @return true if directory
+   */
   @Override
   public boolean isDirectory() {
-    return (this.fd.getAttributes() & 0x80) == 0x80;
+    return (this.fileDescriptor.getAttributes() & DIRECTORY_MASK)
+        == DIRECTORY_MASK;
   }
 
+  /**
+   * Is file type ascii.
+   * <p>
+   *   Not implemented
+   * </p>
+   * @return false
+   */
   @Override
   public boolean isAscii() {
-    // TODO Auto-generated method stub
     return false;
   }
 
+  /**
+   * Get file descriptor.
+   *
+   * @return file descriptor
+   */
   public DWRBFFileDescriptor getFD() {
-    return fd;
+    return fileDescriptor;
   }
 
-  public void setFD(DWRBFFileDescriptor fd) {
-    this.fd = fd;
+  /**
+   * Set file descriptor.
+   *
+   * @param fd file descriptor
+   */
+  public void setFd(final DWRBFFileDescriptor fd) {
+    this.fileDescriptor = fd;
   }
 
-  public int getFDLSN() {
-    return fdlsn;
+  /**
+   * Get file descriptor logical sector number.
+   *
+   * @return logical sector number
+   */
+  @SuppressWarnings("unused")
+  public int getFdLsn() {
+    return fdLsn;
   }
 
-  public void setFDLSN(int fdlsn) {
-    this.fdlsn = fdlsn;
+  /**
+   * Set file descriptor logical sector number.
+   *
+   * @param lsn logical sector number
+   */
+  public void setFdLsn(final int lsn) {
+    this.fdLsn = lsn;
   }
 
+  /**
+   * Get pretty date modified.
+   *
+   * @return date modified
+   */
+  @SuppressWarnings("unused")
   public String getPrettyDateModified() {
-    return DWUtils.pretty5ByteDateTime(this.fd.getDateModified());
+    return DWUtils.pretty5ByteDateTime(this.fileDescriptor.getDateModified());
   }
 
+  /**
+   * get pretty date created.
+   *
+   * @return date created
+   */
+  @SuppressWarnings("unused")
   public String getPrettyDateCreated() {
-    return DWUtils.pretty3ByteDate(this.fd.getDateCreated());
+    return DWUtils.pretty3ByteDate(this.fileDescriptor.getDateCreated());
   }
-
 }

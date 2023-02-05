@@ -10,152 +10,198 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
 
-
 public class DWUIThread implements Runnable {
-
-  private static final Logger logger = Logger.getLogger("DWUIThread");
-
-  private int tcpport;
-  private boolean wanttodie = false;
-  private ServerSocket srvr = null;
-
-  private LinkedList<DWUIClientThread> clientThreads = new LinkedList<DWUIClientThread>();
-
-  private int dropppedevents = 0;
-
+  /**
+   * class logger.
+   */
+  private static final Logger LOGGER = Logger.getLogger(DWUIThread.class);
+  /**
+   * tcp port for thread.
+   */
+  private int tcpPort;
+  /**
+   * waiting to die flag.
+   */
+  private boolean wantToDie = false;
+  /**
+   * owning server socket.
+   */
+  private ServerSocket serverSocket = null;
+  /**
+   * list of UI client threads.
+   */
+  private final LinkedList<DWUIClientThread> clientThreads = new LinkedList<>();
+  /**
+   * counter for dropped events.
+   */
+  private int droppedEvents = 0;
+  /**
+   * queue size at last count.
+   */
   private int lastQueueSize;
 
-  public DWUIThread(int port) {
-    this.tcpport = port;
+  /**
+   * DWUIThread.
+   *
+   * @param port specify tcp port number
+   */
+  public DWUIThread(final int port) {
+    this.tcpPort = port;
   }
 
-
+  /**
+   * die.
+   *
+   * kill thread safely
+   */
   public void die() {
-    this.wanttodie = true;
+    this.wantToDie = true;
     try {
       for (DWUIClientThread ct : this.clientThreads) {
-
         ct.die();
-
       }
-
-      if (this.srvr != null) {
-        this.srvr.close();
+      if (this.serverSocket != null) {
+        this.serverSocket.close();
       }
     } catch (IOException e) {
-      logger.warn("IO Error closing socket: " + e.getMessage());
+      LOGGER.warn("IO Error closing socket: " + e.getMessage());
     } catch (ConcurrentModificationException e) {
       // TODO whatever, we are dying, but should do this right
     }
-
   }
 
-
+  /**
+   * run.
+   *
+   * start thread action
+   */
   public void run() {
-    Thread.currentThread().setName("dwUIserver-" + Thread.currentThread().getId());
+    Thread.currentThread().setName(
+        "dwUIserver-" + Thread.currentThread().getId()
+    );
     Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
-
     // open server socket
-
     try {
       // check for listen address
-
-      srvr = new ServerSocket(this.tcpport);
-      logger.info("UI listening on port " + srvr.getLocalPort());
-
+      serverSocket = new ServerSocket(this.tcpPort);
+      LOGGER.info("UI listening on port " + serverSocket.getLocalPort());
     } catch (IOException e2) {
-      logger.error("Error opening UI socket: " + e2.getClass().getSimpleName() + " " + e2.getMessage());
-      wanttodie = true;
-
+      LOGGER.error(
+          "Error opening UI socket: "
+              + e2.getClass().getSimpleName()
+              + " " + e2.getMessage()
+      );
+      wantToDie = true;
       // hrmmmm
-      if (DriveWireServer.serverconfig.getBoolean("UIorBust", true)) {
+      if (
+          DriveWireServer
+              .getServerConfiguration()
+              .getBoolean("UIorBust", true)
+      ) {
         DriveWireServer.shutdown();
       }
     }
 
-    while ((wanttodie == false) && (srvr.isClosed() == false)) {
+    while (!wantToDie && !serverSocket.isClosed()) {
       //logger.debug("UI waiting for connection");
       Socket skt = null;
       try {
-        skt = srvr.accept();
-
-        if (DriveWireServer.serverconfig.getBoolean("LogUIConnections", false))
-          logger.debug("new UI connection from " + skt.getInetAddress().getHostAddress());
-
-        Thread uiclientthread = new Thread(new DWUIClientThread(skt, this.clientThreads));
+        skt = serverSocket.accept();
+        if (
+            DriveWireServer
+                .getServerConfiguration()
+                .getBoolean("LogUIConnections", false)
+        ) {
+          LOGGER.debug(
+              "new UI connection from "
+                  + skt.getInetAddress().getHostAddress()
+          );
+        }
+        Thread uiclientthread = new Thread(
+            new DWUIClientThread(skt, this.clientThreads)
+        );
         uiclientthread.setDaemon(true);
         uiclientthread.start();
-
-
       } catch (IOException e1) {
-        if (wanttodie)
-          logger.debug("IO error (while dying): " + e1.getMessage());
-        else
-          logger.warn("IO error: " + e1.getMessage());
-
-        wanttodie = true;
+        if (wantToDie) {
+          LOGGER.debug("IO error (while dying): " + e1.getMessage());
+        } else {
+          LOGGER.warn("IO error: " + e1.getMessage());
+        }
+        wantToDie = true;
       }
-
     }
 
-    if (srvr != null) {
+    if (serverSocket != null) {
       try {
-        srvr.close();
+        serverSocket.close();
       } catch (IOException e) {
-        logger.error("error closing server socket: " + e.getMessage());
+        LOGGER.error("error closing server socket: " + e.getMessage());
       }
     }
-
-
-    logger.debug("exiting");
+    LOGGER.debug("exiting");
   }
 
-
-  public void submitEvent(DWEvent evt) {
-
-    //System.out.println("Event " + evt.getEventType() + " " + evt.getParam("k") + " " + evt.getParam("v"));
-
-
+  /**
+   * submitEvent.
+   *
+   * push event to all registered clients
+   * @param evt
+   */
+  public void submitEvent(final DWEvent evt) {
     synchronized (this.clientThreads) {
       Iterator<DWUIClientThread> itr = this.clientThreads.iterator();
-
       while (itr.hasNext()) {
         DWUIClientThread client = itr.next();
-
         // filter for instance
-        if ((client.getInstance() == -1) || (client.getInstance() == evt.getEventInstance()) || (evt.getEventInstance() == -1)) {
-          LinkedBlockingQueue<DWEvent> queue = (LinkedBlockingQueue<DWEvent>) client.getEventQueue();
-
+        if (
+                (client.getInstance() == -1)
+                        || (client.getInstance() == evt.getEventInstance())
+                        || (evt.getEventInstance() == -1)
+        ) {
+          LinkedBlockingQueue<DWEvent> queue = client.getEventQueue();
           synchronized (queue) {
-            if ((queue != null) && !(client.isDropLog() && (evt.getEventType() == DWDefs.EVENT_TYPE_LOG))) {
+            if (
+                !(client.isDropLog()
+                    && evt.getEventType() == DWDefs.EVENT_TYPE_LOG)
+            ) {
               this.lastQueueSize = queue.size();
               if (queue.size() < DWDefs.EVENT_QUEUE_LOGDROP_SIZE) {
                 queue.add(evt);
-              } else if ((queue.size() < DWDefs.EVENT_MAX_QUEUE_SIZE) && (evt.getEventType() != DWDefs.EVENT_TYPE_LOG)) {
+              } else if (
+                      queue.size() < DWDefs.EVENT_MAX_QUEUE_SIZE
+                              && evt.getEventType() != DWDefs.EVENT_TYPE_LOG
+              ) {
                 queue.add(evt);
               } else {
-                this.dropppedevents++;
-                System.out.println("queue drop: " + queue.size() + "/" + this.dropppedevents + "  " + evt.getEventType() + " thr " + client.getThreadName() + " cmd " + client.getCurCmd() + " state " + client.getState());
+                this.droppedEvents++;
+                System.out.println(
+                        "queue drop: " + queue.size() + "/"
+                                + this.droppedEvents + "  " + evt.getEventType()
+                                + " thr " + client.getThreadName()
+                                + " cmd " + client.getCurCmd()
+                                + " state " + client.getState());
               }
             }
           }
         }
       }
-
     }
   }
 
-
+  /**
+   * getNumUIClients.
+   * @return int total number of client threads
+   */
   public int getNumUIClients() {
     return this.clientThreads.size();
   }
 
-
+  /**
+   * getQueueSize.
+   * @return int queue size
+   */
   public int getQueueSize() {
-
-
     return lastQueueSize;
   }
-
-
 }

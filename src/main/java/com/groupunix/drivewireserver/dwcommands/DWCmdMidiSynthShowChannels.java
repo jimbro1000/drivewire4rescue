@@ -6,61 +6,81 @@ import javax.sound.midi.MidiChannel;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
 public class DWCmdMidiSynthShowChannels extends DWCommand {
+  /**
+   * Drivewire protocol handler.
+   */
+  private DWProtocolHandler dwProtocolHandler;
 
-  private DWProtocolHandler dwProto;
-
-  public DWCmdMidiSynthShowChannels(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Show Midi Synthesiser Channels constructor.
+   *
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdMidiSynthShowChannels(
+      final DWProtocolHandler protocolHandler,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
+    this.dwProtocolHandler = protocolHandler;
+    this.setCommand("channels");
+    this.setShortHelp("Show internal synth channel status");
+    this.setUsage("dw midi synth show channels");
   }
 
-  public String getCommand() {
-    return "channels";
-  }
-
-
-  public String getShortHelp() {
-    return "Show internal synth channel status";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth show channels";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
-    String text = new String();
-
-    text = "\r\nInternal synthesizer channel status:\r\n\n";
-
-    if (dwProto.getVPorts().getMidiSynth() != null) {
-      MidiChannel[] midchans = dwProto.getVPorts().getMidiSynth().getChannels();
-
-      Instrument[] instruments = dwProto.getVPorts().getMidiSynth().getLoadedInstruments();
-
-      text += "Chan#  Instr#  Orig#   Instrument\r\n";
-      text += "-----------------------------------------------------------------------------\r\n";
-
-      for (int i = 0; i < midchans.length; i++) {
-        if (midchans[i] != null) {
-          text += String.format(" %2d      %-3d    %-3d    ", (i + 1), midchans[i].getProgram(), dwProto.getVPorts().getGMInstrumentCache(i));
-
-          if (midchans[i].getProgram() < instruments.length) {
-            text += instruments[midchans[i].getProgram()].getName();
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder text = new StringBuilder();
+    text.append("\r\nInternal synthesizer channel status:\r\n\n");
+    if (dwProtocolHandler.getVPorts().getMidiSynth() != null) {
+      MidiChannel[] midiChannels = dwProtocolHandler
+          .getVPorts()
+          .getMidiSynth()
+          .getChannels();
+      Instrument[] instruments = dwProtocolHandler
+          .getVPorts()
+          .getMidiSynth()
+          .getLoadedInstruments();
+      text.append("Chan#  Instr#  Orig#   Instrument\r\n");
+      text.append("--------------------------------------")
+          .append("---------------------------------------\r\n"
+      );
+      for (int i = 0; i < midiChannels.length; i++) {
+        if (midiChannels[i] != null) {
+          text.append(
+              String.format(
+                  " %2d      %-3d    %-3d    ",
+                  (i + 1),
+                  midiChannels[i].getProgram(),
+                  dwProtocolHandler.getVPorts().getGMInstrumentCache(i)
+              )
+          );
+          if (midiChannels[i].getProgram() < instruments.length) {
+            text.append(instruments[midiChannels[i].getProgram()].getName());
           } else {
-            text += "(unknown instrument or no soundbank loaded)";
+            text.append("(unknown instrument or no soundbank loaded)");
           }
-          text += "\r\n";
+          text.append("\r\n");
         }
       }
     } else {
-      text += "MIDI is disabled.\r\n";
+      text.append("MIDI is disabled.\r\n");
     }
-    return (new DWCommandResponse(text));
+    return new DWCommandResponse(text.toString());
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validates command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
 }

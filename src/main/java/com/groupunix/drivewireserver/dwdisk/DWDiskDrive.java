@@ -11,107 +11,180 @@ import com.groupunix.drivewireserver.dwexceptions.DWInvalidSectorException;
 import com.groupunix.drivewireserver.dwexceptions.DWSeekPastEndOfDeviceException;
 
 public class DWDiskDrive {
-  private static final Logger logger = Logger.getLogger("DWServer.DWDiskDrive");
-
-  private int driveno;
+  /**
+   * Log appender.
+   */
+  private static final Logger LOGGER = Logger.getLogger("DWServer.DWDiskDrive");
+  /**
+   * Drive number id.
+   */
+  private final int driveNo;
+  /**
+   * Disk drives object.
+   */
+  private final DWDiskDrives dwDrives;
+  /**
+   * Drive loaded?.
+   */
   private boolean loaded = false;
-  private DWDisk disk = null;
-  private DWDiskDrives drives;
+  /**
+   * Drivewire disk.
+   */
+  private DWDisk dwDisk = null;
 
-
-  public DWDiskDrive(DWDiskDrives drives, int driveno) {
-    this.drives = drives;
-    this.driveno = driveno;
+  /**
+   * Disk drives constructor.
+   *
+   * @param drives
+   * @param driveNumber
+   */
+  public DWDiskDrive(final DWDiskDrives drives, final int driveNumber) {
+    this.dwDrives = drives;
+    this.driveNo = driveNumber;
   }
 
-
+  /**
+   * Get drive number.
+   *
+   * @return drive number
+   */
   public int getDriveNo() {
-    return driveno;
+    return driveNo;
   }
 
-
+  /**
+   * Is a disk loaded in drive.
+   *
+   * @return true if loaded
+   */
   public boolean isLoaded() {
     return this.loaded;
   }
 
-
+  /**
+   * Get loaded disk.
+   *
+   * @return disk object
+   * @throws DWDriveNotLoadedException
+   */
   public DWDisk getDisk() throws DWDriveNotLoadedException {
     if (this.loaded) {
-      return (this.disk);
+      return (this.dwDisk);
     } else {
-      throw new DWDriveNotLoadedException("No disk in drive " + this.getDriveNo());
+      throw new DWDriveNotLoadedException(
+          "No disk in drive " + this.getDriveNo()
+      );
     }
-
   }
 
-
+  /**
+   * Eject disk from drive.
+   *
+   * @throws DWDriveNotLoadedException
+   */
   public void eject() throws DWDriveNotLoadedException {
-
-    if (this.disk == null) {
-      throw new DWDriveNotLoadedException("There is no disk in drive " + this.driveno);
+    if (this.dwDisk == null) {
+      throw new DWDriveNotLoadedException(
+          "There is no disk in drive " + this.driveNo
+      );
     }
-
-    synchronized (this.disk) {
+    synchronized (this.dwDisk) {
       try {
-        this.disk.eject();
+        this.dwDisk.eject();
       } catch (IOException e) {
-        logger.warn("Ejecting from drive " + this.getDriveNo() + ": " + e.getMessage());
+        LOGGER.warn(
+            "Ejecting from drive " + this.getDriveNo() + ": " + e.getMessage()
+        );
       }
-
       this.loaded = false;
-      this.disk = null;
+      this.dwDisk = null;
       this.submitEvent("*eject", "");
     }
   }
 
-
-  public void insert(DWDisk disk) {
-    this.disk = disk;
+  /**
+   * Insert disk in drive.
+   *
+   * @param disk disk object
+   */
+  public void insert(final DWDisk disk) {
+    this.dwDisk = disk;
     this.loaded = true;
-    this.submitEvent("*insert", this.disk.getFilePath());
-    this.disk.insert(this);
-
+    this.submitEvent("*insert", this.dwDisk.getFilePath());
+    this.dwDisk.insert(this);
   }
 
-
-  public void seekSector(int lsn) throws DWInvalidSectorException, DWSeekPastEndOfDeviceException, DWDriveNotLoadedException {
-    if (this.disk == null)
-      throw new DWDriveNotLoadedException("No disk in drive " + this.driveno);
-
-    synchronized (this.disk) {
-      this.disk.seekSector(lsn);
+  /**
+   * Seek sector by LSN.
+   *
+   * @param lsn logical sector number
+   * @throws DWInvalidSectorException
+   * @throws DWSeekPastEndOfDeviceException
+   * @throws DWDriveNotLoadedException
+   */
+  public void seekSector(final int lsn)
+      throws DWInvalidSectorException,
+      DWSeekPastEndOfDeviceException,
+      DWDriveNotLoadedException {
+    if (this.dwDisk == null) {
+      throw new DWDriveNotLoadedException("No disk in drive " + this.driveNo);
     }
-
+    synchronized (this.dwDisk) {
+      this.dwDisk.seekSector(lsn);
+    }
   }
 
-
+  /**
+   * Read sector from disk.
+   *
+   * @return sector byte array
+   * @throws IOException
+   * @throws DWImageFormatException
+   */
   public byte[] readSector() throws IOException, DWImageFormatException {
-    if (this.disk == null)
+    if (this.dwDisk == null) {
       throw new IOException("Disk is null");
-
-    synchronized (this.disk) {
-      return (this.disk.readSector());
+    }
+    synchronized (this.dwDisk) {
+      return (this.dwDisk.readSector());
     }
   }
 
-
-  public void writeSector(byte[] data) throws DWDriveWriteProtectedException, IOException {
-    if (this.disk == null)
+  /**
+   * Write sector to disk.
+   *
+   * @param data sector byte array
+   * @throws DWDriveWriteProtectedException
+   * @throws IOException
+   */
+  public void writeSector(final byte[] data)
+      throws DWDriveWriteProtectedException, IOException {
+    if (this.dwDisk == null) {
       throw new IOException("Disk is null");
-
-    synchronized (this.disk) {
-      this.disk.writeSector(data);
+    }
+    synchronized (this.dwDisk) {
+      this.dwDisk.writeSector(data);
     }
   }
 
-
-  public void submitEvent(String key, String val) {
-    if (this.drives != null)
-      this.drives.submitEvent(this.driveno, key, val);
+  /**
+   * Submit event to drives.
+   *
+   * @param key parameter key
+   * @param val value
+   */
+  public void submitEvent(final String key, final String val) {
+    if (this.dwDrives != null) {
+      this.dwDrives.submitEvent(this.driveNo, key, val);
+    }
   }
 
+  /**
+   * Get drives.
+   *
+   * @return disk drives object
+   */
   public DWDiskDrives getDiskDrives() {
-    return this.drives;
+    return this.dwDrives;
   }
-
 }

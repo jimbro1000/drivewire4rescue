@@ -5,49 +5,49 @@ import java.lang.management.ThreadMXBean;
 
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
-public class DWCmdServerShowThreads extends DWCommand {
+public final class DWCmdServerShowThreads extends DWCommand {
 
-  DWCmdServerShowThreads(DWCommand parent) {
+  /**
+   * Server show threads command constructor.
+   *
+   * @param parent parent command
+   */
+  DWCmdServerShowThreads(final DWCommand parent) {
     setParentCmd(parent);
+    this.setCommand("threads");
+    this.setShortHelp("Show server threads");
+    this.setUsage("dw server show threads");
   }
 
-  public String getCommand() {
-    return "threads";
-  }
-
-
-  public String getShortHelp() {
-    return "Show server threads";
-  }
-
-
-  public String getUsage() {
-    return "dw server show threads";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
-    String text = new String();
-
-    text += "\r\nDriveWire Server Threads:\r\n\n";
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder text = new StringBuilder();
+    text.append("\r\nDriveWire Server Threads:\r\n\n");
     Thread[] threads = getAllThreads();
-
-    for (int i = 0; i < threads.length; i++) {
-      if (threads[i] != null) {
-        text += String.format("%40s %3d %-8s %-14s", shortenname(threads[i].getName()), threads[i].getPriority(), threads[i].getThreadGroup().getName(), threads[i].getState().toString()) + "\r\n";
-
+    for (Thread thread : threads) {
+      if (thread != null) {
+        text
+            .append(
+            String.format(
+                "%40s %3d %-8s %-14s",
+                shortenName(thread.getName()),
+                thread.getPriority(),
+                thread.getThreadGroup().getName(),
+                thread.getState())
+            )
+            .append("\r\n");
       }
     }
-
-    return (new DWCommandResponse(text));
+    return new DWCommandResponse(text.toString());
   }
 
-
-  private Object shortenname(String name) {
-    String res = name;
-
-
-    return res;
+  private Object shortenName(final String name) {
+    return name;
   }
 
   private Thread[] getAllThreads() {
@@ -66,8 +66,13 @@ public class DWCmdServerShowThreads extends DWCommand {
     return copy;
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
 }

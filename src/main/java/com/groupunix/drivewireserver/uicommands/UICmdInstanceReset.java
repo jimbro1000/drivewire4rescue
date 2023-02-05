@@ -6,43 +6,51 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdInstanceReset extends DWCommand {
-
-  static final String command = "reset";
-
-
-  public UICmdInstanceReset(DWUIClientThread dwuiClientThread) {
-
-    commands.addcommand(new UICmdInstanceResetProtodev(dwuiClientThread));
-
+  /**
+   * UI Command Instance Reset.
+   *
+   * @param clientThread client thread ref
+   */
+  public UICmdInstanceReset(final DWUIClientThread clientThread) {
+    this.getCommandList()
+        .addCommand(new UICmdInstanceResetProtodev(clientThread));
+    setHelp();
   }
 
-
-  public UICmdInstanceReset(DWProtocol dwProto) {
-    commands.addcommand(new UICmdInstanceResetProtodev(dwProto));
-
+  /**
+   * UI Command Instance Reset.
+   *
+   * @param protocol protocol
+   */
+  public UICmdInstanceReset(final DWProtocol protocol) {
+    this.getCommandList()
+        .addCommand(new UICmdInstanceResetProtodev(protocol));
+    setHelp();
   }
 
-
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    this.setCommand("reset");
+    this.setShortHelp("Restart commands");
+    this.setUsage("ui instance reset [command]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (commands.parse(cmdline));
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return this.getCommandList().parse(cmdline);
   }
 
-
-  public String getShortHelp() {
-    return "Restart commands";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
-
-
-  public String getUsage() {
-    return "ui instance reset [command]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
-  }
-
 }

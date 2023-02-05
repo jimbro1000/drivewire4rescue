@@ -7,46 +7,63 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdServerTerminate extends DWCommand {
-
-  static final String command = "terminate";
-
+  /**
+   * Client thread ref.
+   */
   @SuppressWarnings("unused")
-  private DWUIClientThread dwuiref;
-
+  private final DWUIClientThread dwuiClientThread;
+  /**
+   * Protocol.
+   */
   @SuppressWarnings("unused")
-  private DWProtocol dwProto;
+  private final DWProtocol dwProtocol;
 
-  public UICmdServerTerminate(DWUIClientThread dwuiClientThread) {
-    this.dwuiref = dwuiClientThread;
+  /**
+   * UI Command Server Terminate.
+   *
+   * @param clientThread client thread ref
+   */
+  public UICmdServerTerminate(final DWUIClientThread clientThread) {
+    this.dwuiClientThread = clientThread;
+    this.dwProtocol = null;
+    setHelp();
   }
 
-
-  public UICmdServerTerminate(DWProtocol dwProto) {
-    this.dwProto = dwProto;
+  /**
+   * UI Command Server Terminate.
+   *
+   * @param protocol protocol
+   */
+  public UICmdServerTerminate(final DWProtocol protocol) {
+    this.dwProtocol = protocol;
+    this.dwuiClientThread = null;
+    setHelp();
   }
 
-
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    setCommand("terminate");
+    setShortHelp("Terminate the server");
+    setUsage("ui server terminate");
   }
 
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     DriveWireServer.shutdown();
-    return (new DWCommandResponse("Server shutdown requested."));
+    return new DWCommandResponse("Server shutdown requested.");
   }
 
-
-  public String getShortHelp() {
-    return "Terminate the server";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
-
-  public String getUsage() {
-    return "ui server terminate";
-  }
-
-  public boolean validate(String cmdline) {
-    return (true);
-  }
-
 }

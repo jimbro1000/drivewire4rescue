@@ -1,69 +1,167 @@
 package com.groupunix.drivewireserver.dwprotocolhandler;
 
+@SuppressWarnings("unused")
 public class DWRFMPathDescriptor {
-  private byte pdbytes[];
+  /**
+   * FST record length.
+   */
+  private static final int FST_LENGTH = 32;
+  /**
+   * FST offset.
+   */
+  private static final int FST_OFFSET = 10;
+  /**
+   * BUF offset.
+   */
+  private static final int BUF_OFFSET = 8;
+  /**
+   * RGS offset.
+   */
+  private static final int RGS_OFFSET = 6;
+  /**
+   * DEV offset.
+   */
+  private static final int DEV_OFFSET = 3;
+  /**
+   * CPR offset.
+   */
+  private static final int CPR_OFFSET = 5;
+  /**
+   * CNT offset.
+   */
+  private static final int CNT_OFFSET = 2;
+  /**
+   * MOD offset.
+   */
+  private static final int MOD_OFFSET = 1;
+  /**
+   * PD offset.
+   */
+  private static final int PD_OFFSET = 0;
+  /**
+   * Path descriptor byte array.
+   */
+  private byte[] pdBytes;
 
-  public DWRFMPathDescriptor(byte[] responsebuf) {
-    setPdbytes(responsebuf);
+  /**
+   * RFM path descriptor.
+   *
+   * @param responseBuffer source response buffer
+   */
+  public DWRFMPathDescriptor(final byte[] responseBuffer) {
+    setPdBytes(responseBuffer);
   }
 
-  public byte[] getPdbytes() {
-    return pdbytes;
+  /**
+   * Get PD byte array.
+   *
+   * @return pd byte array
+   */
+  @SuppressWarnings("unused")
+  public byte[] getPdBytes() {
+    return pdBytes;
   }
 
-  public void setPdbytes(byte pdbytes[]) {
-    this.pdbytes = pdbytes;
+  /**
+   * Set PD byte array.
+   *
+   * @param pd path descriptor byte array
+   */
+  public void setPdBytes(final byte[] pd) {
+    int pdLen = pd.length;
+    byte[] tmp = new byte[pdLen];
+    System.arraycopy(pd, 0, tmp, 0, pdLen);
+    this.pdBytes = tmp;
   }
 
+  /**
+   * Get PD byte.
+   *
+   * @return pd
+   */
+  @SuppressWarnings("unused")
   public byte getPD() {
-    return (this.pdbytes[0]);
+    return (this.pdBytes[PD_OFFSET]);
   }
 
+  /**
+   * Get MOD byte.
+   *
+   * @return mod
+   */
+  @SuppressWarnings("unused")
   public byte getMOD() {
-    return (this.pdbytes[1]);
+    return (this.pdBytes[MOD_OFFSET]);
   }
 
+  /**
+   * Get CNT byte.
+   *
+   * @return cnt
+   */
+  @SuppressWarnings("unused")
   public byte getCNT() {
-    return (this.pdbytes[2]);
+    return (this.pdBytes[CNT_OFFSET]);
   }
 
+  /**
+   * Get DEV word.
+   *
+   * @return dev word
+   */
+  @SuppressWarnings("unused")
   public byte[] getDEV() {
     byte[] tmp = new byte[2];
-
-    tmp[0] = this.pdbytes[3];
-    tmp[1] = this.pdbytes[4];
-
-    return (tmp);
+    tmp[0] = this.pdBytes[DEV_OFFSET];
+    tmp[1] = this.pdBytes[DEV_OFFSET + 1];
+    return tmp;
   }
 
+  /**
+   * Get CPR byte.
+   *
+   * @return cpr
+   */
+  @SuppressWarnings("unused")
   public byte getCPR() {
-    return (this.pdbytes[5]);
+    return (this.pdBytes[CPR_OFFSET]);
   }
 
+  /**
+   * Get RGS word.
+   *
+   * @return rgs word
+   */
+  @SuppressWarnings("unused")
   public byte[] getRGS() {
     byte[] tmp = new byte[2];
-
-    tmp[0] = this.pdbytes[6];
-    tmp[1] = this.pdbytes[7];
-
+    tmp[0] = this.pdBytes[RGS_OFFSET];
+    tmp[1] = this.pdBytes[RGS_OFFSET + 1];
     return (tmp);
   }
 
+  /**
+   * Get BUF word.
+   *
+   * @return buffer size word
+   */
+  @SuppressWarnings("unused")
   public byte[] getBUF() {
     byte[] tmp = new byte[2];
-
-    tmp[0] = this.pdbytes[8];
-    tmp[1] = this.pdbytes[9];
-
-    return (tmp);
+    tmp[0] = this.pdBytes[BUF_OFFSET];
+    tmp[1] = this.pdBytes[BUF_OFFSET + 1];
+    return tmp;
   }
 
+  /**
+   * Get FST.
+   *
+   * @return fst byte array
+   */
+  @SuppressWarnings("unused")
   public byte[] getFST() {
-    byte[] tmp = new byte[32];
-    System.arraycopy(this.pdbytes, 10, tmp, 0, 32);
-    return (tmp);
+    byte[] fstBytes = new byte[FST_LENGTH];
+    System.arraycopy(this.pdBytes, FST_OFFSET, fstBytes, 0, FST_LENGTH);
+    return fstBytes;
   }
-
 }
-
-

@@ -11,50 +11,59 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerConfigShow extends DWCommand {
 
-  static final String command = "show";
-
-
-  public String getCommand() {
-    return command;
+  /**
+   * UI Cmd Server Config Show.
+   */
+  public UICmdServerConfigShow() {
+    setCommand("show");
+    setShortHelp("Show server configuration");
+    setUsage("ui server config show [item]");
   }
 
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @SuppressWarnings("unchecked")
-  public DWCommandResponse parse(String cmdline) {
-    String res = new String();
-
-
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder res = new StringBuilder();
     if (cmdline.length() == 0) {
-      for (Iterator<String> i = DriveWireServer.serverconfig.getKeys(); i.hasNext(); ) {
+      Iterator<String> i = DriveWireServer.getServerConfiguration().getKeys();
+      while (i.hasNext()) {
         String key = i.next();
-        String value = StringUtils.join(DriveWireServer.serverconfig.getStringArray(key), ", ");
-
-        res += key + " = " + value + "\r\n";
-
+        String value = StringUtils.join(
+            DriveWireServer.getServerConfiguration().getStringArray(key),
+            ", "
+        );
+        res.append(key).append(" = ").append(value).append("\r\n");
       }
     } else {
-      if (DriveWireServer.serverconfig.containsKey(cmdline)) {
-        String value = StringUtils.join(DriveWireServer.serverconfig.getStringArray(cmdline), ", ");
-        return (new DWCommandResponse(value));
+      if (DriveWireServer.getServerConfiguration().containsKey(cmdline)) {
+        String value = StringUtils.join(
+            DriveWireServer.getServerConfiguration().getStringArray(cmdline),
+            ", "
+        );
+        return new DWCommandResponse(value);
       } else {
-        return (new DWCommandResponse(false, DWDefs.RC_CONFIG_KEY_NOT_SET, "Key '" + cmdline + "' is not set."));
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_CONFIG_KEY_NOT_SET,
+            "Key '" + cmdline + "' is not set."
+        );
       }
     }
-
-    return (new DWCommandResponse(res));
+    return new DWCommandResponse(res.toString());
   }
 
-
-  public String getShortHelp() {
-    return "Show server configuration";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
-
-  public String getUsage() {
-    return "ui server config show [item]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (true);
-  }
-
 }

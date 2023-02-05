@@ -1,72 +1,96 @@
 package com.groupunix.drivewireserver.dwcommands;
 
-
 import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.DriveWireServer;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
-public class DWCmdInstanceRestart extends DWCommand {
-
-
-  public DWCmdInstanceRestart(DWProtocol dwProto2, DWCommand parent) {
+public final class DWCmdInstanceRestart extends DWCommand {
+  /**
+   * Command Instance Restart constructor.
+   *
+   * @param protocol protocol
+   * @param parent parent command
+   */
+  public DWCmdInstanceRestart(
+      final DWProtocol protocol,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-
+    this.setCommand("restart");
+    this.setShortHelp("Restart instance #");
+    this.setUsage("dw instance restart #");
   }
 
-  public String getCommand() {
-    return "restart";
-  }
-
-
-  public String getShortHelp() {
-    return "Restart instance #";
-  }
-
-
-  public String getUsage() {
-    return "dw instance restart #";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command.
+   *
+   * @param cmdline command string
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Syntax error: dw instance restart requires an instance # as an argument"));
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "Syntax error: "
+              + "dw instance restart requires an instance # as an argument"
+      );
     }
-
-    return (doStart(cmdline));
+    return doRestart(cmdline);
   }
 
-
-  private DWCommandResponse doStart(String instr) {
-
-
+  private DWCommandResponse doRestart(final String instance) {
     try {
-      int intno = Integer.parseInt(instr);
-
-      if (!DriveWireServer.isValidHandlerNo(intno))
-        return (new DWCommandResponse(false, DWDefs.RC_INVALID_HANDLER, "Invalid instance number."));
-
-      if (DriveWireServer.getHandler(intno) == null)
-        return (new DWCommandResponse(false, DWDefs.RC_INVALID_HANDLER, "Instance " + intno + " is not defined."));
-
-      if (!DriveWireServer.getHandler(intno).isReady())
-        return (new DWCommandResponse(false, DWDefs.RC_INSTANCE_ALREADY_STARTED, "Instance " + intno + " is not started."));
-
-      if (DriveWireServer.getHandler(intno).isDying())
-        return (new DWCommandResponse(false, DWDefs.RC_INSTANCE_NOT_READY, "Instance " + intno + " is in the process of shutting down."));
-
-      DriveWireServer.restartHandler(intno);
-
-      return (new DWCommandResponse("Restarting instance # " + intno));
-
+      int instanceNumber = Integer.parseInt(instance);
+      if (!DriveWireServer.isValidHandlerNo(instanceNumber)) {
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_INVALID_HANDLER,
+            "Invalid instance number."
+        );
+      }
+      if (DriveWireServer.getHandler(instanceNumber) == null) {
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_INVALID_HANDLER,
+            "Instance " + instanceNumber + " is not defined."
+        );
+      }
+      if (!DriveWireServer.getHandler(instanceNumber).isReady()) {
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_INSTANCE_ALREADY_STARTED,
+            "Instance " + instanceNumber + " is not started."
+        );
+      }
+      if (DriveWireServer.getHandler(instanceNumber).isDying()) {
+        return new DWCommandResponse(
+            false,
+            DWDefs.RC_INSTANCE_NOT_READY,
+            "Instance "
+                + instanceNumber + " is in the process of shutting down."
+        );
+      }
+      DriveWireServer.restartHandler(instanceNumber);
+      return new DWCommandResponse(
+          "Restarting instance # " + instanceNumber
+      );
     } catch (NumberFormatException e) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "dw instance restart requires a numeric instance # as an argument"));
-
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "dw instance restart requires a numeric instance # as an argument"
+      );
     }
-
   }
 
-
-  public boolean validate(String cmdline) {
+  /**
+   * Validate command.
+   *
+   * @param cmdline command string
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
     return (true);
   }
 }

@@ -1,6 +1,5 @@
 package com.groupunix.drivewireserver.uicommands;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
@@ -11,45 +10,50 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerShowSynthProfiles extends DWCommand {
 
-  @Override
-  public String getCommand() {
-    // TODO Auto-generated method stub
-    return "synthprofiles";
+  /**
+   * UI Command Server Show Synth Profiles.
+   */
+  public UICmdServerShowSynthProfiles() {
+    setHelp();
   }
 
-
-  @Override
-  public String getShortHelp() {
-    // TODO Auto-generated method stub
-    return "show MIDI synth profiles";
+  private void setHelp() {
+    setCommand("synthprofiles");
+    setShortHelp("show MIDI synth profiles");
+    setUsage("ui server show synthprofiles");
   }
 
-  @Override
-  public String getUsage() {
-    // TODO Auto-generated method stub
-    return "ui server show synthprofiles";
-  }
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
   @SuppressWarnings("unchecked")
   @Override
-  public DWCommandResponse parse(String cmdline) {
-    String res = new String();
+  public DWCommandResponse parse(final String cmdline) {
+    StringBuilder res = new StringBuilder();
 
-    List<HierarchicalConfiguration> profiles = DriveWireServer.serverconfig.configurationsAt("midisynthprofile");
+    List<HierarchicalConfiguration> profiles = DriveWireServer
+        .getServerConfiguration()
+        .configurationsAt("midisynthprofile");
 
-    for (Iterator<HierarchicalConfiguration> it = profiles.iterator(); it.hasNext(); ) {
-
-      HierarchicalConfiguration mprof = (HierarchicalConfiguration) it.next();
-      res += mprof.getString("[@name]") + "|" + mprof.getString("[@desc]") + "\n";
-
-
+    for (HierarchicalConfiguration mprof : profiles) {
+      res.append(mprof.getString("[@name]"))
+          .append("|")
+          .append(mprof.getString("[@desc]"))
+          .append("\n");
     }
-
-
-    return (new DWCommandResponse(res));
+    return new DWCommandResponse(res.toString());
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 }

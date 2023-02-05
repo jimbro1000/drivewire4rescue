@@ -4,59 +4,75 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
-public class DWCmd extends DWCommand {
-  static final String command = "dw";
-  private DWCommandList commands;
-  private DWProtocol dwProto;
+public final class DWCmd extends DWCommand {
+  /**
+   * command protocol.
+   */
+  private final DWProtocol dwProtocol;
 
-  public DWCmd(DWProtocol dwProtocol) {
-    this.dwProto = dwProtocol;
-
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-
-    commands.addcommand(new DWCmdServer(dwProtocol, this));
-    commands.addcommand(new DWCmdConfig(dwProtocol, this));
-    commands.addcommand(new DWCmdLog(dwProtocol, this));
-    commands.addcommand(new DWCmdInstance(dwProtocol, this));
-
-    if (this.dwProto.hasDisks())
-      commands.addcommand(new DWCmdDisk((DWProtocolHandler) dwProtocol, this));
-
-    if (this.dwProto.hasVSerial()) {
-      commands.addcommand(new DWCmdPort((DWVSerialProtocol) dwProtocol, this));
-      commands.addcommand(new DWCmdNet((DWVSerialProtocol) dwProtocol, this));
-      commands.addcommand(new DWCmdClient((DWVSerialProtocol) dwProtocol, this));
+  /**
+   * Drivewire command constructor.
+   *
+   * @param protocol protocol
+   */
+  public DWCmd(final DWProtocol protocol) {
+    this.dwProtocol = protocol;
+    DWCommandList commands = new DWCommandList(
+        this.dwProtocol,
+        this.dwProtocol.getCMDCols()
+    );
+    this.setCommandList(commands);
+    commands.addCommand(new DWCmdServer(protocol, this));
+    commands.addCommand(new DWCmdConfig(protocol, this));
+    commands.addCommand(new DWCmdLog(protocol, this));
+    commands.addCommand(new DWCmdInstance(protocol, this));
+    if (this.dwProtocol.hasDisks()) {
+      commands.addCommand(
+          new DWCmdDisk((DWProtocolHandler) protocol, this)
+      );
+    }
+    if (this.dwProtocol.hasVSerial()) {
+      commands.addCommand(
+          new DWCmdPort((DWVSerialProtocol) protocol, this)
+      );
+      commands.addCommand(
+          new DWCmdNet((DWVSerialProtocol) protocol, this)
+      );
+      commands.addCommand(
+          new DWCmdClient((DWVSerialProtocol) protocol, this)
+      );
     }
 
-    if (this.dwProto.hasMIDI())
-      commands.addcommand(new DWCmdMidi((DWProtocolHandler) dwProtocol, this));
-
+    if (this.dwProtocol.hasMIDI()) {
+      commands.addCommand(
+          new DWCmdMidi((DWProtocolHandler) protocol, this)
+      );
+    }
+    this.setCommand("dw");
+    this.setShortHelp("Manage all aspects of the server");
+    this.setUsage("dw [command]");
   }
 
-  public String getCommand() {
-    return command;
-  }
-
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * parse command.
+   *
+   * @param cmdline command string
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
+    return (this.getCommandList().parse(cmdline));
   }
 
-  public String getShortHelp() {
-    return "Manage all aspects of the server";
-  }
-
-  public String getUsage() {
-    return "dw [command]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+  /**
+   * validate command.
+   *
+   * @param cmdline command string
+   * @return true if command is valid
+   */
+  public boolean validate(final String cmdline) {
+    return (this.getCommandList().validate(cmdline));
   }
 }

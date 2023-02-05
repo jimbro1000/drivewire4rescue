@@ -2,52 +2,52 @@ package com.groupunix.drivewireserver.dwcommands;
 
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
-public class DWCmdServerHelp extends DWCommand {
+public final class DWCmdServerHelp extends DWCommand {
+  /**
+   * Drivewire protocol.
+   */
+  private final DWProtocol dwProtocol;
 
-  static final String command = "help";
-  private DWCommandList commands;
-  private DWProtocol dwProto;
-
-
-  public DWCmdServerHelp(DWProtocol dwProtocol, DWCommand parent) {
+  /**
+   * Server help command constructor.
+   *
+   * @param protocol protocol
+   * @param parent parent command
+   */
+  public DWCmdServerHelp(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
-    this.dwProto = dwProtocol;
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdServerHelpShow(dwProtocol, this));
-    commands.addcommand(new DWCmdServerHelpReload(dwProtocol, this));
-
+    this.dwProtocol = protocol;
+    DWCommandList commands = new DWCommandList(
+        this.dwProtocol, this.dwProtocol.getCMDCols()
+    );
+    this.setCommandList(commands);
+    commands.addCommand(new DWCmdServerHelpShow(protocol, this));
+    commands.addCommand(new DWCmdServerHelpReload(protocol, this));
+    this.setCommand("help");
+    this.setShortHelp("Manage the help system");
+    this.setUsage("dw help [command]");
   }
 
-
-  public String getCommand() {
-    return command;
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return new DWCommandResponse(this.getCommandList().getShortHelp());
     }
-    return (commands.parse(cmdline));
+    return this.getCommandList().parse(cmdline);
   }
 
-  public DWCommandList getCommandList() {
-    return (this.commands);
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
-
-
-  public String getShortHelp() {
-    return "Manage the help system";
-  }
-
-
-  public String getUsage() {
-    return "dw help [command]";
-  }
-
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
-  }
-
-
 }

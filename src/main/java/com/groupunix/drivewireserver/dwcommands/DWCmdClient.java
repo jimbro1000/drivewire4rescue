@@ -1,45 +1,57 @@
 package com.groupunix.drivewireserver.dwcommands;
 
-import com.groupunix.drivewireserver.dwprotocolhandler.*;
 
-public class DWCmdClient extends DWCommand {
+import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
-  static final String command = "client";
-  private DWCommandList commands;
-  private DWVSerialProtocol dwProto;
+public final class DWCmdClient extends DWCommand {
+  /**
+   * Drivewire serial protocol.
+   */
+  private final DWVSerialProtocol dwvSerialProtocol;
 
-  public DWCmdClient(DWVSerialProtocol dwProto, DWCommand parent) {
+  /**
+   * Client command constructor.
+   *
+   * @param protocol serial protocol
+   * @param parent   parent command
+   */
+  public DWCmdClient(
+      final DWVSerialProtocol protocol, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-
-    commands.addcommand(new DWCmdClientRestart(dwProto, this));
+    this.dwvSerialProtocol = protocol;
+    DWCommandList commands = new DWCommandList(
+        this.dwvSerialProtocol, this.dwvSerialProtocol.getCMDCols()
+    );
+    this.setCommandList(commands);
+    commands.addCommand(new DWCmdClientRestart(protocol, this));
+    this.setCommand("client");
+    this.setShortHelp("Commands that manage the attached client device");
+    this.setUsage("dw client [command]");
   }
 
-  public String getCommand() {
-    return command;
-  }
-
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return new DWCommandResponse(
+          this.getCommandList().getShortHelp()
+      );
     }
-    return (commands.parse(cmdline));
+    return this.getCommandList().parse(cmdline);
   }
 
-  public String getShortHelp() {
-    return "Commands that manage the attached client device";
-  }
-
-  public String getUsage() {
-    return "dw client [command]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
 }

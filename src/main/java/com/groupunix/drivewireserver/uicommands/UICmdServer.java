@@ -2,49 +2,62 @@ package com.groupunix.drivewireserver.uicommands;
 
 import com.groupunix.drivewireserver.DWUIClientThread;
 import com.groupunix.drivewireserver.dwcommands.DWCommand;
+import com.groupunix.drivewireserver.dwcommands.DWCommandList;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdServer extends DWCommand {
-
-  static final String command = "server";
-
-  public UICmdServer(DWUIClientThread dwuiClientThread) {
-    commands.addcommand(new UICmdServerShow(dwuiClientThread));
-    commands.addcommand(new UICmdServerConfig(dwuiClientThread));
-    commands.addcommand(new UICmdServerTerminate(dwuiClientThread));
-    commands.addcommand(new UICmdServerFile());
+  /**
+   * UI Command Server.
+   *
+   * @param clientThread client thread ref
+   */
+  public UICmdServer(final DWUIClientThread clientThread) {
+    DWCommandList commands = this.getCommandList();
+    commands.addCommand(new UICmdServerShow(clientThread));
+    commands.addCommand(new UICmdServerConfig(clientThread));
+    commands.addCommand(new UICmdServerTerminate(clientThread));
+    commands.addCommand(new UICmdServerFile());
+    setHelp();
   }
 
-
-  public UICmdServer(DWProtocol dwProto) {
-    commands.addcommand(new UICmdServerShow(dwProto));
-    commands.addcommand(new UICmdServerConfig(dwProto));
-    commands.addcommand(new UICmdServerTerminate(dwProto));
-    commands.addcommand(new UICmdServerFile());
+  /**
+   * UI Command Server.
+   *
+   * @param protocol protocol
+   */
+  public UICmdServer(final DWProtocol protocol) {
+    DWCommandList commands = this.getCommandList();
+    commands.addCommand(new UICmdServerShow(protocol));
+    commands.addCommand(new UICmdServerConfig(protocol));
+    commands.addCommand(new UICmdServerTerminate(protocol));
+    commands.addCommand(new UICmdServerFile());
+    setHelp();
   }
 
-
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    this.setCommand("server");
+    this.setShortHelp("Server commands");
+    this.setUsage("ui server [command]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-    return (commands.parse(cmdline));
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
+    return this.getCommandList().parse(cmdline);
   }
 
-
-  public String getShortHelp() {
-    return "Server commands";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
-
-
-  public String getUsage() {
-    return "ui server [command]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
-  }
-
 }

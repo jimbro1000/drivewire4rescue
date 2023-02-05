@@ -13,87 +13,144 @@ import com.groupunix.drivewireserver.dwexceptions.DWInvalidSectorException;
 import com.groupunix.drivewireserver.dwexceptions.DWSeekPastEndOfDeviceException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
+@SuppressWarnings("unused")
 public class DWSIDEImageDisk extends DWDisk {
-  private static final Logger logger = Logger.getLogger("DWServer.DWSIDEImageDisk");
-  private long startpos;
-  private long endpos;
-  @SuppressWarnings("unused")
-  private boolean halfsector;
+  /**
+   * Log appender.
+   */
+  private static final Logger LOGGER
+      = Logger.getLogger("DWServer.DWSIDEImageDisk");
+  /**
+   * Sector size (bytes).
+   */
+  private static final int SECTOR_SIZE = 256;
+  /**
+   * Start position.
+   */
+  private final long startPos;
+  /**
+   * End position.
+   */
+  private final long endPos;
+//  /**
+//   * Use half sectors flag.
+//   */
+//  private final boolean halfsector;
 
-
-  public DWSIDEImageDisk(FileObject fileobj, long start, long end, boolean halfsector) throws IOException, DWImageFormatException {
-    super(fileobj);
+  /**
+   * SIDE Image disk constructor.
+   *
+   * @param fileObject source file object
+   * @param start start position
+   * @param end end position
+   * @param halfSector half sector flag
+   * @throws IOException Failed to load file object
+   * @throws DWImageFormatException Invalid file object format
+   */
+  public DWSIDEImageDisk(
+      final FileObject fileObject,
+      final long start,
+      final long end,
+      final boolean halfSector
+  ) throws IOException, DWImageFormatException {
+    super(fileObject);
     this.setParam("_format", "side");
-
-    this.startpos = start;
-    this.endpos = end;
-    this.halfsector = halfsector;
-
+    this.startPos = start;
+    this.endPos = end;
+//    this.halfsector = halfSector;
     load();
-
-    logger.debug("New SuperIDE image disk for " + fileobj.getName().getURI() + " (start: " + start + " end: " + end + " halfsectors: " + halfsector);
+    LOGGER.debug(
+        "New SuperIDE image disk for " + fileObject.getName().getURI()
+            + " (start: " + start
+            + " end: " + end
+            + " halfsectors: " + halfSector + ")"
+    );
   }
 
+  /**
+   * Seek sector by LSN.
+   * <p>
+   *   Not implemented
+   * </p>
+   * @param lsn logical sector number
+   * @throws DWInvalidSectorException invalid sector number
+   * @throws DWSeekPastEndOfDeviceException attempt to seek past end of disk
+   */
   @Override
-  public void seekSector(int lsn) throws DWInvalidSectorException, DWSeekPastEndOfDeviceException {
-    // TODO Auto-generated method stub
-
+  public void seekSector(final int lsn)
+      throws DWInvalidSectorException, DWSeekPastEndOfDeviceException {
   }
 
+  /**
+   * Write data to sector.
+   * <p>
+   *   not implemented
+   * </p>
+   * @param data byte array
+   * @throws DWDriveWriteProtectedException write protected sector
+   * @throws IOException failed to write to file object
+   */
   @Override
-  public void writeSector(byte[] data) throws DWDriveWriteProtectedException, IOException {
-    // TODO Auto-generated method stub
-
+  public void writeSector(final byte[] data)
+      throws DWDriveWriteProtectedException, IOException {
   }
 
+  /**
+   * Read sector.
+   *
+   * @return null (not implemented)
+   * @throws IOException Failed to read from file object
+   * @throws DWImageFormatException Invalid file object format
+   */
   @Override
   public byte[] readSector() throws IOException, DWImageFormatException {
-    // TODO Auto-generated method stub
     return null;
   }
 
+  /**
+   * Load sector array from file.
+   *
+   * @throws IOException Failed to read from file object
+   * @throws DWImageFormatException Invalid file object format
+   */
   @Override
   protected void load() throws IOException, DWImageFormatException {
     // load file into sector array
-
     int sector = 0;
-
-    long filesize = this.endpos - this.startpos;
-
-    if ((filesize > Integer.MAX_VALUE))
+    long filesize = this.endPos - this.startPos;
+    if ((filesize > Integer.MAX_VALUE)) {
       throw new DWImageFormatException("Image file is too large");
-
+    }
     int sz = 0;
-
-    this.sectors.setSize((int) (filesize / 256));
-
+    this.getSectors().setSize((int) (filesize / SECTOR_SIZE));
     while (sz < filesize) {
-      this.sectors.set(sector, new DWDiskSector(this, sector, 256, true));
+      this.getSectors().set(
+          sector,
+          new DWDiskSector(this, sector, SECTOR_SIZE, true)
+      );
       sector++;
-      sz += 256;
+      sz += SECTOR_SIZE;
     }
-
-
     long lastmodtime = -1;
-
     try {
-      lastmodtime = this.fileobj.getContent().getLastModifiedTime();
+      lastmodtime = this.getFileObject().getContent().getLastModifiedTime();
     } catch (FileSystemException e) {
-      logger.warn(e.getMessage());
+      LOGGER.warn(e.getMessage());
     }
-
     this.setLastModifiedTime(lastmodtime);
-
     this.setParam("_sectors", sector);
-
-    this.setParam("_filesystem", DWUtils.prettyFileSystem(DWDiskDrives.getDiskFSType(this.sectors)));
-
-
+    this.setParam("_filesystem", DWUtils.prettyFileSystem(
+        DWDiskDrives.getDiskFSType(this.getSectors()))
+    );
   }
 
+  /**
+   * Get disk format.
+   *
+   * @return disk format (SIDE)
+   */
   @Override
   public int getDiskFormat() {
     return DWDefs.DISK_FORMAT_SIDE;
   }
-
 }

@@ -2,48 +2,55 @@ package com.groupunix.drivewireserver.dwcommands;
 
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocolHandler;
 
+public final class DWCmdMidiSynthShow extends DWCommand {
+  /**
+   * protocol handler.
+   */
+  private final DWProtocolHandler dwProtocolHandler;
 
-public class DWCmdMidiSynthShow extends DWCommand {
-
-  private DWCommandList commands;
-  private DWProtocolHandler dwProto;
-
-  public DWCmdMidiSynthShow(DWProtocolHandler dwProto, DWCommand parent) {
+  /**
+   * Midi synth show command constructor.
+   * @param protocolHandler protocol handler
+   * @param parent parent command
+   */
+  public DWCmdMidiSynthShow(
+      final DWProtocolHandler protocolHandler,
+      final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProto;
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdMidiSynthShowChannels(dwProto, this));
-    commands.addcommand(new DWCmdMidiSynthShowInstr(dwProto, this));
-    commands.addcommand(new DWCmdMidiSynthShowProfiles(this));
+    this.dwProtocolHandler = protocolHandler;
+    DWCommandList commands = new DWCommandList(
+        this.dwProtocolHandler,
+        this.dwProtocolHandler.getCMDCols()
+    );
+    this.setCommandList(commands);
+    commands.addCommand(new DWCmdMidiSynthShowChannels(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthShowInstr(protocolHandler, this));
+    commands.addCommand(new DWCmdMidiSynthShowProfiles(this));
+    this.setCommand("show");
+    this.setShortHelp("View details about the synth");
+    this.setUsage("dw midi synth show [item]");
   }
 
-  public String getCommand() {
-    return "show";
-  }
-
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-
-  public String getShortHelp() {
-    return "View details about the synth";
-  }
-
-
-  public String getUsage() {
-    return "dw midi synth show [item]";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * parse command.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (commands.parse(cmdline));
+    return (this.getCommandList().parse(cmdline));
   }
 
-  public boolean validate(String cmdline) {
-    return (true);
+  /**
+   * validate command.
+   * @param cmdline command line
+   * @return true if command valid
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
 }

@@ -7,54 +7,70 @@ import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class UICmdInstanceResetProtodev extends DWCommand {
+  /**
+   * Client thread ref.
+   */
+  private final DWUIClientThread dwuiClientThread;
+  /**
+   * Protocol.
+   */
+  private final DWProtocol dwProtocol;
 
-  static final String command = "protodev";
-
-  private DWUIClientThread uiref = null;
-
-  private DWProtocol dwProto = null;
-
-  public UICmdInstanceResetProtodev(DWUIClientThread dwuiClientThread) {
-
-    this.uiref = dwuiClientThread;
+  /**
+   * UI Command Instance Reset Protocol Device.
+   *
+   * @param clientThread client thread ref
+   */
+  public UICmdInstanceResetProtodev(final DWUIClientThread clientThread) {
+    this.dwuiClientThread = clientThread;
+    this.dwProtocol = null;
+    setHelp();
   }
 
-  public UICmdInstanceResetProtodev(DWProtocol dwProto) {
-    this.dwProto = dwProto;
+  /**
+   * UI Command Instance Reset Protocol Device.
+   *
+   * @param protocol protocol
+   */
+  public UICmdInstanceResetProtodev(final DWProtocol protocol) {
+    this.dwProtocol = protocol;
+    this.dwuiClientThread = null;
+    setHelp();
   }
 
-  public String getCommand() {
-    return command;
+  private void setHelp() {
+    setCommand("protodev");
+    setShortHelp("Reset protocol device");
+    setUsage("ui instance reset protodev");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     String res = "Resetting protocol device in instance ";
-
-    if (this.uiref != null) {
-      res += this.uiref.getInstance();
-      DriveWireServer.getHandler(this.uiref.getInstance()).resetProtocolDevice();
+    if (this.dwuiClientThread != null) {
+      res += this.dwuiClientThread.getInstance();
+      DriveWireServer.getHandler(
+          this.dwuiClientThread.getInstance()
+      ).resetProtocolDevice();
     } else {
-      res += this.dwProto.getHandlerNo();
-      dwProto.resetProtocolDevice();
+      res += this.dwProtocol.getHandlerNo();
+      dwProtocol.resetProtocolDevice();
     }
-
-
-    return (new DWCommandResponse(res));
+    return new DWCommandResponse(res);
   }
 
-
-  public String getShortHelp() {
-    return "Reset protocol device";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
-
-
-  public String getUsage() {
-    return "ui instance reset protodev";
-  }
-
-  public boolean validate(String cmdline) {
-    return (true);
-  }
-
 }

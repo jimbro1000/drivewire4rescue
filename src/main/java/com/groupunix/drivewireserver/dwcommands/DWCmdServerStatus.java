@@ -1,41 +1,59 @@
 package com.groupunix.drivewireserver.dwcommands;
 
-import com.groupunix.drivewireserver.*;
-import com.groupunix.drivewireserver.dwprotocolhandler.*;
+
+import com.groupunix.drivewireserver.DriveWireServer;
+import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public class DWCmdServerStatus extends DWCommand {
+  /**
+   * Bytes is a kilobyte.
+   */
+  public static final int KILOBYTE_FACTOR = 1024;
 
-  public DWCmdServerStatus(DWProtocol dwProto, DWCommand parent) {
+  /**
+   * Server status command constructor.
+   *
+   * @param protocol protocol
+   * @param parent   parent command
+   */
+  public DWCmdServerStatus(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
+    this.setCommand("status");
+    this.setShortHelp("Show server status information");
+    this.setUsage("dw server status");
   }
 
-  public String getCommand() {
-    return "status";
-  }
-
-  public String getShortHelp() {
-    return "Show server status information";
-  }
-
-  public String getUsage() {
-    return "dw server status";
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command.
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     return (doServerStatus());
   }
 
   private DWCommandResponse doServerStatus() {
-    String text = "";
-    text += "DriveWire version " + DriveWireServer.DWServerVersion + " (" + DriveWireServer.DWServerVersionDate + ") status:\r\n\n";
-    text += "Total memory:  " + Runtime.getRuntime().totalMemory() / 1024 + " KB";
-    text += "\r\nFree memory:   " + Runtime.getRuntime().freeMemory() / 1024 + " KB";
-    text += "\r\n";
-
-    return (new DWCommandResponse(text));
+    String text = "DriveWire version "
+        + DriveWireServer.DW_SERVER_VERSION
+        + " ("
+        + DriveWireServer.DW_SERVER_VERSION_DATE
+        + ") status:\r\n\n"
+        + "Total memory:  "
+        + Runtime.getRuntime().totalMemory() / KILOBYTE_FACTOR
+        + " KB"
+        + "\r\nFree memory:   "
+        + Runtime.getRuntime().freeMemory() / KILOBYTE_FACTOR
+        + " KB"
+        + "\r\n";
+    return new DWCommandResponse(text);
   }
 
-  public boolean validate(String cmdline) {
+  /**
+   * Validate command.
+   * @param cmdline command line
+   * @return true if valid
+  */
+  public boolean validate(final String cmdline) {
     return (true);
   }
 

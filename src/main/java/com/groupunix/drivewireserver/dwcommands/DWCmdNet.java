@@ -1,49 +1,54 @@
 package com.groupunix.drivewireserver.dwcommands;
 
-
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
-public class DWCmdNet extends DWCommand {
+public final class DWCmdNet extends DWCommand {
+  /**
+   * Drivewire serial protocol.
+   */
+  private DWVSerialProtocol dwvSerialProtocol;
 
-  static final String command = "net";
-  private DWCommandList commands;
-  private DWVSerialProtocol dwProto;
-
-  public DWCmdNet(DWVSerialProtocol dwProtocol, DWCommand parent) {
+  /**
+   * Net command constructor.
+   *
+   * @param protocol protocol
+   * @param parent parent command
+   */
+  public DWCmdNet(
+      final DWVSerialProtocol protocol, final DWCommand parent
+  ) {
     setParentCmd(parent);
-    this.dwProto = dwProtocol;
-    commands = new DWCommandList(this.dwProto, this.dwProto.getCMDCols());
-    commands.addcommand(new DWCmdNetShow(dwProtocol, this));
-
+    this.dwvSerialProtocol = protocol;
+    DWCommandList commands = new DWCommandList(
+        this.dwvSerialProtocol, this.dwvSerialProtocol.getCMDCols()
+    );
+    this.setCommandList(commands);
+    commands.addCommand(new DWCmdNetShow(protocol, this));
+    this.setCommand("net");
+    this.setShortHelp("Manage network connections");
+    this.setUsage("dw net [command]");
   }
 
-
-  public String getCommand() {
-    return command;
-  }
-
-  public DWCommandList getCommandList() {
-    return (this.commands);
-  }
-
-  public DWCommandResponse parse(String cmdline) {
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.commands.getShortHelp()));
+      return new DWCommandResponse(this.getCommandList().getShortHelp());
     }
-    return (commands.parse(cmdline));
+    return this.getCommandList().parse(cmdline);
   }
 
-
-  public String getShortHelp() {
-    return "Manage network connections";
-  }
-
-
-  public String getUsage() {
-    return "dw net [command]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (commands.validate(cmdline));
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true if valid
+   */
+  public boolean validate(final String cmdline) {
+    return this.getCommandList().validate(cmdline);
   }
 }

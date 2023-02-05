@@ -6,71 +6,69 @@ import com.groupunix.drivewireserver.dwcommands.DWCommand;
 import com.groupunix.drivewireserver.dwcommands.DWCommandResponse;
 
 public class UICmdServerConfigSet extends DWCommand {
-
-  static final String command = "set";
-
-
-  public String getCommand() {
-    return command;
+  /**
+   * UI Command Server Config Set.
+   */
+  public UICmdServerConfigSet() {
+    setCommand("set");
+    setShortHelp("Set server configuration item");
+    setUsage("ui server config set [item] [value]");
   }
 
-  public DWCommandResponse parse(String cmdline) {
-
+  /**
+   * Parse command line.
+   *
+   * @param cmdline command line
+   * @return command response
+   */
+  public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(false, DWDefs.RC_SYNTAX_ERROR, "Must specify item"));
+      return new DWCommandResponse(
+          false, DWDefs.RC_SYNTAX_ERROR, "Must specify item"
+      );
     }
-
     String[] args = cmdline.split(" ");
-
     if (args.length == 1) {
-      return (doSetConfig(args[0]));
+      return doSetConfig(args[0]);
     } else {
-
-
-      return (doSetConfig(args[0], cmdline.substring(args[0].length() + 1)));
+      return doSetConfig(
+          args[0], cmdline.substring(args[0].length() + 1)
+      );
     }
-
   }
 
-  public String getShortHelp() {
-    return "Set server configuration item";
+  /**
+   * Validate command line.
+   *
+   * @param cmdline command line
+   * @return true
+   */
+  public boolean validate(final String cmdline) {
+    return true;
   }
 
-
-  public String getUsage() {
-    return "ui server config set [item] [value]";
-  }
-
-  public boolean validate(String cmdline) {
-    return (true);
-  }
-
-
-  private DWCommandResponse doSetConfig(String item) {
-
-    if (DriveWireServer.serverconfig.containsKey(item)) {
-      synchronized (DriveWireServer.serverconfig) {
-        DriveWireServer.serverconfig.setProperty(item, null);
+  private DWCommandResponse doSetConfig(final String item) {
+    if (DriveWireServer.getServerConfiguration().containsKey(item)) {
+      synchronized (DriveWireServer.getServerConfiguration()) {
+        DriveWireServer.getServerConfiguration().setProperty(item, null);
       }
-
     }
-
     return (new DWCommandResponse(item + " unset."));
-
   }
 
-
-  private DWCommandResponse doSetConfig(String item, String value) {
-    synchronized (DriveWireServer.serverconfig) {
-      if (DriveWireServer.serverconfig.containsKey(item)) {
-        if (!DriveWireServer.serverconfig.getProperty(item).equals(value))
-          DriveWireServer.serverconfig.setProperty(item, value);
+  private DWCommandResponse doSetConfig(final String item, final String value) {
+    synchronized (DriveWireServer.getServerConfiguration()) {
+      if (DriveWireServer.getServerConfiguration().containsKey(item)) {
+        if (
+            !DriveWireServer.getServerConfiguration()
+                .getProperty(item).equals(value)
+        ) {
+          DriveWireServer.getServerConfiguration().setProperty(item, value);
+        }
       } else {
-        DriveWireServer.serverconfig.setProperty(item, value);
+        DriveWireServer.getServerConfiguration().setProperty(item, value);
       }
     }
-    return (new DWCommandResponse(item + " set."));
+    return new DWCommandResponse(item + " set.");
   }
-
-
 }

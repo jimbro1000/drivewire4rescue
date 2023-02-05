@@ -12,186 +12,239 @@ import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwexceptions.DWPortNotValidException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
+import static com.groupunix.drivewireserver.DWDefs.CARRIAGE_RETURN;
+import static com.groupunix.drivewireserver.DWDefs.NEWLINE;
+
 public class DWVPortTCPConnectionThread implements Runnable {
-
-  private static final Logger logger = Logger.getLogger("DWServer.DWVPortTCPConnectionThread");
-
-  private int vport = -1;
-  private int tcpport = -1;
-  private String tcphost = null;
-
+  /**
+   * Log appender.
+   */
+  private static final Logger LOGGER
+      = Logger.getLogger("DWServer.DWVPortTCPConnectionThread");
+  /**
+   * Buffer read size.
+   */
+  public static final int READ_BUFFER_SIZE = 256;
+  /**
+   * Delay between read cycles.
+   */
+  public static final int READ_DELAY_MILLIS = 100;
+  /**
+   * virtual port.
+   */
+  private final int vport;
+  /**
+   * TCP host port.
+   */
+  private final int tcpport;
+  /**
+   * TCP host name.
+   */
+  private final String tcphost;
+  /**
+   * Shutdown flag.
+   */
   private boolean wanttodie = false;
-
-  private DWVSerialPorts dwVSerialPorts;
-
+  /**
+   * Serial ports.
+   */
+  private final DWVSerialPorts dwVSerialPorts;
+  /**
+   * Report connection.
+   */
   private boolean reportConnect = true;
-
+  /**
+   * wc data.
+   */
   private byte[] wcdata = null;
-
-
+  /**
+   * Socket channel.
+   */
   private SocketChannel sktchan;
+  /**
+   * Net socket address.
+   */
   private InetSocketAddress sktaddr;
 
-
-  public DWVPortTCPConnectionThread(DWVSerialProtocol dwProto, int vport, String tcphostin, int tcpportin) {
-    logger.debug("init tcp connection thread");
-    this.vport = vport;
-    this.tcpport = tcpportin;
-    this.tcphost = tcphostin;
-
-    this.dwVSerialPorts = dwProto.getVPorts();
-
+  /**
+   * V Port TCP Connection Thread.
+   *
+   * @param protocol  serial protocol
+   * @param vPort     virtual port
+   * @param tcpHostIn tcp host in
+   * @param tcpPortIn tcp port in
+   */
+  public DWVPortTCPConnectionThread(final DWVSerialProtocol protocol,
+                                    final int vPort,
+                                    final String tcpHostIn,
+                                    final int tcpPortIn) {
+    LOGGER.debug("init tcp connection thread");
+    this.vport = vPort;
+    this.tcpport = tcpPortIn;
+    this.tcphost = tcpHostIn;
+    this.dwVSerialPorts = protocol.getVPorts();
   }
 
-
-  public DWVPortTCPConnectionThread(DWVSerialProtocol dwProto, int vport, String tcphostin, int tcpportin, boolean rc) {
-    logger.debug("init tcp connection thread");
-    this.vport = vport;
-    this.tcpport = tcpportin;
-    this.tcphost = tcphostin;
+  /**
+   * V Port TCP Connection Thread.
+   *
+   * @param protocol  serial protocol
+   * @param vPort     virtual port
+   * @param tcpHostIn tcp host in
+   * @param tcpPortIn tcp port in
+   * @param rc        report connect
+   */
+  public DWVPortTCPConnectionThread(final DWVSerialProtocol protocol,
+                                    final int vPort,
+                                    final String tcpHostIn,
+                                    final int tcpPortIn,
+                                    final boolean rc) {
+    LOGGER.debug("init tcp connection thread");
+    this.vport = vPort;
+    this.tcpport = tcpPortIn;
+    this.tcphost = tcpHostIn;
     this.reportConnect = rc;
-
-    this.dwVSerialPorts = dwProto.getVPorts();
+    this.dwVSerialPorts = protocol.getVPorts();
 
   }
 
-
-  public DWVPortTCPConnectionThread(DWVSerialProtocol dwProto, int vport, String tcphostin, int tcpportin, boolean rc, byte[] wcdata) {
-    logger.debug("init NineServer connection thread");
-    this.vport = vport;
-    this.tcpport = tcpportin;
-    this.tcphost = tcphostin;
+  /**
+   * V Port TCP Connection Thread.
+   *
+   * @param protocol  serial protocol
+   * @param vPort     virtual port
+   * @param tcpHostIn tcp host in
+   * @param tcpPortIn tcp port in
+   * @param rc        report connect
+   * @param wcData    wc data
+   */
+  public DWVPortTCPConnectionThread(final DWVSerialProtocol protocol,
+                                    final int vPort,
+                                    final String tcpHostIn,
+                                    final int tcpPortIn,
+                                    final boolean rc,
+                                    final byte[] wcData) {
+    LOGGER.debug("init NineServer connection thread");
+    this.vport = vPort;
+    this.tcpport = tcpPortIn;
+    this.tcphost = tcpHostIn;
     this.reportConnect = rc;
-    this.wcdata = wcdata;
-
-    this.dwVSerialPorts = dwProto.getVPorts();
+    this.wcdata = wcData;
+    this.dwVSerialPorts = protocol.getVPorts();
   }
 
-
+  /**
+   * Run threads.
+   */
   public void run() {
     Thread.currentThread().setName("tcpconn-" + Thread.currentThread().getId());
     Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
-
-    logger.debug("run");
-
-
+    LOGGER.debug("run");
     // try to establish connection
     try {
       sktaddr = new InetSocketAddress(this.tcphost, this.tcpport);
       sktchan = SocketChannel.open();
       sktchan.configureBlocking(true);
-
       sktchan.connect(sktaddr);
-
       if (sktchan.finishConnect()) {
         dwVSerialPorts.setPortChannel(vport, this.sktchan);
-
-        if (this.reportConnect)
-          dwVSerialPorts.writeToCoco(this.vport, ("OK Connected to " + this.tcphost + ":" + this.tcpport + (char) 10 + (char) 13));
-
+        if (this.reportConnect) {
+          dwVSerialPorts.writeToCoco(
+              this.vport,
+              "OK Connected to " + this.tcphost + ":"
+                  + this.tcpport + (char) NEWLINE + (char) CARRIAGE_RETURN
+          );
+        }
         dwVSerialPorts.markConnected(vport);
-
-        logger.debug("Connected to " + this.tcphost + ":" + this.tcpport);
-
+        LOGGER.debug("Connected to " + this.tcphost + ":" + this.tcpport);
         dwVSerialPorts.setUtilMode(vport, DWDefs.UTILMODE_TCPOUT);
-
         if (this.wcdata != null) {
           dwVSerialPorts.write(this.vport, new String(this.wcdata));
         }
-
       }
     } catch (UnknownHostException e) {
-      logger.debug("unknown host " + tcphost);
-
-      if (this.reportConnect)
+      LOGGER.debug("unknown host " + tcphost);
+      if (this.reportConnect) {
         try {
-          dwVSerialPorts.sendUtilityFailResponse(this.vport, DWDefs.RC_NET_UNKNOWN_HOST, "Unknown host '" + this.tcphost + "'");
+          dwVSerialPorts.sendUtilityFailResponse(
+              this.vport,
+              DWDefs.RC_NET_UNKNOWN_HOST,
+              "Unknown host '" + this.tcphost + "'"
+          );
         } catch (DWPortNotValidException e1) {
-          logger.warn(e1.getMessage());
+          LOGGER.warn(e1.getMessage());
         }
+      }
       this.wanttodie = true;
     } catch (IOException e1) {
-      logger.debug("IO error: " + e1.getMessage());
+      LOGGER.debug("IO error: " + e1.getMessage());
 
-      if (this.reportConnect)
+      if (this.reportConnect) {
         try {
-          dwVSerialPorts.sendUtilityFailResponse(this.vport, DWDefs.RC_NET_IO_ERROR, e1.getMessage());
+          dwVSerialPorts.sendUtilityFailResponse(
+              this.vport, DWDefs.RC_NET_IO_ERROR, e1.getMessage()
+          );
         } catch (DWPortNotValidException e) {
-          logger.warn(e1.getMessage());
+          LOGGER.warn(e1.getMessage());
         }
+      }
       this.wanttodie = true;
     } catch (DWPortNotValidException e) {
-      logger.warn(e.getMessage());
+      LOGGER.warn(e.getMessage());
     }
 
-    byte[] readbytes = new byte[256];
+    byte[] readbytes = new byte[READ_BUFFER_SIZE];
     ByteBuffer readBuffer = ByteBuffer.wrap(readbytes);
 
-
-    while ((wanttodie == false) && (sktchan.isOpen()) && (dwVSerialPorts.isOpen(this.vport))) {
+    while ((!wanttodie) && (sktchan.isOpen())
+        && (dwVSerialPorts.isOpen(this.vport))) {
       try {
         int readsize = sktchan.read(readBuffer);
-
         if (readsize == -1) {
-          logger.debug("got end of input stream");
+          LOGGER.debug("got end of input stream");
           wanttodie = true;
         } else if (readsize > 0) {
-
-
           dwVSerialPorts.writeToCoco(this.vport, readbytes, 0, readsize);
           readBuffer.clear();
         }
-
       } catch (IOException e) {
-        logger.debug("IO error reading tcp: " + e.getMessage());
+        LOGGER.debug("IO error reading tcp: " + e.getMessage());
         wanttodie = true;
       } catch (DWPortNotValidException e) {
-        logger.error(e.getMessage());
-
+        LOGGER.error(e.getMessage());
         wanttodie = true;
       }
-
     }
-
-
-    if (wanttodie)
-      logger.debug("exit because wanttodie");
-    else if (!sktchan.isConnected())
-      logger.debug("exit because skt isClosed");
-    else if (!dwVSerialPorts.isOpen(this.vport))
-      logger.debug("exit because port is not open");
-
-
-    // only if we got connected..
+    if (wanttodie) {
+      LOGGER.debug("exit because wanttodie");
+    } else if (!sktchan.isConnected()) {
+      LOGGER.debug("exit because skt isClosed");
+    } else if (!dwVSerialPorts.isOpen(this.vport)) {
+      LOGGER.debug("exit because port is not open");
+    }
+    // only if we got connected...
     if (sktchan != null) {
       if (sktchan.isConnected()) {
-
-        logger.debug("exit stage 1, flush buffer");
-
-        // 	flush buffer, term port
+        LOGGER.debug("exit stage 1, flush buffer");
+        // flush buffer, term port
         try {
-          while ((dwVSerialPorts.bytesWaiting(this.vport) > 0) && (dwVSerialPorts.isOpen(this.vport))) {
-            logger.debug("pause for the cause: " + dwVSerialPorts.bytesWaiting(this.vport) + " bytes left");
-            Thread.sleep(100);
+          while ((dwVSerialPorts.bytesWaiting(this.vport) > 0)
+              && (dwVSerialPorts.isOpen(this.vport))) {
+            LOGGER.debug("pause for the cause: "
+                + dwVSerialPorts.bytesWaiting(this.vport) + " bytes left");
+            Thread.sleep(READ_DELAY_MILLIS);
           }
-        } catch (InterruptedException e) {
-          logger.error(e.getMessage());
-        } catch (DWPortNotValidException e) {
-          logger.error(e.getMessage());
+        } catch (InterruptedException | DWPortNotValidException e) {
+          LOGGER.error(e.getMessage());
         }
-
-        logger.debug("exit stage 2, send peer signal");
-
+        LOGGER.debug("exit stage 2, send peer signal");
         try {
           dwVSerialPorts.closePort(this.vport);
         } catch (DWPortNotValidException e) {
-          logger.error("in close port: " + e.getMessage());
+          LOGGER.error("in close port: " + e.getMessage());
         }
       }
-
-      logger.debug("thread exiting");
+      LOGGER.debug("thread exiting");
     }
   }
 }
-
-	
