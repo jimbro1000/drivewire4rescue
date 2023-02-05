@@ -44,6 +44,26 @@ public class DWVSerialPorts {
   private static final Logger LOGGER
       = Logger.getLogger("DWServer.DWVSerialPorts");
   /**
+   * Default ZTerm port number.
+   */
+  public static final int DEFAULT_ZTERM_PORT = 16;
+  /**
+   * Default max Z device ports.
+   */
+  public static final int DEFAULT_MAX_ZDEV_PORTS = 16;
+  /**
+   * Default max N device ports.
+   */
+  public static final int DEFAULT_MAX_NDEV_PORTS = 16;
+  /**
+   * Default midi port.
+   */
+  public static final int DEFAULT_MIDI_PORT = 14;
+  /**
+   * Port status code.
+   */
+  public static final int PORT_STATUS = 16;
+  /**
    * Serial protocol.
    */
   private final DWVSerialProtocol dwProto;
@@ -133,15 +153,15 @@ public class DWVSerialPorts {
     bytelog = serialProtocol.getConfig()
         .getBoolean("LogVPortBytes", false);
     maxNports = serialProtocol.getConfig()
-        .getInt("VSerial_MaxNDevPorts", 16);
+        .getInt("VSerial_MaxNDevPorts", DEFAULT_MAX_NDEV_PORTS);
     maxZports = serialProtocol.getConfig()
-        .getInt("VSerial_MaxZDevPorts", 16);
+        .getInt("VSerial_MaxZDevPorts", DEFAULT_MAX_ZDEV_PORTS);
     nTermPort = serialProtocol.getConfig()
         .getInt("VSerial_NTermPort", 0);
     zTermPort = serialProtocol.getConfig()
-        .getInt("VSerial_ZTermPort", 16);
+        .getInt("VSerial_ZTermPort", DEFAULT_ZTERM_PORT);
     midiPort = serialProtocol.getConfig()
-        .getInt("VSerial_MIDIPort", 14);
+        .getInt("VSerial_MIDIPort", DEFAULT_MIDI_PORT);
     this.multiReadLimit = serialProtocol.getConfig()
         .getInt("VSerial_MultiReadLimit", 3);
 
@@ -304,7 +324,7 @@ public class DWVSerialPorts {
     for (int i = 0; i < this.maxNports; i++) {
       if (vserialPorts[i] != null) {
         if (vserialPorts[i].isTerm()) {
-          response[0] = (byte) 16;  // port status
+          response[0] = (byte) PORT_STATUS;
           response[1] = (byte) i;   // 000 portnumber
 
           LOGGER.debug("sending terminated status to coco for port " + i);

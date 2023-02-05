@@ -22,6 +22,34 @@ public class DWVPortTelnetPreflightThread implements Runnable {
   private static final Logger LOGGER
       = Logger.getLogger("DWServer.DWVPortTelnetPreflightThread");
   /**
+   * Size of telnet setup/handshake message.
+   */
+  public static final int TELNET_MSG_LEN = 9;
+  /**
+   * Telnet escape code.
+   */
+  public static final int TELNET_ESC = 255;
+  /**
+   * TELNET will command.
+   */
+  public static final int TELNET_WILL = 251;
+  /**
+   * TELNET do command.
+   */
+  public static final int TELNET_DO = 253;
+  /**
+   * TELNET break (end of message) command.
+   */
+  public static final int TELNET_BREAK = 243;
+  /**
+   * Telnet operation echo.
+   */
+  public static final int TELNET_OP_ECHO = 1;
+  /**
+   * Telnet operation suppress go ahead.
+   */
+  public static final int TELNET_OP_SUPPRESS_GO_AHEAD = 3;
+  /**
    * Port.
    */
   private final int vPort;
@@ -68,6 +96,21 @@ public class DWVPortTelnetPreflightThread implements Runnable {
     this.dwVSerialPorts = serialProtocol.getVPorts();
   }
 
+  static byte[] prepTelnet() {
+    int index = 0;
+    byte[] buf = new byte[TELNET_MSG_LEN];
+    buf[index++] = (byte) TELNET_ESC;
+    buf[index++] = (byte) TELNET_WILL;
+    buf[index++] = (byte) TELNET_OP_ECHO;
+    buf[index++] = (byte) TELNET_ESC;
+    buf[index++] = (byte) TELNET_WILL;
+    buf[index++] = (byte) TELNET_OP_SUPPRESS_GO_AHEAD;
+    buf[index++] = (byte) TELNET_ESC;
+    buf[index++] = (byte) TELNET_DO;
+    buf[index] = (byte) TELNET_BREAK;
+    return buf;
+  }
+
   /**
    * Run thread.
    */
@@ -87,9 +130,9 @@ public class DWVPortTelnetPreflightThread implements Runnable {
         // ask telnet to turn off echo, should probably be a setting
         // or left to the client
         byte[] buf = prepTelnet();
-        socketChannel.socket().getOutputStream().write(buf, 0, 9);
+        socketChannel.socket().getOutputStream().write(buf, 0, TELNET_MSG_LEN);
         // read back the echoed controls - TODO has issues
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < TELNET_MSG_LEN; i++) {
           socketChannel.socket().getInputStream().read();
         }
       }
@@ -131,20 +174,6 @@ public class DWVPortTelnetPreflightThread implements Runnable {
       }
     }
     LOGGER.debug("exiting");
-  }
-
-  static byte[] prepTelnet() {
-    byte[] buf = new byte[9];
-    buf[0] = (byte) 255;
-    buf[1] = (byte) 251;
-    buf[2] = (byte) 1;
-    buf[3] = (byte) 255;
-    buf[4] = (byte) 251;
-    buf[5] = (byte) 3;
-    buf[6] = (byte) 255;
-    buf[7] = (byte) 253;
-    buf[8] = (byte) 243;
-    return buf;
   }
 
   private void displayFile(final OutputStream outputStream,

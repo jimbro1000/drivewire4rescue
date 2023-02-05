@@ -172,9 +172,10 @@ public class DWVPortTermThread implements Runnable {
   private void startConn(final SocketChannel skt) {
     // do telnet init stuff
     byte[] buf = DWVPortTelnetPreflightThread.prepTelnet();
+    int len = buf.length;
     try {
-      skt.socket().getOutputStream().write(buf, 0, 9);
-      for (int i = 0; i < 9; i++) {
+      skt.socket().getOutputStream().write(buf, 0, len);
+      for (int i = 0; i < len; i++) {
         skt.socket().getInputStream().read();
       }
     } catch (IOException e) {
