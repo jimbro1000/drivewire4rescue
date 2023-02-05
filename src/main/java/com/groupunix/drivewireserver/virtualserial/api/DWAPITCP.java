@@ -193,8 +193,8 @@ public class DWAPITCP {
     );
     // simulate old behavior
     listener.setMode(mode);
-    listener.setDo_banner(true);
-    listener.setDo_telnet(true);
+    listener.setDoBanner(true);
+    listener.setDoTelnet(true);
     // start TCP listener thread
     Thread listenThread = new Thread(listener);
     listenThread.start();
@@ -220,11 +220,11 @@ public class DWAPITCP {
     if (cmdparts.length > ARG_START) {
       for (int i = ARG_START; i < cmdparts.length; i++) {
         if (cmdparts[i].equalsIgnoreCase("telnet")) {
-          listener.setDo_telnet(true);
+          listener.setDoTelnet(true);
         } else if (cmdparts[i].equalsIgnoreCase("httpd")) {
           listener.setMode(2);
         } else if (cmdparts[i].equalsIgnoreCase("banner")) {
-          listener.setDo_banner(true);
+          listener.setDoBanner(true);
         }
       }
     }

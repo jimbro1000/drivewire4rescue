@@ -22,6 +22,14 @@ public class DWVPortTCPConnectionThread implements Runnable {
   private static final Logger LOGGER
       = Logger.getLogger("DWServer.DWVPortTCPConnectionThread");
   /**
+   * Buffer read size.
+   */
+  public static final int READ_BUFFER_SIZE = 256;
+  /**
+   * Delay between read cycles.
+   */
+  public static final int READ_DELAY_MILLIS = 100;
+  /**
    * virtual port.
    */
   private final int vport;
@@ -61,68 +69,68 @@ public class DWVPortTCPConnectionThread implements Runnable {
   /**
    * V Port TCP Connection Thread.
    *
-   * @param dwProto serial protocol
-   * @param vport virtual port
-   * @param tcphostin tcp host in
-   * @param tcpportin tcp port in
+   * @param protocol  serial protocol
+   * @param vPort     virtual port
+   * @param tcpHostIn tcp host in
+   * @param tcpPortIn tcp port in
    */
-  public DWVPortTCPConnectionThread(final DWVSerialProtocol dwProto,
-                                    final int vport,
-                                    final String tcphostin,
-                                    final int tcpportin) {
+  public DWVPortTCPConnectionThread(final DWVSerialProtocol protocol,
+                                    final int vPort,
+                                    final String tcpHostIn,
+                                    final int tcpPortIn) {
     LOGGER.debug("init tcp connection thread");
-    this.vport = vport;
-    this.tcpport = tcpportin;
-    this.tcphost = tcphostin;
-    this.dwVSerialPorts = dwProto.getVPorts();
+    this.vport = vPort;
+    this.tcpport = tcpPortIn;
+    this.tcphost = tcpHostIn;
+    this.dwVSerialPorts = protocol.getVPorts();
   }
 
   /**
    * V Port TCP Connection Thread.
    *
-   * @param dwProto serial protocol
-   * @param vport virtual port
-   * @param tcphostin tcp host in
-   * @param tcpportin tcp port in
-   * @param rc report connect
+   * @param protocol  serial protocol
+   * @param vPort     virtual port
+   * @param tcpHostIn tcp host in
+   * @param tcpPortIn tcp port in
+   * @param rc        report connect
    */
-  public DWVPortTCPConnectionThread(final DWVSerialProtocol dwProto,
-                                    final int vport,
-                                    final String tcphostin,
-                                    final int tcpportin,
+  public DWVPortTCPConnectionThread(final DWVSerialProtocol protocol,
+                                    final int vPort,
+                                    final String tcpHostIn,
+                                    final int tcpPortIn,
                                     final boolean rc) {
     LOGGER.debug("init tcp connection thread");
-    this.vport = vport;
-    this.tcpport = tcpportin;
-    this.tcphost = tcphostin;
+    this.vport = vPort;
+    this.tcpport = tcpPortIn;
+    this.tcphost = tcpHostIn;
     this.reportConnect = rc;
-    this.dwVSerialPorts = dwProto.getVPorts();
+    this.dwVSerialPorts = protocol.getVPorts();
 
   }
 
   /**
    * V Port TCP Connection Thread.
    *
-   * @param dwProto serial protocol
-   * @param vport virtual port
-   * @param tcphostin tcp host in
-   * @param tcpportin tcp port in
-   * @param rc report connect
-   * @param wcdata wc data
+   * @param protocol  serial protocol
+   * @param vPort     virtual port
+   * @param tcpHostIn tcp host in
+   * @param tcpPortIn tcp port in
+   * @param rc        report connect
+   * @param wcData    wc data
    */
-  public DWVPortTCPConnectionThread(final DWVSerialProtocol dwProto,
-                                    final int vport,
-                                    final String tcphostin,
-                                    final int tcpportin,
+  public DWVPortTCPConnectionThread(final DWVSerialProtocol protocol,
+                                    final int vPort,
+                                    final String tcpHostIn,
+                                    final int tcpPortIn,
                                     final boolean rc,
-                                    final byte[] wcdata) {
+                                    final byte[] wcData) {
     LOGGER.debug("init NineServer connection thread");
-    this.vport = vport;
-    this.tcpport = tcpportin;
-    this.tcphost = tcphostin;
+    this.vport = vPort;
+    this.tcpport = tcpPortIn;
+    this.tcphost = tcpHostIn;
     this.reportConnect = rc;
-    this.wcdata = wcdata;
-    this.dwVSerialPorts = dwProto.getVPorts();
+    this.wcdata = wcData;
+    this.dwVSerialPorts = protocol.getVPorts();
   }
 
   /**
@@ -185,7 +193,7 @@ public class DWVPortTCPConnectionThread implements Runnable {
       LOGGER.warn(e.getMessage());
     }
 
-    byte[] readbytes = new byte[256];
+    byte[] readbytes = new byte[READ_BUFFER_SIZE];
     ByteBuffer readBuffer = ByteBuffer.wrap(readbytes);
 
     while ((!wanttodie) && (sktchan.isOpen())
@@ -218,13 +226,13 @@ public class DWVPortTCPConnectionThread implements Runnable {
     if (sktchan != null) {
       if (sktchan.isConnected()) {
         LOGGER.debug("exit stage 1, flush buffer");
-        // 	flush buffer, term port
+        // flush buffer, term port
         try {
           while ((dwVSerialPorts.bytesWaiting(this.vport) > 0)
               && (dwVSerialPorts.isOpen(this.vport))) {
             LOGGER.debug("pause for the cause: "
                 + dwVSerialPorts.bytesWaiting(this.vport) + " bytes left");
-            Thread.sleep(100);
+            Thread.sleep(READ_DELAY_MILLIS);
           }
         } catch (InterruptedException | DWPortNotValidException e) {
           LOGGER.error(e.getMessage());
