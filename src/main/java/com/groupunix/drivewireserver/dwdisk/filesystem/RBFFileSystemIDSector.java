@@ -1,7 +1,7 @@
 package com.groupunix.drivewireserver.dwdisk.filesystem;
 
-import org.apache.commons.collections.OrderedMap;
-import org.apache.commons.collections.map.LinkedMap;
+import org.apache.commons.collections4.OrderedMap;
+import org.apache.commons.collections4.map.LinkedMap;
 
 import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
 

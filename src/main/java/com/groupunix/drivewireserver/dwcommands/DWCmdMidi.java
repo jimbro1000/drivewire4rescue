@@ -6,7 +6,7 @@ public class DWCmdMidi extends DWCommand {
   /**
    * Drivewire protocol handler.
    */
-  private DWProtocolHandler dwProtocolHandler;
+  private final DWProtocolHandler dwProtocolHandler;
 
   /**
    * Midi command constructor.

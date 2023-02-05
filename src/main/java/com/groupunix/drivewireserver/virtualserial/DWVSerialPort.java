@@ -18,6 +18,11 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
 import static com.groupunix.drivewireserver.DWDefs.CARRIAGE_RETURN;
 import static com.groupunix.drivewireserver.DWDefs.NEWLINE;
+import static com.groupunix.drivewireserver.dwprotocolhandler.DWUtils.MIDI_CHAN_PRESS;
+import static com.groupunix.drivewireserver.dwprotocolhandler.DWUtils.MIDI_CHAN_PRESS_MAX;
+import static com.groupunix.drivewireserver.dwprotocolhandler.DWUtils.MIDI_NOTE_CHANNEL;
+import static com.groupunix.drivewireserver.dwprotocolhandler.DWUtils.MIDI_PITCH_BEND_CHANNEL_MAX;
+import static com.groupunix.drivewireserver.dwprotocolhandler.DWUtils.MIDI_PRG_CHANGE;
 
 public class DWVSerialPort {
   /**
@@ -258,13 +263,15 @@ public class DWVSerialPort {
         } else if (databyte == SEND_MIDI) {
           // We ignore other status stuff for now
           sendMIDI(databyte);
-        } else if ((databyte >= 192) && (databyte < 224)) {
+        } else if ((databyte >= MIDI_PRG_CHANGE)
+            && (databyte <= MIDI_CHAN_PRESS_MAX)) {
           // Program change and channel pressure have 1 data byte
           mmsgDatabytes = 1;
           lastMmsgStatus = mmsgStatus;
           mmsgStatus = databyte;
           mmsgPos = 0;
-        } else if ((databyte > 127) && (databyte < 240)) {
+        } else if ((databyte >= MIDI_NOTE_CHANNEL)
+            && (databyte <= MIDI_PITCH_BEND_CHANNEL_MAX)) {
           // Note on/off, key pressure, controller change,
           // pitch bend have 2 data bytes
           mmsgDatabytes = 2;
@@ -281,7 +288,8 @@ public class DWVSerialPort {
               mmsgPos = 1;
             } else {
               // send midimsg with 1 data byte
-              if ((mmsgStatus >= MIDI_MSG_BASE) && (databyte < 208)) {
+              if ((mmsgStatus >= MIDI_MSG_BASE)
+                  && (databyte < MIDI_CHAN_PRESS)) {
                 if (dwvSerialProtocol.getVPorts().getMidiVoicelock()) {
                   // ignore program change
                   LOGGER.debug(

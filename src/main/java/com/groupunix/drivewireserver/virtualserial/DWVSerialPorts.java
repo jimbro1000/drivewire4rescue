@@ -64,6 +64,22 @@ public class DWVSerialPorts {
    */
   public static final int PORT_STATUS = 16;
   /**
+   * Default multi read limit.
+   */
+  public static final int DEFAULT_MULTI_READ_LIMIT = 3;
+  /**
+   * serial readM response base value.
+   */
+  public static final int SERIAL_READ_BASE = 16;
+  /**
+   * Bits to shift for response bit flag.
+   */
+  public static final int RESPONSE_BIT_SHIFT = 6;
+  /**
+   * Reboot requested response status code.
+   */
+  public static final int REBOOT_STATUS = 255;
+  /**
    * Serial protocol.
    */
   private final DWVSerialProtocol dwProto;
@@ -163,7 +179,7 @@ public class DWVSerialPorts {
     midiPort = serialProtocol.getConfig()
         .getInt("VSerial_MIDIPort", DEFAULT_MIDI_PORT);
     this.multiReadLimit = serialProtocol.getConfig()
-        .getInt("VSerial_MultiReadLimit", 3);
+        .getInt("VSerial_MultiReadLimit", DEFAULT_MULTI_READ_LIMIT);
 
     maxports = maxNports + maxZports;
 
@@ -273,8 +289,8 @@ public class DWVSerialPorts {
     byte[] response = new byte[2];
     // reboot req takes absolute priority
     if (this.isRebootRequested()) {
-      response[0] = (byte) 16;
-      response[1] = (byte) 255;
+      response[0] = (byte) PORT_STATUS;
+      response[1] = (byte) REBOOT_STATUS;
       LOGGER.debug("reboot request pending, sending response "
           + response[0] + "," + response[1]);
       this.setRebootRequested(false);
@@ -311,7 +327,7 @@ public class DWVSerialPorts {
     if (oldestZport > -1) {
       // if we have a small byte waiter, send serread for it
       dataWait[oldestZport] = 0;
-      response[0] = (byte) ((DWDefs.POLL_RESP_MODE_WINDOW << 6)
+      response[0] = (byte) ((DWDefs.POLL_RESP_MODE_WINDOW << RESPONSE_BIT_SHIFT)
           + (oldestZport) - this.maxNports);
       response[1] = vserialPorts[oldestZport].read1();
       LOGGER.debug("Z poll response " + response[0] + "," + response[1]);
@@ -379,7 +395,7 @@ public class DWVSerialPorts {
       // send serream for oldest bulk
       dataWait[oldestMport] = 0;
       // add one and 16 for serreadm
-      response[0] = (byte) (oldestMport + 16 + 1);
+      response[0] = (byte) (oldestMport + SERIAL_READ_BASE + 1);
       //send data size
       response[1] = (byte) vserialPorts[oldestMport].bytesWaiting();
     } else {
