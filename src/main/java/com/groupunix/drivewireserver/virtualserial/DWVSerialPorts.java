@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.sound.midi.InvalidMidiDataException;
@@ -28,150 +27,239 @@ import com.groupunix.drivewireserver.dwexceptions.DWPortNotOpenException;
 import com.groupunix.drivewireserver.dwexceptions.DWPortNotValidException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
 
+import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
+
 public class DWVSerialPorts {
-
+  /**
+   * Terminal mode.
+   */
   public static final int MODE_TERM = 3;
-  private static final Logger logger = Logger.getLogger("DWServer.DWVSerialPorts");
+  /**
+   * Cache size limit.
+   */
   public static final int MAX_CACHE = 16;
-  private DWVSerialProtocol dwProto;
-  private boolean bytelog = false;
+  /**
+   * Log appender.
+   */
+  private static final Logger LOGGER
+      = Logger.getLogger("DWServer.DWVSerialPorts");
+  /**
+   * Serial protocol.
+   */
+  private final DWVSerialProtocol dwProto;
+  /**
+   * Log bytes switch.
+   */
+  private final boolean bytelog;
 
-
-  private DWVSerialPort[] vserialPorts;
-  private DWVPortListenerPool listenerpool = new DWVPortListenerPool();
-
-  private int[] dataWait;
+  /**
+   * Serial ports.
+   */
+  private final DWVSerialPort[] vserialPorts;
+  /**
+   * Port listener pool.
+   */
+  private final DWVPortListenerPool listenerpool = new DWVPortListenerPool();
+  /**
+   * Data wait array.
+   */
+  private final int[] dataWait;
 
   // midi stuff
+  /**
+   * Maximum number of N ports.
+   */
+  private final int maxNports;
+  /**
+   * Maximum number of Z ports.
+   */
+  private final int maxZports;
+  /**
+   * Maximum number of ports.
+   */
+  private final int maxports;
+  /**
+   * NTerm port.
+   */
+  private final int nTermPort;
+  /**
+   * ZTerm port.
+   */
+  private final int zTermPort;
+  /**
+   * MIDI port.
+   */
+  private final int midiPort;
+  /**
+   * Multi read limit.
+   */
+  private final int multiReadLimit;
+  /**
+   * MIDI device.
+   */
   private MidiDevice midiDevice;
+  /**
+   * MIDI synthesizer.
+   */
   private Synthesizer midiSynth;
+  /**
+   * Sound bank file name.
+   */
   private String soundbankfilename = null;
+  /**
+   * MIDI voice lock switch.
+   */
   private boolean midiVoicelock = false;
+  /**
+   * Configuration.
+   */
   private HierarchicalConfiguration midiProfConf = null;
-  private int[] GMInstrumentCache;
-  private int maxNports = 0;
-  private int maxZports = 0;
-  private int maxports = 0;
-  private int nTermPort = 0;
-  private int zTermPort = 0;
-  private int MIDIPort = 0;
-  private int multiReadLimit = 0;
+  /**
+   * GM Instrument cache.
+   */
+  private int[] gmInstrumentCache;
+  /**
+   * Reboot requested flag.
+   */
   private boolean rebootRequested = false;
 
-  public DWVSerialPorts(DWVSerialProtocol dwProto) {
-    this.dwProto = dwProto;
-    bytelog = dwProto.getConfig().getBoolean("LogVPortBytes", false);
-
-    maxNports = dwProto.getConfig().getInt("VSerial_MaxNDevPorts", 16);
-    maxZports = dwProto.getConfig().getInt("VSerial_MaxZDevPorts", 16);
-    nTermPort = dwProto.getConfig().getInt("VSerial_NTermPort", 0);
-    zTermPort = dwProto.getConfig().getInt("VSerial_ZTermPort", 16);
-    MIDIPort = dwProto.getConfig().getInt("VSerial_MIDIPort", 14);
-    this.multiReadLimit = dwProto.getConfig().getInt("VSerial_MultiReadLimit", 3);
+  /**
+   * Virtual Serial Ports.
+   *
+   * @param serialProtocol serial protocol
+   */
+  public DWVSerialPorts(final DWVSerialProtocol serialProtocol) {
+    this.dwProto = serialProtocol;
+    bytelog = serialProtocol.getConfig()
+        .getBoolean("LogVPortBytes", false);
+    maxNports = serialProtocol.getConfig()
+        .getInt("VSerial_MaxNDevPorts", 16);
+    maxZports = serialProtocol.getConfig()
+        .getInt("VSerial_MaxZDevPorts", 16);
+    nTermPort = serialProtocol.getConfig()
+        .getInt("VSerial_NTermPort", 0);
+    zTermPort = serialProtocol.getConfig()
+        .getInt("VSerial_ZTermPort", 16);
+    midiPort = serialProtocol.getConfig()
+        .getInt("VSerial_MIDIPort", 14);
+    this.multiReadLimit = serialProtocol.getConfig()
+        .getInt("VSerial_MultiReadLimit", 3);
 
     maxports = maxNports + maxZports;
 
     dataWait = new int[maxports];
     vserialPorts = new DWVSerialPort[maxports];
 
-
-    if (dwProto.getConfig().getBoolean("UseMIDI", false) && !DriveWireServer.getNoMIDI()) {
-
+    if (serialProtocol.getConfig().getBoolean("UseMIDI", false)
+        && !DriveWireServer.getNoMIDI()) {
       clearGMInstrumentCache();
-
       try {
-
         // set default output
-        if (dwProto.getConfig().containsKey("MIDIDefaultOutput")) {
-          int devno = dwProto.getConfig().getInt("MIDIDefaultOutput", -1);
-
+        if (serialProtocol.getConfig()
+            .containsKey("MIDIDefaultOutput")) {
+          int devno = serialProtocol.getConfig()
+              .getInt("MIDIDefaultOutput", -1);
           MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
-
           if ((devno < 0) || (devno > infos.length)) {
-            logger.warn("Invalid MIDI output device # " + devno + " specified in MIDIDefaultOutput setting");
+            LOGGER.warn("Invalid MIDI output device # "
+                + devno + " specified in MIDIDefaultOutput setting");
           } else {
             setMIDIDevice(MidiSystem.getMidiDevice(infos[devno]));
           }
-
         } else {
           midiSynth = MidiSystem.getSynthesizer();
           setMIDIDevice(midiSynth);
         }
-
         // soundbank
-        if (dwProto.getConfig().containsKey("MIDISynthDefaultSoundbank")) {
-          loadSoundbank(dwProto.getConfig().getString("MIDISynthDefaultSoundbank"));
+        if (serialProtocol.getConfig()
+            .containsKey("MIDISynthDefaultSoundbank")) {
+          loadSoundbank(serialProtocol.getConfig()
+              .getString("MIDISynthDefaultSoundbank"));
         }
-
-
         // default translation profile
-        if (dwProto.getConfig().containsKey("MIDISynthDefaultProfile")) {
-          if (!setMidiProfile(dwProto.getConfig().getString("MIDISynthDefaultProfile"))) {
-            logger.warn("Invalid MIDI profile specified in config file.");
+        if (serialProtocol.getConfig()
+            .containsKey("MIDISynthDefaultProfile")) {
+          if (!setMidiProfile(serialProtocol.getConfig()
+              .getString("MIDISynthDefaultProfile"))) {
+            LOGGER.warn("Invalid MIDI profile specified in config file.");
           }
         }
-
       } catch (MidiUnavailableException e) {
-        logger.warn("MIDI is not available");
+        LOGGER.warn("MIDI is not available");
       }
     }
   }
 
-
-  public void openPort(int port) throws DWPortNotValidException {
-    this.validateport(port);
-    if (vserialPorts[port] == null) {
-      resetPort(port);
+  /**
+   * Open port.
+   *
+   * @param vport virtual port
+   * @throws DWPortNotValidException invalid port
+   */
+  public void openPort(final int vport) throws DWPortNotValidException {
+    this.validateport(vport);
+    if (vserialPorts[vport] == null) {
+      resetPort(vport);
     }
-
-    vserialPorts[port].open();
+    vserialPorts[vport].open();
   }
 
-
-  public String prettyPort(int port) {
-    if (port == this.nTermPort) {
+  /**
+   * Prettify port.
+   *
+   * @param vport virtual port
+   * @return formatted string
+   */
+  public String prettyPort(final int vport) {
+    if (vport == this.nTermPort) {
       return ("NTerm");
-    } else if (port == this.zTermPort) {
+    } else if (vport == this.zTermPort) {
       return ("ZTerm");
-    } else if (port == this.MIDIPort) {
+    } else if (vport == this.midiPort) {
       return ("MIDI");
-    } else if (port < this.maxNports) {
-      return ("N" + port);
-    } else if (port < this.maxNports + this.maxZports) {
-      return ("Z" + (port - this.maxNports));
+    } else if (vport < this.maxNports) {
+      return ("N" + vport);
+    } else if (vport < this.maxNports + this.maxZports) {
+      return ("Z" + (vport - this.maxNports));
     } else {
-      return ("?" + port);
+      return ("?" + vport);
     }
   }
 
-
-  public void closePort(int port) throws DWPortNotValidException {
-    if (port < vserialPorts.length) {
-      if (vserialPorts[port] != null) {
-        vserialPorts[port].close();
-        //vserialPorts[port] = null;
+  /**
+   * Close port.
+   *
+   * @param vport virtual port
+   * @throws DWPortNotValidException invalid port
+   */
+  public void closePort(final int vport) throws DWPortNotValidException {
+    if (vport < vserialPorts.length) {
+      if (vserialPorts[vport] != null) {
+        vserialPorts[vport].close();
       }
     } else {
-      throw new DWPortNotValidException("Valid port range is 0 - " + (vserialPorts.length - 1));
+      throw new DWPortNotValidException("Valid port range is 0 - "
+          + (vserialPorts.length - 1));
     }
   }
 
 
+  /**
+   * Serial read.
+   *
+   * @return data array
+   */
   public byte[] serRead() {
     byte[] response = new byte[2];
-
     // reboot req takes absolute priority
-
     if (this.isRebootRequested()) {
       response[0] = (byte) 16;
       response[1] = (byte) 255;
-
-      logger.debug("reboot request pending, sending response " + response[0] + "," + response[1]);
-
+      LOGGER.debug("reboot request pending, sending response "
+          + response[0] + "," + response[1]);
       this.setRebootRequested(false);
       return (response);
     }
-
 
     // Z devices go first...
 
@@ -180,8 +268,8 @@ public class DWVSerialPorts {
         if (vserialPorts[i].bytesWaiting() > 0) {
           // increment wait count
           dataWait[i]++;
-
-          logger.debug("waiting Z " + i + ": " + vserialPorts[i].bytesWaiting());
+          LOGGER.debug("waiting Z " + i + ": "
+              + vserialPorts[i].bytesWaiting());
         }
       }
     }
@@ -196,26 +284,21 @@ public class DWVSerialPorts {
         if (dataWait[i] > oldestZ) {
           oldestZ = dataWait[i];
           oldestZport = i;
-
         }
       }
     }
 
     if (oldestZport > -1) {
       // if we have a small byte waiter, send serread for it
-
       dataWait[oldestZport] = 0;
-      response[0] = (byte) ((DWDefs.POLL_RESP_MODE_WINDOW << 6) + (oldestZport) - this.maxNports);
+      response[0] = (byte) ((DWDefs.POLL_RESP_MODE_WINDOW << 6)
+          + (oldestZport) - this.maxNports);
       response[1] = vserialPorts[oldestZport].read1();
-
-      logger.debug("Z poll response " + response[0] + "," + response[1]);
-
+      LOGGER.debug("Z poll response " + response[0] + "," + response[1]);
       return (response);
     }
 
-
     // N devices
-
 
     // first look for termed ports
     for (int i = 0; i < this.maxNports; i++) {
@@ -224,7 +307,7 @@ public class DWVSerialPorts {
           response[0] = (byte) 16;  // port status
           response[1] = (byte) i;   // 000 portnumber
 
-          logger.debug("sending terminated status to coco for port " + i);
+          LOGGER.debug("sending terminated status to coco for port " + i);
 
           vserialPorts[i] = new DWVSerialPort(this, this.dwProto, i);
 
@@ -234,7 +317,6 @@ public class DWVSerialPorts {
     }
 
     // first data pass, increment data waiters
-
     for (int i = 0; i < this.maxNports; i++) {
       if (vserialPorts[i] != null) {
         if (vserialPorts[i].bytesWaiting() > 0) {
@@ -245,7 +327,6 @@ public class DWVSerialPorts {
     }
 
     // second pass, look for oldest waiting ports
-
     int oldest1 = 0;
     int oldest1port = -1;
     int oldestM = 0;
@@ -269,218 +350,333 @@ public class DWVSerialPorts {
 
     if (oldest1port > -1) {
       // if we have a small byte waiter, send serread for it
-
       dataWait[oldest1port] = 0;
-      response[0] = (byte) (oldest1port + 1);     // add one
-      response[1] = vserialPorts[oldest1port].read1();  // send data byte
+      // add one
+      response[0] = (byte) (oldest1port + 1);
+      // send data byte
+      response[1] = vserialPorts[oldest1port].read1();
     } else if (oldestMport > -1) {
       // send serream for oldest bulk
-
       dataWait[oldestMport] = 0;
-      response[0] = (byte) (oldestMport + 16 + 1);     // add one and 16 for serreadm
-      response[1] = (byte) vserialPorts[oldestMport].bytesWaiting(); //send data size
-      // logger.debug("SERREADM RESPONSE: " + Integer.toBinaryString(response[0]) + " " + Integer.toBinaryString(response[1]));
-
+      // add one and 16 for serreadm
+      response[0] = (byte) (oldestMport + 16 + 1);
+      //send data size
+      response[1] = (byte) vserialPorts[oldestMport].bytesWaiting();
     } else {
       // no waiting ports
-
       response[0] = (byte) 0;
       response[1] = (byte) 0;
     }
-
-    // logger.debug("SERREAD RESPONSE: " + Integer.toBinaryString(response[0]) + " " + Integer.toBinaryString(response[1]));
-
     return (response);
   }
 
-
-  public void serWriteM(int port, byte[] data) throws DWPortNotOpenException, DWPortNotValidException {
+  /**
+   * Write byte array to serial port.
+   *
+   * @param vport virtual port
+   * @param data  byte array
+   * @throws DWPortNotOpenException  port not open
+   * @throws DWPortNotValidException invalid port
+   */
+  public void serWriteM(final int vport, final byte[] data)
+      throws DWPortNotOpenException, DWPortNotValidException {
     for (int i = 0; i < data.length; i++) {
-      // inefficient as hell, but serwriteM isn't even implemented in driver anyway
-      serWrite(port, data[i]);
+      serWrite(vport, data[i]);
     }
   }
 
-  public void serWriteM(int port, byte[] data, int bread) throws DWPortNotOpenException, DWPortNotValidException {
+  /**
+   * Write byte array to serial port.
+   *
+   * @param vport virtual port
+   * @param data  byte array
+   * @param bread bread
+   * @throws DWPortNotOpenException  port not open
+   * @throws DWPortNotValidException invalid port
+   */
+  @SuppressWarnings("unused")
+  public void serWriteM(final int vport, final byte[] data, final int bread)
+      throws DWPortNotOpenException, DWPortNotValidException {
     for (int i = 0; (i < data.length) && (i < bread); i++) {
-      // inefficient as hell, but serwriteM isn't even implemented in driver anyway
-      serWrite(port, data[i]);
+      serWrite(vport, data[i]);
     }
   }
 
-
-  public void serWrite(int port, int databyte) throws DWPortNotOpenException, DWPortNotValidException {
-
-
-    if ((port < this.maxports) && (port >= 0)) {
-      if (vserialPorts[port] != null) {
-        if (vserialPorts[port].isOpen()) {
+  /**
+   * Write byte to serial port.
+   *
+   * @param vport    virtual port
+   * @param databyte data byte
+   * @throws DWPortNotOpenException  port not open
+   * @throws DWPortNotValidException invalid port
+   */
+  public void serWrite(final int vport, final int databyte)
+      throws DWPortNotOpenException, DWPortNotValidException {
+    if ((vport < this.maxports) && (vport >= 0)) {
+      if (vserialPorts[vport] != null) {
+        if (vserialPorts[vport].isOpen()) {
           if (bytelog) {
-
-            logger.debug("write to port " + port + ": " + databyte + " (" + (char) databyte + ")");
+            LOGGER.debug("write to port " + vport + ": "
+                + databyte + " (" + (char) databyte + ")");
           }
-
           // normal write
-          vserialPorts[port].write(databyte);
+          vserialPorts[vport].write(databyte);
         } else {
-          throw new DWPortNotOpenException("Port " + port + " is not open (but coco sent us a byte: " + (0xff & databyte) + " '" + Character.toString((char) databyte) + "')");
+          throw new DWPortNotOpenException(
+              "Port " + vport + " is not open (but coco sent us a byte: "
+                  + (BYTE_MASK & databyte) + " '" + (char) databyte + "')"
+          );
         }
       } else {
-        // should port not initialized be different than port not open?
-        throw new DWPortNotOpenException("Port " + port + " is not open (but coco sent us a byte: " + (0xff & databyte) + " '" + Character.toString((char) databyte) + "')");
+        // should port not initialized be different from port not open?
+        throw new DWPortNotOpenException(
+            "Port " + vport + " is not open (but coco sent us a byte: "
+                + (BYTE_MASK & databyte) + " '"
+                + (char) databyte + "')"
+        );
       }
     } else {
-      throw new DWPortNotValidException(port + " is not a valid port number");
+      throw new DWPortNotValidException(vport + " is not a valid port number");
     }
-
   }
 
-
-  public byte[] serReadM(int port, int len) throws DWPortNotOpenException, DWPortNotValidException {
-
-
-    if ((port < this.maxports) && (port >= 0)) {
-      if (vserialPorts[port].isOpen()) {
-        byte[] data = new byte[len];
-        data = vserialPorts[port].readM(len);
-        return (data);
+  /**
+   * Read data from port.
+   *
+   * @param vport virtual port
+   * @param len   bytes to read
+   * @return byte array
+   * @throws DWPortNotOpenException  port not open
+   * @throws DWPortNotValidException invalid port
+   */
+  public byte[] serReadM(final int vport, final int len)
+      throws DWPortNotOpenException, DWPortNotValidException {
+    if ((vport < this.maxports) && (vport >= 0)) {
+      if (vserialPorts[vport].isOpen()) {
+        byte[] data = vserialPorts[vport].readM(len);
+        return data;
       } else {
-        throw new DWPortNotOpenException("Port " + port + " is not open");
+        throw new DWPortNotOpenException("Port " + vport + " is not open");
       }
     } else {
-      throw new DWPortNotValidException(port + " is not a valid port number");
+      throw new DWPortNotValidException(vport + " is not a valid port number");
     }
-
   }
 
-
-  public OutputStream getPortInput(int vport) throws DWPortNotValidException {
+  /**
+   * Get port input.
+   *
+   * @param vport virtual port
+   * @return port output stream
+   * @throws DWPortNotValidException invalid port
+   */
+  public OutputStream getPortInput(final int vport)
+      throws DWPortNotValidException {
     validateport(vport);
     return (vserialPorts[vport].getPortInput());
   }
 
-  public InputStream getPortOutput(int vport) throws DWPortNotValidException {
+  /**
+   * Get port output.
+   *
+   * @param vport virtual port
+   * @return port input stream
+   * @throws DWPortNotValidException invalid port
+   */
+  public InputStream getPortOutput(final int vport)
+      throws DWPortNotValidException {
     validateport(vport);
     return (vserialPorts[vport].getPortOutput());
   }
-	
-	
-	/*
-	
-	public InputStream getPortOutput(int vport) throws DWPortNotValidException 
-	{
-		validateport(vport);
-		return (vserialPorts[vport].getPortOutput());
-	}
-	
-	public void setPortOutput(int vport, OutputStream output)
-	{
-		if (isNull(vport))
-		{
-			logger.debug("attempt to set output on null port " + vport);
-		}
-		else
-		{
-			vserialPorts[vport].setPortOutput(output);
-		}
-	}
-	*/
 
-  public void setPortChannel(int vport, SocketChannel sc) {
+  /**
+   * Set virtual port channel.
+   *
+   * @param vport virtual port
+   * @param sc    socket channel
+   */
+  public void setPortChannel(final int vport, final SocketChannel sc) {
     if (isNull(vport)) {
-      logger.debug("attempt to set io channel on null port " + vport);
+      LOGGER.debug("attempt to set io channel on null port " + vport);
     } else {
       vserialPorts[vport].setPortChannel(sc);
     }
   }
 
-
-  public void markConnected(int port) {
-    if ((port < vserialPorts.length) && (vserialPorts[port] != null)) {
-      vserialPorts[port].setConnected(true);
+  /**
+   * Mark port as connected.
+   *
+   * @param vport virtual port
+   */
+  public void markConnected(final int vport) {
+    if ((vport < vserialPorts.length) && (vserialPorts[vport] != null)) {
+      vserialPorts[vport].setConnected(true);
     } else {
-      logger.warn("mark connected on invalid port " + port);
+      LOGGER.warn("mark connected on invalid port " + vport);
     }
   }
 
-
-  public void markDisconnected(int port) {
-    if ((port < vserialPorts.length) && (vserialPorts[port] != null)) {
-      vserialPorts[port].setConnected(false);
+  /**
+   * Mark port as disconnected.
+   *
+   * @param vport virtual port
+   */
+  public void markDisconnected(final int vport) {
+    if ((vport < vserialPorts.length) && (vserialPorts[vport] != null)) {
+      vserialPorts[vport].setConnected(false);
     } else {
-      logger.warn("mark disconnected on invalid port " + port);
+      LOGGER.warn("mark disconnected on invalid port " + vport);
     }
   }
 
-
-  public boolean isConnected(int port) {
-    if ((port < vserialPorts.length) && (vserialPorts[port] != null)) {
-      return (vserialPorts[port].isConnected());
+  /**
+   * Is port connected.
+   *
+   * @param vport virtual port
+   * @return port is connected
+   */
+  public boolean isConnected(final int vport) {
+    if ((vport < vserialPorts.length) && (vserialPorts[vport] != null)) {
+      return vserialPorts[vport].isConnected();
     }
-    return (false);
+    return false;
   }
 
-
-  public void setUtilMode(int port, int mode) throws DWPortNotValidException {
-    validateport(port);
-    vserialPorts[port].setUtilMode(mode);
-  }
-
-
-  public void wr3ite1(int port, byte data) throws IOException, DWPortNotValidException {
-    validateport(port);
-    getPortInput(port).write(data);
-  }
-
-  public void write(int port, String str) throws DWPortNotValidException {
-    validateport(port);
-    vserialPorts[port].writeM(str);
-
-  }
-
-
-  public void setPD_INT(int port, byte pD_INT) throws DWPortNotValidException {
-    validateport(port);
-    vserialPorts[port].setPdInt(pD_INT);
-  }
-
-
-  public byte getPD_INT(int port) throws DWPortNotValidException {
-    validateport(port);
-    return (vserialPorts[port].getPdInt());
-  }
-
-
-  public void setPD_QUT(int port, byte pD_QUT) throws DWPortNotValidException {
-    validateport(port);
-    vserialPorts[port].setPdQut(pD_QUT);
-  }
-
-
-  public byte getPD_QUT(int port) throws DWPortNotValidException {
-    validateport(port);
-    return (vserialPorts[port].getPdQut());
-  }
-
-
-  public void sendUtilityFailResponse(int vport, byte code, String txt) throws DWPortNotValidException {
+  /**
+   * Set utility mode.
+   *
+   * @param vport virtual port
+   * @param mode  utility mode
+   * @throws DWPortNotValidException invalid port
+   */
+  public void setUtilMode(final int vport, final int mode)
+      throws DWPortNotValidException {
     validateport(vport);
-    logger.info("API FAIL: port " + vport + " code " + code + ": " + txt);
+    vserialPorts[vport].setUtilMode(mode);
+  }
+
+  /**
+   * Write data byte to port.
+   *
+   * @param vport virtual port
+   * @param data  data byte
+   * @throws IOException             write failure
+   * @throws DWPortNotValidException invalid port
+   */
+  @SuppressWarnings("unused")
+  public void write1(final int vport, final byte data) throws IOException,
+      DWPortNotValidException {
+    validateport(vport);
+    getPortInput(vport).write(data);
+  }
+
+  /**
+   * Write string to port.
+   *
+   * @param vport virtual port
+   * @param str   string message
+   * @throws DWPortNotValidException invalid port
+   */
+  public void write(final int vport, final String str)
+      throws DWPortNotValidException {
+    validateport(vport);
+    vserialPorts[vport].writeM(str);
+  }
+
+  /**
+   * Set PD.INT.
+   *
+   * @param vport virtual port
+   * @param pdInt PD.INT
+   * @throws DWPortNotValidException invalid port
+   */
+  public void setPdInt(final int vport, final byte pdInt)
+      throws DWPortNotValidException {
+    validateport(vport);
+    vserialPorts[vport].setPdInt(pdInt);
+  }
+
+  /**
+   * Get PD.INT.
+   *
+   * @param vport virtual port
+   * @return PD.INT
+   * @throws DWPortNotValidException invalid port
+   */
+  public byte getPdInt(final int vport) throws DWPortNotValidException {
+    validateport(vport);
+    return (vserialPorts[vport].getPdInt());
+  }
+
+  /**
+   * Set PD.QUT.
+   *
+   * @param vport virtual port
+   * @param pdQut PD.QUT
+   * @throws DWPortNotValidException invalid port
+   */
+  public void setPdQut(final int vport, final byte pdQut)
+      throws DWPortNotValidException {
+    validateport(vport);
+    vserialPorts[vport].setPdQut(pdQut);
+  }
+
+  /**
+   * Get PD.QUT.
+   *
+   * @param vport virtual port
+   * @return PD.QUT
+   * @throws DWPortNotValidException invalid port
+   */
+  public byte getPdQut(final int vport) throws DWPortNotValidException {
+    validateport(vport);
+    return (vserialPorts[vport].getPdQut());
+  }
+
+  /**
+   * Send utility fail response.
+   *
+   * @param vport virtual port
+   * @param code  response code
+   * @param txt   fail message
+   * @throws DWPortNotValidException invalid port
+   */
+  public void sendUtilityFailResponse(final int vport,
+                                      final byte code,
+                                      final String txt)
+      throws DWPortNotValidException {
+    validateport(vport);
+    LOGGER.info("API FAIL: port " + vport + " code " + code + ": " + txt);
     vserialPorts[vport].sendUtilityFailResponse(code, txt);
   }
 
-
-  public void sendUtilityOKResponse(int vport, String txt) throws DWPortNotValidException {
+  /**
+   * Send utility OK response message.
+   *
+   * @param vport virtual port
+   * @param txt   message text
+   * @throws DWPortNotValidException invalid port
+   */
+  public void sendUtilityOKResponse(final int vport, final String txt)
+      throws DWPortNotValidException {
     validateport(vport);
-    logger.debug("API OK: port " + vport + ": command successful");
+    LOGGER.debug("API OK: port " + vport + ": command successful");
     vserialPorts[vport].sendUtilityOKResponse("command successful");
     vserialPorts[vport].writeToCoco(txt);
   }
 
-
-  public void sendUtilityOKResponse(int vport, byte[] responseBytes) throws DWPortNotValidException {
+  /**
+   * Send utility OK response data.
+   *
+   * @param vport         virtual port
+   * @param responseBytes ok response
+   * @throws DWPortNotValidException invalid port
+   */
+  public void sendUtilityOKResponse(final int vport,
+                                    final byte[] responseBytes)
+      throws DWPortNotValidException {
     validateport(vport);
-    logger.debug("API OK: port " + vport + ": command successful (byte mode)");
+    LOGGER.debug("API OK: port " + vport + ": command successful (byte mode)");
     vserialPorts[vport].sendUtilityOKResponse("command successful");
     vserialPorts[vport].writeToCoco(responseBytes);
   }
@@ -514,14 +710,16 @@ public class DWVSerialPorts {
    * Reset all virtual ports.
    */
   public void resetAllPorts() {
-    logger.debug("Resetting all virtual serial ports - part 1, close all sockets");
+    LOGGER.debug(
+        "Resetting all virtual serial ports - part 1, close all sockets"
+    );
 
     for (int i = 0; i < this.maxports; i++) {
       this.listenerpool.closePortConnectionSockets(i);
       this.listenerpool.closePortServerSockets(i);
     }
 
-    logger.debug("Resetting all virtual serial ports - part 2, init all ports");
+    LOGGER.debug("Resetting all virtual serial ports - part 2, init all ports");
 
     //vserialPorts = new DWVSerialPort[MAX_PORTS];
     for (int i = 0; i < this.maxports; i++) {
@@ -530,7 +728,7 @@ public class DWVSerialPorts {
         try {
           resetPort(i);
         } catch (DWPortNotValidException e) {
-          logger.warn(e.getMessage());
+          LOGGER.warn(e.getMessage());
         }
       }
     }
@@ -539,7 +737,7 @@ public class DWVSerialPorts {
       try {
         resetPort(this.nTermPort);
       } catch (DWPortNotValidException e) {
-        logger.warn(e.getMessage());
+        LOGGER.warn(e.getMessage());
       }
     }
   }
@@ -629,7 +827,8 @@ public class DWVSerialPorts {
    * @throws DWPortNotValidException invalid port
    */
   @SuppressWarnings("unused")
-  public void writeToCoco(int vport, byte[] b) throws DWPortNotValidException {
+  public void writeToCoco(final int vport, final byte[] b)
+      throws DWPortNotValidException {
     validateport(vport);
     vserialPorts[vport].writeToCoco(b);
   }
@@ -764,7 +963,7 @@ public class DWVSerialPorts {
    * Shutdown.
    */
   public void shutdown() {
-    logger.debug("shutting down");
+    LOGGER.debug("shutting down");
     for (int i = 0; i < this.maxports; i++) {
       this.listenerpool.closePortConnectionSockets(i);
       this.listenerpool.closePortServerSockets(i);
@@ -797,7 +996,8 @@ public class DWVSerialPorts {
       throws MidiUnavailableException, IllegalArgumentException {
     if (this.midiDevice != null) {
       if (this.midiDevice.isOpen()) {
-        logger.debug("midi: closing " + this.midiDevice.getDeviceInfo().getName());
+        LOGGER.debug("midi: closing "
+            + this.midiDevice.getDeviceInfo().getName());
         this.midiDevice.close();
       }
     }
@@ -808,7 +1008,7 @@ public class DWVSerialPorts {
         "device",
         this.midiDevice.getDeviceInfo().getName()
     );
-    logger.info("midi: opened " + this.midiDevice.getDeviceInfo().getName());
+    LOGGER.info("midi: opened " + this.midiDevice.getDeviceInfo().getName());
   }
 
   /**
@@ -822,10 +1022,10 @@ public class DWVSerialPorts {
       try {
         this.midiDevice.getReceiver().send(mmsg, timestamp);
       } catch (MidiUnavailableException | IllegalStateException e) {
-        logger.warn(e.getMessage());
+        LOGGER.warn(e.getMessage());
       }
     } else {
-      logger.warn("No MIDI device for MIDI msg");
+      LOGGER.warn("No MIDI device for MIDI msg");
     }
   }
 
@@ -869,7 +1069,7 @@ public class DWVSerialPorts {
   public boolean setMidiSoundbank(final Soundbank soundbank,
                                   final String fname) {
     if (midiSynth.loadAllInstruments(soundbank)) {
-      logger.debug("loaded soundbank file '" + fname + "'");
+      LOGGER.debug("loaded soundbank file '" + fname + "'");
       this.soundbankfilename = fname;
       return true;
     }
@@ -894,12 +1094,17 @@ public class DWVSerialPorts {
     return this.midiVoicelock;
   }
 
+  /**
+   * Set MIDI voice lock.
+   *
+   * @param lock bool
+   */
   public void setMidiVoicelock(final boolean lock) {
     this.midiVoicelock = lock;
     DriveWireServer.submitMIDIEvent(
         this.dwProto.getHandlerNo(), "voicelock", String.valueOf(lock)
     );
-    logger.debug("MIDI: synth voicelock = " + lock);
+    LOGGER.debug("MIDI: synth voicelock = " + lock);
   }
 
   private void loadSoundbank(final String filename) {
@@ -908,19 +1113,19 @@ public class DWVSerialPorts {
     try {
       soundbank = MidiSystem.getSoundbank(file);
     } catch (InvalidMidiDataException | IOException e) {
-      logger.warn("Error loading soundbank: " + e.getMessage());
+      LOGGER.warn("Error loading soundbank: " + e.getMessage());
       return;
     }
     if (isSoundbankSupported(soundbank)) {
       if (!setMidiSoundbank(soundbank, filename)) {
-        logger.warn("Failed to set soundbank '" + filename + "'");
+        LOGGER.warn("Failed to set soundbank '" + filename + "'");
         return;
       }
       DriveWireServer.submitMIDIEvent(
           this.dwProto.getHandlerNo(), "soundbank", filename
       );
     } else {
-      logger.warn("Unsupported soundbank '" + filename + "'");
+      LOGGER.warn("Unsupported soundbank '" + filename + "'");
       return;
     }
   }
@@ -967,7 +1172,7 @@ public class DWVSerialPorts {
         DriveWireServer.submitMIDIEvent(
             this.dwProto.getHandlerNo(), "profile", profile
         );
-        logger.debug("MIDI: set profile to '" + profile + "'");
+        LOGGER.debug("MIDI: set profile to '" + profile + "'");
         return true;
       }
     }
@@ -980,7 +1185,7 @@ public class DWVSerialPorts {
       MidiChannel[] chans = this.midiSynth.getChannels();
       for (int i = 0; i < chans.length; i++) {
         if (chans[i] != null) {
-          chans[i].programChange(getGMInstrument(this.GMInstrumentCache[i]));
+          chans[i].programChange(getGMInstrument(this.gmInstrumentCache[i]));
         }
       }
     }
@@ -1005,7 +1210,7 @@ public class DWVSerialPorts {
           + this.midiProfConf.getInt("[@dev_adjust]", 0)) == voice) {
         xvoice = sub.getInt("[@gm]")
             + this.midiProfConf.getInt("[@gm_adjust]", 0);
-        logger.debug("MIDI: profile '"
+        LOGGER.debug("MIDI: profile '"
             + this.midiProfConf.getString("[@name]")
             + "' translates device inst " + voice + " to GM instr "
             + xvoice);
@@ -1028,7 +1233,8 @@ public class DWVSerialPorts {
     if (channel < chans.length) {
       if (chans[channel] != null) {
         chans[channel].programChange(instr);
-        logger.debug("MIDI: set instrument " + instr + " on channel " + channel);
+        LOGGER.debug("MIDI: set instrument "
+            + instr + " on channel " + channel);
         return true;
       }
     }
@@ -1039,9 +1245,9 @@ public class DWVSerialPorts {
    * Clear GM instrument cache on all channels.
    */
   public void clearGMInstrumentCache() {
-    this.GMInstrumentCache = new int[MAX_CACHE];
+    this.gmInstrumentCache = new int[MAX_CACHE];
     for (int i = 0; i < MAX_CACHE; i++) {
-      this.GMInstrumentCache[i] = 0;
+      this.gmInstrumentCache[i] = 0;
     }
   }
 
@@ -1052,10 +1258,10 @@ public class DWVSerialPorts {
    * @param instr cache
    */
   public void setGMInstrumentCache(final int chan, final int instr) {
-    if ((chan >= 0) && (chan < this.GMInstrumentCache.length)) {
-      this.GMInstrumentCache[chan] = instr;
+    if ((chan >= 0) && (chan < this.gmInstrumentCache.length)) {
+      this.gmInstrumentCache[chan] = instr;
     } else {
-      logger.debug("MIDI: channel out of range on program change: " + chan);
+      LOGGER.debug("MIDI: channel out of range on program change: " + chan);
     }
   }
 
@@ -1066,11 +1272,11 @@ public class DWVSerialPorts {
    * @return channel cache
    */
   public int getGMInstrumentCache(final int chan) {
-    return this.GMInstrumentCache[chan];
+    return this.gmInstrumentCache[chan];
   }
 
   /**
-   * Get port listener pool
+   * Get port listener pool.
    *
    * @return listener pool
    */
@@ -1142,14 +1348,14 @@ public class DWVSerialPorts {
    * @return port
    */
   public int getMIDIPort() {
-    return this.MIDIPort;
+    return this.midiPort;
   }
 
   /**
    * Get Port Virtual Modem.
    *
    * @param port port
-   * @return
+   * @return modem
    * @throws DWPortNotValidException
    */
   public DWVModem getPortVModem(final int port)

@@ -1255,15 +1255,15 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
           // store it
           dwVSerialPorts.setDD(responseBuffer[0], devDescr);
           // set PD.INT offset 16 and PD.QUT offset 17
-          if (dwVSerialPorts.getPD_INT(responseBuffer[0])
+          if (dwVSerialPorts.getPdInt(responseBuffer[0])
               != devDescr[PD_INT_OFFSET]) {
-            dwVSerialPorts.setPD_INT(
+            dwVSerialPorts.setPdInt(
                 responseBuffer[0], devDescr[PD_INT_OFFSET]
             );
           }
-          if (dwVSerialPorts.getPD_QUT(responseBuffer[0])
+          if (dwVSerialPorts.getPdQut(responseBuffer[0])
               != devDescr[PD_QUT_OFFSET]) {
-            dwVSerialPorts.setPD_QUT(
+            dwVSerialPorts.setPdQut(
                 responseBuffer[0], devDescr[PD_QUT_OFFSET]
             );
           }

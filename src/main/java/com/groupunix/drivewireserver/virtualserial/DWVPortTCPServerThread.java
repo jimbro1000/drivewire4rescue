@@ -111,8 +111,8 @@ public class DWVPortTCPServerThread implements Runnable {
           // filter CR,NULL if in telnet or term mode
           // unless PD.INT and PD.QUT = 0
           if (((mode == MODE_TELNET) || (mode == MODE_TERM))
-              && ((dwVSerialPorts.getPD_INT(this.vport) != 0)
-              || (dwVSerialPorts.getPD_QUT(this.vport) != 0))) {
+              && ((dwVSerialPorts.getPdInt(this.vport) != 0)
+              || (dwVSerialPorts.getPdQut(this.vport) != 0))) {
             // TODO filter CR/LF.. should do this better
             if (!((lastbyte == CARRIAGE_RETURN)
                 && ((databyte == NEWLINE)
