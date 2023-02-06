@@ -205,7 +205,7 @@ public class DWAPISerial {
         spd.setDatabits(dataBits);
       } else if (item.equalsIgnoreCase("fc")) {
         int fc = 0;
-        for (byte b : val.getBytes()) {
+        for (byte b : val.getBytes(DWDefs.ENCODING)) {
           int fcVal = flowControl(b);
           if (fcVal == -1) {
             return new DWCommandResponse(
@@ -410,9 +410,8 @@ public class DWAPISerial {
     }
     if (ok) {
       return new DWCommandResponse(res);
-    } else {
-      return new DWCommandResponse(false, DWDefs.RC_SERIAL_PORTERROR, res);
     }
+    return new DWCommandResponse(false, DWDefs.RC_SERIAL_PORTERROR, res);
   }
 
   private DWCommandResponse doCommandDevs() {

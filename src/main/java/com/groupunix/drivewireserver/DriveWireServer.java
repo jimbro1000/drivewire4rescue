@@ -687,40 +687,35 @@ public final class DriveWireServer {
    */
   private static boolean checkRXTXLoaded() {
     // try to load RXTX, redirect its version messages into our logs
-
     PrintStream ops = System.out;
     PrintStream eps = System.err;
-
     ByteArrayOutputStream rxtxBaos = new ByteArrayOutputStream();
     ByteArrayOutputStream rxtxBaes = new ByteArrayOutputStream();
-
-    PrintStream rxtxOut = new PrintStream(rxtxBaos);
-    PrintStream rxtxErr = new PrintStream(rxtxBaes);
-
+    PrintStream rxtxOut = new PrintStream(rxtxBaos, false, DWDefs.ENCODING);
+    PrintStream rxtxErr = new PrintStream(rxtxBaes, false, DWDefs.ENCODING);
     System.setOut(rxtxOut);
     System.setErr(rxtxErr);
-
     boolean res = DWUtils.testClassPath("gnu.io.RXTXCommDriver");
-
-    for (String l : rxtxBaes.toString().trim().split("\n")) {
+    for (
+        String l : rxtxBaes.toString(DWDefs.ENCODING).trim().split("\n")
+    ) {
       System.out.println(l);
       if (!l.equals("")) {
         LOGGER.warn(l);
       }
     }
-
-    for (String l : rxtxBaos.toString().trim().split("\n")) {
+    for (
+        String l : rxtxBaos.toString(DWDefs.ENCODING).trim().split("\n")
+    ) {
       System.out.println(l);
       // ignore pesky version warning that doesn't ever seem to matter
       if (!l.equals("WARNING:  RXTX Version mismatch") && !l.equals("")) {
         LOGGER.debug(l);
       }
     }
-
     System.setOut(ops);
     System.setErr(eps);
-
-    return (res);
+    return res;
   }
 
   /**

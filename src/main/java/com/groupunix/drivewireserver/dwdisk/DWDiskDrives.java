@@ -269,8 +269,8 @@ public class DWDiskDrives {
         // LWFS
         byte[] lwfs = new byte[LWFS_ARRAY_SIZE];
         System.arraycopy(sectors.get(0).getData(), 0, lwfs, 0, lwfs.length);
-        if (new String(lwfs).equals("LWFS")
-            || new String(lwfs).equals("LW16")) {
+        if (new String(lwfs, DWDefs.ENCODING).equals("LWFS")
+            || new String(lwfs, DWDefs.ENCODING).equals("LW16")) {
           return (DWDefs.DISK_FILESYSTEM_LWFS);
         }
         // TODO - outdated? cocoboot isave

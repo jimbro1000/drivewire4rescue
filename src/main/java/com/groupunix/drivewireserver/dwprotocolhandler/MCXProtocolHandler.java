@@ -312,27 +312,22 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
     try {
       // read flag byte
       int flag = dwProtocolDevice.comRead1(true);
-
       // read arg length
-      int arglen = dwProtocolDevice.comRead1(true);
-
+      int argLen = dwProtocolDevice.comRead1(true);
       // read arg
-      byte[] buf = new byte[arglen];
-      buf = dwProtocolDevice.comRead(arglen);
-      logger.debug("DIRFILEREQUEST fl: " + flag + "  arg: " + new String(buf));
-
+      byte[] buf = dwProtocolDevice.comRead(argLen);
+      logger.debug("DIRFILEREQUEST fl: " + flag + "  arg: "
+          + new String(buf, DWDefs.ENCODING));
       //respond
+      dwProtocolDevice.comWrite1(0, false);
       if (flag == 0) {
-        dwProtocolDevice.comWrite1(0, false);
         dwProtocolDevice.comWrite1(ARG_BYTES, false);
       } else {
-        dwProtocolDevice.comWrite1(0, false);
         dwProtocolDevice.comWrite1(0, false);
       }
     } catch (IOException e) {
       logger.warn(e.getMessage());
     } catch (DWCommTimeOutException e) {
-      // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }

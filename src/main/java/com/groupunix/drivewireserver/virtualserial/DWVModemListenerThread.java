@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import com.groupunix.drivewireserver.DWDefs;
 import org.apache.log4j.Logger;
 
 import com.groupunix.drivewireserver.dwprotocolhandler.DWVSerialProtocol;
@@ -99,7 +100,7 @@ public class DWVModemListenerThread implements Runnable {
                           This DriveWire virtual modem is in use.\r
                           Please try again later.\r
                           """
-                  ).getBytes());
+                  ).getBytes(DWDefs.ENCODING));
               skt.close();
             } catch (IOException e) {
               LOGGER.warn("in new modem connection: " + e.getMessage());

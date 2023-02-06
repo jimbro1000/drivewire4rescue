@@ -1,5 +1,6 @@
 package com.groupunix.drivewireserver.dwdisk.filesystem;
 
+import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwexceptions.DWFileSystemInvalidFATException;
 
 import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
@@ -84,7 +85,8 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return filename
    */
   public String getFileName() {
-    return (new String(getData()).substring(BEGIN_FILENAME, END_FILENAME));
+    return (new String(getData(), DWDefs.ENCODING)
+        .substring(BEGIN_FILENAME, END_FILENAME));
   }
 
   /**
@@ -95,7 +97,7 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return extension
    */
   public String getFileExt() {
-    return new String(getData()).substring(BEGIN_EXT, END_EXT);
+    return new String(getData(), DWDefs.ENCODING).substring(BEGIN_EXT, END_EXT);
   }
 
   /**

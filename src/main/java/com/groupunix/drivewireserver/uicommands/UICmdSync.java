@@ -81,7 +81,7 @@ public class UICmdSync extends DWCommand {
       if (!lastevt.hasParam(key)
           || !lastevt.getParam(key).equals(msg.getParam(key))) {
         dwuiClientThread.getOutputStream().write(
-            (key + ':' + msg.getParam(key)).getBytes()
+            (key + ':' + msg.getParam(key)).getBytes(DWDefs.ENCODING)
         );
         dwuiClientThread.getOutputStream().write(CARRIAGE_RETURN);
         lastevt.setParam(key, msg.getParam(key));

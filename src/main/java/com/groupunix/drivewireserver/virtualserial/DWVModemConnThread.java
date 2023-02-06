@@ -166,15 +166,13 @@ public class DWVModemConnThread implements Runnable {
 
     if (!wanttodie) {
       try {
-
         if ((sktchan != null) && sktchan.isConnected()) {
           modem.getVSerialPorts().markConnected(vport);
           modem.getVSerialPorts().setUtilMode(vport, DWDefs.UTILMODE_VMODEMOUT);
           modem.getVSerialPorts().setPortChannel(vport, sktchan);
           modem.getVSerialPorts().getPortInput(vport)
-              .write("CONNECT\r\n".getBytes());
+              .write("CONNECT\r\n".getBytes(DWDefs.ENCODING));
         }
-
         while ((sktchan != null) && sktchan.isConnected()) {
           int data = sktchan.socket().getInputStream().read();
 

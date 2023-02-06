@@ -406,7 +406,7 @@ public class DWVSerialPort {
    */
   public void writeToCoco(final String str) {
     try {
-      inputBuffer.getOutputStream().write(str.getBytes());
+      inputBuffer.getOutputStream().write(str.getBytes(DWDefs.ENCODING));
     } catch (IOException e) {
       LOGGER.warn(e.getMessage());
     }
@@ -698,7 +698,8 @@ public class DWVSerialPort {
     try {
       inputBuffer.getOutputStream().write(
           ("FAIL " + sErrNo + " " + txt
-              + (char) NEWLINE + (char) CARRIAGE_RETURN).getBytes()
+              + (char) NEWLINE
+              + (char) CARRIAGE_RETURN).getBytes(DWDefs.ENCODING)
       );
     } catch (IOException e) {
       LOGGER.warn(e.getMessage());
@@ -713,7 +714,8 @@ public class DWVSerialPort {
   public void sendUtilityOKResponse(final String txt) {
     try {
       inputBuffer.getOutputStream().write(
-          ("OK " + txt + (char) NEWLINE + (char) CARRIAGE_RETURN).getBytes()
+          ("OK " + txt + (char) NEWLINE
+              + (char) CARRIAGE_RETURN).getBytes(DWDefs.ENCODING)
       );
     } catch (IOException e) {
       LOGGER.warn(e.getMessage());

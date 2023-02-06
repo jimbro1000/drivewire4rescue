@@ -106,7 +106,7 @@ public final class DWCmdDiskDosList extends DWCommand {
     DWDECBFileSystem tmp = new DWDECBFileSystem(
         dwProtocolHandler.getDiskDrives().getDisk(driveNumber)
     );
-    res = new String(tmp.getFileContents(filename));
+    res = new String(tmp.getFileContents(filename), DWDefs.ENCODING);
     return new DWCommandResponse(res);
   }
 
