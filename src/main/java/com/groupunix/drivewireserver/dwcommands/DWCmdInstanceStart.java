@@ -6,6 +6,12 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public final class DWCmdInstanceStart extends DWCommand {
   /**
+   * Protocol.
+   */
+  @SuppressWarnings("unused")
+  private final DWProtocol dwProtocol;
+
+  /**
    * Command Instance Start constructor.
    *
    * @param protocol protocol
@@ -13,6 +19,7 @@ public final class DWCmdInstanceStart extends DWCommand {
    */
   public DWCmdInstanceStart(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
+    this.dwProtocol = protocol;
     this.setCommand("start");
     this.setShortHelp("Start instance #");
     this.setUsage("dw instance start #");

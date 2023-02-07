@@ -10,6 +10,7 @@ public class DWCmdConfigSave extends DWCommand {
   /**
    * Drivewire protocol.
    */
+  @SuppressWarnings("unused")
   private final DWProtocol dwProtocol;
 
   /**

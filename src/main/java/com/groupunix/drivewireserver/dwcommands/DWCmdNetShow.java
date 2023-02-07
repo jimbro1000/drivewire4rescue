@@ -71,8 +71,7 @@ public final class DWCmdNetShow extends DWCommand {
                 )
             )
             .append(")\r\n");
-      } catch (DWConnectionNotValidException e) {
-        // text += e.getMessage();
+      } catch (DWConnectionNotValidException ignored) {
       }
     }
     text.append("\r\n");

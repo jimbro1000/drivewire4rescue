@@ -248,10 +248,9 @@ public class DWDMKDisk extends DWDisk {
           >= TRACK_MINIMUM)
           && ((DWDefs.BYTE_MASK & this.tracks.get(track).getData()[loc])
           <= TRACK_MAXIMUM)
+          && (this.header.isSingleDensity() || sync)
       ) {
-        if (this.header.isSingleDensity() || sync) {
-          break;
-        }
+        break;
       }
       if (!this.header.isSingleDensity()) {
         sync = (DWDefs.BYTE_MASK

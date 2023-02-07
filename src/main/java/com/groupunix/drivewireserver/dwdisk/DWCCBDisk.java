@@ -51,15 +51,13 @@ public class DWCCBDisk extends DWDisk {
    */
   public static int considerImage(final byte[] hdr, final long fileObjectSize) {
     // is it big enough to have a header
-    if (fileObjectSize >= DWCCBDisk.CCB_FILE_SIZE_MIN) {
-      // starts with 'ccb'
-      if (compareByteArray(hdr, CCB_INDENTIFIER)) {
-        // has it been isaved..
-        if (fileObjectSize % DWDefs.DISK_SECTORSIZE == 0) {
-          return (DWDefs.DISK_CONSIDER_YES);
-        }
-        return (DWDefs.DISK_CONSIDER_MAYBE);
+    if (fileObjectSize >= DWCCBDisk.CCB_FILE_SIZE_MIN
+        && compareByteArray(hdr, CCB_INDENTIFIER)) {
+      // has it been isaved...
+      if (fileObjectSize % DWDefs.DISK_SECTORSIZE == 0) {
+        return (DWDefs.DISK_CONSIDER_YES);
       }
+      return (DWDefs.DISK_CONSIDER_MAYBE);
     }
     return DWDefs.DISK_CONSIDER_NO;
   }

@@ -65,8 +65,7 @@ public class DWUIThread implements Runnable {
       }
     } catch (IOException e) {
       LOGGER.warn("IO Error closing socket: " + e.getMessage());
-    } catch (ConcurrentModificationException e) {
-      // TODO whatever, we are dying, but should do this right
+    } catch (ConcurrentModificationException ignored) {
     }
   }
 
