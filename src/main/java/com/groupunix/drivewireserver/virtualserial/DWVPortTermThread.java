@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
+import com.groupunix.drivewireserver.DWDefs;
 import org.apache.log4j.Logger;
 
 import com.groupunix.drivewireserver.dwexceptions.DWConnectionNotValidException;
@@ -145,7 +146,7 @@ public class DWVPortTermThread implements Runnable {
                         .getInetAddress()
                         .getHostName()
                         + ")\r\n"
-                    ).getBytes());
+                    ).getBytes(DWDefs.ENCODING));
             skt.close();
           } catch (IOException e) {
             LOGGER.debug("io error closing socket: " + e.getMessage());

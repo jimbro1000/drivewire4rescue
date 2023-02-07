@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 
 import javax.imageio.ImageIO;
 
+import com.groupunix.drivewireserver.DWDefs;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
 import com.groupunix.drivewireserver.dwexceptions.DWPrinterFileError;
@@ -602,7 +603,9 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
 
     FileInputStream fStream = new FileInputStream(fName);
     DataInputStream in = new DataInputStream(fStream);
-    BufferedReader br = new BufferedReader(new InputStreamReader(in));
+    BufferedReader br = new BufferedReader(
+        new InputStreamReader(in, DWDefs.ENCODING)
+    );
     String strLine;
     while ((strLine = br.readLine()) != null) {
       curline++;

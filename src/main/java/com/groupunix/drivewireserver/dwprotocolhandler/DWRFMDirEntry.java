@@ -1,5 +1,6 @@
 package com.groupunix.drivewireserver.dwprotocolhandler;
 
+import com.groupunix.drivewireserver.DWDefs;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
@@ -99,7 +100,7 @@ public class DWRFMDirEntry {
     byte[] res = new byte[ENTRY_LEN];
     if (this.fileName != null) {
       System.arraycopy(
-          this.fileName.getBytes(),
+          this.fileName.getBytes(DWDefs.ENCODING),
           FILE_NAME_OFFSET,
           res,
           0,

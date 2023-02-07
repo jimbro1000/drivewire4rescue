@@ -104,7 +104,10 @@ public class UICmdInstancePortStatus extends DWCommand {
               } else {
                 res.append("||");
               }
-              res.append(new String(dwvSerialProtocol.getVPorts().getDD(p)))
+              res.append(
+                  new String(dwvSerialProtocol.getVPorts().getDD(p),
+                      DWDefs.ENCODING)
+                  )
                   .append("|");
             } else {
               res.append("closed|");

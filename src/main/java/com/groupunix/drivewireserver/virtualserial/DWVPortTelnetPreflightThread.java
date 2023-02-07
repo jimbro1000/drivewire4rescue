@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.channels.SocketChannel;
 
+import com.groupunix.drivewireserver.DWDefs;
 import org.apache.log4j.Logger;
 
 import com.groupunix.drivewireserver.DriveWireServer;
@@ -124,7 +125,8 @@ public class DWVPortTelnetPreflightThread implements Runnable {
       if (this.telnet) {
         socketChannel.socket().getOutputStream()
             .write(("DriveWire Telnet Server "
-            + DriveWireServer.DW_SERVER_VERSION + "\r\n\n").getBytes());
+            + DriveWireServer.DW_SERVER_VERSION + "\r\n\n")
+                .getBytes(DWDefs.ENCODING));
       }
       if (this.telnet) {
         // ask telnet to turn off echo, should probably be a setting
@@ -177,22 +179,23 @@ public class DWVPortTelnetPreflightThread implements Runnable {
   }
 
   private void displayFile(final OutputStream outputStream,
-                           final String fname
+                           final String fName
   ) {
-    FileInputStream fstream;
-    try {
-      fstream = new FileInputStream(fname);
-      DataInputStream in = new DataInputStream(fstream);
-      BufferedReader br = new BufferedReader(new InputStreamReader(in));
+    try (
+      FileInputStream fStream = new FileInputStream(fName)
+    ) {
+      DataInputStream in = new DataInputStream(fStream);
+      BufferedReader br = new BufferedReader(
+          new InputStreamReader(in, DWDefs.ENCODING)
+      );
       String strLine;
-      LOGGER.debug("sending file '" + fname + "' to telnet client");
+      LOGGER.debug("sending file '" + fName + "' to telnet client");
       while ((strLine = br.readLine()) != null) {
-        outputStream.write(strLine.getBytes());
-        outputStream.write("\r\n".getBytes());
+        outputStream.write(strLine.getBytes(DWDefs.ENCODING));
+        outputStream.write("\r\n".getBytes(DWDefs.ENCODING));
       }
-      fstream.close();
     } catch (FileNotFoundException e) {
-      LOGGER.warn("File not found: " + fname);
+      LOGGER.warn("File not found: " + fName);
     } catch (IOException e1) {
       LOGGER.warn(e1.getMessage());
     }

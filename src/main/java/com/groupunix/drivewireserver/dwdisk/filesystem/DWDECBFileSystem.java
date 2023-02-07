@@ -389,14 +389,14 @@ public class DWDECBFileSystem extends DWFileSystem {
     }
 
     System.arraycopy(
-        name.toString().getBytes(),
+        name.toString().getBytes(DWDefs.ENCODING),
         0,
         buf,
         0,
         DIRECTORY_ENTRY_LEN
     );
     System.arraycopy(
-        ext.getBytes(),
+        ext.getBytes(DWDefs.ENCODING),
         0,
         buf,
         DIRECTORY_ENTRY_LEN,

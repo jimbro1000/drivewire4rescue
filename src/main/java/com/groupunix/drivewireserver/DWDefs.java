@@ -1,5 +1,8 @@
 package com.groupunix.drivewireserver;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 /**
  * Static helper class.
  * <p>
@@ -987,4 +990,8 @@ public final class DWDefs {
    * ASCII BS.
    */
   public static final int BACKSPACE = 8;
+  /**
+   * Text Encoding.
+   */
+  public static final Charset ENCODING = StandardCharsets.UTF_8;
 }

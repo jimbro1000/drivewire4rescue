@@ -159,7 +159,8 @@ public class DWVPortTCPConnectionThread implements Runnable {
         LOGGER.debug("Connected to " + this.tcphost + ":" + this.tcpport);
         dwVSerialPorts.setUtilMode(vport, DWDefs.UTILMODE_TCPOUT);
         if (this.wcdata != null) {
-          dwVSerialPorts.write(this.vport, new String(this.wcdata));
+          dwVSerialPorts.write(this.vport,
+              new String(this.wcdata, DWDefs.ENCODING));
         }
       }
     } catch (UnknownHostException e) {

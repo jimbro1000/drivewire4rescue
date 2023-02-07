@@ -654,7 +654,7 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
     long startTime = System.currentTimeMillis();
     int nameSize = protodev.comRead1(true);
     byte[] nameBuf = protodev.comRead(nameSize);
-    String objName = new String(nameBuf);
+    String objName = new String(nameBuf, DWDefs.ENCODING);
     int result = diskDrives.nameObjMount(objName);
     // artificial delay test
     if (config.containsKey("NameObjMountDelay")) {

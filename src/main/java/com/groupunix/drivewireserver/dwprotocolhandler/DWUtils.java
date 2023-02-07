@@ -797,9 +797,9 @@ public class DWUtils {
     // name length
     res[pos++] = (byte) f.getName().length();
     for (int i = 0; i < f.getName().length(); i++) {
-      res[pos++] = f.getName().getBytes()[i];
+      res[pos++] = f.getName().getBytes(DWDefs.ENCODING)[i];
     }
-    return new String(res);
+    return new String(res, DWDefs.ENCODING);
   }
 
   /**

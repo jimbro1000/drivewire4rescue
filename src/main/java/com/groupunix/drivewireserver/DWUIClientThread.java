@@ -242,7 +242,7 @@ public class DWUIClientThread implements Runnable {
     if (resp.isUseBytes() && (resp.getResponseBytes() != null)) {
       this.bufferedout.write(resp.getResponseBytes());
     } else if (resp.getResponseText() != null) {
-      this.bufferedout.write(resp.getResponseText().getBytes());
+      this.bufferedout.write(resp.getResponseText().getBytes(DWDefs.ENCODING));
     }
   }
 

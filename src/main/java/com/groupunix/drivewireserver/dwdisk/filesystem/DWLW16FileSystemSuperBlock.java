@@ -1,5 +1,6 @@
 package com.groupunix.drivewireserver.dwdisk.filesystem;
 
+import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwdisk.DWDiskSector;
 
 import java.io.IOException;
@@ -108,7 +109,7 @@ public class DWLW16FileSystemSuperBlock {
    */
   public boolean isValid() {
     // magic number
-    if (new String(this.magic).equals("LW16")) {
+    if (new String(this.magic, DWDefs.ENCODING).equals("LW16")) {
       // fs size
       if (
           (this.dataBlockCount + this.iNodeBmpBlocks
