@@ -37,10 +37,9 @@ public class DWServerConfigListener implements ConfigurationListener {
           DriveWireServer.setLoggingRestart();
         }
         // UI thread
-        if (event.getPropertyName().startsWith("UI")) {
-          if (!DriveWireServer.isConfigFreeze()) {
-            DriveWireServer.setUIRestart();
-          }
+        if (event.getPropertyName().startsWith("UI")
+            && !DriveWireServer.isConfigFreeze()) {
+          DriveWireServer.setUIRestart();
         }
       }
     }

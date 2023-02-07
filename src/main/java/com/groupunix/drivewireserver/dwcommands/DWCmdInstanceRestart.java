@@ -6,6 +6,12 @@ import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
 public final class DWCmdInstanceRestart extends DWCommand {
   /**
+   * Protocol.
+   */
+  @SuppressWarnings("unused")
+  private final DWProtocol dwProtocol;
+
+  /**
    * Command Instance Restart constructor.
    *
    * @param protocol protocol
@@ -16,6 +22,7 @@ public final class DWCmdInstanceRestart extends DWCommand {
       final DWCommand parent
   ) {
     setParentCmd(parent);
+    this.dwProtocol = protocol;
     this.setCommand("restart");
     this.setShortHelp("Restart instance #");
     this.setUsage("dw instance restart #");
@@ -42,34 +49,10 @@ public final class DWCmdInstanceRestart extends DWCommand {
   private DWCommandResponse doRestart(final String instance) {
     try {
       int instanceNumber = Integer.parseInt(instance);
-      if (!DriveWireServer.isValidHandlerNo(instanceNumber)) {
-        return new DWCommandResponse(
-            false,
-            DWDefs.RC_INVALID_HANDLER,
-            "Invalid instance number."
-        );
-      }
-      if (DriveWireServer.getHandler(instanceNumber) == null) {
-        return new DWCommandResponse(
-            false,
-            DWDefs.RC_INVALID_HANDLER,
-            "Instance " + instanceNumber + " is not defined."
-        );
-      }
-      if (!DriveWireServer.getHandler(instanceNumber).isReady()) {
-        return new DWCommandResponse(
-            false,
-            DWDefs.RC_INSTANCE_ALREADY_STARTED,
-            "Instance " + instanceNumber + " is not started."
-        );
-      }
-      if (DriveWireServer.getHandler(instanceNumber).isDying()) {
-        return new DWCommandResponse(
-            false,
-            DWDefs.RC_INSTANCE_NOT_READY,
-            "Instance "
-                + instanceNumber + " is in the process of shutting down."
-        );
+      DWCommandResponse testInstance
+          = DWCmdInstance.guardInstance(instanceNumber);
+      if (testInstance != null) {
+        return testInstance;
       }
       DriveWireServer.restartHandler(instanceNumber);
       return new DWCommandResponse(

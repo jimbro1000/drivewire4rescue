@@ -145,8 +145,7 @@ public final class DWCmdDiskCreate extends DWCommand {
           false,
           DWDefs.RC_INVALID_DRIVE, e.getMessage()
       );
-    } catch (DWDriveNotLoadedException e) {
-      // dont care
+    } catch (DWDriveNotLoadedException ignored) {
     } catch (DWDriveAlreadyLoadedException e) {
       return new DWCommandResponse(
           false,

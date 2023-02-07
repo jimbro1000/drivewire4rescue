@@ -263,12 +263,11 @@ public class DWUIClientThread implements Runnable {
   public void setInstance(final int handler) {
     this.instance = handler;
     // valid instances get a dw cmd mapping
-    if (DriveWireServer.isValidHandlerNo(handler)) {
-      if (!this.commands.validate("dw")) {
-        this.commands.addCommand(
-            new DWCmd(DriveWireServer.getHandler(handler))
-        );
-      }
+    if (DriveWireServer.isValidHandlerNo(handler)
+        && !this.commands.validate("dw")) {
+      this.commands.addCommand(
+          new DWCmd(DriveWireServer.getHandler(handler))
+      );
     }
   }
 

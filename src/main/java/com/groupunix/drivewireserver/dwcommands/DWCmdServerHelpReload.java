@@ -32,11 +32,11 @@ public class DWCmdServerHelpReload extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    return (doHelpReload(cmdline));
+    return doHelpReload();
   }
 
 
-  private DWCommandResponse doHelpReload(final String cmdline) {
+  private DWCommandResponse doHelpReload() {
     dwProtocol.getHelp().reload();
     return new DWCommandResponse("Reloaded help topics.");
   }

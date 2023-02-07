@@ -11,6 +11,12 @@ import static com.groupunix.drivewireserver.DriveWireServer.OPEN_PORT_TIMEOUT_MI
 
 public class DWCmdServerShowSerial extends DWCommand {
   /**
+   * Protocol.
+   */
+  @SuppressWarnings("unused")
+  private final DWProtocol dwProtocol;
+
+  /**
    * Server show serial command constructor.
    *
    * @param protocol protocol
@@ -18,6 +24,7 @@ public class DWCmdServerShowSerial extends DWCommand {
    */
   DWCmdServerShowSerial(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
+    this.dwProtocol = protocol;
     this.setCommand("serial");
     this.setShortHelp("Show serial device information");
     this.setUsage("dw server show serial");

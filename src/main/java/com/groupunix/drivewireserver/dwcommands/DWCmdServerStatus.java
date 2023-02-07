@@ -9,6 +9,11 @@ public class DWCmdServerStatus extends DWCommand {
    * Bytes is a kilobyte.
    */
   public static final int KILOBYTE_FACTOR = 1024;
+  /**
+   * Protocol.
+   */
+  @SuppressWarnings("unused")
+  private final DWProtocol dwProtocol;
 
   /**
    * Server status command constructor.
@@ -18,6 +23,7 @@ public class DWCmdServerStatus extends DWCommand {
    */
   public DWCmdServerStatus(final DWProtocol protocol, final DWCommand parent) {
     setParentCmd(parent);
+    this.dwProtocol = protocol;
     this.setCommand("status");
     this.setShortHelp("Show server status information");
     this.setUsage("dw server status");

@@ -1125,10 +1125,8 @@ public final class DriveWireServer {
   public static int getNumHandlersAlive() {
     int res = 0;
     for (DWProtocol p : DW_PROTOCOL_HANDLERS) {
-      if (p != null) {
-        if (!p.isDying() && p.isReady()) {
-          res++;
-        }
+      if (p != null && !p.isDying() && p.isReady()) {
+        res++;
       }
     }
     return res;
