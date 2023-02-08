@@ -768,11 +768,6 @@ public class DWUtils {
     while (bytePos > 0) {
       res[pos++] = (byte) (l >>> BYTE_BITS * --bytePos);
     }
-//    // 4 byte file size
-//    res[pos++] = (byte) (l >>> BYTE_BITS * --bytePos);
-//    res[pos++] = (byte) (l >>> BYTE_BITS * --bytePos);
-//    res[pos++] = (byte) (l >>> BYTE_BITS * --bytePos);
-//    res[pos++] = (byte) (l);
 
     // 5 byte OS9 style modified date - Y M D Hr Min
     Date moddate = new Date(f.lastModified());
@@ -796,8 +791,9 @@ public class DWUtils {
     }
     // name length
     res[pos++] = (byte) f.getName().length();
+    byte[] nameBytes = f.getName().getBytes(DWDefs.ENCODING);
     for (int i = 0; i < f.getName().length(); i++) {
-      res[pos++] = f.getName().getBytes(DWDefs.ENCODING)[i];
+      res[pos++] = nameBytes[i];
     }
     return new String(res, DWDefs.ENCODING);
   }
