@@ -5,6 +5,7 @@ import gnu.io.PortInUseException;
 import gnu.io.UnsupportedCommOperationException;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.TooManyListenersException;
 
@@ -719,7 +720,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
     String text = "";
     text += "Last OpCode:   " + DWUtils.prettyOP(getLastOpcode()) + "\r\n";
     text += "Last Drive:    " + getLastDrive() + "\r\n";
-    text += "Last LSN:      " + getLastLSN() + "\r\n";
+    text += "Last LSN:      " + Arrays.toString(getLastLSN()) + "\r\n";
     text += "Last Error:    " + (getLastError() & BYTE_MASK) + "\r\n";
     return text;
   }

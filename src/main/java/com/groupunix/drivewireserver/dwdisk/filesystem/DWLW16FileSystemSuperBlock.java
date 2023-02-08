@@ -109,19 +109,16 @@ public class DWLW16FileSystemSuperBlock {
    */
   public boolean isValid() {
     // magic number
-    if (new String(this.magic, DWDefs.ENCODING).equals("LW16")) {
-      // fs size
-      if (
-          (this.dataBlockCount + this.iNodeBmpBlocks
+    if (new String(this.magic, DWDefs.ENCODING).equals("LW16")
+        && (this.dataBlockCount + this.iNodeBmpBlocks
               + this.dataBmpBlockCount + 1) <= WORD_SHIFT
-      ) {
-        // Assumptions:
-        // 256 = sector size
-        // 8 = sectors per iNode
-        return Math.ceil(
-            (double) this.iNodeCount / SECTORS_PER_NODE / SECTOR_SIZE
-        ) == this.iNodeBmpBlocks;
-      }
+    ) {
+      // Assumptions:
+      // 256 = sector size
+      // 8 = sectors per iNode
+      return Math.ceil(
+          (double) this.iNodeCount / SECTORS_PER_NODE / SECTOR_SIZE
+      ) == this.iNodeBmpBlocks;
     }
     return false;
   }

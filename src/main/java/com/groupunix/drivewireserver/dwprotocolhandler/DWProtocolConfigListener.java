@@ -29,15 +29,13 @@ public class DWProtocolConfigListener implements ConfigurationListener {
    */
   @Override
   public void configurationChanged(final ConfigurationEvent event) {
-    if (!event.isBeforeUpdate()) {
-      if (event.getPropertyName() != null) {
-        if (event.getPropertyValue() == null) {
-          this.dwProtocol.submitConfigEvent(event.getPropertyName(), "");
-        } else {
-          this.dwProtocol.submitConfigEvent(
-              event.getPropertyName(), event.getPropertyValue().toString()
-          );
-        }
+    if (!event.isBeforeUpdate() && event.getPropertyName() != null) {
+      if (event.getPropertyValue() == null) {
+        this.dwProtocol.submitConfigEvent(event.getPropertyName(), "");
+      } else {
+        this.dwProtocol.submitConfigEvent(
+            event.getPropertyName(), event.getPropertyValue().toString()
+        );
       }
     }
   }

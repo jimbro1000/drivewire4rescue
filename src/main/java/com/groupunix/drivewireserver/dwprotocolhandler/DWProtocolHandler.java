@@ -743,11 +743,11 @@ public class DWProtocolHandler implements Runnable, DWVSerialProtocol {
         LOGGER.info("DWINIT got unknown driver version # " + drvVersion);
       }
       // possibly extend this to all DWINITs..
-      if (drvVersion < VERSION_MAX) {
-        if (this.config.getBoolean("HDBDOSMode", false)) {
-          LOGGER.warn("Disabling HDBDOS mode due to non HDBDOS DWINIT");
-          this.config.setProperty("HDBDOSMode", false);
-        }
+      if (drvVersion < VERSION_MAX
+          && this.config.getBoolean("HDBDOSMode", false)
+      ) {
+        LOGGER.warn("Disabling HDBDOS mode due to non HDBDOS DWINIT");
+        this.config.setProperty("HDBDOSMode", false);
       }
       // coco has just booted an os..
       dwinitTime = new GregorianCalendar();

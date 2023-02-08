@@ -31,8 +31,8 @@ public class DWCCBDisk extends DWDisk {
    * CCB Disk Constructor.
    *
    * @param fileobj file object
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException read/write failure
+   * @throws DWImageFormatException invalid image format
    */
   public DWCCBDisk(final FileObject fileobj)
       throws IOException, DWImageFormatException {
@@ -72,10 +72,18 @@ public class DWCCBDisk extends DWDisk {
   }
 
   /**
+   * Synchronise disk.
+   */
+  @Override
+  void sync() {
+    // no operation
+  }
+
+  /**
    * Load file into sector array.
    *
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException read failure
+   * @throws DWImageFormatException invalid image format
    */
   public void load() throws IOException, DWImageFormatException {
     InputStream fis;
@@ -144,8 +152,8 @@ public class DWCCBDisk extends DWDisk {
    * Seek disk sector.
    *
    * @param newLSN logical sector number
-   * @throws DWInvalidSectorException
-   * @throws DWSeekPastEndOfDeviceException
+   * @throws DWInvalidSectorException invalid sector
+   * @throws DWSeekPastEndOfDeviceException attempt to seek past end of disk
    */
   public void seekSector(final int newLSN)
       throws DWInvalidSectorException, DWSeekPastEndOfDeviceException {
@@ -164,8 +172,8 @@ public class DWCCBDisk extends DWDisk {
    * Write disk sector.
    *
    * @param data byte array of new sector content
-   * @throws DWDriveWriteProtectedException
-   * @throws IOException
+   * @throws DWDriveWriteProtectedException failed to write to protected disk
+   * @throws IOException write failure
    */
   public void writeSector(final byte[] data)
       throws DWDriveWriteProtectedException, IOException {
@@ -181,7 +189,7 @@ public class DWCCBDisk extends DWDisk {
    * Read disk sector.
    *
    * @return byte array of sector content
-   * @throws IOException
+   * @throws IOException read failure
    */
   public byte[] readSector() throws IOException {
     this.incParam("_reads");

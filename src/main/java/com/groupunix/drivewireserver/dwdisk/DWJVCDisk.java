@@ -86,6 +86,14 @@ public class DWJVCDisk extends DWDisk {
   }
 
   /**
+   * Synchronise disk.
+   */
+  @Override
+  void sync() {
+    // no operation
+  }
+
+  /**
    * Load file into sector array.
    *
    * @throws IOException

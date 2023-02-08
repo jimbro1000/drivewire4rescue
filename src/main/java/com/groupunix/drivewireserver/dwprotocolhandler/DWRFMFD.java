@@ -140,7 +140,7 @@ public class DWRFMFD {
     b[OFFSET_LINK] = getLink();
     System.arraycopy(getSize(), 0, b, OFFSET_SIZE, SIZE_LENGTH);
     System.arraycopy(getCreat(), 0, b, OFFSET_CREAT, CREAT_LENGTH);
-    return (b);
+    return b;
   }
 
   /**

@@ -48,7 +48,7 @@ public class UICmd extends DWCommand {
     if (cmdline.length() == 0) {
       return (new DWCommandResponse(this.getCommandList().getShortHelp()));
     }
-    return (getCommandList().parse(cmdline));
+    return getCommandList().parse(cmdline);
   }
 
   /**

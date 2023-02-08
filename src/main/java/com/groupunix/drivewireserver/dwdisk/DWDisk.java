@@ -304,9 +304,7 @@ public abstract class DWDisk {
    *
    * @throws IOException Failed to write to file object
    */
-  public void sync() throws IOException {
-    // NOP on readonly image formats
-  }
+  abstract void sync() throws IOException;
 
   /**
    * Write disk.
@@ -375,8 +373,7 @@ public abstract class DWDisk {
     if (this.getParams().containsKey("_sectorsize")) {
       try {
         ss = (Integer) this.getParam("_sectorsize");
-      } catch (NumberFormatException e) {
-        // how did they get a non int value in there... whatever
+      } catch (NumberFormatException ignored) {
       }
     }
     byte[] zerofill = new byte[ss];
@@ -421,10 +418,8 @@ public abstract class DWDisk {
     int drt = 0;
     if (this.sectors != null) {
       for (DWDiskSector sector : this.sectors) {
-        if (sector != null) {
-          if (sector.isDirty()) {
-            drt++;
-          }
+        if (sector != null && sector.isDirty()) {
+          drt++;
         }
       }
     }

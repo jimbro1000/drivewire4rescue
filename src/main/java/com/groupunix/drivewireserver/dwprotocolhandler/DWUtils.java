@@ -224,7 +224,7 @@ public class DWUtils {
    */
   @SuppressWarnings("unused")
   public static byte[] hexStringToByteArray(final String hexString) {
-    if (hexString.length() <= 0 || (hexString.length() % 2) != 0) {
+    if (hexString.length() == 0 || (hexString.length() % 2) != 0) {
       return null;
     }
     byte[] res = new byte[hexString.length() / 2];

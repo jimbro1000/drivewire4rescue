@@ -118,10 +118,18 @@ public class DWDMKDisk extends DWDisk {
   }
 
   /**
+   * Synchronise disk.
+   */
+  @Override
+  void sync() {
+    // no operation
+  }
+
+  /**
    * Load sectors from file.
    *
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException read failure
+   * @throws DWImageFormatException invalid image format
    */
   public void load() throws IOException, DWImageFormatException {
     // load file into sector array

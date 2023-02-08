@@ -153,4 +153,12 @@ public class DWSIDEImageDisk extends DWDisk {
   public int getDiskFormat() {
     return DWDefs.DISK_FORMAT_SIDE;
   }
+
+  /**
+   * Synchronise disk.
+   */
+  @Override
+  public void sync() {
+    // no-operation
+  }
 }

@@ -431,27 +431,24 @@ public class DWDECBFileSystem extends DWFileSystem {
                 && DriveWireServer
                 .getServerConfiguration()
                 .containsKey(kp + "[@filetype]")
+            && DriveWireServer
+                  .getServerConfiguration()
+                  .getString(kp + "[@extension]").equalsIgnoreCase(ext)
         ) {
+          // we have a winner
+          mapping.setType(
+              DriveWireServer
+                  .getServerConfiguration()
+                  .getByte(kp + "[@filetype]")
+          );
           if (
               DriveWireServer
                   .getServerConfiguration()
-                  .getString(kp + "[@extension]").equalsIgnoreCase(ext)
+                  .getBoolean(kp + "[@ascii]")
           ) {
-            // we have a winner
-            mapping.setType(
-                DriveWireServer
-                    .getServerConfiguration()
-                    .getByte(kp + "[@filetype]")
-            );
-            if (
-                DriveWireServer
-                    .getServerConfiguration()
-                    .getBoolean(kp + "[@ascii]")
-            ) {
-              mapping.setFlag(DECBDefs.FLAG_ASCII);
-            } else {
-              mapping.setFlag(DECBDefs.FLAG_BIN);
-            }
+            mapping.setFlag(DECBDefs.FLAG_ASCII);
+          } else {
+            mapping.setFlag(DECBDefs.FLAG_BIN);
           }
         }
       }

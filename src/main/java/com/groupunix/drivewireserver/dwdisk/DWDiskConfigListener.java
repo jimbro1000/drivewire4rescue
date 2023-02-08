@@ -27,14 +27,12 @@ public class DWDiskConfigListener implements ConfigurationListener {
   @Override
   public void configurationChanged(final ConfigurationEvent event) {
     if (!event.isBeforeUpdate()) {
-      if (event.getPropertyName() != null) {
-        if (event.getPropertyValue() != null) {
-          this.dwDisk.submitEvent(
-              event.getPropertyName(), event.getPropertyValue().toString()
-          );
-        } else {
-          this.dwDisk.submitEvent(event.getPropertyName(), "");
-        }
+      if (event.getPropertyName() != null && event.getPropertyValue() != null) {
+        this.dwDisk.submitEvent(
+            event.getPropertyName(), event.getPropertyValue().toString()
+        );
+      } else {
+        this.dwDisk.submitEvent(event.getPropertyName(), "");
       }
     }
   }

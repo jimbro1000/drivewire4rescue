@@ -224,10 +224,9 @@ public class DWRawDisk extends DWDisk {
         || ((filesize / this.getSectorSize()) > DWDefs.DISK_MAXSECTORS)) {
       throw new DWImageFormatException("Image file is too large");
     }
-    if (!forceCache) {
-      if ((this.getFileObject().getName().toString()).startsWith("file://")) {
-        this.direct = true;
-      }
+    if (!forceCache
+        && (this.getFileObject().getName().toString()).startsWith("file://")) {
+      this.direct = true;
     }
     if (!direct) {
       LOGGER.debug("Caching " + this.getFileObject().getName() + " in memory");
@@ -303,38 +302,34 @@ public class DWRawDisk extends DWDisk {
    * Read sector to byte array.
    *
    * @return sector bytes
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException read failure
+   * @throws DWImageFormatException image format exception
    */
   public byte[] readSector() throws IOException, DWImageFormatException {
     this.incParam("_reads");
     // check source for changes...
-    if (this.isSyncFrom() && (this.getFileObject() != null)) {
-      if (
-          this.getFileObject()
+    if (this.isSyncFrom()
+        && (this.getFileObject() != null)
+        && this.getFileObject()
               .getContent()
               .getLastModifiedTime() != this.getLastModifiedTime()
-      ) {
-        // source has changed.. have we?
-        if (this.getDirtySectors() > 0) {
-          // doh
-          LOGGER.warn(
-              "Sync conflict on " + getFilePath()
-                  + ", both the source and our cached image have changed.  "
-                  + "Source will be overwritten!"
-          );
-          try {
-            this.write();
-          } catch (DWImageHasNoSourceException e) {
-            //don't care
-          }
-        } else {
-          LOGGER.info(
-              "Disk source " + getFilePath() + " has changed, reloading"
-          );
-          this.reload();
-        }
+        && this.getDirtySectors() > 0
+    ) {
+      // doh
+      LOGGER.warn(
+          "Sync conflict on " + getFilePath()
+              + ", both the source and our cached image have changed.  "
+              + "Source will be overwritten!"
+      );
+      try {
+        this.write();
+      } catch (DWImageHasNoSourceException ignored) {
       }
+    } else {
+      LOGGER.info(
+          "Disk source " + getFilePath() + " has changed, reloading"
+      );
+      this.reload();
     }
     int effLSN = this.getLSN() + this.getOffset();
     // we can read beyond the current size of the image
@@ -350,7 +345,7 @@ public class DWRawDisk extends DWDisk {
       // no need to expand disk on read, give a blank sector
       return (new byte[this.getSectorSize()]);
     }
-    return (this.getSectors().get(effLSN).getData());
+    return this.getSectors().get(effLSN).getData();
   }
 
   /**
@@ -367,8 +362,8 @@ public class DWRawDisk extends DWDisk {
    * Write sector data.
    *
    * @param data byte array
-   * @throws DWDriveWriteProtectedException
-   * @throws IOException
+   * @throws DWDriveWriteProtectedException write attempt to protected disk
+   * @throws IOException write failure
    */
   public void writeSector(final byte[] data)
       throws DWDriveWriteProtectedException, IOException {
@@ -450,26 +445,24 @@ public class DWRawDisk extends DWDisk {
           .getRandomAccessContent(RandomAccessMode.READWRITE);
 
       for (int i = 0; i < this.getSectors().size(); i++) {
-        if (getSector(i) != null) {
-          if (getSector(i).isDirty()) {
-            if (
-                this.getDrive().getDiskDrives().getDWProtocolHandler().isInOp()
-            ) {
-              try {
-                long sleepStart = System.currentTimeMillis();
-                Thread.sleep(DWDefs.DISK_SYNC_INOP_PAUSE);
-                sleeptime += System.currentTimeMillis() - sleepStart;
-              } catch (InterruptedException e) {
-                //  this would be weird..
-                e.printStackTrace();
-              }
+        if (getSector(i) != null && getSector(i).isDirty()) {
+          if (
+              this.getDrive().getDiskDrives().getDWProtocolHandler().isInOp()
+          ) {
+            try {
+              long sleepStart = System.currentTimeMillis();
+              Thread.sleep(DWDefs.DISK_SYNC_INOP_PAUSE);
+              sleeptime += System.currentTimeMillis() - sleepStart;
+            } catch (InterruptedException e) {
+              //  this would be weird..
+              e.printStackTrace();
             }
-            long pos = (long) i * this.getSectorSize();
-            raf.seek(pos);
-            raf.write(getSector(i).getData());
-            sectorswritten++;
-            getSector(i).makeClean();
           }
+          long pos = (long) i * this.getSectorSize();
+          raf.seek(pos);
+          raf.write(getSector(i).getData());
+          sectorswritten++;
+          getSector(i).makeClean();
         }
       }
       raf.close();
