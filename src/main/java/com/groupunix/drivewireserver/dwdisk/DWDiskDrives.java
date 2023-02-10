@@ -96,7 +96,7 @@ public class DWDiskDrives {
     for (int i = 0; i < getMaxDrives(); i++) {
       this.diskDrives[i] = new DWDiskDrive(this, i);
 
-      if (!DriveWireServer.getNoMount()
+      if (!DriveWireServer.isNoMount()
           && protocolHandler.getConfig()
           .getBoolean("RestoreDrivePaths", true)
           && (protocolHandler.getConfig()

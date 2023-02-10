@@ -20,6 +20,7 @@ public class DWCmdPortClose extends DWCommand {
       final DWVSerialProtocol protocol,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("close");
@@ -40,7 +41,7 @@ public class DWCmdPortClose extends DWCommand {
           "dw port close requires a port # as an argument"
       );
     }
-    return (doPortClose(cmdline));
+    return doPortClose(cmdline);
   }
 
   private DWCommandResponse doPortClose(final String port) {

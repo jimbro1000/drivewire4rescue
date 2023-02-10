@@ -187,7 +187,7 @@ public class DWVSerialPorts {
     vserialPorts = new DWVSerialPort[maxports];
 
     if (serialProtocol.getConfig().getBoolean("UseMIDI", false)
-        && !DriveWireServer.getNoMIDI()) {
+        && !DriveWireServer.isNoMIDI()) {
       clearGMInstrumentCache();
       try {
         // set default output

@@ -18,6 +18,7 @@ public final class DWCmdServerTurbo extends DWCommand {
    * @param parent parent command
    */
   public DWCmdServerTurbo(final DWProtocol protocol, final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("turbo");
@@ -37,9 +38,10 @@ public final class DWCmdServerTurbo extends DWCommand {
 
   private DWCommandResponse doServerTurbo() {
     String text;
-    DWSerialDevice serdev = (DWSerialDevice) this.dwProtocol.getProtoDev();
+    final DWSerialDevice serialDevice =
+        (DWSerialDevice) this.dwProtocol.getProtoDev();
     try {
-      serdev.enableDATurbo();
+      serialDevice.enableDATurbo();
       text = "Device is now in DATurbo mode";
     } catch (UnsupportedCommOperationException e) {
       text = "Failed to enable DATurbo mode: " + e.getMessage();

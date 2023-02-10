@@ -41,9 +41,9 @@ public final class DWCmdMidiSynthShow extends DWCommand {
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
+      return new DWCommandResponse(this.getCommandList().getShortHelp());
     }
-    return (this.getCommandList().parse(cmdline));
+    return this.getCommandList().parse(cmdline);
   }
 
   /**

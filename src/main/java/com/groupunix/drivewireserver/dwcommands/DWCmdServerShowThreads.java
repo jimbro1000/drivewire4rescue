@@ -12,7 +12,8 @@ public final class DWCmdServerShowThreads extends DWCommand {
    *
    * @param parent parent command
    */
-  DWCmdServerShowThreads(final DWCommand parent) {
+  public DWCmdServerShowThreads(final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.setCommand("threads");
     this.setShortHelp("Show server threads");
@@ -26,19 +27,19 @@ public final class DWCmdServerShowThreads extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder text = new StringBuilder();
+    final StringBuilder text = new StringBuilder();
     text.append("\r\nDriveWire Server Threads:\r\n\n");
-    Thread[] threads = getAllThreads();
-    for (Thread thread : threads) {
+    final Thread[] threads = getAllThreads();
+    for (final Thread thread : threads) {
       if (thread != null) {
         text
             .append(
-            String.format(
-                "%40s %3d %-8s %-14s",
-                shortenName(thread.getName()),
-                thread.getPriority(),
-                thread.getThreadGroup().getName(),
-                thread.getState())
+                String.format(
+                    "%40s %3d %-8s %-14s",
+                    shortenName(thread.getName()),
+                    thread.getPriority(),
+                    thread.getThreadGroup().getName(),
+                    thread.getState())
             )
             .append("\r\n");
       }
@@ -54,14 +55,14 @@ public final class DWCmdServerShowThreads extends DWCommand {
     final ThreadGroup root = DWUtils.getRootThreadGroup();
     final ThreadMXBean thbean = ManagementFactory.getThreadMXBean();
     int nAlloc = thbean.getThreadCount();
-    int n = 0;
+    int count;
     Thread[] threads;
     do {
       nAlloc *= 2;
       threads = new Thread[nAlloc];
-      n = root.enumerate(threads, true);
-    } while (n == nAlloc);
-    Thread[] copy = new Thread[threads.length];
+      count = root.enumerate(threads, true);
+    } while (count == nAlloc);
+    final Thread[] copy = new Thread[threads.length];
     System.arraycopy(threads, 0, copy, 0, threads.length);
     return copy;
   }

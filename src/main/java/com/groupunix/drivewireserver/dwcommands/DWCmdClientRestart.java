@@ -32,12 +32,12 @@ public class DWCmdClientRestart extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    return (doStart());
+    return doStart();
   }
 
   private DWCommandResponse doStart() {
     this.dwvSerialProtocol.getVPorts().setRebootRequested(true);
-    return (new DWCommandResponse("Restart pending"));
+    return new DWCommandResponse("Restart pending");
   }
 
   /**

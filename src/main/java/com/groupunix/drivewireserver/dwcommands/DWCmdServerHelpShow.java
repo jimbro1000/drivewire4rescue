@@ -22,6 +22,7 @@ public class DWCmdServerHelpShow extends DWCommand {
       final DWProtocol protocol,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("show");
@@ -47,7 +48,7 @@ public class DWCmdServerHelpShow extends DWCommand {
 
     try {
       text += dwProtocol.getHelp().getTopicText(cmdline);
-      return (new DWCommandResponse(text));
+      return new DWCommandResponse(text);
     } catch (DWHelpTopicNotFoundException e) {
       return new DWCommandResponse(
           false,
@@ -58,9 +59,9 @@ public class DWCmdServerHelpShow extends DWCommand {
   }
 
   private DWCommandResponse doShowHelp() {
-    StringBuilder text = new StringBuilder("Help Topics:\r\n\r\n");
-    ArrayList<String> tops = dwProtocol.getHelp().getTopics(null);
-    for (String top : tops) {
+    final StringBuilder text = new StringBuilder("Help Topics:\r\n\r\n");
+    final ArrayList<String> tops = dwProtocol.getHelp().getTopics(null);
+    for (final String top : tops) {
       text.append(top).append("\r\n");
     }
     return new DWCommandResponse(text.toString());

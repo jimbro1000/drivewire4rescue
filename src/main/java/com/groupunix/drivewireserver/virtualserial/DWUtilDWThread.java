@@ -76,7 +76,7 @@ public class DWUtilDWThread implements Runnable {
       this.dwVSerialPorts.markConnected(vport);
       this.dwVSerialPorts.setUtilMode(this.vport, DWDefs.UTILMODE_DWCMD);
       DWCommandResponse resp = commands.parse(this.strargs);
-      if (resp.getSuccess()) {
+      if (resp.isSuccess()) {
         if (resp.isUseBytes()) {
           dwVSerialPorts.sendUtilityOKResponse(
               this.vport, resp.getResponseBytes()

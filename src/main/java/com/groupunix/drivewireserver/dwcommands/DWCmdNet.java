@@ -17,9 +17,10 @@ public final class DWCmdNet extends DWCommand {
   public DWCmdNet(
       final DWVSerialProtocol protocol, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwvSerialProtocol = protocol;
-    DWCommandList commands = new DWCommandList(
+    final DWCommandList commands = new DWCommandList(
         this.dwvSerialProtocol, this.dwvSerialProtocol.getCMDCols()
     );
     this.setCommandList(commands);

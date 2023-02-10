@@ -16,9 +16,10 @@ public class DWCmdServerShow extends DWCommand {
    * @param parent parent command
    */
   public DWCmdServerShow(final DWProtocol protocol, final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
-    DWCommandList commands = new DWCommandList(
+    final DWCommandList commands = new DWCommandList(
         this.dwProtocol, this.dwProtocol.getCMDCols()
     );
     this.setCommandList(commands);

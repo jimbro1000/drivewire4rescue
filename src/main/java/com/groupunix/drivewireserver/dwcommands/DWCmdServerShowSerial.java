@@ -1,10 +1,13 @@
 package com.groupunix.drivewireserver.dwcommands;
 
+import gnu.io.CommPortIdentifier;
 import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 
 import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
+
+import java.util.Enumeration;
 
 import static com.groupunix.drivewireserver.DriveWireServer.OPEN_PORT_TIMEOUT_MILLIS;
 
@@ -20,9 +23,11 @@ public class DWCmdServerShowSerial extends DWCommand {
    * Server show serial command constructor.
    *
    * @param protocol protocol
-   * @param parent parent command
+   * @param parent   parent command
    */
-  DWCmdServerShowSerial(final DWProtocol protocol, final DWCommand parent) {
+  public DWCmdServerShowSerial(final DWProtocol protocol,
+                               final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("serial");
@@ -37,22 +42,20 @@ public class DWCmdServerShowSerial extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder text = new StringBuilder();
-
+    final StringBuilder text = new StringBuilder();
     text.append("Server serial devices:\r\n\r\n");
 
-    @SuppressWarnings("unchecked")
-    java.util.Enumeration<gnu.io.CommPortIdentifier> thePorts
-        = gnu.io.CommPortIdentifier.getPortIdentifiers();
+    @SuppressWarnings("unchecked") final Enumeration<CommPortIdentifier> thePorts
+        = CommPortIdentifier.getPortIdentifiers();
 
     while (thePorts.hasMoreElements()) {
       try {
-        gnu.io.CommPortIdentifier com = thePorts.nextElement();
-        if (com.getPortType() == gnu.io.CommPortIdentifier.PORT_SERIAL) {
+        final CommPortIdentifier com = thePorts.nextElement();
+        if (com.getPortType() == CommPortIdentifier.PORT_SERIAL) {
           text.append(com.getName()).append("  ");
 
           try {
-            SerialPort serialPort = (SerialPort) com.open(
+            final SerialPort serialPort = (SerialPort) com.open(
                 "DWList", OPEN_PORT_TIMEOUT_MILLIS
             );
 
@@ -109,11 +112,11 @@ public class DWCmdServerShowSerial extends DWCommand {
                 text.append("Out: XOn/XOff  ");
               }
             }
-            text.append(" CD:").append(yn(serialPort.isCD()));
-            text.append(" CTS:").append(yn(serialPort.isCTS()));
-            text.append(" DSR:").append(yn(serialPort.isDSR()));
-            text.append(" DTR:").append(yn(serialPort.isDTR()));
-            text.append(" RTS:").append(yn(serialPort.isRTS()));
+            text.append(" CD:").append(yesOrNo(serialPort.isCD()));
+            text.append(" CTS:").append(yesOrNo(serialPort.isCTS()));
+            text.append(" DSR:").append(yesOrNo(serialPort.isDSR()));
+            text.append(" DTR:").append(yesOrNo(serialPort.isDTR()));
+            text.append(" RTS:").append(yesOrNo(serialPort.isRTS()));
             text.append("\r\n");
             serialPort.close();
           } catch (PortInUseException e1) {
@@ -131,11 +134,8 @@ public class DWCmdServerShowSerial extends DWCommand {
     return new DWCommandResponse(text.toString());
   }
 
-  private String yn(final boolean cd) {
-    if (cd) {
-      return "Y";
-    }
-    return "n";
+  private String yesOrNo(final boolean bool) {
+    return bool ? "Y" : "n";
   }
 
   /**

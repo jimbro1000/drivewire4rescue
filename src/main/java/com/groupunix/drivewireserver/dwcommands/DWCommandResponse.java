@@ -81,7 +81,7 @@ public class DWCommandResponse {
    *
    * @return success
    */
-  public boolean getSuccess() {
+  public boolean isSuccess() {
     return this.successStatus;
   }
 

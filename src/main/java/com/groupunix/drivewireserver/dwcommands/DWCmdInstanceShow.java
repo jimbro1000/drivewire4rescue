@@ -86,7 +86,7 @@ public final class DWCmdInstanceShow extends DWCommand {
         text.append("\r\n");
       }
     }
-    return (new DWCommandResponse(text.toString()));
+    return new DWCommandResponse(text.toString());
   }
 
   /**
@@ -96,6 +96,6 @@ public final class DWCmdInstanceShow extends DWCommand {
    * @return true if valid
    */
   public boolean validate(final String cmdline) {
-    return (true);
+    return true;
   }
 }

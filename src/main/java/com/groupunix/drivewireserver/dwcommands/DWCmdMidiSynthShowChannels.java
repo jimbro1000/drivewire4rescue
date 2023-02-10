@@ -56,7 +56,7 @@ public class DWCmdMidiSynthShowChannels extends DWCommand {
           text.append(
               String.format(
                   " %2d      %-3d    %-3d    ",
-                  (i + 1),
+                  i + 1,
                   midiChannels[i].getProgram(),
                   dwProtocolHandler.getVPorts().getGMInstrumentCache(i)
               )

@@ -145,7 +145,7 @@ public final class DWCmdDiskDosAdd extends DWCommand {
           content
       );
     } else {
-      throw (new IOException("Unreadable source path"));
+      throw new IOException("Unreadable source path");
     }
     return new DWCommandResponse("File added to DOS disk.");
   }

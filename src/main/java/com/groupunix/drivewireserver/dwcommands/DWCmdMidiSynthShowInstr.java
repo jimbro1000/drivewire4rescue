@@ -52,7 +52,7 @@ public final class DWCmdMidiSynthShowInstr extends DWCommand {
       }
       for (int i = 0; i < instruments.length; i++) {
         text.append(String.format("%3d:%-15s", i, instruments[i].getName()));
-        if ((i % COLUMN_LIMIT) == 0) {
+        if (i % COLUMN_LIMIT == 0) {
           text.append("\r\n");
         }
       }

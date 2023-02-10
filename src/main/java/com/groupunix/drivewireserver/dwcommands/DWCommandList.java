@@ -64,44 +64,44 @@ public final class DWCommandList {
   /**
    * Convert ps to column layout.
    *
-   * @param ps content list
-   * @param columns number of columns
+   * @param protocols content list
+   * @param columns   number of columns
    * @return formatted content
    */
   public static String colLayout(
-      final ArrayList<String> ps,
+      final ArrayList<String> protocols,
       final int columns
   ) {
-    int cols = columns - 1;
-    StringBuilder text = new StringBuilder();
+    final int workingCols = columns - 1;
+    final StringBuilder text = new StringBuilder();
 
-    Iterator<String> it = ps.iterator();
+    Iterator<String> iterator = protocols.iterator();
     int maxlen = 1;
-    while (it.hasNext()) {
-      int curlen = it.next().length();
-      if (curlen > maxlen) {
-        maxlen = curlen;
+    while (iterator.hasNext()) {
+      final int currentLength = iterator.next().length();
+      if (currentLength > maxlen) {
+        maxlen = currentLength;
       }
     }
     // leave spaces between cols
-    if (cols > MAX_COLS) {
+    if (workingCols > MAX_COLS) {
       maxlen += 2;
     } else {
       maxlen++;
     }
-    it = ps.iterator();
-    int i = 0;
-    int ll = cols / maxlen;
-    while (it.hasNext()) {
-      String itxt = String.format("%-" + maxlen + "s", it.next());
-      if ((i > 0) && ((i % ll) == 0)) {
+    iterator = protocols.iterator();
+    int index = 0;
+    final int colLen = workingCols / maxlen;
+    while (iterator.hasNext()) {
+      String itxt = String.format("%-" + maxlen + "s", iterator.next());
+      if (index > 0 && index % colLen == 0) {
         text.append("\r\n");
       }
-      if (cols <= MAX_COLS) {
+      if (workingCols <= MAX_COLS) {
         itxt = itxt.toUpperCase();
       }
       text.append(itxt);
-      i++;
+      index++;
     }
     text.append("\r\n");
     return text.toString();
@@ -132,12 +132,12 @@ public final class DWCommandList {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String[] args = cmdline.split(" ");
     if (cmdline.length() == 0) {
       // ended here, show commands..
       return new DWCommandResponse(getShortHelp());
     }
-    int matches = numCommandMatches(args[0]);
+    final String[] args = cmdline.split(" ");
+    final int matches = numCommandMatches(args[0]);
     if (matches == 0) {
       return new DWCommandResponse(
           false,
@@ -152,9 +152,9 @@ public final class DWCommandList {
               + "' matches " + getTextMatches(args[0])
       );
     } else {
-      if ((args.length == 2) && args[1].equals("?")) {
+      if (args.length == 2 && args[1].equals("?")) {
         return getLongHelp(getCommandMatch(args[0]));
-      } else if ((args.length == 2) && args[1].equals("*")) {
+      } else if (args.length == 2 && args[1].equals("*")) {
         return getCmdTree(getCommandMatch(args[0]));
       } else {
         return getCommandMatch(args[0]).parse(DWUtils.dropFirstToken(cmdline));
@@ -165,11 +165,11 @@ public final class DWCommandList {
   private DWCommandResponse getCmdTree(final DWCommand command) {
     String text = "";
     // figure out whole command..
-    StringBuilder cmdline = new StringBuilder(command.getCommand());
-    DWCommand tmp = command;
-    while (tmp.getParentCmd() != null) {
-      tmp = tmp.getParentCmd();
-      cmdline.insert(0, tmp.getCommand() + " ");
+    final StringBuilder cmdline = new StringBuilder(command.getCommand());
+    DWCommand tmpCommand = command;
+    while (tmpCommand.getParentCmd() != null) {
+      tmpCommand = tmpCommand.getParentCmd();
+      cmdline.insert(0, tmpCommand.getCommand() + " ");
     }
     text = "Tree for " + cmdline + "\r\n\n";
     text += makeTreeString(command, 0);
@@ -180,16 +180,16 @@ public final class DWCommandList {
   }
 
   private String makeTreeString(final DWCommand command, final int depth) {
-    StringBuilder res = new StringBuilder();
+    final StringBuilder res = new StringBuilder();
     res.append(String.format(
         "%-30s",
         String.format(
-            ("%-" + (depth + 1) * TREE_PADDING + "s"),
+            "%-" + (depth + 1) * TREE_PADDING + "s",
             " "
         ) + command.getCommand())
     ).append(command.getShortHelp()).append("\r\n");
     if (command.getCommandList() != null) {
-      for (DWCommand c : command.getCommandList().commands) {
+      for (final DWCommand c : command.getCommandList().commands) {
         res.append(makeTreeString(c, depth + 1));
       }
     }
@@ -199,7 +199,7 @@ public final class DWCommandList {
   private DWCommandResponse getLongHelp(final DWCommand command) {
     String text = "";
     // figure out whole command..
-    StringBuilder cmdline = new StringBuilder(command.getCommand());
+    final StringBuilder cmdline = new StringBuilder(command.getCommand());
 
     DWCommand tmp = command;
 
@@ -230,21 +230,21 @@ public final class DWCommandList {
    */
   public String getShortHelp() {
     String helpText = "";
-    ArrayList<String> ps = new ArrayList<>();
+    final ArrayList<String> options = new ArrayList<>();
 
-    for (DWCommand cmd : this.commands) {
-      ps.add(cmd.getCommand());
+    for (final DWCommand cmd : this.commands) {
+      options.add(cmd.getCommand());
     }
 
-    Collections.sort(ps);
-    helpText = DWCommandList.colLayout(ps, this.outputCols);
+    Collections.sort(options);
+    helpText = DWCommandList.colLayout(options, this.outputCols);
     helpText = "Possible commands:\r\n\r\n" + helpText;
-    return (helpText);
+    return helpText;
   }
 
   private String getTextMatches(final String arg) {
-    StringBuilder textMatch = new StringBuilder();
-    for (DWCommand cmd : this.commands) {
+    final StringBuilder textMatch = new StringBuilder();
+    for (final DWCommand cmd : this.commands) {
       if (cmd.getCommand().startsWith(arg.toLowerCase())) {
         if (textMatch.length() == 0) {
           textMatch.append(cmd.getCommand());
@@ -258,7 +258,7 @@ public final class DWCommandList {
 
   private int numCommandMatches(final String arg) {
     int matches = 0;
-    for (DWCommand command : this.commands) {
+    for (final DWCommand command : this.commands) {
       if (command.getCommand().startsWith(arg.toLowerCase())) {
         matches++;
       }
@@ -267,11 +267,9 @@ public final class DWCommandList {
   }
 
   private DWCommand getCommandMatch(final String arg) {
-    DWCommand command;
-    for (DWCommand dwCommand : this.commands) {
-      command = dwCommand;
-      if (command.getCommand().startsWith(arg.toLowerCase())) {
-        return command;
+    for (final DWCommand dwCommand : this.commands) {
+      if (dwCommand.getCommand().startsWith(arg.toLowerCase())) {
+        return dwCommand;
       }
     }
     return null;
@@ -284,12 +282,11 @@ public final class DWCommandList {
    * @return true if valid
    */
   public boolean validate(final String cmdline) {
-    String[] args = cmdline.split(" ");
     if (cmdline.length() == 0) {
-      // we ended here
       return true;
     }
-    int matches = numCommandMatches(args[0]);
+    final String[] args = cmdline.split(" ");
+    final int matches = numCommandMatches(args[0]);
     if (matches == 0) {
       // no match
       return false;
@@ -306,6 +303,7 @@ public final class DWCommandList {
    *
    * @return List of commands
    */
+  @SuppressWarnings("unused")
   public ArrayList<String> getCommandStrings() {
     return this.getCommandStrings(this, "");
   }
@@ -314,13 +312,13 @@ public final class DWCommandList {
       final DWCommandList commandList,
       final String prefix
   ) {
-    ArrayList<String> result = new ArrayList<>();
-    for (DWCommand cmd : commandList.getCommands()) {
+    final ArrayList<String> result = new ArrayList<>();
+    for (final DWCommand cmd : commandList.getCommands()) {
       result.add(prefix + " " + cmd.getCommand());
       if (cmd.getCommandList() != null) {
         result.addAll(this.getCommandStrings(
-            cmd.getCommandList(),
-            prefix + " " + cmd.getCommand()
+                cmd.getCommandList(),
+                prefix + " " + cmd.getCommand()
             )
         );
       }

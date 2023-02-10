@@ -52,7 +52,7 @@ public final class DWCmdMidiOutput extends DWCommand {
       try {
         final int deviceId = Integer.parseInt(deviceNumber);
         final MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
-        if ((deviceId < 0) || (deviceId > infos.length)) {
+        if (deviceId < 0 || deviceId > infos.length) {
           return new DWCommandResponse(
               false,
               DWDefs.RC_MIDI_INVALID_DEVICE,

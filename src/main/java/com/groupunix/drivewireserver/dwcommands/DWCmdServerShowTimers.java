@@ -17,12 +17,13 @@ public final class DWCmdServerShowTimers extends DWCommand {
    * server show timers command constructor.
    *
    * @param protocol protocol
-   * @param parent parent command
+   * @param parent   parent command
    */
-  DWCmdServerShowTimers(
+  public DWCmdServerShowTimers(
       final DWProtocol protocol,
       final DWCommand parent
   ) {
+    super();
     this.dwProtocol = protocol;
     setParentCmd(parent);
     this.setCommand("timers");
@@ -37,8 +38,7 @@ public final class DWCmdServerShowTimers extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder text = new StringBuilder();
-
+    final StringBuilder text = new StringBuilder();
     text.append("DriveWire instance timers (not shown == 0):\r\n\r\n");
     for (int i = 0; i < MAX_TIMER; i++) {
       if (dwProtocol.getTimers().getTimer((byte) i) > 0) {

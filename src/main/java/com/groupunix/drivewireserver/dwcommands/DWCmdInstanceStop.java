@@ -40,7 +40,7 @@ public final class DWCmdInstanceStop extends DWCommand {
           "Syntax error: dw instance stop requires an instance # as an argument"
       );
     }
-    return (doStart(cmdline));
+    return doStart(cmdline);
   }
 
   private DWCommandResponse doStart(final String instance) {

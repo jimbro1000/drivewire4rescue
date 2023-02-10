@@ -43,7 +43,7 @@ public final class DWCmdConfigSet extends DWCommand {
     }
     final String[] args = cmdline.split(" ");
     if (args.length == 1) {
-      return (doSetConfig(args[0]));
+      return doSetConfig(args[0]);
     } else {
       return doSetConfig(
           args[0], cmdline.substring(args[0].length() + 1)

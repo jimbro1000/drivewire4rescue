@@ -157,7 +157,7 @@ public class DWVPortHandler {
    * @param cr command response
    */
   public void respond(final DWCommandResponse cr) {
-    if (cr.getSuccess()) {
+    if (cr.isSuccess()) {
       respondOk(cr.getResponseText());
     } else {
       respondFail(cr.getResponseCode(), cr.getResponseText());

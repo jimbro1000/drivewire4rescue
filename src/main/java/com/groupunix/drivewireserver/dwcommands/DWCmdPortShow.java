@@ -21,6 +21,7 @@ public class DWCmdPortShow extends DWCommand {
       final DWVSerialProtocol protocol,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("show");
@@ -38,7 +39,7 @@ public class DWCmdPortShow extends DWCommand {
   }
 
   private DWCommandResponse doPortShow() {
-    StringBuilder text = new StringBuilder();
+    final StringBuilder text = new StringBuilder();
 
     text.append("\r\nCurrent port status:\r\n\n");
     for (int i = 0; i < dwProtocol.getVPorts().getMaxPorts(); i++) {

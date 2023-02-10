@@ -19,6 +19,7 @@ public final class DWCmdNetShow extends DWCommand {
       final DWVSerialProtocol protocol,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("show");
@@ -36,7 +37,7 @@ public final class DWCmdNetShow extends DWCommand {
   }
 
   private DWCommandResponse doNetShow() {
-    StringBuilder text = new StringBuilder();
+    final StringBuilder text = new StringBuilder();
 
     text.append("\r\nDriveWire Network Connections:\r\n\n");
     for (int i = 0; i < DWVPortListenerPool.MAX_CONN; i++) {

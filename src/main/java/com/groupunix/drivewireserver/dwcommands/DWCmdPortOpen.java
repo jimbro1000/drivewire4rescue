@@ -21,6 +21,7 @@ public class DWCmdPortOpen extends DWCommand {
       final DWVSerialProtocol protocol,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwvSerialProtocol = protocol;
     this.setCommand("open");
@@ -35,7 +36,7 @@ public class DWCmdPortOpen extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
     if (args.length < 2) {
       return new DWCommandResponse(
           false,
@@ -52,8 +53,6 @@ public class DWCmdPortOpen extends DWCommand {
       final String hostPort
   ) {
     int portNumber;
-    int tcpPort;
-    String tcpHostName;
 
     try {
       portNumber = Integer.parseInt(port);
@@ -64,12 +63,12 @@ public class DWCmdPortOpen extends DWCommand {
           "Syntax error: non numeric port #"
       );
     }
-    String[] tcpArguments = hostPort.split(":");
+    final String[] tcpArguments = hostPort.split(":");
     try {
-      tcpPort = Integer.parseInt(tcpArguments[1]);
-      tcpHostName = tcpArguments[0];
+      final int tcpPort = Integer.parseInt(tcpArguments[1]);
+      final String tcpHostName = tcpArguments[0];
       dwvSerialProtocol.getVPorts().openPort(portNumber);
-      Thread cthread = new Thread(
+      final Thread cthread = new Thread(
           new DWVPortTCPConnectionThread(
               this.dwvSerialProtocol,
               portNumber,

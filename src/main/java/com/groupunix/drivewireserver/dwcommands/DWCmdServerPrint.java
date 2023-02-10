@@ -31,6 +31,7 @@ public class DWCmdServerPrint extends DWCommand {
       final DWProtocol protocol,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("print");
@@ -52,20 +53,19 @@ public class DWCmdServerPrint extends DWCommand {
           "dw server print requires a URI or local file path as an argument"
       );
     }
-    return (doPrint(cmdline));
+    return doPrint(cmdline);
   }
 
   private DWCommandResponse doPrint(final String path) {
-    FileSystemManager fsManager;
     InputStream ins = null;
     FileObject fileobj = null;
-    FileContent fc = null;
+    FileContent content = null;
 
     try {
-      fsManager = VFS.getManager();
+      final FileSystemManager fsManager = VFS.getManager();
       fileobj = fsManager.resolveFile(DWUtils.convertStarToBang(path));
-      fc = fileobj.getContent();
-      ins = fc.getInputStream();
+      content = fileobj.getContent();
+      ins = content.getInputStream();
       byte data = (byte) ins.read();
       while (data >= 0) {
         ((DWProtocolHandler) dwProtocol).getVPrinter().addByte(data);
@@ -90,14 +90,13 @@ public class DWCmdServerPrint extends DWCommand {
         if (ins != null) {
           ins.close();
         }
-        if (fc != null) {
-          fc.close();
+        if (content != null) {
+          content.close();
         }
         if (fileobj != null) {
           fileobj.close();
         }
       } catch (IOException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
     }

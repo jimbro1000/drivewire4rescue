@@ -62,9 +62,9 @@ public final class DWCmd extends DWCommand {
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
+      return new DWCommandResponse(this.getCommandList().getShortHelp());
     }
-    return (this.getCommandList().parse(cmdline));
+    return this.getCommandList().parse(cmdline);
   }
 
   /**
@@ -74,6 +74,6 @@ public final class DWCmd extends DWCommand {
    * @return true if command is valid
    */
   public boolean validate(final String cmdline) {
-    return (this.getCommandList().validate(cmdline));
+    return this.getCommandList().validate(cmdline);
   }
 }

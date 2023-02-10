@@ -18,6 +18,7 @@ public class DWCmdServerHelpReload extends DWCommand {
       final DWProtocol protocol,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("reload");

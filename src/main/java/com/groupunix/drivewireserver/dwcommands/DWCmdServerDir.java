@@ -20,6 +20,7 @@ public final class DWCmdServerDir extends DWCommand {
    * @param parent parent command
    */
   public DWCmdServerDir(final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.setCommand("dir");
     this.setShortHelp("Show directory of URI or local path");
@@ -44,17 +45,16 @@ public final class DWCmdServerDir extends DWCommand {
   }
 
   private DWCommandResponse doDir(final String path) {
-    FileSystemManager fsManager;
-    StringBuilder text = new StringBuilder();
+    final StringBuilder text = new StringBuilder();
 
     try {
-      fsManager = VFS.getManager();
+      final FileSystemManager fsManager = VFS.getManager();
 
-      FileObject dirobj = fsManager.resolveFile(
+      final FileObject dirobj = fsManager.resolveFile(
           DWUtils.convertStarToBang(path)
       );
 
-      FileObject[] children = dirobj.getChildren();
+      final FileObject[] children = dirobj.getChildren();
 
       text.append("Directory of ")
           .append(dirobj.getName().getURI())
@@ -62,7 +62,7 @@ public final class DWCmdServerDir extends DWCommand {
 
       int longest = 0;
 
-      for (FileObject child : children) {
+      for (final FileObject child : children) {
         if (child.getName().getBaseName().length() > longest) {
           longest = child.getName().getBaseName().length();
         }
@@ -70,14 +70,14 @@ public final class DWCmdServerDir extends DWCommand {
 
       longest++;
       longest++;
-      int cols = Math.max(1, SCREEN_WIDTH / longest);
+      final int cols = Math.max(1, SCREEN_WIDTH / longest);
       for (int i = 0; i < children.length; i++) {
         text.append(
             String.format(
                 "%-" + longest + "s", children[i].getName().getBaseName()
             )
         );
-        if (((i + 1) % cols) == 0) {
+        if ((i + 1) % cols == 0) {
           text.append("\r\n");
         }
       }

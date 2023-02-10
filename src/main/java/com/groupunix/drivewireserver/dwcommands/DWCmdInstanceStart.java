@@ -36,16 +36,14 @@ public final class DWCmdInstanceStart extends DWCommand {
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (
-          new DWCommandResponse(
-              false,
-              DWDefs.RC_SYNTAX_ERROR,
-              "Syntax error: "
-                  + "dw instance start requires an instance # as an argument"
-          )
+      return new DWCommandResponse(
+          false,
+          DWDefs.RC_SYNTAX_ERROR,
+          "Syntax error: "
+              + "dw instance start requires an instance # as an argument"
       );
     }
-    return (doStart(cmdline));
+    return doStart(cmdline);
   }
 
   /**

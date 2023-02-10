@@ -44,9 +44,9 @@ public class DWCmdMidiSynth extends DWCommand {
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
+      return new DWCommandResponse(this.getCommandList().getShortHelp());
     }
-    return (this.getCommandList().parse(cmdline));
+    return this.getCommandList().parse(cmdline);
   }
 
 
@@ -56,6 +56,6 @@ public class DWCmdMidiSynth extends DWCommand {
    * @return true if command valid
    */
   public boolean validate(final String cmdline) {
-    return (this.getCommandList().validate(cmdline));
+    return this.getCommandList().validate(cmdline);
   }
 }

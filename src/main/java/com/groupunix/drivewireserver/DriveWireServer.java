@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
@@ -279,9 +280,9 @@ public final class DriveWireServer {
   private static void checkHandlerHealth() {
     for (int i = 0; i < DriveWireServer.DW_PROTOCOL_HANDLERS.size(); i++) {
       if (
-          (DW_PROTOCOL_HANDLERS.get(i) != null)
-              && (DW_PROTOCOL_HANDLERS.get(i).isReady())
-              && (!DW_PROTOCOL_HANDLERS.get(i).isDying())
+          DW_PROTOCOL_HANDLERS.get(i) != null
+              && DW_PROTOCOL_HANDLERS.get(i).isReady()
+              && !DW_PROTOCOL_HANDLERS.get(i).isDying()
       ) {
         // check thread
         if (DW_PROTO_HANDLER_THREADS.get(i) == null) {
@@ -396,7 +397,7 @@ public final class DriveWireServer {
       for (final String key : EVT.getParamKeys()) {
         if (
             !STATUS_EVENT.hasParam(key)
-                || (!STATUS_EVENT.getParam(key).equals(EVT.getParam(key)))
+                || !STATUS_EVENT.getParam(key).equals(EVT.getParam(key))
         ) {
           fevt.setParam(key, EVT.getParam(key));
           STATUS_EVENT.setParam(key, EVT.getParam(key));
@@ -980,7 +981,7 @@ public final class DriveWireServer {
    * Apply UI settings.
    */
   public static void applyUISettings() {
-    if ((uiT != null) && (uiT.isAlive())) {
+    if (uiT != null && uiT.isAlive()) {
       uiObj.die();
       uiT.interrupt();
       try {
@@ -1019,8 +1020,8 @@ public final class DriveWireServer {
       Logger.getRootLogger().addAppender(consoleAppender);
     }
     if (
-        (serverConfiguration.getBoolean("LogToFile", false))
-            && (serverConfiguration.containsKey("LogFile"))
+        serverConfiguration.getBoolean("LogToFile", false)
+            && serverConfiguration.containsKey("LogFile")
     ) {
       try {
         final FileAppender fileAppender = new FileAppender(
@@ -1086,8 +1087,8 @@ public final class DriveWireServer {
    * @return handler protocol
    */
   public static DWProtocol getHandler(final int handlerId) {
-    if ((handlerId < DW_PROTOCOL_HANDLERS.size()) && (handlerId > -1)) {
-      return (DW_PROTOCOL_HANDLERS.get(handlerId));
+    if (handlerId < DW_PROTOCOL_HANDLERS.size() && handlerId > -1) {
+      return DW_PROTOCOL_HANDLERS.get(handlerId);
     }
     return null;
   }
@@ -1143,7 +1144,7 @@ public final class DriveWireServer {
    */
   public static boolean isValidHandlerNo(final int handler) {
     boolean result = false;
-    if ((handler < DW_PROTOCOL_HANDLERS.size()) && (handler >= 0)) {
+    if (handler < DW_PROTOCOL_HANDLERS.size() && handler >= 0) {
       result = DW_PROTOCOL_HANDLERS.get(handler) != null;
     }
     return result;
@@ -1169,11 +1170,11 @@ public final class DriveWireServer {
   public static boolean handlerIsAlive(final int handlerId) {
     boolean result = false;
     if (
-        (DW_PROTOCOL_HANDLERS.get(handlerId) != null)
-            && (DW_PROTO_HANDLER_THREADS.get(handlerId) != null)
+        DW_PROTOCOL_HANDLERS.get(handlerId) != null
+            && DW_PROTO_HANDLER_THREADS.get(handlerId) != null
     ) {
-      result = (!DW_PROTOCOL_HANDLERS.get(handlerId).isDying())
-          && (DW_PROTO_HANDLER_THREADS.get(handlerId).isAlive());
+      result = !DW_PROTOCOL_HANDLERS.get(handlerId).isDying()
+          && DW_PROTO_HANDLER_THREADS.get(handlerId).isAlive();
     }
     return result;
   }
@@ -1191,13 +1192,13 @@ public final class DriveWireServer {
           .getConfig()
           .getString("[@name]", "unnamed instance " + handlerId);
     }
-    return ("null handler " + handlerId);
+    return "null handler " + handlerId;
   }
 
   /**
    * Save configuration.
    *
-   * @throws ConfigurationException
+   * @throws ConfigurationException invalid configuration
    */
   public static void saveServerConfig() throws ConfigurationException {
     serverConfiguration.save();
@@ -1211,12 +1212,12 @@ public final class DriveWireServer {
   @SuppressWarnings("unchecked")
   public static ArrayList<String> getAvailableSerialPorts() {
     final ArrayList<String> ports = new ArrayList<>();
-    final java.util.Enumeration<gnu.io.CommPortIdentifier> allPorts =
-        gnu.io.CommPortIdentifier.getPortIdentifiers();
+    final Enumeration<CommPortIdentifier> allPorts =
+        CommPortIdentifier.getPortIdentifiers();
     while (allPorts.hasMoreElements()) {
       try {
-        final gnu.io.CommPortIdentifier com = allPorts.nextElement();
-        if (com.getPortType() == gnu.io.CommPortIdentifier.PORT_SERIAL) {
+        final CommPortIdentifier com = allPorts.nextElement();
+        if (com.getPortType() == CommPortIdentifier.PORT_SERIAL) {
           ports.add(com.getName());
         }
       } catch (Exception e) {
@@ -1415,7 +1416,7 @@ public final class DriveWireServer {
           CommPortIdentifier.getPortIdentifier(device);
 
       if (identifier.isCurrentlyOwned()) {
-        throw (new Exception("In use by " + identifier.getCurrentOwner()));
+        throw new Exception("In use by " + identifier.getCurrentOwner());
       } else {
         final CommPort commPort = identifier.open(
             "DriveWireTest",
@@ -1429,11 +1430,11 @@ public final class DriveWireServer {
           testSerialPort.enableReceiveTimeout(RECEIVE_TIMEOUT);
           return true;
         } else {
-          throw (new Exception("Not a serial port"));
+          throw new Exception("Not a serial port");
         }
       }
     } catch (Exception e) {
-      throw (new Exception(e.getLocalizedMessage()));
+      throw new Exception(e.getLocalizedMessage());
     }
   }
 
@@ -1455,7 +1456,7 @@ public final class DriveWireServer {
           SerialPort.PARITY_NONE);
       return true;
     } catch (Exception e) {
-      throw (new Exception(e.getLocalizedMessage()));
+      throw new Exception(e.getLocalizedMessage());
     }
   }
 
@@ -1467,7 +1468,7 @@ public final class DriveWireServer {
    */
   public static int testSerialPortRead() throws Exception {
     try {
-      return (testSerialPort.getInputStream().read());
+      return testSerialPort.getInputStream().read();
     } catch (Exception e) {
       throw new Exception(e.getLocalizedMessage());
     }
@@ -1561,7 +1562,7 @@ public final class DriveWireServer {
    * @return magic
    */
   public static long getMagic() {
-    return (MAGIC);
+    return MAGIC;
   }
 
   /**
@@ -1569,7 +1570,7 @@ public final class DriveWireServer {
    *
    * @return no midi flag
    */
-  public static boolean getNoMIDI() {
+  public static boolean isNoMIDI() {
     return noMIDI;
   }
 
@@ -1578,7 +1579,7 @@ public final class DriveWireServer {
    *
    * @return no mount flag
    */
-  public static boolean getNoMount() {
+  public static boolean isNoMount() {
     return noMount;
   }
 
@@ -1587,7 +1588,8 @@ public final class DriveWireServer {
    *
    * @return no UI flag
    */
-  public static boolean getNoUI() {
+  @SuppressWarnings("unused")
+  public static boolean isNoUI() {
     return noUI;
   }
 
@@ -1596,7 +1598,8 @@ public final class DriveWireServer {
    *
    * @return no server flag
    */
-  public static boolean getNoServer() {
+  @SuppressWarnings("unused")
+  public static boolean isNoServer() {
     return noServer;
   }
 

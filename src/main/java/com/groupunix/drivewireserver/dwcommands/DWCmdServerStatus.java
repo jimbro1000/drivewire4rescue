@@ -22,6 +22,7 @@ public class DWCmdServerStatus extends DWCommand {
    * @param parent   parent command
    */
   public DWCmdServerStatus(final DWProtocol protocol, final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("status");
@@ -35,11 +36,11 @@ public class DWCmdServerStatus extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    return (doServerStatus());
+    return doServerStatus();
   }
 
   private DWCommandResponse doServerStatus() {
-    String text = "DriveWire version "
+    final String text = "DriveWire version "
         + DriveWireServer.DW_SERVER_VERSION
         + " ("
         + DriveWireServer.DW_SERVER_VERSION_DATE
@@ -60,7 +61,6 @@ public class DWCmdServerStatus extends DWCommand {
    * @return true if valid
   */
   public boolean validate(final String cmdline) {
-    return (true);
+    return true;
   }
-
 }

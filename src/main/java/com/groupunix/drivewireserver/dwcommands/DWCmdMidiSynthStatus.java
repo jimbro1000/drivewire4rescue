@@ -26,6 +26,7 @@ public class DWCmdMidiSynthStatus extends DWCommand {
   public DWCmdMidiSynthStatus(
       final DWProtocolHandler protocolHandler, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("status");
@@ -48,18 +49,18 @@ public class DWCmdMidiSynthStatus extends DWCommand {
     // dw midi synth show
     text = "\r\nInternal synthesizer status:\r\n\n";
     if (dwProtocolHandler.getVPorts().getMidiSynth() != null) {
-      MidiDevice.Info midiinfo = dwProtocolHandler
+      final MidiDevice.Info midiInfo = dwProtocolHandler
           .getVPorts()
           .getMidiSynth()
           .getDeviceInfo();
       text += "Device:\r\n";
-      text += midiinfo.getVendor() + ", "
-          + midiinfo.getName() + ", " + midiinfo.getVersion() + "\r\n";
-      text += midiinfo.getDescription() + "\r\n";
+      text += midiInfo.getVendor() + ", "
+          + midiInfo.getName() + ", " + midiInfo.getVersion() + "\r\n";
+      text += midiInfo.getDescription() + "\r\n";
       text += "\r\n";
       text += "Soundbank: ";
       if (dwProtocolHandler.getVPorts().getMidiSoundbankFilename() == null) {
-        Soundbank soundbank = dwProtocolHandler
+        final Soundbank soundbank = dwProtocolHandler
             .getVPorts().getMidiSynth().getDefaultSoundbank();
         if (soundbank != null) {
           text += " (default)\r\n";
@@ -70,18 +71,18 @@ public class DWCmdMidiSynthStatus extends DWCommand {
           text += " none\r\n";
         }
       } else {
-        File file = new File(
+        final File file = new File(
             dwProtocolHandler.getVPorts().getMidiSoundbankFilename()
         );
         try {
-          Soundbank sbank = MidiSystem.getSoundbank(file);
+          final Soundbank soundbank = MidiSystem.getSoundbank(file);
           text += " (" + dwProtocolHandler
               .getVPorts()
               .getMidiSoundbankFilename()
               + ")\r\n";
-          text += sbank.getVendor() + ", "
-              + sbank.getName() + ", " + sbank.getVersion() + "\r\n";
-          text += sbank.getDescription() + "\r\n";
+          text += soundbank.getVendor() + ", "
+              + soundbank.getName() + ", " + soundbank.getVersion() + "\r\n";
+          text += soundbank.getDescription() + "\r\n";
         } catch (InvalidMidiDataException e) {
           return new DWCommandResponse(
               false,

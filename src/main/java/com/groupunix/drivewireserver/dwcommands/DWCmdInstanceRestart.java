@@ -75,6 +75,6 @@ public final class DWCmdInstanceRestart extends DWCommand {
    * @return true if valid
    */
   public boolean validate(final String cmdline) {
-    return (true);
+    return true;
   }
 }

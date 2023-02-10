@@ -38,9 +38,9 @@ public class DWCmdConfigShow extends DWCommand {
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() > 0) {
-      return (doShowConfig(cmdline));
+      return doShowConfig(cmdline);
     }
-    return (doShowConfig());
+    return doShowConfig();
   }
 
   private DWCommandResponse doShowConfig(final String item) {

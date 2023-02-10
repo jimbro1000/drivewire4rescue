@@ -33,7 +33,7 @@ public final class DWCmdMidiSynthLock extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    return (doMidiSynthLock());
+    return doMidiSynthLock();
   }
 
   private DWCommandResponse doMidiSynthLock() {

@@ -25,6 +25,7 @@ public final class DWCmdServerList extends DWCommand {
    * @param parent parent command
    */
   public DWCmdServerList(final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.setCommand("list");
     this.setShortHelp("List contents of file on server");
@@ -50,27 +51,24 @@ public final class DWCmdServerList extends DWCommand {
 
 
   private DWCommandResponse doList(final String path) {
-    FileSystemManager fsManager;
     InputStream ins = null;
     FileObject fileobj = null;
-    FileContent fc = null;
+    FileContent content = null;
 
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
     try {
-      fsManager = VFS.getManager();
+      final FileSystemManager fsManager = VFS.getManager();
 
       fileobj = fsManager.resolveFile(DWUtils.convertStarToBang(path));
+      content = fileobj.getContent();
+      ins = content.getInputStream();
 
-      fc = fileobj.getContent();
+      final byte[] buffer = new byte[BUFFER_SIZE];
+      int size = 0;
 
-      ins = fc.getInputStream();
-
-      byte[] buffer = new byte[BUFFER_SIZE];
-      int sz = 0;
-
-      while ((sz = ins.read(buffer)) >= 0) {
-        baos.write(buffer, 0, sz);
+      while ((size = ins.read(buffer)) >= 0) {
+        baos.write(buffer, 0, size);
       }
       ins.close();
     } catch (FileSystemException e) {
@@ -90,14 +88,13 @@ public final class DWCmdServerList extends DWCommand {
         if (ins != null) {
           ins.close();
         }
-        if (fc != null) {
-          fc.close();
+        if (content != null) {
+          content.close();
         }
         if (fileobj != null) {
           fileobj.close();
         }
       } catch (IOException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
     }

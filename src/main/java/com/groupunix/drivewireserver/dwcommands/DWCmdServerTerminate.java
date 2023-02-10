@@ -9,6 +9,7 @@ public class DWCmdServerTerminate extends DWCommand {
    * @param parent parent command
    */
   public DWCmdServerTerminate(final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.setCommand("terminate");
     this.setShortHelp("Shut down server");
