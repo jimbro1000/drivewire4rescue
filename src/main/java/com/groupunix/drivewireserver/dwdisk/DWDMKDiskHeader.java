@@ -93,7 +93,7 @@ public class DWDMKDiskHeader {
    * @return number of tracks on disk
    */
   public int getTracks() {
-    return (BYTE_MASK & this.header[NUMBER_OF_TRACKS]);
+    return BYTE_MASK & this.header[NUMBER_OF_TRACKS];
   }
 
   /**
@@ -102,8 +102,8 @@ public class DWDMKDiskHeader {
    * @return track length (bytes)
    */
   public int getTrackLength() {
-    return ((BYTE_MASK & this.header[TRACK_LENGTH_MSB]) * BYTE_SHIFT
-        + (BYTE_MASK & this.header[TRACK_LENGTH_LSB]));
+    return (BYTE_MASK & this.header[TRACK_LENGTH_MSB]) * BYTE_SHIFT
+        + (BYTE_MASK & this.header[TRACK_LENGTH_LSB]);
   }
 
   /**
@@ -111,8 +111,9 @@ public class DWDMKDiskHeader {
    *
    * @return disk options byte
    */
+  @SuppressWarnings("unused")
   public int getOptions() {
-    return (BYTE_MASK & this.header[DISK_OPTIONS]);
+    return BYTE_MASK & this.header[DISK_OPTIONS];
   }
 
   /**
@@ -121,8 +122,8 @@ public class DWDMKDiskHeader {
    * @return true if single sided
    */
   public boolean isSingleSided() {
-    return (((byte) BIT_MASK_4
-        & this.header[DISK_OPTIONS]) == (byte) BIT_MASK_4);
+    return ((byte) BIT_MASK_4
+        & this.header[DISK_OPTIONS]) == (byte) BIT_MASK_4;
   }
 
   /**
@@ -131,8 +132,8 @@ public class DWDMKDiskHeader {
    * @return true if single density
    */
   public boolean isSingleDensity() {
-    return (((byte) BIT_MASK_6
-        & this.header[DISK_OPTIONS]) == (byte) BIT_MASK_6);
+    return ((byte) BIT_MASK_6
+        & this.header[DISK_OPTIONS]) == (byte) BIT_MASK_6;
   }
 
   // bytes 5-11 reserved
@@ -142,13 +143,14 @@ public class DWDMKDiskHeader {
    *
    * @return reality
    */
+  @SuppressWarnings("unused")
   public boolean isRealDisk() {
     // bytes 12-15 for real disk or not...
     // not sure i've got this right, or if it even matters
-    return ((BYTE_MASK & header[DISK_SIGNATURE_OFFSET]) == SIGNATURE_1)
-        && ((BYTE_MASK & header[DISK_SIGNATURE_OFFSET + 1]) == SIGNATURE_2)
-        && ((BYTE_MASK & header[DISK_SIGNATURE_OFFSET + 2]) == SIGNATURE_3)
-        && ((BYTE_MASK & header[DISK_SIGNATURE_OFFSET_END]) == SIGNATURE_4);
+    return (BYTE_MASK & header[DISK_SIGNATURE_OFFSET]) == SIGNATURE_1
+        && (BYTE_MASK & header[DISK_SIGNATURE_OFFSET + 1]) == SIGNATURE_2
+        && (BYTE_MASK & header[DISK_SIGNATURE_OFFSET + 2]) == SIGNATURE_3
+        && (BYTE_MASK & header[DISK_SIGNATURE_OFFSET_END]) == SIGNATURE_4;
   }
 
   /**

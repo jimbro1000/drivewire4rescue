@@ -45,7 +45,8 @@ public class DWCmdServerShowSerial extends DWCommand {
     final StringBuilder text = new StringBuilder();
     text.append("Server serial devices:\r\n\r\n");
 
-    @SuppressWarnings("unchecked") final Enumeration<CommPortIdentifier> thePorts
+    @SuppressWarnings("unchecked")
+    final Enumeration<CommPortIdentifier> thePorts
         = CommPortIdentifier.getPortIdentifiers();
 
     while (thePorts.hasMoreElements()) {

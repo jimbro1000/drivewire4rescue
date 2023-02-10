@@ -368,7 +368,7 @@ public class DWRawDisk extends DWDisk {
   public void writeSector(final byte[] data)
       throws DWDriveWriteProtectedException, IOException {
 
-    if (this.getWriteProtect()) {
+    if (this.isWriteProtect()) {
       throw new DWDriveWriteProtectedException("Disk is write protected");
     } else {
       int effLSN = this.getLSN() + this.getOffset();
@@ -569,7 +569,7 @@ public class DWRawDisk extends DWDisk {
    * @return direct flag
    */
   @Override
-  public boolean getDirect() {
+  public boolean isDirect() {
     return this.direct;
   }
 }

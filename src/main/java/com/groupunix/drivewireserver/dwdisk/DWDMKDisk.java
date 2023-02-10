@@ -92,7 +92,7 @@ public class DWDMKDisk extends DWDisk {
     // is it big enough to have a header
     if (fObjSize > HEADER_SIZE) {
       // make a header object
-      DWDMKDiskHeader header = new DWDMKDiskHeader(hdr);
+      final DWDMKDiskHeader header = new DWDMKDiskHeader(hdr);
       // is the size right?
       if (
           fObjSize == HEADER_SIZE + (
@@ -102,10 +102,10 @@ public class DWDMKDisk extends DWDisk {
           )
       ) {
         // good enough for mess, good enough for me
-        return (DWDefs.DISK_CONSIDER_YES);
+        return DWDefs.DISK_CONSIDER_YES;
       }
     }
-    return (DWDefs.DISK_CONSIDER_NO);
+    return DWDefs.DISK_CONSIDER_NO;
   }
 
   /**
@@ -121,7 +121,7 @@ public class DWDMKDisk extends DWDisk {
    * Synchronise disk.
    */
   @Override
-  void sync() {
+  public void sync() {
     // no operation
   }
 
@@ -137,12 +137,12 @@ public class DWDMKDisk extends DWDisk {
     fis = this.getFileObject().getContent().getInputStream();
     // read disk header
     int readres = 0;
-    byte[] hbuff = new byte[HEADER_SIZE];
+    final byte[] hBuff = new byte[HEADER_SIZE];
 
     while (readres < HEADER_SIZE) {
-      readres += fis.read(hbuff, readres, HEADER_SIZE - readres);
+      readres += fis.read(hBuff, readres, HEADER_SIZE - readres);
     }
-    this.header = new DWDMKDiskHeader(hbuff);
+    this.header = new DWDMKDiskHeader(hBuff);
     this.setParam("writeprotect", header.isWriteProtected());
     this.setParam("_tracks", header.getTracks());
     this.setParam("_sides", header.getSides());
@@ -171,8 +171,9 @@ public class DWDMKDisk extends DWDisk {
       // read track data
       tbuf = new byte[header.getTrackLength()];
       readres = 0;
-      while ((readres < header.getTrackLength()) && (readres > -1)) {
-        int res = fis.read(tbuf, readres, header.getTrackLength() - readres);
+      while (readres < header.getTrackLength() && readres > -1) {
+        final int res
+            = fis.read(tbuf, readres, header.getTrackLength() - readres);
         if (res > -1) {
           readres += res;
         } else {
@@ -185,15 +186,15 @@ public class DWDMKDisk extends DWDisk {
             "DMK format appears corrupt, incomplete data for track " + i
         );
       }
-      DWDMKDiskTrack dmktrack = new DWDMKDiskTrack(tbuf);
-      if (dmktrack.getNumSectors() != SECTORS_PER_TRACK) {
+      final DWDMKDiskTrack dmkTrack = new DWDMKDiskTrack(tbuf);
+      if (dmkTrack.getNumSectors() != SECTORS_PER_TRACK) {
         fis.close();
         throw new DWImageFormatException(
             "Unsupported DMK format, "
                 + "only 18 sectors per track is supported at this time"
         );
       }
-      this.tracks.add(dmktrack);
+      this.tracks.add(dmkTrack);
     }
     fis.close();
     // all tracks loaded ok, find sector data
@@ -213,7 +214,7 @@ public class DWDMKDisk extends DWDisk {
     for (int t = 0; t < header.getTracks(); t++) {
       // track header / IDAM ptr table
       for (int i = 0; i < IDAM_MAX; i++) {
-        DWDMKDiskIDAM idam = this.tracks.get(t).getIDAM(i);
+        final DWDMKDiskIDAM idam = this.tracks.get(t).getIDAM(i);
         if (idam.getPtr() != 0) {
           if (idam.getTrack() != t) {
             System.out.println("mismatch track in IDAM?");
@@ -226,8 +227,8 @@ public class DWDMKDisk extends DWDisk {
 
   private void addSectorFrom(final DWDMKDiskIDAM idam, final int track)
       throws DWImageFormatException, FileSystemException {
-    int lsn = calcLSN(idam);
-    if ((lsn > -1) && (lsn < this.getSectors().size())) {
+    final int lsn = calcLSN(idam);
+    if (lsn > -1 && lsn < this.getSectors().size()) {
       this.getSectors().set(
           lsn,
           new DWDiskSector(this, lsn, idam.getSectorSize(), false)
@@ -244,7 +245,7 @@ public class DWDMKDisk extends DWDisk {
 
   private byte[] getSectorDataFrom(final DWDMKDiskIDAM idam, final int track)
       throws DWImageFormatException {
-    byte[] buf = new byte[idam.getSectorSize()];
+    final byte[] buf = new byte[idam.getSectorSize()];
     int loc = idam.getPtr() + LOCATION_OFFSET;
     int gap = INITIAL_GAP;
     boolean sync = false;
@@ -252,10 +253,10 @@ public class DWDMKDisk extends DWDisk {
       gap = SINGLE_DENSITY_GAP;
     }
     while (gap > 0) {
-      if (((DWDefs.BYTE_MASK & this.tracks.get(track).getData()[loc])
-          >= TRACK_MINIMUM)
-          && ((DWDefs.BYTE_MASK & this.tracks.get(track).getData()[loc])
-          <= TRACK_MAXIMUM)
+      if ((DWDefs.BYTE_MASK & this.tracks.get(track).getData()[loc])
+          >= TRACK_MINIMUM
+          && (DWDefs.BYTE_MASK & this.tracks.get(track).getData()[loc])
+          <= TRACK_MAXIMUM
           && (this.header.isSingleDensity() || sync)
       ) {
         break;
@@ -286,12 +287,12 @@ public class DWDMKDisk extends DWDisk {
   }
 
   private int calcLSN(final DWDMKDiskIDAM idam) {
-    int t = idam.getTrack() * SECTORS_PER_TRACK;
+    int track = idam.getTrack() * SECTORS_PER_TRACK;
     if (!header.isSingleSided()) {
-      t = t * 2;
+      track = track * 2;
     }
-    t += (idam.getSector() - 1) + (SECTORS_PER_TRACK * idam.getSide());
-    return t;
+    track += (idam.getSector() - 1) + (SECTORS_PER_TRACK * idam.getSide());
+    return track;
   }
 
   /**
@@ -325,7 +326,7 @@ public class DWDMKDisk extends DWDisk {
    */
   public void writeSector(final byte[] data)
       throws DWDriveWriteProtectedException, IOException {
-    if (this.getWriteProtect()) {
+    if (this.isWriteProtect()) {
       throw new DWDriveWriteProtectedException("Disk is write protected");
     } else {
       this.getSectors().get(this.getLSN()).setData(data);

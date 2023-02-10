@@ -494,7 +494,7 @@ public class DWDECBFileSystem extends DWFileSystem {
       for (int i = 0; i < MAX_SECTORS; i++) {
         this.getDisk().getSectors().add(
             new DWDiskSector(
-                this.getDisk(), i, BUFFER_SIZE, this.getDisk().getDirect()
+                this.getDisk(), i, BUFFER_SIZE, this.getDisk().isDirect()
             )
         );
         this.getDisk().getSectors().get(i).setData(buf);

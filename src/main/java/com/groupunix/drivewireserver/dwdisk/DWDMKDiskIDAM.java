@@ -57,7 +57,7 @@ public class DWDMKDiskIDAM {
    * @return tracks
    */
   public int getTrack() {
-    return (BYTE_MASK & idamData[TRACK_COUNT_OFFSET]);
+    return BYTE_MASK & idamData[TRACK_COUNT_OFFSET];
   }
 
   /**
@@ -66,7 +66,7 @@ public class DWDMKDiskIDAM {
    * @return sides
    */
   public int getSide() {
-    return (BYTE_MASK & idamData[DISK_SIDES_OFFSET]);
+    return BYTE_MASK & idamData[DISK_SIDES_OFFSET];
   }
 
   /**
@@ -75,7 +75,7 @@ public class DWDMKDiskIDAM {
    * @return sectors
    */
   public int getSector() {
-    return (BYTE_MASK & idamData[SECTOR_COUNT_OFFSET]);
+    return BYTE_MASK & idamData[SECTOR_COUNT_OFFSET];
   }
 
   /**
@@ -95,8 +95,9 @@ public class DWDMKDiskIDAM {
    *
    * @return true if double density
    */
+  @SuppressWarnings("unused")
   public boolean isDoubleDensity() {
-    return ((LOW_SIX_BITS & this.idamPtrMsb) == LOW_SIX_BITS);
+    return (LOW_SIX_BITS & this.idamPtrMsb) == LOW_SIX_BITS;
   }
 
   /**
@@ -105,7 +106,7 @@ public class DWDMKDiskIDAM {
    * @return ptr
    */
   public int getPtr() {
-    return ((LOW_SIX_BITS & this.idamPtrMsb) * BYTE_SHIFT
-        + (BYTE_MASK & this.idamPtrLsb));
+    return (LOW_SIX_BITS & this.idamPtrMsb) * BYTE_SHIFT
+        + (BYTE_MASK & this.idamPtrLsb);
   }
 }

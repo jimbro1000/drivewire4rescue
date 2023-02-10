@@ -153,7 +153,7 @@ public final class DWCmdDiskShow extends DWCommand {
       if (dwProtocolHandler.getDiskDrives().isLoaded(i)) {
         try {
           text.append(String.format("X%-3d", i));
-          if (dwProtocolHandler.getDiskDrives().getDisk(i).getWriteProtect()) {
+          if (dwProtocolHandler.getDiskDrives().getDisk(i).isWriteProtect()) {
             text.append("*");
           } else {
             text.append(" ");

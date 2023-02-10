@@ -30,16 +30,16 @@ public class DWCCBDisk extends DWDisk {
   /**
    * CCB Disk Constructor.
    *
-   * @param fileobj file object
+   * @param fileObj file object
    * @throws IOException read/write failure
    * @throws DWImageFormatException invalid image format
    */
-  public DWCCBDisk(final FileObject fileobj)
+  public DWCCBDisk(final FileObject fileObj)
       throws IOException, DWImageFormatException {
-    super(fileobj);
+    super(fileObj);
     this.setParam("_format", "ccb");
     load();
-    LOGGER.debug("New CCB disk for " + fileobj.getName().getURI());
+    LOGGER.debug("New CCB disk for " + fileObj.getName().getURI());
   }
 
   /**
@@ -55,9 +55,9 @@ public class DWCCBDisk extends DWDisk {
         && compareByteArray(hdr, CCB_INDENTIFIER)) {
       // has it been isaved...
       if (fileObjectSize % DWDefs.DISK_SECTORSIZE == 0) {
-        return (DWDefs.DISK_CONSIDER_YES);
+        return DWDefs.DISK_CONSIDER_YES;
       }
-      return (DWDefs.DISK_CONSIDER_MAYBE);
+      return DWDefs.DISK_CONSIDER_MAYBE;
     }
     return DWDefs.DISK_CONSIDER_NO;
   }
@@ -75,7 +75,7 @@ public class DWCCBDisk extends DWDisk {
    * Synchronise disk.
    */
   @Override
-  void sync() {
+  public void sync() {
     // no operation
   }
 
@@ -86,23 +86,23 @@ public class DWCCBDisk extends DWDisk {
    * @throws DWImageFormatException invalid image format
    */
   public void load() throws IOException, DWImageFormatException {
-    InputStream fis;
-    fis = this.getFileObject().getContent().getInputStream();
-    long fobjsize = this.getFileObject().getContent().getSize();
-    if (fobjsize > Integer.MAX_VALUE) {
+    final long fObjSize = this.getFileObject().getContent().getSize();
+    if (fObjSize > Integer.MAX_VALUE) {
       throw new DWImageFormatException("Image is too large.");
     }
-    this.getSectors().setSize((int) ((fobjsize / DWDefs.DISK_SECTORSIZE) + 1));
+    this.getSectors().setSize((int) (fObjSize / DWDefs.DISK_SECTORSIZE) + 1);
     byte[] buf = new byte[DWDefs.DISK_SECTORSIZE];
     int readres = 0;
     int secres = 0;
     int sec = 0;
+    final InputStream fis
+        = this.getFileObject().getContent().getInputStream();
     while (readres > -1) {
-      int sz = (int) Math.min(
+      final int size = (int) Math.min(
           DWDefs.DISK_SECTORSIZE - secres,
-          fobjsize - ((long) sec * DWDefs.DISK_SECTORSIZE)
+          fObjSize - ((long) sec * DWDefs.DISK_SECTORSIZE)
       );
-      readres = fis.read(buf, readres, sz);
+      readres = fis.read(buf, readres, size);
       // ccb scripts may not be /256
       if (readres == -1) {
         this.getSectors().set(
@@ -122,7 +122,6 @@ public class DWCCBDisk extends DWDisk {
       } else {
         secres += readres;
         readres = 0;
-
         if (secres == DWDefs.DISK_SECTORSIZE) {
           this.getSectors().set(
               sec,
@@ -135,7 +134,6 @@ public class DWCCBDisk extends DWDisk {
           );
           this.getSectors().get(sec).setData(buf, false);
           secres = 0;
-
           sec++;
         }
       }
@@ -177,7 +175,7 @@ public class DWCCBDisk extends DWDisk {
    */
   public void writeSector(final byte[] data)
       throws DWDriveWriteProtectedException, IOException {
-    if (this.getWriteProtect()) {
+    if (this.isWriteProtect()) {
       throw new DWDriveWriteProtectedException("Disk is write protected");
     } else {
       this.getSectors().get(this.getLSN()).setData(data);
@@ -193,6 +191,6 @@ public class DWCCBDisk extends DWDisk {
    */
   public byte[] readSector() throws IOException {
     this.incParam("_reads");
-    return (this.getSectors().get(this.getLSN()).getData());
+    return this.getSectors().get(this.getLSN()).getData();
   }
 }

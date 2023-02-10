@@ -107,17 +107,17 @@ public abstract class DWDisk {
    * ignored
    * </p>
    *
-   * @param b1 first byte array
-   * @param b2 second byte array
+   * @param arrayA first byte array
+   * @param arrayB second byte array
    * @return true if contents are equal
    */
   public static boolean compareByteArray(
-      final byte[] b1, final byte[] b2
+      final byte[] arrayA, final byte[] arrayB
   ) {
     boolean result = true;
     int index = 0;
-    while (result && index < b1.length && index < b2.length) {
-      result = b1[index] == b2[index];
+    while (result && index < arrayA.length && index < arrayB.length) {
+      result = arrayA[index] == arrayB[index];
       ++index;
     }
     return result;
@@ -248,7 +248,7 @@ public abstract class DWDisk {
    * @return sector count
    */
   public int getLSN() {
-    return (this.params.getInt("_lsn", 0));
+    return this.params.getInt("_lsn", 0);
   }
 
   /**
@@ -273,9 +273,9 @@ public abstract class DWDisk {
       // load from path
       load();
     } else {
-      throw (new DWImageFormatException(
+      throw new DWImageFormatException(
           "Image is in memory only, so cannot reload."
-      ));
+      );
     }
   }
 
@@ -304,7 +304,7 @@ public abstract class DWDisk {
    *
    * @throws IOException Failed to write to file object
    */
-  abstract void sync() throws IOException;
+  public abstract void sync() throws IOException;
 
   /**
    * Write disk.
@@ -329,21 +329,21 @@ public abstract class DWDisk {
   public void writeTo(final String path) throws IOException {
     // write in memory image to specified path (raw format)
     // using most efficient method available
-    FileObject altobj = VFS.getManager().resolveFile(path);
-    if (altobj.isWriteable()) {
-      if (altobj.getFileSystem().hasCapability(Capability.WRITE_CONTENT)) {
+    final FileObject altObj = VFS.getManager().resolveFile(path);
+    if (altObj.isWriteable()) {
+      if (altObj.getFileSystem().hasCapability(Capability.WRITE_CONTENT)) {
         // we always rewrite the entire object
-        writeSectors(altobj);
+        writeSectors(altObj);
       } else {
         // no way to write to this filesystem
         LOGGER.warn(
-            "Filesystem is unwritable for path '" + altobj.getName() + "'"
+            "Filesystem is unwritable for path '" + altObj.getName() + "'"
         );
         throw new FileSystemException("Filesystem is unwriteable");
       }
     } else {
       LOGGER.warn(
-          "File is unwriteable for path '" + altobj.getName() + "'"
+          "File is unwriteable for path '" + altObj.getName() + "'"
       );
       throw new IOException("File is unwriteable");
     }
@@ -352,10 +352,10 @@ public abstract class DWDisk {
   /**
    * Write cached sectors to disk file.
    *
-   * @param fobj disk file
+   * @param file disk file
    * @throws IOException Failed to write to file object
    */
-  public void writeSectors(final FileObject fobj) throws IOException {
+  public void writeSectors(final FileObject file) throws IOException {
     // write out all sectors
     long timeGetdata = 0;
     long timeWrite = 0;
@@ -364,35 +364,35 @@ public abstract class DWDisk {
     long timePoint = System.currentTimeMillis();
 
     LOGGER.debug(
-        "Writing out all sectors from cache to " + fobj.getName()
+        "Writing out all sectors from cache to " + file.getName()
     );
-    BufferedOutputStream fos = new BufferedOutputStream(
-        fobj.getContent().getOutputStream()
+    final BufferedOutputStream fileOutputStream = new BufferedOutputStream(
+        file.getContent().getOutputStream()
     );
-    int ss = DWDefs.DISK_SECTORSIZE;
+    int sectorSize = DWDefs.DISK_SECTORSIZE;
     if (this.getParams().containsKey("_sectorsize")) {
       try {
-        ss = (Integer) this.getParam("_sectorsize");
+        sectorSize = (Integer) this.getParam("_sectorsize");
       } catch (NumberFormatException ignored) {
       }
     }
-    byte[] zerofill = new byte[ss];
+    final byte[] zerofill = new byte[sectorSize];
     timeInit = System.currentTimeMillis() - timePoint;
-    for (DWDiskSector sector : this.sectors) {
+    for (final DWDiskSector sector : this.sectors) {
       // we do have a sector obj
       if (sector != null) {
         timePoint = System.currentTimeMillis();
-        byte[] tmp = sector.getData();
-        timeGetdata += (System.currentTimeMillis() - timePoint);
+        final byte[] tmp = sector.getData();
+        timeGetdata += System.currentTimeMillis() - timePoint;
         timePoint = System.currentTimeMillis();
-        fos.write(tmp, 0, tmp.length);
-        timeWrite += (System.currentTimeMillis() - timePoint);
+        fileOutputStream.write(tmp, 0, tmp.length);
+        timeWrite += System.currentTimeMillis() - timePoint;
         timePoint = System.currentTimeMillis();
         sector.makeClean();
-        timeClean += (System.currentTimeMillis() - timePoint);
+        timeClean += System.currentTimeMillis() - timePoint;
       } else {
         // we don't, write 0 filled
-        fos.write(zerofill, 0, ss);
+        fileOutputStream.write(zerofill, 0, sectorSize);
       }
     }
     LOGGER.debug(
@@ -401,7 +401,7 @@ public abstract class DWDisk {
             + "  writestream: " + timeWrite
             + "  clean: " + timeClean
     );
-    fos.close();
+    fileOutputStream.close();
     if (this.fileObj != null) {
       this.setLastModifiedTime(
           this.fileObj.getContent().getLastModifiedTime()
@@ -417,7 +417,7 @@ public abstract class DWDisk {
   public int getDirtySectors() {
     int drt = 0;
     if (this.sectors != null) {
-      for (DWDiskSector sector : this.sectors) {
+      for (final DWDiskSector sector : this.sectors) {
         if (sector != null && sector.isDirty()) {
           drt++;
         }
@@ -436,16 +436,16 @@ public abstract class DWDisk {
   public DWDiskSector getSector(final int sectorNumber)
       throws DWDiskInvalidSectorNumber {
     if (
-        (sectorNumber < 0) || (sectorNumber >= this.sectors.size())
+        sectorNumber < 0 || sectorNumber >= this.sectors.size()
     ) {
       throw new DWDiskInvalidSectorNumber(
           "Invalid sector number: " + sectorNumber
       );
     }
     if (this.sectors.get(sectorNumber) != null) {
-      return (this.sectors.get(sectorNumber));
+      return this.sectors.get(sectorNumber);
     }
-    return (null);
+    return null;
   }
 
   /**
@@ -453,10 +453,10 @@ public abstract class DWDisk {
    *
    * @return status
    */
-  public boolean getWriteProtect() {
-    return (this.params.getBoolean(
+  public boolean isWriteProtect() {
+    return this.params.getBoolean(
         "writeprotect", DWDefs.DISK_DEFAULT_WRITEPROTECT
-    ));
+    );
   }
 
   /**
@@ -467,9 +467,9 @@ public abstract class DWDisk {
    */
   public Object getParam(final String key) {
     if (this.params.containsKey(key)) {
-      return (this.params.getProperty(key));
+      return this.params.getProperty(key);
     }
-    return (null);
+    return null;
   }
 
   /**
@@ -489,7 +489,7 @@ public abstract class DWDisk {
   public void insert(final DWDiskDrive targetDrive) {
     this.drive = targetDrive;
     // remove any existing listeners
-    for (ConfigurationListener configurationListener : this.params
+    for (final ConfigurationListener configurationListener : this.params
         .getConfigurationListeners()) {
       this.params.removeConfigurationListener(configurationListener);
     }
@@ -498,9 +498,9 @@ public abstract class DWDisk {
         new DWDiskConfigListener(this)
     );
     // announce drive info to any event listeners
-    Iterator<String> itr = this.params.getKeys();
+    final Iterator<String> itr = this.params.getKeys();
     while (itr.hasNext()) {
-      String key = itr.next();
+      final String key = itr.next();
       this.drive.submitEvent(
           key, this.params.getProperty(key).toString()
       );
@@ -526,7 +526,7 @@ public abstract class DWDisk {
    *
    * @return true if direct available
    */
-  public boolean getDirect() {
+  public boolean isDirect() {
     return false;
   }
 

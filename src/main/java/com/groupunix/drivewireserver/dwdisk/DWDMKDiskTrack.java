@@ -35,9 +35,9 @@ public class DWDMKDiskTrack {
    * @return IDAM record
    */
   public DWDMKDiskIDAM getIDAM(final int index) {
-    byte msb = this.trackData[(index * 2) + 1];
-    byte lsb = this.trackData[(index * 2)];
-    byte[] iBuf = new byte[IDAM_SIZE];
+    final byte msb = this.trackData[index * 2 + 1];
+    final byte lsb = this.trackData[index * 2];
+    final byte[] iBuf = new byte[IDAM_SIZE];
     System.arraycopy(
         this.trackData, getIDAMPtr(msb, lsb) + 1, iBuf, 0, IDAM_SIZE
     );
@@ -52,7 +52,7 @@ public class DWDMKDiskTrack {
    * @return masked ptr value
    */
   public int getIDAMPtr(final byte msb, final byte lsb) {
-    return ((LOW_SIX_BITS & msb) * BYTE_SHIFT + (BYTE_MASK & lsb));
+    return (LOW_SIX_BITS & msb) * BYTE_SHIFT + (BYTE_MASK & lsb);
   }
 
   /**
@@ -71,12 +71,12 @@ public class DWDMKDiskTrack {
    * @return sectors
    */
   public int getNumSectors() {
-    int ns = 0;
+    int sectors = 0;
     for (int i = 0; i < MAXIMUM_IDAM; i++) {
       if (getIDAM(i).getPtr() != 0) {
-        ns++;
+        sectors++;
       }
     }
-    return ns;
+    return sectors;
   }
 }

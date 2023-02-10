@@ -89,7 +89,7 @@ public class DWJVCDisk extends DWDisk {
    * Synchronise disk.
    */
   @Override
-  void sync() {
+  public void sync() {
     // no operation
   }
 
@@ -182,7 +182,7 @@ public class DWJVCDisk extends DWDisk {
    */
   public void writeSector(final byte[] data)
       throws DWDriveWriteProtectedException, IOException {
-    if (this.getWriteProtect()) {
+    if (this.isWriteProtect()) {
       throw new DWDriveWriteProtectedException("Disk is write protected");
     } else {
       this.getSectors().get(this.getLSN()).setData(data);

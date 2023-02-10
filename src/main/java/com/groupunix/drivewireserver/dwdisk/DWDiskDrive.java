@@ -69,7 +69,7 @@ public class DWDiskDrive {
    */
   public DWDisk getDisk() throws DWDriveNotLoadedException {
     if (this.loaded) {
-      return (this.dwDisk);
+      return this.dwDisk;
     } else {
       throw new DWDriveNotLoadedException(
           "No disk in drive " + this.getDriveNo()
@@ -138,15 +138,15 @@ public class DWDiskDrive {
    * Read sector from disk.
    *
    * @return sector byte array
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException read failure
+   * @throws DWImageFormatException invalid image format
    */
   public byte[] readSector() throws IOException, DWImageFormatException {
     if (this.dwDisk == null) {
       throw new IOException("Disk is null");
     }
     synchronized (this.dwDisk) {
-      return (this.dwDisk.readSector());
+      return this.dwDisk.readSector();
     }
   }
 
@@ -154,8 +154,8 @@ public class DWDiskDrive {
    * Write sector to disk.
    *
    * @param data sector byte array
-   * @throws DWDriveWriteProtectedException
-   * @throws IOException
+   * @throws DWDriveWriteProtectedException attempt to write to protected disk
+   * @throws IOException write failure
    */
   public void writeSector(final byte[] data)
       throws DWDriveWriteProtectedException, IOException {
