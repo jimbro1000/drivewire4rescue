@@ -19,9 +19,10 @@ public final class DWCmdDiskDos extends DWCommand {
       final DWProtocolHandler protocolHandler,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
-    DWCommandList commands = new DWCommandList(
+    final DWCommandList commands = new DWCommandList(
         this.dwProtocolHandler,
         this.dwProtocolHandler.getCMDCols()
     );

@@ -45,7 +45,7 @@ public class DWEvent {
    * @return true if key is present
    */
   public boolean hasParam(final String key) {
-    return (this.params.containsKey(key));
+    return this.params.containsKey(key);
   }
 
   /**

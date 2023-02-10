@@ -26,6 +26,7 @@ public class DWCmdMidiSynthBank extends DWCommand {
       final DWProtocolHandler protocolHandler,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("bank");
@@ -54,7 +55,7 @@ public class DWCmdMidiSynthBank extends DWCommand {
     Soundbank soundbank = null;
 
     if (dwProtocolHandler.getConfig().getBoolean("UseMIDI", true)) {
-      File file = new File(path);
+      final File file = new File(path);
       try {
         soundbank = MidiSystem.getSoundbank(file);
       } catch (InvalidMidiDataException e) {

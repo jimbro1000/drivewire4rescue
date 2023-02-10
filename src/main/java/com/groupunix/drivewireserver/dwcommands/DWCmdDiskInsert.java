@@ -28,6 +28,7 @@ public final class DWCmdDiskInsert extends DWCommand {
       final DWProtocolHandler protocolHandler,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("insert");
@@ -42,7 +43,7 @@ public final class DWCmdDiskInsert extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
 
     if (args.length > 1) {
       // insert disk

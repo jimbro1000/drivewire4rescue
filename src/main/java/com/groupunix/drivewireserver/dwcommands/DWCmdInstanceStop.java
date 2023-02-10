@@ -18,6 +18,7 @@ public final class DWCmdInstanceStop extends DWCommand {
    * @param parent parent
    */
   public DWCmdInstanceStop(final DWProtocol protocol, final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("stop");
@@ -44,8 +45,8 @@ public final class DWCmdInstanceStop extends DWCommand {
 
   private DWCommandResponse doStart(final String instance) {
     try {
-      int instanceNumber = Integer.parseInt(instance);
-      DWCommandResponse testInstance
+      final int instanceNumber = Integer.parseInt(instance);
+      final DWCommandResponse testInstance
           = DWCmdInstance.guardInstance(instanceNumber);
       if (testInstance != null) {
         return testInstance;

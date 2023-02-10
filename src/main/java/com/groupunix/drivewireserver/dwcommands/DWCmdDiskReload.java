@@ -23,6 +23,7 @@ public final class DWCmdDiskReload extends DWCommand {
   public DWCmdDiskReload(
       final DWProtocolHandler protocolHandler, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("reload");

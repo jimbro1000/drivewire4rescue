@@ -152,9 +152,9 @@ public class DWUIThread implements Runnable {
       for (final DWUIClientThread client : this.clientThreads) {
         // filter for instance
         if (
-            (client.getInstance() == -1)
-                || (client.getInstance() == evt.getEventInstance())
-                || (evt.getEventInstance() == -1)
+            client.getInstance() == -1
+                || client.getInstance() == evt.getEventInstance()
+                || evt.getEventInstance() == -1
         ) {
           final LinkedBlockingQueue<DWEvent> queue = client.getEventQueue();
           synchronized (queue) {

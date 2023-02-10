@@ -22,6 +22,7 @@ public final class DWCmdMidiStatus extends DWCommand {
   public DWCmdMidiStatus(
       final DWProtocolHandler protocolHandler, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("status");
@@ -40,7 +41,7 @@ public final class DWCmdMidiStatus extends DWCommand {
   }
 
   private DWCommandResponse doMidiStatus() {
-    StringBuilder text = new StringBuilder();
+    final StringBuilder text = new StringBuilder();
     text.append("\r\nDriveWire MIDI status:\r\n\n");
     if (
         dwProtocolHandler
@@ -48,11 +49,10 @@ public final class DWCmdMidiStatus extends DWCommand {
             .getBoolean("UseMIDI", true)
     ) {
       text.append("Devices:\r\n");
-      MidiDevice device;
-      MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+      final MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
       for (int i = 0; i < infos.length; i++) {
         try {
-          device = MidiSystem.getMidiDevice(infos[i]);
+          final MidiDevice device = MidiSystem.getMidiDevice(infos[i]);
           text.append("[").append(i).append("] ");
           text.append(device.getDeviceInfo().getName())
               .append(" (")

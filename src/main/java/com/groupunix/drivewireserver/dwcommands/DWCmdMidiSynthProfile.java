@@ -18,6 +18,7 @@ public final class DWCmdMidiSynthProfile extends DWCommand {
   public DWCmdMidiSynthProfile(
       final DWProtocolHandler protocolHandler, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("profile");

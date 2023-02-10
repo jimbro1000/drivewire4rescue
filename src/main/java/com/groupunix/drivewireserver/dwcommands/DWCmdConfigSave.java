@@ -22,6 +22,7 @@ public class DWCmdConfigSave extends DWCommand {
   public DWCmdConfigSave(
       final DWProtocol protocol, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("save");

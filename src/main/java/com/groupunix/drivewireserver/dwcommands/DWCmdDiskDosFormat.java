@@ -25,6 +25,7 @@ public final class DWCmdDiskDosFormat extends DWCommand {
   public DWCmdDiskDosFormat(
       final DWProtocolHandler protocolHandler, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("format");
@@ -39,7 +40,7 @@ public final class DWCmdDiskDosFormat extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
     if (args.length == 1) {
       try {
         return doDiskDosCreate(

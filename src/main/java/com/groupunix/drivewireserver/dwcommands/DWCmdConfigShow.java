@@ -22,6 +22,7 @@ public class DWCmdConfigShow extends DWCommand {
   public DWCmdConfigShow(
       final DWProtocol protocol, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("show");
@@ -45,7 +46,7 @@ public class DWCmdConfigShow extends DWCommand {
   private DWCommandResponse doShowConfig(final String item) {
     String text = "";
     if (dwProtocol.getConfig().containsKey(item)) {
-      String value = StringUtils.join(
+      final String value = StringUtils.join(
           dwProtocol.getConfig().getStringArray(item), ", "
       );
       text += item + " = " + value;
@@ -71,12 +72,13 @@ public class DWCmdConfigShow extends DWCommand {
 
   @SuppressWarnings("unchecked")
   private DWCommandResponse doShowConfig() {
-    StringBuilder text = new StringBuilder(
+    final StringBuilder text = new StringBuilder(
         "Current protocol handler configuration:\r\n\n"
     );
-    for (Iterator<String> i = dwProtocol.getConfig().getKeys(); i.hasNext();) {
-      String key = i.next();
-      String value = dwProtocol.getConfig().getProperty(key).toString();
+    final Iterator<String> keys = dwProtocol.getConfig().getKeys();
+    while (keys.hasNext()) {
+      final String key = keys.next();
+      final String value = dwProtocol.getConfig().getProperty(key).toString();
       text.append(key).append(" = ").append(value).append("\r\n");
     }
     return new DWCommandResponse(text.toString());

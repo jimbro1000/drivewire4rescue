@@ -21,6 +21,7 @@ public class DWCmdMidiSynthShowChannels extends DWCommand {
       final DWProtocolHandler protocolHandler,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("channels");
@@ -35,14 +36,14 @@ public class DWCmdMidiSynthShowChannels extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder text = new StringBuilder();
+    final StringBuilder text = new StringBuilder();
     text.append("\r\nInternal synthesizer channel status:\r\n\n");
     if (dwProtocolHandler.getVPorts().getMidiSynth() != null) {
-      MidiChannel[] midiChannels = dwProtocolHandler
+      final MidiChannel[] midiChannels = dwProtocolHandler
           .getVPorts()
           .getMidiSynth()
           .getChannels();
-      Instrument[] instruments = dwProtocolHandler
+      final Instrument[] instruments = dwProtocolHandler
           .getVPorts()
           .getMidiSynth()
           .getLoadedInstruments();

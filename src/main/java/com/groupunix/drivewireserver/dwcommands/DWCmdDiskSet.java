@@ -24,6 +24,7 @@ public class DWCmdDiskSet extends DWCommand {
       final DWProtocolHandler protocolHandler,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("set");
@@ -37,7 +38,7 @@ public class DWCmdDiskSet extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
     if (args.length < MAX_COMMANDS) {
       return new DWCommandResponse(
           false,
@@ -64,7 +65,7 @@ public class DWCmdDiskSet extends DWCommand {
       final String cmdline
   ) {
     // driveNumber + param/val
-    String[] parts = cmdline.split(" ");
+    final String[] parts = cmdline.split(" ");
     // set item
     try {
       if (dwProtocolHandler

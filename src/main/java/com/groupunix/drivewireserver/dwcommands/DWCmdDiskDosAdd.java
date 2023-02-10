@@ -35,6 +35,7 @@ public final class DWCmdDiskDosAdd extends DWCommand {
       final DWProtocolHandler protocolHandler,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("add");
@@ -49,7 +50,7 @@ public final class DWCmdDiskDosAdd extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
 
     if (args.length == 2) {
       try {
@@ -113,34 +114,34 @@ public final class DWCmdDiskDosAdd extends DWCommand {
       DWFileSystemInvalidFATException,
       DWDiskInvalidSectorNumber,
       DWFileSystemInvalidDirectoryException {
-    DWDECBFileSystem decbfs = new DWDECBFileSystem(
+    final DWDECBFileSystem decbFs = new DWDECBFileSystem(
         dwProtocolHandler.getDiskDrives().getDisk(driveno)
     );
-    FileObject fileobj = VFS.getManager().resolveFile(path);
-    if (fileobj.exists() && fileobj.isReadable()) {
-      FileContent fc = fileobj.getContent();
-      long fobjsize = fc.getSize();
+    final FileObject fileObj = VFS.getManager().resolveFile(path);
+    if (fileObj.exists() && fileObj.isReadable()) {
+      final FileContent fileContent = fileObj.getContent();
+      final long fObjSize = fileContent.getSize();
       // size check
-      if (fobjsize > Integer.MAX_VALUE) {
+      if (fObjSize > Integer.MAX_VALUE) {
         throw new DWFileSystemFullException(
             "File too big, maximum size is "
                 + Integer.MAX_VALUE + " bytes."
         );
       }
       // get header
-      byte[] content = new byte[(int) fobjsize];
+      final byte[] content = new byte[(int) fObjSize];
       if (content.length > 0) {
         int readres = 0;
-        InputStream fis = fc.getInputStream();
+        final InputStream inputStream = fileContent.getInputStream();
         while (readres < content.length) {
-          readres += fis.read(
+          readres += inputStream.read(
               content, readres, content.length - readres
           );
         }
-        fis.close();
+        inputStream.close();
       }
-      decbfs.addFile(
-          fileobj.getName().getBaseName().toUpperCase(),
+      decbFs.addFile(
+          fileObj.getName().getBaseName().toUpperCase(),
           content
       );
     } else {

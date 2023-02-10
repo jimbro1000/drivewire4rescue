@@ -70,9 +70,9 @@ public class DWLogAppender extends AppenderSkeleton {
    */
   protected void append(final LoggingEvent event) {
     // fatal to console
-    if ((event.getLevel() == Level.FATAL)
-        && (!DriveWireServer.isConsoleLogging())
-        && (!DriveWireServer.isDebug())
+    if (event.getLevel() == Level.FATAL
+        && !DriveWireServer.isConsoleLogging()
+        && !DriveWireServer.isDebug()
     ) {
       System.out.println("FATAL: " + event.getRenderedMessage());
     }

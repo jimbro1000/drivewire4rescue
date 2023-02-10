@@ -101,7 +101,7 @@ public class DWUIClientThread implements Runnable {
       this.bufferedout = new BufferedOutputStream(socket.getOutputStream());
       // cmd loop
       StringBuilder cmd = new StringBuilder();
-      while ((!socket.isClosed()) && (!wanttodie)) {
+      while (!socket.isClosed() && !wanttodie) {
         this.state = "read from output stream";
         final int databyte = socket.getInputStream().read();
 
@@ -186,7 +186,7 @@ public class DWUIClientThread implements Runnable {
     // wait for server/instance ready
     int waits = 0;
     while (!DriveWireServer.isReady()
-        && (waits < DWDefs.UITHREAD_SERVER_WAIT_TIME)) {
+        && waits < DWDefs.UITHREAD_SERVER_WAIT_TIME) {
       try {
         Thread.sleep(DWDefs.UITHREAD_WAIT_TICK);
         waits += DWDefs.UITHREAD_WAIT_TICK;
@@ -238,7 +238,7 @@ public class DWUIClientThread implements Runnable {
     this.bufferedout.write(resp.getResponseCode() & BYTE_MASK);
     this.bufferedout.write(0);
     // data
-    if (resp.isUseBytes() && (resp.getResponseBytes() != null)) {
+    if (resp.isUseBytes() && resp.getResponseBytes() != null) {
       this.bufferedout.write(resp.getResponseBytes());
     } else if (resp.getResponseText() != null) {
       this.bufferedout.write(resp.getResponseText().getBytes(DWDefs.ENCODING));
@@ -318,7 +318,7 @@ public class DWUIClientThread implements Runnable {
    * @return event queue
    */
   public LinkedBlockingQueue<DWEvent> getEventQueue() {
-    return (this.eventQueue);
+    return this.eventQueue;
   }
 
   /**

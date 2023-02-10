@@ -29,6 +29,7 @@ public final class DWCmdDiskShow extends DWCommand {
       final DWProtocolHandler protocolHandler,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("show");
@@ -45,9 +46,9 @@ public final class DWCmdDiskShow extends DWCommand {
   public DWCommandResponse parse(final String cmdline) {
     // show loaded disks
     if (cmdline.length() == 0) {
-      return (doDiskShow());
+      return doDiskShow();
     }
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
     if (args.length == 1) {
       try {
         return doDiskShow(
@@ -72,7 +73,8 @@ public final class DWCmdDiskShow extends DWCommand {
     String text;
 
     try {
-      DWDisk disk = dwProtocolHandler.getDiskDrives().getDisk(driveNumber);
+      final DWDisk disk
+          = dwProtocolHandler.getDiskDrives().getDisk(driveNumber);
       text = "Details for disk in drive #" + driveNumber + ":\r\n\r\n";
       text += DWUtils.shortenLocalURI(disk.getFilePath()) + "\r\n";
       text += "\r\n";
@@ -93,10 +95,10 @@ public final class DWCmdDiskShow extends DWCommand {
             + disk.getDirtySectors()
             + " dirty sectors.\r\n";
       }
-      HierarchicalConfiguration params = disk.getParams();
-      ArrayList<String> ignores = new ArrayList<>();
-      ArrayList<String> syss = new ArrayList<>();
-      ArrayList<String> usrs = new ArrayList<>();
+      final HierarchicalConfiguration params = disk.getParams();
+      final ArrayList<String> ignores = new ArrayList<>();
+      final ArrayList<String> syss = new ArrayList<>();
+      final ArrayList<String> usrs = new ArrayList<>();
 
       ignores.add("_readerrors");
       ignores.add("_writeerrors");
@@ -104,14 +106,15 @@ public final class DWCmdDiskShow extends DWCommand {
       ignores.add("_last_modified");
 
       @SuppressWarnings("unchecked")
-      Iterator<String> itk = params.getKeys();
+      final Iterator<String> itk = params.getKeys();
       while (itk.hasNext()) {
-        String p = itk.next();
-        if (!ignores.contains(p)) {
-          if (p.startsWith("_")) {
-            syss.add(p.substring(1) + ": " + params.getProperty(p));
+        final String param = itk.next();
+        if (!ignores.contains(param)) {
+          if (param.startsWith("_")) {
+            syss.add(param.substring(1) + ": "
+                + params.getProperty(param));
           } else {
-            usrs.add(p + ": " + params.getProperty(p));
+            usrs.add(param + ": " + params.getProperty(param));
           }
         }
       }
@@ -144,7 +147,7 @@ public final class DWCmdDiskShow extends DWCommand {
   }
 
   private DWCommandResponse doDiskShow() {
-    StringBuilder text = new StringBuilder();
+    final StringBuilder text = new StringBuilder();
     text.append("\r\nCurrent DriveWire disks:\r\n\r\n");
     for (int i = 0; i < dwProtocolHandler.getDiskDrives().getMaxDrives(); i++) {
       if (dwProtocolHandler.getDiskDrives().isLoaded(i)) {

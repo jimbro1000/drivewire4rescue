@@ -23,6 +23,7 @@ public final class DWCmdMidiSynthShowInstr extends DWCommand {
   public DWCmdMidiSynthShowInstr(
       final DWProtocolHandler protocolHandler, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("instr");
@@ -37,11 +38,10 @@ public final class DWCmdMidiSynthShowInstr extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder text = new StringBuilder();
-
+    final StringBuilder text = new StringBuilder();
     text.append("\r\nInternal synthesizer instrument list:\r\n\n");
     if (dwProtocolHandler.getVPorts().getMidiSynth() != null) {
-      Instrument[] instruments = dwProtocolHandler
+      final Instrument[] instruments = dwProtocolHandler
           .getVPorts()
           .getMidiSynth()
           .getLoadedInstruments();

@@ -21,6 +21,7 @@ public final class DWCmdInstanceRestart extends DWCommand {
       final DWProtocol protocol,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("restart");
@@ -48,8 +49,8 @@ public final class DWCmdInstanceRestart extends DWCommand {
 
   private DWCommandResponse doRestart(final String instance) {
     try {
-      int instanceNumber = Integer.parseInt(instance);
-      DWCommandResponse testInstance
+      final int instanceNumber = Integer.parseInt(instance);
+      final DWCommandResponse testInstance
           = DWCmdInstance.guardInstance(instanceNumber);
       if (testInstance != null) {
         return testInstance;

@@ -19,6 +19,7 @@ public final class DWCmdConfigSet extends DWCommand {
   public DWCmdConfigSet(
       final DWProtocol protocol, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("set");
@@ -40,7 +41,7 @@ public final class DWCmdConfigSet extends DWCommand {
           "Syntax error: dw config set requires an item and value as arguments"
       );
     }
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
     if (args.length == 1) {
       return (doSetConfig(args[0]));
     } else {

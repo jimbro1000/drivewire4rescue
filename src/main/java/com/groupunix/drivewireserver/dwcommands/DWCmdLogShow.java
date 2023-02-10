@@ -8,10 +8,11 @@ import com.groupunix.drivewireserver.DriveWireServer;
 public class DWCmdLogShow extends DWCommand {
 
   /**
-   * Commmand log show constructor.
-   * @param parent
+   * Command log show constructor.
+   * @param parent parent command
    */
   public DWCmdLogShow(final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.setCommand("show");
     this.setShortHelp("Show last 20 (or #) log entries");
@@ -19,7 +20,7 @@ public class DWCmdLogShow extends DWCommand {
   }
   /**
    * Parse command.
-   * @param cmdline
+   * @param cmdline command line
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
@@ -35,15 +36,15 @@ public class DWCmdLogShow extends DWCommand {
    * @return log lines
    */
   private DWCommandResponse doShowLog(final String lineCount) {
-    StringBuilder text = new StringBuilder();
+    final StringBuilder text = new StringBuilder();
     try {
-      int lines = Integer.parseInt(lineCount);
+      final int lines = Integer.parseInt(lineCount);
       text.append("\r\nDriveWire Server Log (")
           .append(DriveWireServer.getLogEventsSize())
           .append(" events in buffer):\r\n\n");
-      ArrayList<String> logLines = DriveWireServer.getLogEvents(lines);
-      for (int i = 0; i < logLines.size(); i++) {
-        text.append(logLines.get(i));
+      final ArrayList<String> logLines = DriveWireServer.getLogEvents(lines);
+      for (final String logLine : logLines) {
+        text.append(logLine);
       }
       return new DWCommandResponse(text.toString());
     } catch (NumberFormatException e) {
@@ -57,7 +58,7 @@ public class DWCmdLogShow extends DWCommand {
 
   /**
    * Validate command.
-   * @param cmdline
+   * @param cmdline command line
    * @return true if valid
    */
   public boolean validate(final String cmdline) {

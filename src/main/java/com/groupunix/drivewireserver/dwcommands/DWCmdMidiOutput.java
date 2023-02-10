@@ -22,6 +22,7 @@ public final class DWCmdMidiOutput extends DWCommand {
   public DWCmdMidiOutput(
       final DWProtocolHandler protocolHandler, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("output");
@@ -43,14 +44,14 @@ public final class DWCmdMidiOutput extends DWCommand {
           "Syntax error: dw midi output requires a device # as an argument"
       );
     }
-    return (doMidiOutput(cmdline));
+    return doMidiOutput(cmdline);
   }
 
   private DWCommandResponse doMidiOutput(final String deviceNumber) {
     if (dwProtocolHandler.getConfig().getBoolean("UseMIDI", true)) {
       try {
-        int deviceId = Integer.parseInt(deviceNumber);
-        MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+        final int deviceId = Integer.parseInt(deviceNumber);
+        final MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         if ((deviceId < 0) || (deviceId > infos.length)) {
           return new DWCommandResponse(
               false,

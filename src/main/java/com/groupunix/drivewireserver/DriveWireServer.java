@@ -304,7 +304,8 @@ public final class DriveWireServer {
                       .getString("[@name]", "unnamed")
               );
 
-              @SuppressWarnings("unchecked") final List<HierarchicalConfiguration> handlerConfigurations
+              @SuppressWarnings("unchecked")
+              final List<HierarchicalConfiguration> handlerConfigurations
                   = serverConfiguration.configurationsAt("instance");
 
               DW_PROTOCOL_HANDLERS.set(
@@ -551,7 +552,8 @@ public final class DriveWireServer {
    * Start protocol handlers.
    */
   private static void startProtoHandlers() {
-    @SuppressWarnings("unchecked") final List<HierarchicalConfiguration> handlerConfigurations
+    @SuppressWarnings("unchecked")
+    final List<HierarchicalConfiguration> handlerConfigurations
         = serverConfiguration.configurationsAt("instance");
 
     DW_PROTOCOL_HANDLERS.ensureCapacity(handlerConfigurations.size());

@@ -18,6 +18,7 @@ public final class DWCmdInstanceStart extends DWCommand {
    * @param parent parent
    */
   public DWCmdInstanceStart(final DWProtocol protocol, final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("start");
@@ -50,57 +51,48 @@ public final class DWCmdInstanceStart extends DWCommand {
   /**
    * start command.
    *
-   * @param instr interrupt handler id
+   * @param intId interrupt handler id
    * @return command response
    */
-  private DWCommandResponse doStart(final String instr) {
+  private DWCommandResponse doStart(final String intId) {
     try {
-      int intno = Integer.parseInt(instr);
-      if (!DriveWireServer.isValidHandlerNo(intno)) {
-        return (
-            new DWCommandResponse(
+      final int interruptId = Integer.parseInt(intId);
+      if (!DriveWireServer.isValidHandlerNo(interruptId)) {
+        return new DWCommandResponse(
                 false,
                 DWDefs.RC_INVALID_HANDLER,
                 "Invalid instance number."
-            )
         );
       }
-      if (DriveWireServer.getHandler(intno) == null) {
-        return (
-            new DWCommandResponse(
+      if (DriveWireServer.getHandler(interruptId) == null) {
+        return new DWCommandResponse(
                 false,
                 DWDefs.RC_INVALID_HANDLER,
-                "Instance " + intno + " is not defined."
-            )
+                "Instance " + interruptId + " is not defined."
         );
       }
-      if (DriveWireServer.getHandler(intno).isReady()) {
-        return (
-            new DWCommandResponse(
+      if (DriveWireServer.getHandler(interruptId).isReady()) {
+        return new DWCommandResponse(
                 false,
                 DWDefs.RC_INSTANCE_ALREADY_STARTED,
-                "Instance " + intno + " is already started."
-            )
+                "Instance " + interruptId + " is already started."
         );
       }
-      if (DriveWireServer.getHandler(intno).isDying()) {
-        return (
-            new DWCommandResponse(
+      if (DriveWireServer.getHandler(interruptId).isDying()) {
+        return new DWCommandResponse(
                 false,
                 DWDefs.RC_INSTANCE_NOT_READY,
-                "Instance " + intno + " is in the process of shutting down."
-            )
+                "Instance " + interruptId
+                    + " is in the process of shutting down."
         );
       }
-      DriveWireServer.startHandler(intno);
-      return (new DWCommandResponse("Starting instance # " + intno));
+      DriveWireServer.startHandler(interruptId);
+      return new DWCommandResponse("Starting instance # " + interruptId);
     } catch (NumberFormatException e) {
-      return (
-          new DWCommandResponse(
+      return new DWCommandResponse(
               false,
               DWDefs.RC_SYNTAX_ERROR,
               "dw instance start requires a numeric instance # as an argument"
-          )
       );
     }
   }
@@ -112,6 +104,6 @@ public final class DWCmdInstanceStart extends DWCommand {
    * @return true if valid
    */
   public boolean validate(final String cmdline) {
-    return (true);
+    return true;
   }
 }

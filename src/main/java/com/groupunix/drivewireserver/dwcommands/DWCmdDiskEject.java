@@ -20,6 +20,7 @@ public class DWCmdDiskEject extends DWCommand {
       final DWProtocolHandler protocolHandler,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("eject");
@@ -33,7 +34,7 @@ public class DWCmdDiskEject extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
     if (args.length == 1) {
       if (args[0].equals("all")) {
         // eject all disks

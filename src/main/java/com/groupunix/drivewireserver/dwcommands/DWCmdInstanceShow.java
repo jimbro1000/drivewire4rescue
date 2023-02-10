@@ -16,7 +16,8 @@ public final class DWCmdInstanceShow extends DWCommand {
    * @param protocol protocol
    * @param parent parent command
    */
-  DWCmdInstanceShow(final DWProtocol protocol, final DWCommand parent) {
+  public DWCmdInstanceShow(final DWProtocol protocol, final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommand("show");
@@ -31,7 +32,7 @@ public final class DWCmdInstanceShow extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder text = new StringBuilder();
+    final StringBuilder text = new StringBuilder();
     text.append("DriveWire protocol handler instances:\r\n\n");
     for (int i = 0; i < DriveWireServer.getNumHandlers(); i++) {
       text.append("#").append(i).append("  (");
@@ -47,12 +48,12 @@ public final class DWCmdInstanceShow extends DWCommand {
       if (DriveWireServer.getHandler(i) == null) {
         text.append(" Null (?)\r\n");
       } else {
-        String proto = DriveWireServer
+        final String proto = DriveWireServer
             .getHandler(i)
             .getConfig()
             .getString("Protocol", "DriveWire");
         text.append(String.format("Proto: %-11s", proto));
-        String dwType = DriveWireServer
+        final String dwType = DriveWireServer
             .getHandler(i)
             .getConfig()
             .getString("DeviceType", "Unknown");

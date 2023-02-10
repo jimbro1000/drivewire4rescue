@@ -14,6 +14,7 @@ public class DWCmdMidiSynthShowProfiles extends DWCommand {
    * @param parent parent command
    */
   public DWCmdMidiSynthShowProfiles(final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.setCommand("profiles");
     this.setShortHelp("Show internal synth profiles");
@@ -28,15 +29,13 @@ public class DWCmdMidiSynthShowProfiles extends DWCommand {
    */
   @SuppressWarnings("unchecked")
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder text = new StringBuilder();
-
+    final StringBuilder text = new StringBuilder();
     text.append("\r\nAvailable sound translation profiles:\r\n\n");
-
-    List<HierarchicalConfiguration> profiles = DriveWireServer
+    final List<HierarchicalConfiguration> profiles = DriveWireServer
         .getServerConfiguration()
         .configurationsAt("midisynthprofile");
 
-    for (HierarchicalConfiguration midiProfile : profiles) {
+    for (final HierarchicalConfiguration midiProfile : profiles) {
       text.append(
           String.format(
               "%-10s: %-35s dev_adjust: %2d  gm_adjust: %2d",

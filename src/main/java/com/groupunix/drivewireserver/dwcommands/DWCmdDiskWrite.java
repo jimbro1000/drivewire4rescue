@@ -24,6 +24,7 @@ public class DWCmdDiskWrite extends DWCommand {
   public DWCmdDiskWrite(
       final DWProtocolHandler protocolHandler, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("write");
@@ -45,7 +46,7 @@ public class DWCmdDiskWrite extends DWCommand {
           "Syntax error"
       );
     }
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
     if (args.length == 1) {
       try {
         return doDiskWrite(
@@ -112,7 +113,7 @@ public class DWCmdDiskWrite extends DWCommand {
   private DWCommandResponse doDiskWrite(
       final int driveNumber, final String path
   ) {
-    String safePath = DWUtils.convertStarToBang(path);
+    final String safePath = DWUtils.convertStarToBang(path);
     try {
       System.out.println("write " + safePath);
       dwProtocolHandler.getDiskDrives().writeDisk(driveNumber, safePath);

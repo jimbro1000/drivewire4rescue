@@ -15,6 +15,7 @@ public class DWCmdLog extends DWCommand {
    * @param parent parent command
    */
   public DWCmdLog(final DWProtocol protocol, final DWCommand parent) {
+    super();
     setParentCmd(parent);
     this.dwProtocol = protocol;
     this.setCommandList(new DWCommandList(

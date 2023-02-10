@@ -27,6 +27,7 @@ public final class DWCmdDiskDosList extends DWCommand {
   public DWCmdDiskDosList(
       final DWProtocolHandler protocolHandler, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("list");
@@ -41,7 +42,7 @@ public final class DWCmdDiskDosList extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
 
     if (args.length == 2) {
       try {
@@ -103,7 +104,7 @@ public final class DWCmdDiskDosList extends DWCommand {
       DWFileSystemInvalidDirectoryException {
     String res = "";
 
-    DWDECBFileSystem tmp = new DWDECBFileSystem(
+    final DWDECBFileSystem tmp = new DWDECBFileSystem(
         dwProtocolHandler.getDiskDrives().getDisk(driveNumber)
     );
     res = new String(tmp.getFileContents(filename), DWDefs.ENCODING);

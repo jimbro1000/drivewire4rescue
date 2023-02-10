@@ -29,6 +29,7 @@ public final class DWCmdDiskDosDir extends DWCommand {
       final DWProtocolHandler protocolHandler,
       final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("dir");
@@ -43,7 +44,7 @@ public final class DWCmdDiskDosDir extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
 
     if (args.length == 1) {
       try {
@@ -91,13 +92,13 @@ public final class DWCmdDiskDosDir extends DWCommand {
       DWFileSystemInvalidDirectoryException {
     String res = "Directory of drive " + driveNumber + "\r\n\r\n";
 
-    DWDECBFileSystem tmp = new DWDECBFileSystem(
+    final DWDECBFileSystem tmp = new DWDECBFileSystem(
         dwProtocolHandler.getDiskDrives().getDisk(driveNumber)
     );
-    ArrayList<String> dir = new ArrayList<>();
-    for (DWFileSystemDirEntry e : tmp.getDirectory(null)) {
-      if (((DWDECBFileSystemDirEntry) e).isUsed()) {
-        dir.add(e.getFileName() + "." + e.getFileExt());
+    final ArrayList<String> dir = new ArrayList<>();
+    for (final DWFileSystemDirEntry entry : tmp.getDirectory(null)) {
+      if (((DWDECBFileSystemDirEntry) entry).isUsed()) {
+        dir.add(entry.getFileName() + "." + entry.getFileExt());
       }
     }
     Collections.sort(dir);

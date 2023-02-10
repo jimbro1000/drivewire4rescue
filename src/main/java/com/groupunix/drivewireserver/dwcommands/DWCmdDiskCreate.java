@@ -29,6 +29,7 @@ public final class DWCmdDiskCreate extends DWCommand {
   public DWCmdDiskCreate(
       final DWProtocolHandler protocolHandler, final DWCommand parent
   ) {
+    super();
     setParentCmd(parent);
     this.dwProtocolHandler = protocolHandler;
     this.setCommand("create");
@@ -43,7 +44,7 @@ public final class DWCmdDiskCreate extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
 
     if (args.length == 1) {
       try {
