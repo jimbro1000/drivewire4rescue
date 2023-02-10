@@ -17,6 +17,7 @@ public class DWCmdClientRestart extends DWCommand {
   public DWCmdClientRestart(
       final DWVSerialProtocol serialProtocol, final DWCommand parent
   ) {
+    super();
     this.dwvSerialProtocol = serialProtocol;
     setParentCmd(parent);
     this.setCommand("restart");

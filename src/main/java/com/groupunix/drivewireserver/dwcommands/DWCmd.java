@@ -16,8 +16,9 @@ public final class DWCmd extends DWCommand {
    * @param protocol protocol
    */
   public DWCmd(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
-    DWCommandList commands = new DWCommandList(
+    final DWCommandList commands = new DWCommandList(
         this.dwProtocol,
         this.dwProtocol.getCMDCols()
     );

@@ -103,7 +103,7 @@ public class DWUIClientThread implements Runnable {
       StringBuilder cmd = new StringBuilder();
       while ((!socket.isClosed()) && (!wanttodie)) {
         this.state = "read from output stream";
-        int databyte = socket.getInputStream().read();
+        final int databyte = socket.getInputStream().read();
 
         if (databyte == -1) {
           //logger.debug("got -1 in input stream");
@@ -143,7 +143,7 @@ public class DWUIClientThread implements Runnable {
   private void doCmd(final String cmd) throws IOException {
     this.curcmd = cmd;
     // grab instance
-    int div = cmd.indexOf(0);
+    final int div = cmd.indexOf(0);
     // malformed command
     if (div < 1) {
       sendUiResponse(new DWCommandResponse(
@@ -175,7 +175,7 @@ public class DWUIClientThread implements Runnable {
       }
     }
     // strip instance
-    String trimmedCmd = cmd.substring(div + 1);
+    final String trimmedCmd = cmd.substring(div + 1);
     if (DriveWireServer
         .getServerConfiguration()
         .getBoolean("LogUIConnections", false)
@@ -209,8 +209,7 @@ public class DWUIClientThread implements Runnable {
       ));
       return;
     }
-    DWCommandResponse resp = this.commands.parse(trimmedCmd);
-    sendUiResponse(resp);
+    sendUiResponse(this.commands.parse(trimmedCmd));
     this.bufferedout.flush();
   }
 

@@ -7,8 +7,11 @@
 
     <description>Remove rules</description>
 
-    <rule ref="category/java/codestyle.xml" >
-        <exclude name="TooManyStaticImports" />
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="TooManyStaticImports"/>
+        <exclude name="LongVariable"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="AtLeastOneConstructor"/>
     </rule>
 
 </ruleset>

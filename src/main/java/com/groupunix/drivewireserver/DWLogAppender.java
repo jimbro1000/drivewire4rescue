@@ -23,6 +23,7 @@ public class DWLogAppender extends AppenderSkeleton {
    * @param layout layout
    */
   public DWLogAppender(final Layout layout) {
+    super();
     setLayout(layout);
   }
 
@@ -103,7 +104,7 @@ public class DWLogAppender extends AppenderSkeleton {
    * @return list of events
    */
   public ArrayList<String> getLastEvents(final int num) {
-    ArrayList<String> eventsText = new ArrayList<>();
+    final ArrayList<String> eventsText = new ArrayList<>();
     int start = 0;
     int limit = num;
     synchronized (events) {

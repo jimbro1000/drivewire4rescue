@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ConcurrentModificationException;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -57,7 +56,7 @@ public class DWUIThread implements Runnable {
   public void die() {
     this.wantToDie = true;
     try {
-      for (DWUIClientThread ct : this.clientThreads) {
+      for (final DWUIClientThread ct : this.clientThreads) {
         ct.die();
       }
       if (this.serverSocket != null) {
@@ -116,7 +115,7 @@ public class DWUIThread implements Runnable {
                   + skt.getInetAddress().getHostAddress()
           );
         }
-        Thread uiclientthread = new Thread(
+        final Thread uiclientthread = new Thread(
             new DWUIClientThread(skt, this.clientThreads)
         );
         uiclientthread.setDaemon(true);
@@ -143,22 +142,21 @@ public class DWUIThread implements Runnable {
 
   /**
    * submitEvent.
-   *
+   * <p>
    * push event to all registered clients
-   * @param evt
+   *
+   * @param evt event
    */
   public void submitEvent(final DWEvent evt) {
     synchronized (this.clientThreads) {
-      Iterator<DWUIClientThread> itr = this.clientThreads.iterator();
-      while (itr.hasNext()) {
-        DWUIClientThread client = itr.next();
+      for (final DWUIClientThread client : this.clientThreads) {
         // filter for instance
         if (
-                (client.getInstance() == -1)
-                        || (client.getInstance() == evt.getEventInstance())
-                        || (evt.getEventInstance() == -1)
+            (client.getInstance() == -1)
+                || (client.getInstance() == evt.getEventInstance())
+                || (evt.getEventInstance() == -1)
         ) {
-          LinkedBlockingQueue<DWEvent> queue = client.getEventQueue();
+          final LinkedBlockingQueue<DWEvent> queue = client.getEventQueue();
           synchronized (queue) {
             if (
                 !(client.isDropLog()
@@ -168,18 +166,18 @@ public class DWUIThread implements Runnable {
               if (queue.size() < DWDefs.EVENT_QUEUE_LOGDROP_SIZE) {
                 queue.add(evt);
               } else if (
-                      queue.size() < DWDefs.EVENT_MAX_QUEUE_SIZE
-                              && evt.getEventType() != DWDefs.EVENT_TYPE_LOG
+                  queue.size() < DWDefs.EVENT_MAX_QUEUE_SIZE
+                      && evt.getEventType() != DWDefs.EVENT_TYPE_LOG
               ) {
                 queue.add(evt);
               } else {
                 this.droppedEvents++;
                 System.out.println(
-                        "queue drop: " + queue.size() + "/"
-                                + this.droppedEvents + "  " + evt.getEventType()
-                                + " thr " + client.getThreadName()
-                                + " cmd " + client.getCurCmd()
-                                + " state " + client.getState());
+                    "queue drop: " + queue.size() + "/"
+                        + this.droppedEvents + "  " + evt.getEventType()
+                        + " thr " + client.getThreadName()
+                        + " cmd " + client.getCurCmd()
+                        + " state " + client.getState());
               }
             }
           }

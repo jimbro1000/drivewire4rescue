@@ -3,7 +3,6 @@ package com.groupunix.drivewireserver;
 import java.lang.Thread.UncaughtExceptionHandler;
 
 public class DWExceptionHandler implements UncaughtExceptionHandler {
-
   /**
    * Uncaught exception handler.
    *

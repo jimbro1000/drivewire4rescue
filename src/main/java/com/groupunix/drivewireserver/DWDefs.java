@@ -12,12 +12,6 @@ import java.nio.charset.StandardCharsets;
 @SuppressWarnings("unused")
 public final class DWDefs {
   /**
-   * DWDefs Utility Class.
-   */
-  private DWDefs() {
-    //hidden constructor
-  }
-  /**
    * Drivewire protocol version.
    */
   public static final byte DW_PROTOCOL_VERSION = 4;
@@ -535,7 +529,7 @@ public final class DWDefs {
   /**
    * Maximum number of sectors.
    */
-  public static final int DISK_MAXSECTORS = 16777215;
+  public static final int DISK_MAXSECTORS = 16_777_215;
   /**
    * Sector size (bytes).
    */
@@ -913,11 +907,11 @@ public final class DWDefs {
   /**
    * Minimum turbo serial baud rate.
    */
-  public static final int COM_MIN_DATURBO_RATE = 57600;
+  public static final int COM_MIN_DATURBO_RATE = 57_600;
   /**
    * Maximum turbo serial baud rate.
    */
-  public static final int COM_MAX_DATURBO_RATE = 115200;
+  public static final int COM_MAX_DATURBO_RATE = 115_200;
   /**
    * Low nibble mask.
    */
@@ -949,7 +943,7 @@ public final class DWDefs {
   /**
    * Multiplier for word.
    */
-  public static final int WORD_SHIFT = 65536;
+  public static final int WORD_SHIFT = 65_536;
   /**
    * Bytes in a double word.
    */
@@ -994,4 +988,11 @@ public final class DWDefs {
    * Text Encoding.
    */
   public static final Charset ENCODING = StandardCharsets.UTF_8;
+
+  /**
+   * DWDefs Utility Class.
+   */
+  private DWDefs() {
+    //hidden constructor
+  }
 }
