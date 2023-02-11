@@ -240,6 +240,11 @@
         <artifactId>maven-jxr-plugin</artifactId>
         <version>3.3.0</version>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.4.1</version>
+      </plugin>
     </plugins>
   </reporting>
 </project>

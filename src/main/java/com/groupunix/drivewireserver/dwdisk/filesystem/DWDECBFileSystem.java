@@ -538,7 +538,8 @@ public class DWDECBFileSystem extends DWFileSystem {
             wacky = true;
           } else if (
               ((DWDECBFileSystemDirEntry) entry).getFileFlag() != 0
-                  && ((DWDECBFileSystemDirEntry) entry).getFileFlag() != BYTE_MASK
+                  && ((DWDECBFileSystemDirEntry) entry)
+                  .getFileFlag() != BYTE_MASK
           ) {
             this.fsErrors.add(
                 entry.getFileName() + "."
