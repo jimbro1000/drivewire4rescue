@@ -173,9 +173,9 @@ public class RBFFileSystemIDSector {
   @SuppressWarnings("unchecked")
   private void addStrAttrib(final String key, final int offset) {
     int runningOffset = offset;
-    StringBuilder val = new StringBuilder();
-    while ((runningOffset < sectorData.length - 1)
-        && ((sectorData[runningOffset] & BYTE_MASK) < BIT_8_MASK)) {
+    final StringBuilder val = new StringBuilder();
+    while (runningOffset < sectorData.length - 1
+        && (sectorData[runningOffset] & BYTE_MASK) < BIT_8_MASK) {
       val.append((char) (sectorData[runningOffset] & BYTE_MASK));
       runningOffset++;
     }
@@ -218,7 +218,7 @@ public class RBFFileSystemIDSector {
    */
   public Object getAttrib(final String key) {
     if (this.attribs.containsKey(key)) {
-      return (this.attribs.get(key));
+      return this.attribs.get(key);
     }
     return null;
   }

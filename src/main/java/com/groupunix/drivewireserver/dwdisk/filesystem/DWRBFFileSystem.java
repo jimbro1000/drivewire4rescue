@@ -149,17 +149,17 @@ public class DWRBFFileSystem extends DWFileSystem {
           this.getDisk().getSector(this.getRootDirectoryLSN()).getData()
       );
     }
-    String[] path = filename.split("/");
-    ArrayList<DWRBFFileSystemDirEntry> dir = this.getRootDirectory();
+    final String[] path = filename.split("/");
+    final ArrayList<DWRBFFileSystemDirEntry> dir = this.getRootDirectory();
     DWRBFFileDescriptor res = null;
-    for (String s : path) {
+    for (final String s : path) {
       res = null;
-      int j = 0;
-      while ((j < dir.size()) && (res == null)) {
-        if (dir.get(j).getFileName().equals(s)) {
-          res = dir.get(j).getFD();
+      int index = 0;
+      while (index < dir.size() && res == null) {
+        if (dir.get(index).getFileName().equals(s)) {
+          res = dir.get(index).getFD();
         }
-        j++;
+        index++;
       }
       if (res == null) {
         throw new DWFileSystemFileNotFoundException(
@@ -217,15 +217,14 @@ public class DWRBFFileSystem extends DWFileSystem {
   @Override
   public boolean isValidFS() {
     try {
-      RBFFileSystemIDSector idSector
+      final RBFFileSystemIDSector idSector
           = new RBFFileSystemIDSector(getDisk().getSector(0).getData());
-      int ddmap = (Integer) idSector.getAttrib("DD.MAP");
-      int ddbit = (Integer) idSector.getAttrib("DD.BIT");
+      final int ddmap = (Integer) idSector.getAttrib("DD.MAP");
+      final int ddbit = (Integer) idSector.getAttrib("DD.BIT");
       if (
-          (ddbit > 0) && (Math.abs(
+          ddbit > 0 && Math.abs(
               ((Integer) idSector.getAttrib("DD.TOT"))
-              - (ddmap / ddbit * SHIFT_BITS)) < SHIFT_BITS
-          )
+                  - ddmap / ddbit * SHIFT_BITS) < SHIFT_BITS
       ) {
         return true;
       }
@@ -266,14 +265,15 @@ public class DWRBFFileSystem extends DWFileSystem {
   @SuppressWarnings("unused")
   public byte[] getSectorAllocationMap()
       throws IOException, DWDiskInvalidSectorNumber {
-    RBFFileSystemIDSector idSector = this.getIDSector();
-    int mapBytes = Integer.parseInt(idSector.getAttrib("DD.MAP").toString());
-    byte[] res = new byte[mapBytes];
-    int lsn = 1;
+    final RBFFileSystemIDSector idSector = this.getIDSector();
+    final int mapBytes =
+        Integer.parseInt(idSector.getAttrib("DD.MAP").toString());
+    final byte[] res = new byte[mapBytes];
+    final int lsn = 1;
     int bytesReadTotal = 0;
     while (bytesReadTotal < mapBytes) {
-      DWDiskSector sector = this.getDisk().getSector(lsn);
-      int toRead = Math.min(MAX_SINGLE_READ, mapBytes - bytesReadTotal);
+      final DWDiskSector sector = this.getDisk().getSector(lsn);
+      final int toRead = Math.min(MAX_SINGLE_READ, mapBytes - bytesReadTotal);
       System.arraycopy(sector.getData(), 0, res, bytesReadTotal, toRead);
       bytesReadTotal += toRead;
     }
@@ -294,11 +294,13 @@ public class DWRBFFileSystem extends DWFileSystem {
       DWFileSystemInvalidDirectoryException {
     ArrayList<DWRBFFileSystemDirEntry> dir;
     try {
-      int rootsec = this.getRootDirectoryLSN();
-      DWRBFFileDescriptor fd = new DWRBFFileDescriptor(
+      final int rootsec = this.getRootDirectoryLSN();
+      final DWRBFFileDescriptor descriptor = new DWRBFFileDescriptor(
           this.getDisk().getSector(rootsec).getData()
       );
-      dir = this.directoryFromContents(this.getFileContentsFromDescriptor(fd));
+      dir = this.directoryFromContents(
+          this.getFileContentsFromDescriptor(descriptor)
+      );
     } catch (NumberFormatException e) {
       throw new DWDiskInvalidSectorNumber(e.getMessage());
     }
@@ -328,18 +330,20 @@ public class DWRBFFileSystem extends DWFileSystem {
   /**
    * Get directory from file descriptor.
    *
-   * @param fd file descriptor
+   * @param descriptor file descriptor
    * @return list of file system directory entries
-   * @throws IOException failed to read from source
-   * @throws DWDiskInvalidSectorNumber invalid sector number
+   * @throws IOException                           failed to read from source
+   * @throws DWDiskInvalidSectorNumber             invalid sector number
    * @throws DWFileSystemInvalidDirectoryException invalid file path
    */
   public ArrayList<DWRBFFileSystemDirEntry> getDirectoryFromFD(
-      final DWRBFFileDescriptor fd
+      final DWRBFFileDescriptor descriptor
   ) throws IOException,
       DWDiskInvalidSectorNumber,
       DWFileSystemInvalidDirectoryException {
-    return this.directoryFromContents(this.getFileContentsFromDescriptor(fd));
+    return this.directoryFromContents(
+        this.getFileContentsFromDescriptor(descriptor)
+    );
   }
 
   /**
@@ -353,9 +357,9 @@ public class DWRBFFileSystem extends DWFileSystem {
   private ArrayList<DWRBFFileSystemDirEntry> directoryFromContents(
       final byte[] data
   ) throws IOException, DWDiskInvalidSectorNumber {
-    ArrayList<DWRBFFileSystemDirEntry> res = new ArrayList<>();
+    final ArrayList<DWRBFFileSystemDirEntry> res = new ArrayList<>();
     for (int i = 0; i < data.length / DESCRIPTOR_LENGTH; i++) {
-      byte[] entry = new byte[DESCRIPTOR_LENGTH];
+      final byte[] entry = new byte[DESCRIPTOR_LENGTH];
       System.arraycopy(
           data,
           i * DESCRIPTOR_LENGTH,
@@ -364,13 +368,16 @@ public class DWRBFFileSystem extends DWFileSystem {
           DESCRIPTOR_LENGTH
       );
       if (entry[0] != 0) {
-        int lsn = (entry[SECTOR_OFFSET] & BYTE_MASK) * BYTE_SHIFT * BYTE_SHIFT
-            + (entry[SECTOR_OFFSET + 1] & BYTE_MASK) * BYTE_SHIFT
-            + (entry[SECTOR_OFFSET + 2] & BYTE_MASK);
-        DWRBFFileDescriptor fd = new DWRBFFileDescriptor(
+        final int lsn =
+            (entry[SECTOR_OFFSET] & BYTE_MASK) * BYTE_SHIFT * BYTE_SHIFT
+                + (entry[SECTOR_OFFSET + 1] & BYTE_MASK) * BYTE_SHIFT
+                + (entry[SECTOR_OFFSET + 2] & BYTE_MASK);
+        final DWRBFFileDescriptor descriptor = new DWRBFFileDescriptor(
             this.getDisk().getSector(lsn).getData()
         );
-        res.add(new DWRBFFileSystemDirEntry(DWUtils.os9String(entry), lsn, fd));
+        res.add(new DWRBFFileSystemDirEntry(
+            DWUtils.os9String(entry), lsn, descriptor)
+        );
       }
     }
     return res;
@@ -379,37 +386,38 @@ public class DWRBFFileSystem extends DWFileSystem {
   /**
    * Get file contents from file descriptor.
    *
-   * @param fd file descriptor
+   * @param descriptor file descriptor
    * @return byte array of file contents
-   * @throws IOException failed to read from source
-   * @throws DWDiskInvalidSectorNumber invalid sector number
+   * @throws IOException                           failed to read from source
+   * @throws DWDiskInvalidSectorNumber             invalid sector number
    * @throws DWFileSystemInvalidDirectoryException invalid file path
    */
-  public byte[] getFileContentsFromDescriptor(final DWRBFFileDescriptor fd)
-      throws IOException,
+  public byte[] getFileContentsFromDescriptor(
+      final DWRBFFileDescriptor descriptor
+  ) throws IOException,
       DWDiskInvalidSectorNumber,
       DWFileSystemInvalidDirectoryException {
-    if (fd.getFilesize() < 0) {
+    if (descriptor.getFilesize() < 0) {
       throw new DWFileSystemInvalidDirectoryException("Negative file size?");
     }
-    byte[] res = new byte[fd.getFilesize()];
+    final byte[] res = new byte[descriptor.getFilesize()];
     int bytesread = 0;
     int segmentsread = 0;
-    while ((bytesread < res.length) && (segmentsread < MAX_SEGMENTS)) {
-      int lsn = fd.getSegmentList()[segmentsread].getLsn();
-      int siz = fd.getSegmentList()[segmentsread].getSize();
-      int i = lsn;
-      while ((i < lsn + siz) && (bytesread < res.length)) {
-        int toRead = Math.min(MAX_SINGLE_READ, res.length - bytesread);
+    while (bytesread < res.length && segmentsread < MAX_SEGMENTS) {
+      final int lsn = descriptor.getSegmentList()[segmentsread].getLsn();
+      final int siz = descriptor.getSegmentList()[segmentsread].getSize();
+      int index = lsn;
+      while (index < lsn + siz && bytesread < res.length) {
+        final int toRead = Math.min(MAX_SINGLE_READ, res.length - bytesread);
         System.arraycopy(
-            this.getDisk().getSector(i).getData(),
+            this.getDisk().getSector(index).getData(),
             0,
             res,
             bytesread,
             toRead
         );
         bytesread += toRead;
-        i++;
+        index++;
       }
       segmentsread++;
     }

@@ -24,17 +24,17 @@ public class DWRBFFileSystemDirEntry extends DWFileSystemDirEntry {
   /**
    * RBF file system directory entry.
    *
-   * @param fn file name
-   * @param lsn file descriptor logical sector number
-   * @param fd file descriptor
+   * @param file       file name
+   * @param lsn        file descriptor logical sector number
+   * @param descriptor file descriptor
    */
   public DWRBFFileSystemDirEntry(
-      final String fn, final int lsn, final DWRBFFileDescriptor fd
+      final String file, final int lsn, final DWRBFFileDescriptor descriptor
   ) {
     super(null);
-    this.filename = fn;
+    this.filename = file;
     this.setFdLsn(lsn);
-    this.setFd(fd);
+    this.setFd(descriptor);
   }
 
   /**
@@ -55,8 +55,8 @@ public class DWRBFFileSystemDirEntry extends DWFileSystemDirEntry {
   @Override
   public String getFileExt() {
     String res = "";
-    int dot = this.filename.lastIndexOf(".");
-    if ((dot > 0) && (dot < this.filename.length() - 1)) {
+    final int dot = this.filename.lastIndexOf(".");
+    if (dot > 0 && dot < this.filename.length() - 1) {
       res = this.filename.substring(dot + 1);
     }
     return res;
@@ -145,10 +145,10 @@ public class DWRBFFileSystemDirEntry extends DWFileSystemDirEntry {
   /**
    * Set file descriptor.
    *
-   * @param fd file descriptor
+   * @param descriptor file descriptor
    */
-  public void setFd(final DWRBFFileDescriptor fd) {
-    this.fileDescriptor = fd;
+  public void setFd(final DWRBFFileDescriptor descriptor) {
+    this.fileDescriptor = descriptor;
   }
 
   /**
