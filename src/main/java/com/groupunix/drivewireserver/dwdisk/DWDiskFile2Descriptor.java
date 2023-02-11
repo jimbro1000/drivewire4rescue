@@ -69,6 +69,7 @@ public class DWDiskFile2Descriptor {
    *
    * @param sector sector byte array
    */
+  @SuppressWarnings("unused")
   public DWDiskFile2Descriptor(final byte[] sector) {
     this.fdBytes = sector;
     this.fileDescriptor = ByteBuffer.wrap(fdBytes);
@@ -79,6 +80,7 @@ public class DWDiskFile2Descriptor {
    *
    * @return att byte
    */
+  @SuppressWarnings("unused")
   public byte fdAtt() {
     return fdBytes[FD_ATT_OFFSET];
   }
@@ -88,8 +90,9 @@ public class DWDiskFile2Descriptor {
    *
    * @return own byte array
    */
+  @SuppressWarnings("unused")
   public long fdOwn() {
-    byte[] fdOwnBytes = new byte[FD_OWN_SIZE];
+    final byte[] fdOwnBytes = new byte[FD_OWN_SIZE];
     fileDescriptor.position(FD_OWN_OFFSET);
     fileDescriptor.get(fdOwnBytes, 0, FD_OWN_SIZE);
     return DWUtils.int2(fdOwnBytes);
@@ -100,8 +103,9 @@ public class DWDiskFile2Descriptor {
    *
    * @return dat byte array
    */
+  @SuppressWarnings("unused")
   public byte[] fdDat() {
-    byte[] fdDatBytes = new byte[FD_DAT_SIZE];
+    final byte[] fdDatBytes = new byte[FD_DAT_SIZE];
     fileDescriptor.position(FD_DAT_OFFSET);
     fileDescriptor.get(fdDatBytes, 0, FD_DAT_SIZE);
     return fdDatBytes;
@@ -112,8 +116,9 @@ public class DWDiskFile2Descriptor {
    *
    * @return lnk byte
    */
+  @SuppressWarnings("unused")
   public byte fdLnk() {
-    return (fdBytes[FD_LNK_OFFSET]);
+    return fdBytes[FD_LNK_OFFSET];
   }
 
   /**
@@ -121,8 +126,9 @@ public class DWDiskFile2Descriptor {
    *
    * @return siz byte array
    */
+  @SuppressWarnings("unused")
   public long fdSiz() {
-    byte[] fdSizBytes = new byte[FD_SIZ_SIZE];
+    final byte[] fdSizBytes = new byte[FD_SIZ_SIZE];
     fileDescriptor.position(FD_SIZ_OFFSET);
     fileDescriptor.get(fdSizBytes, 0, FD_SIZ_SIZE);
     return DWUtils.int4(fdSizBytes);
@@ -133,8 +139,9 @@ public class DWDiskFile2Descriptor {
    *
    * @return creat byte array
    */
+  @SuppressWarnings("unused")
   public byte[] fdCreat() {
-    byte[] fdCreatBytes = new byte[FD_CREAT_SIZE];
+    final byte[] fdCreatBytes = new byte[FD_CREAT_SIZE];
     fileDescriptor.position(FD_CREAT_OFFSET);
     fileDescriptor.get(fdCreatBytes, 0, FD_CREAT_SIZE);
     return fdCreatBytes;
@@ -145,8 +152,9 @@ public class DWDiskFile2Descriptor {
    *
    * @return seg byte array
    */
+  @SuppressWarnings("unused")
   public byte[] fdSeg() {
-    byte[] fdSegBytes = new byte[FD_SEG_SIZE];
+    final byte[] fdSegBytes = new byte[FD_SEG_SIZE];
     fileDescriptor.position(FD_SEG_OFFSET);
     fileDescriptor.get(fdSegBytes, 0, FD_SEG_SIZE);
     return fdSegBytes;

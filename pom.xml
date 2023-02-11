@@ -8,13 +8,17 @@
   <artifactId>drivewire</artifactId>
   <version>4.3.3-SNAPSHOT</version>
 
+  <name>Drivewire4</name>
+  <url>https://github.com/jimbro1000/drivewire4rescue</url>
+
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <apache.commons-cli.version>1.5.0</apache.commons-cli.version>
     <apache.commons-collections.version>4.4</apache.commons-collections.version>
-    <apache.commons-configuration.version>1.10.LIFERAY-PATCHED-2</apache.commons-configuration.version>
+    <apache.commons-configuration.version>1.10.LIFERAY-PATCHED-2
+    </apache.commons-configuration.version>
     <apache.commons-lang.version>2.6</apache.commons-lang.version>
     <apache.commons-vfs2.version>2.9.0</apache.commons-vfs2.version>
     <jericho-html.version>3.4</jericho-html.version>
@@ -221,7 +225,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>3.3.0</version>
       </plugin>
     </plugins>
   </reporting>

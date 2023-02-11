@@ -99,8 +99,8 @@ public class DWDiskDrives {
       if (!DriveWireServer.isNoMount()
           && protocolHandler.getConfig()
           .getBoolean("RestoreDrivePaths", true)
-          && (protocolHandler.getConfig()
-          .getString("Drive" + i + "Path", null) != null)
+          && protocolHandler.getConfig()
+          .getString("Drive" + i + "Path", null) != null
       ) {
         try {
           LOGGER.debug(
@@ -145,8 +145,8 @@ public class DWDiskDrives {
    * @param fileobj    file object
    * @param forcecache force cache
    * @return disk object
-   * @throws DWImageFormatException
-   * @throws IOException
+   * @throws DWImageFormatException invalid disk image
+   * @throws IOException            read failure
    */
   public static DWDisk diskFromFile(
       final FileObject fileobj, final boolean forcecache
@@ -156,51 +156,52 @@ public class DWDiskDrives {
       throw new DWImageFormatException("Attempt to load image from non file");
     }
 
-    FileContent fc = fileobj.getContent();
-    long fobjsize = fc.getSize();
+    final FileContent content = fileobj.getContent();
+    final long fObjSize = content.getSize();
 
     // size check
-    if (fobjsize > Integer.MAX_VALUE) {
+    if (fObjSize > Integer.MAX_VALUE) {
       throw new DWImageFormatException(
           "Image too big, maximum size is " + Integer.MAX_VALUE + " bytes."
       );
     }
 
     // get header
-    int hdrsize = (int) Math.min(DWDefs.DISK_IMAGE_HEADER_SIZE, fobjsize);
+    final int hdrSize
+        = (int) Math.min(DWDefs.DISK_IMAGE_HEADER_SIZE, fObjSize);
 
-    byte[] header = new byte[hdrsize];
+    final byte[] header = new byte[hdrSize];
 
-    if (hdrsize > 0) {
+    if (hdrSize > 0) {
       int readres = 0;
-      InputStream fis = fc.getInputStream();
-      while (readres < hdrsize) {
-        readres += fis.read(header, readres, hdrsize - readres);
+      final InputStream inputStream = content.getInputStream();
+      while (readres < hdrSize) {
+        readres += inputStream.read(header, readres, hdrSize - readres);
       }
-      fis.close();
+      inputStream.close();
     }
     // collect votes
-    Hashtable<Integer, Integer> votes = new Hashtable<>();
+    final Hashtable<Integer, Integer> votes = new Hashtable<>();
     votes.put(DWDefs.DISK_FORMAT_DMK,
-        DWDMKDisk.considerImage(header, fobjsize));
+        DWDMKDisk.considerImage(header, fObjSize));
     votes.put(DWDefs.DISK_FORMAT_RAW,
-        DWRawDisk.considerImage(header, fobjsize));
+        DWRawDisk.considerImage(header, fObjSize));
     votes.put(DWDefs.DISK_FORMAT_VDK,
-        DWVDKDisk.considerImage(header, fobjsize));
+        DWVDKDisk.considerImage(header, fObjSize));
     votes.put(DWDefs.DISK_FORMAT_JVC,
-        DWJVCDisk.considerImage(header, fobjsize));
+        DWJVCDisk.considerImage(header, fObjSize));
     votes.put(DWDefs.DISK_FORMAT_CCB,
-        DWCCBDisk.considerImage(header, fobjsize));
-    int format = getBestFormat(votes);
+        DWCCBDisk.considerImage(header, fObjSize));
+    final int format = getBestFormat(votes);
     return switch (format) {
-      case DWDefs.DISK_FORMAT_DMK -> (new DWDMKDisk(fileobj));
-      case DWDefs.DISK_FORMAT_VDK -> (new DWVDKDisk(fileobj));
-      case DWDefs.DISK_FORMAT_JVC -> (new DWJVCDisk(fileobj));
-      case DWDefs.DISK_FORMAT_CCB -> (new DWCCBDisk(fileobj));
-      case DWDefs.DISK_FORMAT_RAW -> (new DWRawDisk(fileobj,
+      case DWDefs.DISK_FORMAT_DMK -> new DWDMKDisk(fileobj);
+      case DWDefs.DISK_FORMAT_VDK -> new DWVDKDisk(fileobj);
+      case DWDefs.DISK_FORMAT_JVC -> new DWJVCDisk(fileobj);
+      case DWDefs.DISK_FORMAT_CCB -> new DWCCBDisk(fileobj);
+      case DWDefs.DISK_FORMAT_RAW -> new DWRawDisk(fileobj,
           DWDefs.DISK_SECTORSIZE,
           DWDefs.DISK_MAXSECTORS,
-          forcecache));
+          forcecache);
       default -> throw new DWImageFormatException("Unsupported image format");
     };
   }
@@ -208,21 +209,20 @@ public class DWDiskDrives {
   /**
    * Get best guess disk format.
    *
-   * @param votes
+   * @param votes votes
    * @return disk format
-   * @throws DWImageFormatException
+   * @throws DWImageFormatException invalid image format
    */
   private static int getBestFormat(final Hashtable<Integer, Integer> votes)
       throws DWImageFormatException {
-    // who wants it.. lets get silly playing with java collections
-    int res = DWDefs.DISK_FORMAT_NONE;
+    // who wants it... lets get silly playing with java collections
     // yes
     if (votes.containsValue(DWDefs.DISK_CONSIDER_YES)) {
       if (Collections.frequency(votes.values(), DWDefs.DISK_CONSIDER_YES) > 1) {
         throw new DWImageFormatException("Multiple formats claim this image?");
       } else {
         // a single yes vote.. we are good to go
-        for (Entry<Integer, Integer> entry : votes.entrySet()) {
+        for (final Entry<Integer, Integer> entry : votes.entrySet()) {
           if (entry.getValue().equals(DWDefs.DISK_CONSIDER_YES)) {
             return entry.getKey();
           }
@@ -233,20 +233,19 @@ public class DWDiskDrives {
       if (Collections
           .frequency(votes.values(), DWDefs.DISK_CONSIDER_MAYBE) > 1
       ) {
-        // TODO maybe something better here..
         throw new DWImageFormatException(
             "Multiple formats might read this image?"
         );
       } else {
         // a single maybe vote.. we are good to go
-        for (Entry<Integer, Integer> entry : votes.entrySet()) {
+        for (final Entry<Integer, Integer> entry : votes.entrySet()) {
           if (entry.getValue().equals(DWDefs.DISK_CONSIDER_MAYBE)) {
             return entry.getKey();
           }
         }
       }
     }
-    return res;
+    return DWDefs.DISK_FORMAT_NONE;
   }
 
   /**
@@ -260,34 +259,35 @@ public class DWDiskDrives {
       if (!sectors.isEmpty()) {
         // OS9 ?
         if (
-            (sectors.get(0).getData()[OS9_OFFSET1] == OS9_DATA_MATCH)
-                && (sectors.get(0).getData()[OS9_OFFSET2] == OS9_DATA_MATCH)
-                && (sectors.get(0).getData()[OS9_OFFSET3] == OS9_DATA_MATCH)
+            sectors.get(0).getData()[OS9_OFFSET1] == OS9_DATA_MATCH
+                && sectors.get(0).getData()[OS9_OFFSET2] == OS9_DATA_MATCH
+                && sectors.get(0).getData()[OS9_OFFSET3] == OS9_DATA_MATCH
         ) {
           return DWDefs.DISK_FILESYSTEM_OS9;
         }
         // LWFS
-        byte[] lwfs = new byte[LWFS_ARRAY_SIZE];
+        final byte[] lwfs = new byte[LWFS_ARRAY_SIZE];
         System.arraycopy(sectors.get(0).getData(), 0, lwfs, 0, lwfs.length);
         if (new String(lwfs, DWDefs.ENCODING).equals("LWFS")
             || new String(lwfs, DWDefs.ENCODING).equals("LW16")) {
-          return (DWDefs.DISK_FILESYSTEM_LWFS);
+          return DWDefs.DISK_FILESYSTEM_LWFS;
         }
         // TODO - outdated? cocoboot isave
         if (sectors.get(0).getData()[0]
             == (byte) 'f' && sectors.get(0).getData()[1] == (byte) 'c') {
-          return (DWDefs.DISK_FILESYSTEM_CCB);
+          return DWDefs.DISK_FILESYSTEM_CCB;
         }
         // DECB? no 100% sure way that i know of
-        DWDECBFileSystem fs = new DWDECBFileSystem(new DWRawDisk(sectors));
-        if (fs.isValidFS()) {
-          return (DWDefs.DISK_FILESYSTEM_DECB);
+        final DWDECBFileSystem fileSystem =
+            new DWDECBFileSystem(new DWRawDisk(sectors));
+        if (fileSystem.isValidFS()) {
+          return DWDefs.DISK_FILESYSTEM_DECB;
         }
       }
     } catch (IOException e) {
       LOGGER.debug("While checking FS type: " + e.getMessage());
     }
-    return (DWDefs.DISK_FILESYSTEM_UNKNOWN);
+    return DWDefs.DISK_FILESYSTEM_UNKNOWN;
   }
 
   /**
@@ -340,10 +340,10 @@ public class DWDiskDrives {
    *
    * @param driveNumber drive number
    * @return sector byte array
-   * @throws DWDriveNotLoadedException
-   * @throws DWDriveNotValidException
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws DWDriveNotLoadedException drive not loaded
+   * @throws DWDriveNotValidException invalid drive
+   * @throws IOException read failure
+   * @throws DWImageFormatException invalid disk image format
    */
   public byte[] readSector(final int driveNumber)
       throws DWDriveNotLoadedException,
@@ -354,7 +354,7 @@ public class DWDiskDrives {
     if (dwProtocolHandler.getConfig().getBoolean("HDBDOSMode", false)) {
       driveNo = this.hdbdosdrive;
     }
-    return (this.diskDrives[driveNo].readSector());
+    return this.diskDrives[driveNo].readSector();
   }
 
   /**
@@ -362,10 +362,10 @@ public class DWDiskDrives {
    *
    * @param driveNumber drive number
    * @param lsn         logical sector number
-   * @throws DWDriveNotLoadedException
-   * @throws DWDriveNotValidException
-   * @throws DWInvalidSectorException
-   * @throws DWSeekPastEndOfDeviceException
+   * @throws DWDriveNotLoadedException drive not loaded
+   * @throws DWDriveNotValidException invalid drive
+   * @throws DWInvalidSectorException invalid sector
+   * @throws DWSeekPastEndOfDeviceException attempt to read past end of disk
    */
   public void seekSector(final int driveNumber, final int lsn)
       throws DWDriveNotLoadedException,
@@ -378,7 +378,7 @@ public class DWDiskDrives {
       // every 630 sectors is drive, lsn to remainder
       newdriveno = lsn / SECTORS_PER_DRIVE;
       newlsn = lsn % SECTORS_PER_DRIVE;
-      if ((lsn != newlsn) || (driveNumber != newdriveno)) {
+      if (lsn != newlsn || driveNumber != newdriveno) {
         LOGGER.debug(
             "HDBDOSMode maps seek from drv " + driveNumber
                 + " sector " + lsn
@@ -398,7 +398,7 @@ public class DWDiskDrives {
    * @return true if valid
    */
   public boolean isDriveNo(final int driveNumber) {
-    return (driveNumber >= 0) && (driveNumber < getMaxDrives());
+    return driveNumber >= 0 && driveNumber < getMaxDrives();
   }
 
   /**
@@ -408,7 +408,7 @@ public class DWDiskDrives {
    * @return loaded status of drive
    */
   public boolean isLoaded(final int driveNumber) {
-    return (this.diskDrives[driveNumber].isLoaded());
+    return this.diskDrives[driveNumber].isLoaded();
   }
 
   /**
@@ -532,7 +532,7 @@ public class DWDiskDrives {
     // Determine what kind of disk we have
     this.fsManager = VFS.getManager();
     try {
-      FileObject fileobj = fsManager.resolveFile(path);
+      final FileObject fileobj = fsManager.resolveFile(path);
       if (fileobj.exists() && fileobj.isReadable()) {
         this.loadDisk(driveNumber, DWDiskDrives.diskFromFile(fileobj));
       } else {
@@ -643,7 +643,7 @@ public class DWDiskDrives {
    */
   public int getFreeDriveNo() {
     int res = getMaxDrives() - 1;
-    while (isLoaded(res) && (res > 0)) {
+    while (isLoaded(res) && res > 0) {
       res--;
     }
     return res;
@@ -772,16 +772,16 @@ public class DWDiskDrives {
    */
   public int nameObjMount(final String objname) {
     // turn objname into path
-    String fn = getObjPath(objname);
+    final String objPath = getObjPath(objname);
     try {
-      FileObject fileobj = fsManager.resolveFile(fn);
+      final FileObject fileobj = fsManager.resolveFile(objPath);
       // look for already mounted
       for (int i = 0; i < getMaxDrives(); i++) {
         try {
           if (
               this.diskDrives[i] != null
                   && this.diskDrives[i].isLoaded()
-                  && (this.diskDrives[i].getDisk().getFilePath().equals(fn)
+                  && (this.diskDrives[i].getDisk().getFilePath().equals(objPath)
                   || this.diskDrives[i].getDisk()
                   .getFilePath().equals(fileobj.getName().getFriendlyURI())
                   || this.diskDrives[i].getDisk()
@@ -792,15 +792,15 @@ public class DWDiskDrives {
         } catch (DWDriveNotLoadedException ignored) {
         }
       }
-      int drv = this.getFreeDriveNo();
-      this.loadDiskFromFile(drv, fn);
+      final int drv = this.getFreeDriveNo();
+      this.loadDiskFromFile(drv, objPath);
       return drv;
     } catch (DWDriveNotValidException
              | DWImageFormatException
              | IOException
              | DWDriveAlreadyLoadedException e) {
       LOGGER.debug(
-          "namedobjmount of '" + fn + "' failed with: " + e.getMessage()
+          "namedobjmount of '" + objPath + "' failed with: " + e.getMessage()
       );
     }
     return 0;
@@ -813,16 +813,15 @@ public class DWDiskDrives {
    * @return path parameter
    */
   public String getObjPath(final String objName) {
-    @SuppressWarnings("unchecked")
-    List<HierarchicalConfiguration> objs = this.dwProtocolHandler
+    @SuppressWarnings("unchecked") final List<HierarchicalConfiguration> objs = this.dwProtocolHandler
         .getConfig()
         .configurationsAt("NamedObject");
-    for (HierarchicalConfiguration obj : objs) {
+    for (final HierarchicalConfiguration obj : objs) {
       if (
           obj.containsKey("[@name]")
               && obj.containsKey("[@path]")
               && obj.getString("[@name]").equals(objName)) {
-        return (obj.getString("[@path]"));
+        return obj.getString("[@path]");
       }
     }
     // namedobjdir

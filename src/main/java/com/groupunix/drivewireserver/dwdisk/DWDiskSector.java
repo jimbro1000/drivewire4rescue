@@ -39,7 +39,7 @@ public class DWDiskSector {
    * @param sector     logical sector number
    * @param sectorSize sector size
    * @param direct     is direct
-   * @throws FileSystemException
+   * @throws FileSystemException file system error
    */
   public DWDiskSector(
       final DWDisk disk, final int sector,
@@ -82,7 +82,7 @@ public class DWDiskSector {
    * Get sector data as byte array.
    *
    * @return byte array
-   * @throws IOException
+   * @throws IOException read failure
    */
   public synchronized byte[] getData() throws IOException {
     if (this.data != null) {
@@ -126,16 +126,16 @@ public class DWDiskSector {
    * Get file sector as byte array.
    *
    * @return byte array
-   * @throws IOException
+   * @throws IOException read failure
    */
   private byte[] getFileSector() throws IOException {
-    RandomAccessContent raf = this.dwDisk
+    final RandomAccessContent raf = this.dwDisk
         .getFileObject()
         .getContent()
         .getRandomAccessContent(RandomAccessMode.READ);
-    long pos = (long) this.lsn * this.sectorsize;
+    final long pos = (long) this.lsn * this.sectorsize;
     raf.seek(pos);
-    byte[] buf = new byte[this.sectorsize];
+    final byte[] buf = new byte[this.sectorsize];
     raf.readFully(buf);
     raf.close();
     return buf;
@@ -153,18 +153,19 @@ public class DWDiskSector {
   /**
    * Modify byte at offset.
    * <p>
-   *   Tags sector as dirty
+   * Tags sector as dirty
    * </p>
    *
-   * @param i offset
-   * @param b byte data
-   * @throws IOException
+   * @param index offset
+   * @param value byte data
+   * @throws IOException write failure
    */
-  public void setDataByte(final int i, final byte b) throws IOException {
+  public void setDataByte(final int index, final byte value)
+      throws IOException {
     if (this.data == null) {
       this.data = this.getFileSector();
     }
-    this.data[i] = b;
+    this.data[index] = value;
     this.dirtyFlag = true;
   }
 

@@ -17,7 +17,7 @@ public class DWDiskLazyWriter implements Runnable {
   /**
    * Lazy write interval in milliseconds.
    */
-  private static final int WRITE_INTERVAL = 15000;
+  private static final int WRITE_INTERVAL = 15_000;
   /**
    * Thread waiting to die.
    */
