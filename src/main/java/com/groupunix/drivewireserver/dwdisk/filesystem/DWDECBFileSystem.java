@@ -114,11 +114,11 @@ public class DWDECBFileSystem extends DWFileSystem {
    */
   public List<DWFileSystemDirEntry> getDirectory(final String path)
       throws IOException, DWFileSystemInvalidDirectoryException {
-    List<DWFileSystemDirEntry> dir = new ArrayList<>();
+    final List<DWFileSystemDirEntry> dir = new ArrayList<>();
     try {
       for (int i = 0; i < BLOCK_GROUPS; i++) {
         for (int j = 0; j < DIRECTORY_BLOCKS; j++) {
-          byte[] buf = new byte[DIRECTORY_SIZE];
+          final byte[] buf = new byte[DIRECTORY_SIZE];
           System.arraycopy(
               this.getDisk().getSector(i + DECBDefs.DIRECTORY_OFFSET).getData(),
               DIRECTORY_SIZE * j,
@@ -126,8 +126,7 @@ public class DWDECBFileSystem extends DWFileSystem {
               0,
               DIRECTORY_SIZE
           );
-          DWDECBFileSystemDirEntry entry = new DWDECBFileSystemDirEntry(buf);
-          dir.add(entry);
+          dir.add(new DWDECBFileSystemDirEntry(buf));
         }
       }
     } catch (DWDiskInvalidSectorNumber e) {
@@ -146,10 +145,10 @@ public class DWDECBFileSystem extends DWFileSystem {
    */
   public boolean hasFile(final String filename) throws IOException {
     try {
-      for (DWFileSystemDirEntry e : this.getDirectory(null)) {
+      for (final DWFileSystemDirEntry entry : this.getDirectory(null)) {
         if (
-            (e.getFileName().trim() + "."
-                + e.getFileExt()).equalsIgnoreCase(filename)
+            (entry.getFileName().trim() + "."
+                + entry.getFileExt()).equalsIgnoreCase(filename)
         ) {
           return true;
         }
@@ -195,12 +194,12 @@ public class DWDECBFileSystem extends DWFileSystem {
       throws DWFileSystemFileNotFoundException,
       IOException,
       DWFileSystemInvalidDirectoryException {
-    for (DWFileSystemDirEntry e : this.getDirectory(null)) {
+    for (final DWFileSystemDirEntry entry : this.getDirectory(null)) {
       if (
-          (e.getFileName().trim() + "." + e.getFileExt())
-          .equalsIgnoreCase(filename)
+          (entry.getFileName().trim() + "." + entry.getFileExt())
+              .equalsIgnoreCase(filename)
       ) {
-        return e;
+        return entry;
       }
     }
     throw new DWFileSystemFileNotFoundException(
@@ -226,11 +225,11 @@ public class DWDECBFileSystem extends DWFileSystem {
       DWDiskInvalidSectorNumber,
       DWFileSystemInvalidDirectoryException {
     byte[] res = new byte[0];
-    ArrayList<DWDiskSector> sectors = this.getFileSectors(filename);
-    int bl = ((DWDECBFileSystemDirEntry) getDirEntry(filename))
+    final ArrayList<DWDiskSector> sectors = this.getFileSectors(filename);
+    final int bytes = ((DWDECBFileSystemDirEntry) getDirEntry(filename))
         .getBytesInLastSector();
-    if ((sectors != null) && (sectors.size() > 0)) {
-      res = new byte[(sectors.size() - 1) * DWDefs.DISK_SECTORSIZE + bl];
+    if (sectors != null && sectors.size() > 0) {
+      res = new byte[(sectors.size() - 1) * DWDefs.DISK_SECTORSIZE + bytes];
       for (int i = 0; i < sectors.size() - 1; i++) {
         System.arraycopy(
             sectors.get(i).getData(),
@@ -242,13 +241,13 @@ public class DWDECBFileSystem extends DWFileSystem {
       }
     }
     // last sector is partial bytes
-    if (bl > 0) {
+    if (bytes > 0) {
       assert sectors != null;
       System.arraycopy(
           sectors.get(sectors.size() - 1).getData(),
           0,
           res,
-          (sectors.size() - 1) * DWDefs.DISK_SECTORSIZE, bl
+          (sectors.size() - 1) * DWDefs.DISK_SECTORSIZE, bytes
       );
     }
     return res;
@@ -275,9 +274,9 @@ public class DWDECBFileSystem extends DWFileSystem {
       IOException,
       DWDiskInvalidSectorNumber,
       DWFileSystemInvalidDirectoryException {
-    DWDECBFileSystemFAT fat = getFAT();
+    final DWDECBFileSystemFAT fat = getFAT();
     // make fat entries
-    byte firstGranule = fat.allocate(fileContents.length);
+    final byte firstGranule = fat.allocate(fileContents.length);
 
     // dir entry
     this.addDirectoryEntry(
@@ -285,12 +284,12 @@ public class DWDECBFileSystem extends DWFileSystem {
     );
 
     // put content into sectors
-    ArrayList<DWDiskSector> sectors = this.getFileSectors(filename);
+    final ArrayList<DWDiskSector> sectors = this.getFileSectors(filename);
 
     int byteswritten = 0;
     byte[] buf = new byte[BUFFER_SIZE];
 
-    for (DWDiskSector sector : sectors) {
+    for (final DWDiskSector sector : sectors) {
       if (fileContents.length - byteswritten >= BUFFER_SIZE) {
         System.arraycopy(fileContents, byteswritten, buf, 0, BUFFER_SIZE);
         byteswritten += BUFFER_SIZE;
@@ -300,15 +299,15 @@ public class DWDECBFileSystem extends DWFileSystem {
             byteswritten,
             buf,
             0,
-            (fileContents.length - byteswritten)
+            fileContents.length - byteswritten
         );
         // zero pad partial sectors?
         for (
-            int i = (fileContents.length - byteswritten); i < BUFFER_SIZE; i++
+            int i = fileContents.length - byteswritten; i < BUFFER_SIZE; i++
         ) {
           buf[i] = 0;
         }
-        byteswritten += (fileContents.length - byteswritten);
+        byteswritten += fileContents.length - byteswritten;
       }
       sector.setData(buf);
     }
@@ -340,28 +339,27 @@ public class DWDECBFileSystem extends DWFileSystem {
       IOException,
       DWDiskInvalidSectorNumber,
       DWFileSystemInvalidDirectoryException {
-    List<DWFileSystemDirEntry> dr = this.getDirectory(null);
+    final List<DWFileSystemDirEntry> dirEntries = this.getDirectory(null);
 
     int dirsize = 0;
 
-    for (DWFileSystemDirEntry d : dr) {
-      if (((DWDECBFileSystemDirEntry) d).isUsed()) {
+    for (final DWFileSystemDirEntry dirEntry : dirEntries) {
+      if (((DWDECBFileSystemDirEntry) dirEntry).isUsed()) {
         dirsize++;
       }
     }
 
     if (dirsize > MAX_DIRECTORY_ENTRIES) {
-      throw (new DWFileSystemFullException("No free directory entries"));
+      throw new DWFileSystemFullException("No free directory entries");
     }
 
-    byte[] buf = new byte[DIRECTORY_BUFFER_SIZE];
     byte[] secdata;
 
-    DWDiskSector sec = this.getDisk().getSector(
-        (dirsize / DIRECTORY_ENTRY_LEN) + DECBDefs.DIRECTORY_OFFSET
+    final DWDiskSector sec = this.getDisk().getSector(
+        dirsize / DIRECTORY_ENTRY_LEN + DECBDefs.DIRECTORY_OFFSET
     );
     secdata = sec.getData();
-    String[] fileParts = filename.split("\\.");
+    final String[] fileParts = filename.split("\\.");
 
     if (fileParts.length != 2) {
       throw new DWFileSystemInvalidFilenameException(
@@ -369,15 +367,14 @@ public class DWDECBFileSystem extends DWFileSystem {
       );
     }
 
-    StringBuilder name = new StringBuilder(fileParts[0]);
-    String ext = fileParts[1];
-
-    if ((name.length() < 1) || (name.length() > DIRECTORY_ENTRY_LEN)) {
+    final StringBuilder name = new StringBuilder(fileParts[0]);
+    if (name.length() < 1 || name.length() > DIRECTORY_ENTRY_LEN) {
       throw new DWFileSystemInvalidFilenameException(
           "Invalid filename (name) '" + filename + "'"
       );
     }
 
+    final String ext = fileParts[1];
     if (ext.length() != FILENAME_EXTENSION_LEN) {
       throw new DWFileSystemInvalidFilenameException(
           "Invalid filename (ext) '" + filename + "'"
@@ -388,6 +385,7 @@ public class DWDECBFileSystem extends DWFileSystem {
       name.append(" ");
     }
 
+    byte[] buf = new byte[DIRECTORY_BUFFER_SIZE];
     System.arraycopy(
         name.toString().getBytes(DWDefs.ENCODING),
         0,
@@ -403,9 +401,9 @@ public class DWDECBFileSystem extends DWFileSystem {
         FILENAME_EXTENSION_LEN
     );
     // try to recognize filetype.. assume binary?
-    DWDECBFileSystemDirExtensionMapping mapping
+    final DWDECBFileSystemDirExtensionMapping mapping
         = new DWDECBFileSystemDirExtensionMapping(
-            ext, DECBDefs.FLAG_BIN, DECBDefs.FILETYPE_ML
+        ext, DECBDefs.FLAG_BIN, DECBDefs.FILETYPE_ML
     );
     if (
         DriveWireServer
@@ -419,32 +417,32 @@ public class DWDECBFileSystem extends DWFileSystem {
               .getMaxIndex("DECBExtensionMapping");
           i++
       ) {
-        String kp = "DECBExtensionMapping(" + i + ")";
+        final String key = "DECBExtensionMapping(" + i + ")";
         // validate entry first
         if (
             DriveWireServer
                 .getServerConfiguration()
-                .containsKey(kp + "[@extension]")
+                .containsKey(key + "[@extension]")
                 && DriveWireServer
                 .getServerConfiguration()
-                .containsKey(kp + "[@ascii]")
+                .containsKey(key + "[@ascii]")
                 && DriveWireServer
                 .getServerConfiguration()
-                .containsKey(kp + "[@filetype]")
+                .containsKey(key + "[@filetype]")
             && DriveWireServer
-                  .getServerConfiguration()
-                  .getString(kp + "[@extension]").equalsIgnoreCase(ext)
+                .getServerConfiguration()
+                .getString(key + "[@extension]").equalsIgnoreCase(ext)
         ) {
           // we have a winner
           mapping.setType(
               DriveWireServer
                   .getServerConfiguration()
-                  .getByte(kp + "[@filetype]")
+                  .getByte(key + "[@filetype]")
           );
           if (
               DriveWireServer
                   .getServerConfiguration()
-                  .getBoolean(kp + "[@ascii]")
+                  .getBoolean(key + "[@ascii]")
           ) {
             mapping.setFlag(DECBDefs.FLAG_ASCII);
           } else {
@@ -524,26 +522,28 @@ public class DWDECBFileSystem extends DWFileSystem {
       boolean wacky = false;
 
       try {
-        List<DWFileSystemDirEntry> dir = this.getDirectory(null);
+        final List<DWFileSystemDirEntry> dir = this.getDirectory(null);
         // look for wacky directory entries
-        for (DWFileSystemDirEntry e : dir) {
+        for (final DWFileSystemDirEntry entry : dir) {
           if (
-              ((DWDECBFileSystemDirEntry) e).getFirstGranule()
+              ((DWDECBFileSystemDirEntry) entry).getFirstGranule()
                   > DECBDefs.FAT_SIZE
           ) {
             this.fsErrors.add(
-                e.getFileName() + "." + e.getFileExt() + ": First granule of "
-                    + ((DWDECBFileSystemDirEntry) e).getFirstGranule()
+                entry.getFileName() + "." + entry.getFileExt()
+                    + ": First granule of "
+                    + ((DWDECBFileSystemDirEntry) entry).getFirstGranule()
                     + " is > FAT size"
             );
             wacky = true;
           } else if (
-              (((DWDECBFileSystemDirEntry) e).getFileFlag() != 0)
-                  && (((DWDECBFileSystemDirEntry) e).getFileFlag() != BYTE_MASK)
+              ((DWDECBFileSystemDirEntry) entry).getFileFlag() != 0
+                  && ((DWDECBFileSystemDirEntry) entry).getFileFlag() != BYTE_MASK
           ) {
             this.fsErrors.add(
-                e.getFileName() + "." + e.getFileExt() + ": FileFlag of "
-                    + ((DWDECBFileSystemDirEntry) e).getFileFlag()
+                entry.getFileName() + "."
+                    + entry.getFileExt() + ": FileFlag of "
+                    + ((DWDECBFileSystemDirEntry) entry).getFileFlag()
                     + " is not defined..?"
             );
             wacky = true;
@@ -556,8 +556,8 @@ public class DWDECBFileSystem extends DWFileSystem {
             val = BYTE_MASK
                 & this.getDisk().getSector(DECBDefs.FAT_OFFSET).getData()[i];
             if (
-                ((val > DECBDefs.FAT_SIZE) && (val < MIN_SAFE))
-                    || ((val > MAX_SAFE) && (val < BYTE_MASK))
+                val > DECBDefs.FAT_SIZE && val < MIN_SAFE
+                    || val > MAX_SAFE && val < BYTE_MASK
             ) {
               this.fsErrors.add("FAT entry #" + i
                   + " is " + val + ", which points beyond FAT");

@@ -80,20 +80,20 @@ public final class DWVDKDisk extends DWDisk {
       throws IOException, DWImageFormatException {
     // read sig and hdr length
     int readres = 0;
-    byte[] hbuff1 = new byte[HEADER_BUFFER_LEN];
+    final byte[] hbuff1 = new byte[HEADER_BUFFER_LEN];
 
     while (readres < HEADER_BUFFER_LEN) {
       readres += fis.read(hbuff1, readres, HEADER_BUFFER_LEN - readres);
     }
     // size and sanity
-    int headerLen = getHeaderLen(hbuff1);
+    final int headerLen = getHeaderLen(hbuff1);
     // make complete header buffer
-    byte[] hbuff2 = new byte[headerLen];
+    final byte[] hbuff2 = new byte[headerLen];
     System.arraycopy(hbuff1, 0, hbuff2, 0, HEADER_BUFFER_LEN);
     while (readres < headerLen) {
       readres += fis.read(hbuff2, readres, headerLen - readres);
     }
-    return (new DWVDKDiskHeader(hbuff2));
+    return new DWVDKDiskHeader(hbuff2);
   }
 
   private static int getHeaderLen(final byte[] hBuffer)
@@ -107,8 +107,8 @@ public final class DWVDKDisk extends DWDisk {
 
     // check signature
     if (
-        ((BYTE_MASK & hBuffer[HEADER_SIG_OFFSET]) != 'd')
-            || ((BYTE_MASK & hBuffer[HEADER_SIG_OFFSET + 1]) != 'k')
+        (BYTE_MASK & hBuffer[HEADER_SIG_OFFSET]) != 'd'
+            || (BYTE_MASK & hBuffer[HEADER_SIG_OFFSET + 1]) != 'k'
     ) {
       throw new DWImageFormatException(
           "Invalid VDK header: " + hBuffer[0] + " " + hBuffer[1]
@@ -116,8 +116,8 @@ public final class DWVDKDisk extends DWDisk {
     }
 
     // check header length
-    int len = (BYTE_MASK & hBuffer[HEADER_LEN_OFFSET])
-        + ((BYTE_MASK & hBuffer[HEADER_LEN_OFFSET + 1]) * MSB_SHIFT);
+    final int len = (BYTE_MASK & hBuffer[HEADER_LEN_OFFSET])
+        + (BYTE_MASK & hBuffer[HEADER_LEN_OFFSET + 1]) * MSB_SHIFT;
 
     if (len > DWVDKDisk.VDK_HEADER_SIZE_MAX) {
       throw new DWImageFormatException(
@@ -142,13 +142,12 @@ public final class DWVDKDisk extends DWDisk {
       try {
         hdrlen = getHeaderLen(hdr);
       } catch (DWImageFormatException e) {
-        return (DWDefs.DISK_CONSIDER_NO);
+        return DWDefs.DISK_CONSIDER_NO;
       }
       // make proper sized buffer for hdr
-      byte[] buf = new byte[hdrlen];
+      final byte[] buf = new byte[hdrlen];
       System.arraycopy(hdr, 0, buf, 0, hdrlen);
-
-      DWVDKDiskHeader header = new DWVDKDiskHeader(buf);
+      final DWVDKDiskHeader header = new DWVDKDiskHeader(buf);
       // is the size right?
       if (
           fObjSize
@@ -192,7 +191,7 @@ public final class DWVDKDisk extends DWDisk {
     );
 
     // read disk header
-    DWVDKDiskHeader header = readHeader(fis);
+    final DWVDKDiskHeader header = readHeader(fis);
     this.setParam("writeprotect", header.isWriteProtected());
     this.setParam("_tracks", header.getTracks());
     this.setParam("_sides", header.getSides());
@@ -205,16 +204,16 @@ public final class DWVDKDisk extends DWDisk {
 
     if (
         this.getFileObject().getContent().getSize()
-            != ((long) this.getParams().getInt("_sectors")
+            != (long) this.getParams().getInt("_sectors")
             * DWVDKDisk.VDK_SECTOR_SIZE
-            + header.getHeaderLen())
+            + header.getHeaderLen()
     ) {
       throw new DWImageFormatException("Invalid VDK image, wrong file size");
     }
 
     this.getSectors().setSize(this.getParams().getInt("_sectors"));
 
-    byte[] buf = new byte[DWVDKDisk.VDK_SECTOR_SIZE];
+    final byte[] buf = new byte[DWVDKDisk.VDK_SECTOR_SIZE];
     int readres;
 
     for (int i = 0; i < this.getParams().getInt("_sectors"); i++) {

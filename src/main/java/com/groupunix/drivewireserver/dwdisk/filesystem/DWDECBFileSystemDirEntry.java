@@ -85,8 +85,8 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return filename
    */
   public String getFileName() {
-    return (new String(getData(), DWDefs.ENCODING)
-        .substring(BEGIN_FILENAME, END_FILENAME));
+    return new String(getData(), DWDefs.ENCODING)
+        .substring(BEGIN_FILENAME, END_FILENAME);
   }
 
   /**
@@ -137,13 +137,12 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return file type
    */
   public String getPrettyFileType() {
-    String res = "unknown";
     return switch (this.getData()[FILE_TYPE_OFFSET]) {
-      case BASIC_FILE_TYPE -> ("BASIC");
-      case DATA_FILE_TYPE -> ("Data");
-      case MACHINE_CODE_TYPE -> ("ML");
-      case TEXT_FILE_TYPE -> ("Text");
-      default -> res;
+      case BASIC_FILE_TYPE -> "BASIC";
+      case DATA_FILE_TYPE -> "Data";
+      case MACHINE_CODE_TYPE -> "ML";
+      case TEXT_FILE_TYPE -> "Text";
+      default -> "unknown";
     };
   }
 
@@ -153,7 +152,7 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @return raw file flag value
    */
   public int getFileFlag() {
-    return (this.getData()[FILE_FLAG_OFFSET] & BYTE_MASK);
+    return this.getData()[FILE_FLAG_OFFSET] & BYTE_MASK;
   }
 
   /**
@@ -172,14 +171,13 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    */
   @SuppressWarnings("unused")
   public String getPrettyFileFlag() {
-    String res = "unknown";
     if ((this.getData()[FILE_FLAG_OFFSET] & BYTE_MASK) == BYTE_MASK) {
       return "ASCII";
     }
     if (this.getData()[FILE_FLAG_OFFSET] == 0) {
       return "Binary";
     }
-    return res;
+    return "unknown";
   }
 
   /**
@@ -198,8 +196,9 @@ public class DWDECBFileSystemDirEntry extends DWFileSystemDirEntry {
    * @throws DWFileSystemInvalidFATException invalid fat descriptor
    */
   public int getBytesInLastSector() throws DWFileSystemInvalidFATException {
-    int res = (BYTE_MASK & this.getData()[HIGH_SECTOR_SIZE_OFFSET]) * BYTE_SHIFT
-        + (BYTE_MASK & this.getData()[LOW_SECTOR_SIZE_OFFSET]);
+    final int res =
+        (BYTE_MASK & this.getData()[HIGH_SECTOR_SIZE_OFFSET]) * BYTE_SHIFT
+            + (BYTE_MASK & this.getData()[LOW_SECTOR_SIZE_OFFSET]);
     if (res > MAX_SECTOR_SIZE) {
       throw new DWFileSystemInvalidFATException(
           "file " + this.getFileName() + "." + this.getFileExt()

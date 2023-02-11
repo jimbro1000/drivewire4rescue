@@ -169,7 +169,7 @@ public class DWLW16FileSystemInode {
     for (int i = 0; i < DOUBLE_WORD; ++i) {
       result *= BYTE_SHIFT;
       if (index + i >= 0 && index + i < data.length) {
-        result += (BYTE_MASK & data[index + i]);
+        result += BYTE_MASK & data[index + i];
       }
     }
     return result;
@@ -188,7 +188,7 @@ public class DWLW16FileSystemInode {
     if (index == data.length - 1) {
       return (BYTE_MASK & data[index]) * BYTE_SHIFT;
     }
-    return ((BYTE_MASK & data[index]) * BYTE_SHIFT)
+    return (BYTE_MASK & data[index]) * BYTE_SHIFT
         + (BYTE_MASK & data[index + 1]);
   }
 
@@ -298,10 +298,10 @@ public class DWLW16FileSystemInode {
   /**
    * Set gId.
    *
-   * @param id gId
+   * @param identifier gId
    */
-  public void setGid(final int id) {
-    this.gid = id;
+  public void setGid(final int identifier) {
+    this.gid = identifier;
   }
 
   /**

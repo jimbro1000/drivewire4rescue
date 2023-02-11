@@ -42,11 +42,11 @@ import static com.groupunix.drivewireserver.DWDefs.BYTE_MASK;
  * classes and connecting them.
  * <p>
  * This class is thread safe.
+ * see CircularCharBuffer
+ * see CircularObjectBuffer
  *
  * @author Stephen Ostermiller
  * http://ostermiller.org/contact.pl?regarding=Java+Utilities
- * @ see CircularCharBuffer
- * @ see CircularObjectBuffer
  * @since ostermillerutils 1.00.00
  */
 public class DWVSerialCircularBuffer {

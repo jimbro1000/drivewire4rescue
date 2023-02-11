@@ -20,15 +20,15 @@ public class DWRBFFileSegment {
   /**
    * RBF File Segment.
    *
-   * @param data content data
-   * @param i segment offset
+   * @param data  content data
+   * @param index segment offset
    */
-  public DWRBFFileSegment(final byte[] data, final int i) {
-    this.setLsn((data[i] & BYTE_MASK) * BYTE_SHIFT * BYTE_SHIFT
-        + (data[i + 1] & BYTE_MASK) * BYTE_SHIFT
-        + (data[i + 2] & BYTE_MASK));
-    this.setSize((data[i + SIZE_OFFSET] & BYTE_MASK) * BYTE_SHIFT
-        + (data[i + SIZE_OFFSET + 1] & BYTE_MASK));
+  public DWRBFFileSegment(final byte[] data, final int index) {
+    this.setLsn((data[index] & BYTE_MASK) * BYTE_SHIFT * BYTE_SHIFT
+        + (data[index + 1] & BYTE_MASK) * BYTE_SHIFT
+        + (data[index + 2] & BYTE_MASK));
+    this.setSize((data[index + SIZE_OFFSET] & BYTE_MASK) * BYTE_SHIFT
+        + (data[index + SIZE_OFFSET + 1] & BYTE_MASK));
   }
 
   /**

@@ -124,7 +124,7 @@ public class DWRBFFileDescriptor {
    * @param data file data
    */
   public DWRBFFileDescriptor(final byte[] data) {
-    this.setAttributes((data[ATTRIBUTES_OFFSET] & BYTE_MASK));
+    this.setAttributes(data[ATTRIBUTES_OFFSET] & BYTE_MASK);
     this.setOwner(
         (data[OWNER_MSB_OFFSET] & BYTE_MASK) * BYTE_SHIFT
             + (data[OWNER_LSB_OFFSET] & BYTE_MASK)

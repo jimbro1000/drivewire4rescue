@@ -65,7 +65,7 @@ public class DWLW16FileSystem extends DWFileSystem {
   @Override
   public List<DWFileSystemDirEntry> getDirectory(final String path)
       throws IOException, DWDiskInvalidSectorNumber {
-    List<DWFileSystemDirEntry> res = new ArrayList<>();
+    final List<DWFileSystemDirEntry> res = new ArrayList<>();
     if (path == null) {
       res.addAll(this.getRootDirectory());
     } else {
@@ -83,7 +83,7 @@ public class DWLW16FileSystem extends DWFileSystem {
    */
   public List<DWLW16FileSystemDirEntry> getRootDirectory()
       throws DWDiskInvalidSectorNumber, IOException {
-    List<DWLW16FileSystemDirEntry> res = new ArrayList<>();
+    final List<DWLW16FileSystemDirEntry> res = new ArrayList<>();
 
     // get inode 0
     System.out.println("first inode: " + this.superBlock.getFirstInodeBlock());
@@ -93,7 +93,7 @@ public class DWLW16FileSystem extends DWFileSystem {
     System.out.println("tot inodes: " + this.superBlock.getInodes());
     System.out.println();
 
-    DWLW16FileSystemInode in0 = new DWLW16FileSystemInode(
+    final DWLW16FileSystemInode in0 = new DWLW16FileSystemInode(
         0,
         this.getDisk()
             .getSector(this.superBlock.getFirstInodeBlock() + 1)
@@ -203,11 +203,11 @@ public class DWLW16FileSystem extends DWFileSystem {
     // valid super block?
     if (this.superBlock.isValid()) {
       // image size checks
-      return (this.getDisk().getSectors().size() < (BYTE_SHIFT * BYTE_SHIFT))
-          && (this.superBlock.getFirstDataBlock()
-            < this.getDisk().getSectors().size())
-          && (this.superBlock.getFirstInodeBlock()
-            < this.getDisk().getSectors().size());
+      return this.getDisk().getSectors().size() < (BYTE_SHIFT * BYTE_SHIFT)
+          && this.superBlock.getFirstDataBlock()
+          < this.getDisk().getSectors().size()
+          && this.superBlock.getFirstInodeBlock()
+          < this.getDisk().getSectors().size();
     }
     return false;
   }

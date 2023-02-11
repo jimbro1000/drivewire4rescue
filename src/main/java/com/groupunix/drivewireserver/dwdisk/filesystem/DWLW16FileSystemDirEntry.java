@@ -13,15 +13,15 @@ public class DWLW16FileSystemDirEntry extends DWFileSystemDirEntry {
   /**
    * LW16 File system directory entry.
    *
-   * @param fn filename
+   * @param file filename
    * @param node iNode
    */
   public DWLW16FileSystemDirEntry(
-      final String fn, final DWLW16FileSystemInode node
+      final String file, final DWLW16FileSystemInode node
   ) {
     super(null);
     this.setInode(node);
-    this.filename = fn;
+    this.filename = file;
   }
 
   /**
@@ -41,12 +41,11 @@ public class DWLW16FileSystemDirEntry extends DWFileSystemDirEntry {
    */
   @Override
   public String getFileExt() {
-    String res = "";
-    int dot = this.filename.lastIndexOf(".");
-    if ((dot > 0) && (dot < this.filename.length() - 1)) {
-      res = this.filename.substring(dot + 1);
+    final int dot = this.filename.lastIndexOf(".");
+    if (dot > 0 && dot < this.filename.length() - 1) {
+      return this.filename.substring(dot + 1);
     }
-    return res;
+    return "";
   }
 
   /**

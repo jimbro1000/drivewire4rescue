@@ -62,10 +62,10 @@ public class DWJVCDiskHeader {
    * @return sectors per track
    */
   public int getSectorsPerTrack() {
-    if ((headerData == null) || (headerData.length < 1)) {
+    if (headerData == null || headerData.length < 1) {
       return DEFAULT_SECTORS_PER_TRACK;
     }
-    return (BYTE_MASK & headerData[0]);
+    return BYTE_MASK & headerData[0];
   }
 
   /**
@@ -74,10 +74,10 @@ public class DWJVCDiskHeader {
    * @return number of disk sides
    */
   public int getSides() {
-    if ((headerData == null) || (headerData.length <= DISK_SIDES_OFFSET)) {
+    if (headerData == null || headerData.length <= DISK_SIDES_OFFSET) {
       return DEFAULT_DISK_SIDES;
     }
-    return (BYTE_MASK & headerData[DISK_SIDES_OFFSET]);
+    return BYTE_MASK & headerData[DISK_SIDES_OFFSET];
   }
 
   /**
@@ -86,10 +86,10 @@ public class DWJVCDiskHeader {
    * @return sector size
    */
   public int getSectorSize() {
-    if ((headerData == null) || (headerData.length <= SECTOR_SIZE_OFFSET)) {
+    if (headerData == null || headerData.length <= SECTOR_SIZE_OFFSET) {
       return DEFAULT_SECTOR_SIZE;
     }
-    return (MINIMUM_SECTOR_SIZE << this.headerData[SECTOR_SIZE_OFFSET]);
+    return MINIMUM_SECTOR_SIZE << this.headerData[SECTOR_SIZE_OFFSET];
   }
 
   /**
@@ -98,10 +98,10 @@ public class DWJVCDiskHeader {
    * @return first sector byte
    */
   public int getFirstSector() {
-    if ((headerData == null) || (headerData.length <= FIRST_SECTOR_OFFSET)) {
+    if (headerData == null || headerData.length <= FIRST_SECTOR_OFFSET) {
       return DEFAULT_FIRST_SECTOR;
     }
-    return (BYTE_MASK & headerData[FIRST_SECTOR_OFFSET]);
+    return BYTE_MASK & headerData[FIRST_SECTOR_OFFSET];
   }
 
   /**
@@ -110,9 +110,9 @@ public class DWJVCDiskHeader {
    * @return attributes byte
    */
   public int getSectorAttributes() {
-    if ((headerData == null) || (headerData.length <= ATTRIBUTES_OFFSET)) {
+    if (headerData == null || headerData.length <= ATTRIBUTES_OFFSET) {
       return 0;
     }
-    return (BYTE_MASK & headerData[ATTRIBUTES_OFFSET]);
+    return BYTE_MASK & headerData[ATTRIBUTES_OFFSET];
   }
 }

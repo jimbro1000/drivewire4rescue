@@ -116,20 +116,20 @@ public class DWSIDEImageDisk extends DWDisk {
   @Override
   protected void load() throws IOException, DWImageFormatException {
     // load file into sector array
-    int sector = 0;
-    long filesize = this.endPos - this.startPos;
-    if ((filesize > Integer.MAX_VALUE)) {
+    final long filesize = this.endPos - this.startPos;
+    if (filesize > Integer.MAX_VALUE) {
       throw new DWImageFormatException("Image file is too large");
     }
-    int sz = 0;
+    int size = 0;
     this.getSectors().setSize((int) (filesize / SECTOR_SIZE));
-    while (sz < filesize) {
+    int sector = 0;
+    while (size < filesize) {
       this.getSectors().set(
           sector,
           new DWDiskSector(this, sector, SECTOR_SIZE, true)
       );
       sector++;
-      sz += SECTOR_SIZE;
+      size += SECTOR_SIZE;
     }
     long lastmodtime = -1;
     try {

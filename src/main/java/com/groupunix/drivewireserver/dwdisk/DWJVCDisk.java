@@ -53,22 +53,22 @@ public class DWJVCDisk extends DWDisk {
    * @return decision on identification
    */
   public static int considerImage(final byte[] hdr, final long fObjSize) {
-    DWJVCDiskHeader header = new DWJVCDiskHeader();
-    int headerLen = (int) (fObjSize % BYTE_SHIFT);
+    final DWJVCDiskHeader header = new DWJVCDiskHeader();
+    final int headerLen = (int) (fObjSize % BYTE_SHIFT);
     // only consider jvc with header
     if (headerLen > 0) {
-      byte[] buf = new byte[headerLen];
+      final byte[] buf = new byte[headerLen];
       System.arraycopy(hdr, 0, buf, 0, headerLen);
       header.setData(buf);
       if (
-          (header.getSectorAttributes() == 0)
-          && (header.getSectorSize() == SECTOR_SIZE)
-          && (fObjSize >= header.getSectorSize())
-          && (header.getSides() > 0)
-          && (fObjSize - headerLen > 0)
-          && (header.getSectorsPerTrack() > 0)
-          && (header.getSectorSize() > 0)
-          && (fObjSize - headerLen) % header.getSectorSize() == 0
+          header.getSectorAttributes() == 0
+              && header.getSectorSize() == SECTOR_SIZE
+              && fObjSize >= header.getSectorSize()
+              && header.getSides() > 0
+              && fObjSize - headerLen > 0
+              && header.getSectorsPerTrack() > 0
+              && header.getSectorSize() > 0
+              && (fObjSize - headerLen) % header.getSectorSize() == 0
       ) {
         return DWDefs.DISK_CONSIDER_MAYBE;
       }
@@ -100,14 +100,13 @@ public class DWJVCDisk extends DWDisk {
    * @throws DWImageFormatException
    */
   public void load() throws IOException, DWImageFormatException {
-    InputStream fis;
-    fis = this.getFileObject().getContent().getInputStream();
+    final InputStream fis = this.getFileObject().getContent().getInputStream();
     this.header = new DWJVCDiskHeader();
-    int filelen = (int) this.getFileObject().getContent().getSize();
-    int headerlen = (filelen % BYTE_SHIFT);
+    final int filelen = (int) this.getFileObject().getContent().getSize();
+    final int headerlen = filelen % BYTE_SHIFT;
     if (headerlen > 0) {
       int readres = 0;
-      byte[] buf = new byte[headerlen];
+      final byte[] buf = new byte[headerlen];
       while (readres < headerlen) {
         readres += fis.read(buf, readres, headerlen - readres);
       }
@@ -122,7 +121,7 @@ public class DWJVCDisk extends DWDisk {
     this.setParam("_sides", header.getSides());
     this.setParam("_sectorsize", header.getSectorSize());
     this.setParam("_firstsector", header.getFirstSector());
-    int tracks = (filelen - headerlen)
+    final int tracks = (filelen - headerlen)
         / (header.getSectorsPerTrack() * (header.getSectorSize()))
         / header.getSides();
     this.setParam("_tracks", tracks);
@@ -131,10 +130,9 @@ public class DWJVCDisk extends DWDisk {
         tracks * header.getSides() * header.getSectorsPerTrack()
     );
     this.getSectors().setSize(this.getParams().getInt("_sectors"));
-    byte[] buf = new byte[header.getSectorSize()];
-    int readres;
+    final byte[] buf = new byte[header.getSectorSize()];
     for (int i = 0; i < this.getParams().getInt("_sectors"); i++) {
-      readres = 0;
+      int readres = 0;
       while (readres < header.getSectorSize()) {
         readres += fis.read(buf, readres, header.getSectorSize() - readres);
       }

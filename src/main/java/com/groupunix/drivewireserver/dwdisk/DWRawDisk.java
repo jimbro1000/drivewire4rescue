@@ -118,13 +118,13 @@ public class DWRawDisk extends DWDisk {
             + (BYTE_MASK & header[2])) * BYTE_SHIFT)
       ) {
         // exact match, lets claim it
-        return (DWDefs.DISK_CONSIDER_YES);
+        return DWDefs.DISK_CONSIDER_YES;
       }
       // not os9 so can't be sure?
-      return (DWDefs.DISK_CONSIDER_MAYBE);
+      return DWDefs.DISK_CONSIDER_MAYBE;
     }
     // not /256
-    return (DWDefs.DISK_CONSIDER_NO);
+    return DWDefs.DISK_CONSIDER_NO;
   }
 
   private void commonConstructor(
@@ -165,7 +165,7 @@ public class DWRawDisk extends DWDisk {
    * @return disk format (raw)
    */
   public int getDiskFormat() {
-    return (DWDefs.DISK_FORMAT_RAW);
+    return DWDefs.DISK_FORMAT_RAW;
   }
 
   /**
@@ -177,18 +177,18 @@ public class DWRawDisk extends DWDisk {
    */
   public void seekSector(final int newLSN)
       throws DWInvalidSectorException, DWSeekPastEndOfDeviceException {
-    if ((newLSN < 0) || (newLSN > this.getMaxSectors())) {
+    if (newLSN < 0 || newLSN > this.getMaxSectors()) {
       throw new DWInvalidSectorException("Sector " + newLSN + " is not valid");
     } else if (
-        (newLSN >= this.getDiskSectors())
-            && (!this.getParams().
-            getBoolean("expand", DWDefs.DISK_DEFAULT_EXPAND))
+        newLSN >= this.getDiskSectors()
+            && !this.getParams().
+            getBoolean("expand", DWDefs.DISK_DEFAULT_EXPAND)
     ) {
       throw new DWSeekPastEndOfDeviceException(
           "Sector " + newLSN
               + " is beyond end of file, and expansion is not allowed"
       );
-    } else if ((this.getSizeLimit() > -1) && (newLSN >= this.getSizeLimit())) {
+    } else if (this.getSizeLimit() > -1 && newLSN >= this.getSizeLimit()) {
       throw new DWSeekPastEndOfDeviceException(
           "Sector " + newLSN + " is beyond specified sector size limit"
       );
@@ -217,20 +217,31 @@ public class DWRawDisk extends DWDisk {
   public void load(final boolean forceCache)
       throws IOException, DWImageFormatException {
     // load file into sector array
-    int sector = 0;
-    int sectorsize = this.getSectorSize();
-    long filesize = this.getFileObject().getContent().getSize();
-    if ((filesize > Integer.MAX_VALUE)
-        || ((filesize / this.getSectorSize()) > DWDefs.DISK_MAXSECTORS)) {
+    final long filesize = this.getFileObject().getContent().getSize();
+    if (filesize > Integer.MAX_VALUE
+        || filesize / this.getSectorSize() > DWDefs.DISK_MAXSECTORS) {
       throw new DWImageFormatException("Image file is too large");
     }
     if (!forceCache
-        && (this.getFileObject().getName().toString()).startsWith("file://")) {
+        && this.getFileObject().getName().toString().startsWith("file://")) {
       this.direct = true;
     }
-    if (!direct) {
+    final int sectorsize = this.getSectorSize();
+    int sector = 0;
+    if (direct) {
+      int size = 0;
+      this.getSectors().setSize((int) (filesize / sectorsize));
+      while (size < filesize) {
+        this.getSectors().set(
+            sector,
+            new DWDiskSector(this, sector, sectorsize, true)
+        );
+        sector++;
+        size += sectorsize;
+      }
+    } else {
       LOGGER.debug("Caching " + this.getFileObject().getName() + " in memory");
-      long memFree = Runtime.getRuntime().maxMemory()
+      final long memFree = Runtime.getRuntime().maxMemory()
           - (Runtime.getRuntime().totalMemory()
           - Runtime.getRuntime().freeMemory());
       if (filesize > memFree) {
@@ -240,16 +251,15 @@ public class DWRawDisk extends DWDisk {
         );
       }
 
-      BufferedInputStream fis = new BufferedInputStream(
+      final BufferedInputStream inputStream = new BufferedInputStream(
           this.getFileObject().getContent().getInputStream()
       );
 
       int readres = 0;
       int bytesRead = 0;
-      byte[] buffer = new byte[sectorsize];
-
+      final byte[] buffer = new byte[sectorsize];
       this.getSectors().setSize((int) (filesize / sectorsize));
-      readres = fis.read(buffer, 0, sectorsize);
+      readres = inputStream.read(buffer, 0, sectorsize);
       while (readres > -1) {
         bytesRead += readres;
         if (bytesRead == sectorsize) {
@@ -260,7 +270,7 @@ public class DWRawDisk extends DWDisk {
           sector++;
           bytesRead = 0;
         }
-        readres = fis.read(buffer, bytesRead, (sectorsize - bytesRead));
+        readres = inputStream.read(buffer, bytesRead, sectorsize - bytesRead);
       }
       if (bytesRead > 0) {
         throw new DWImageFormatException(
@@ -271,18 +281,7 @@ public class DWRawDisk extends DWDisk {
           "read " + sector
               + " sectors from '" + this.getFileObject().getName() + "'"
       );
-      fis.close();
-    } else {
-      int sz = 0;
-      this.getSectors().setSize((int) (filesize / sectorsize));
-      while (sz < filesize) {
-        this.getSectors().set(
-            sector,
-            new DWDiskSector(this, sector, sectorsize, true)
-        );
-        sector++;
-        sz += sectorsize;
-      }
+      inputStream.close();
     }
     long lastmodtime = -1;
     try {
@@ -309,10 +308,10 @@ public class DWRawDisk extends DWDisk {
     this.incParam("_reads");
     // check source for changes...
     if (this.isSyncFrom()
-        && (this.getFileObject() != null)
+        && this.getFileObject() != null
         && this.getFileObject()
-              .getContent()
-              .getLastModifiedTime() != this.getLastModifiedTime()
+        .getContent()
+        .getLastModifiedTime() != this.getLastModifiedTime()
         && this.getDirtySectors() > 0
     ) {
       // doh
@@ -331,11 +330,11 @@ public class DWRawDisk extends DWDisk {
       );
       this.reload();
     }
-    int effLSN = this.getLSN() + this.getOffset();
+    final int effLSN = this.getLSN() + this.getOffset();
     // we can read beyond the current size of the image
     if (
-        (effLSN >= this.getSectors().size())
-            || (this.getSectors().get(effLSN) == null)
+        effLSN >= this.getSectors().size()
+            || this.getSectors().get(effLSN) == null
     ) {
       LOGGER.debug(
           "request for undefined sector, effLSN: " + effLSN
@@ -343,7 +342,7 @@ public class DWRawDisk extends DWDisk {
               + "  curSize: " + (this.getSectors().size() - 1)
       );
       // no need to expand disk on read, give a blank sector
-      return (new byte[this.getSectorSize()]);
+      return new byte[this.getSectorSize()];
     }
     return this.getSectors().get(effLSN).getData();
   }
@@ -371,7 +370,7 @@ public class DWRawDisk extends DWDisk {
     if (this.isWriteProtect()) {
       throw new DWDriveWriteProtectedException("Disk is write protected");
     } else {
-      int effLSN = this.getLSN() + this.getOffset();
+      final int effLSN = this.getLSN() + this.getOffset();
 
       // we can write beyond our current size
       if (effLSN >= this.getSectors().size()) {
@@ -401,11 +400,10 @@ public class DWRawDisk extends DWDisk {
    */
   public void write() throws IOException, DWImageHasNoSourceException {
     if (this.getFileObject() == null) {
-      throw (
+      throw
           new DWImageHasNoSourceException(
               "The image has no source object, must specify write path."
-          )
-      );
+          );
     }
     if (this.getFileObject().isWriteable()) {
       if (
@@ -436,11 +434,11 @@ public class DWRawDisk extends DWDisk {
    */
   private void syncSectors() {
     long sectorswritten = 0;
-    long starttime = System.currentTimeMillis();
+    final long starttime = System.currentTimeMillis();
     long sleeptime = 0;
 
     try {
-      RandomAccessContent raf = getFileObject()
+      final RandomAccessContent raf = getFileObject()
           .getContent()
           .getRandomAccessContent(RandomAccessMode.READWRITE);
 
@@ -450,7 +448,7 @@ public class DWRawDisk extends DWDisk {
               this.getDrive().getDiskDrives().getDWProtocolHandler().isInOp()
           ) {
             try {
-              long sleepStart = System.currentTimeMillis();
+              final long sleepStart = System.currentTimeMillis();
               Thread.sleep(DWDefs.DISK_SYNC_INOP_PAUSE);
               sleeptime += System.currentTimeMillis() - sleepStart;
             } catch (InterruptedException e) {
@@ -458,7 +456,7 @@ public class DWRawDisk extends DWDisk {
               e.printStackTrace();
             }
           }
-          long pos = (long) i * this.getSectorSize();
+          final long pos = (long) i * this.getSectorSize();
           raf.seek(pos);
           raf.write(getSector(i).getData());
           sectorswritten++;

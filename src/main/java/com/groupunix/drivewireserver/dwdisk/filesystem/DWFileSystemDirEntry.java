@@ -24,7 +24,7 @@ public abstract class DWFileSystemDirEntry {
    * @return source data
    */
   protected byte[] getData() {
-    byte[] result = new byte[data.length];
+    final byte[] result = new byte[data.length];
     System.arraycopy(data, 0, result, 0, data.length);
     return result;
   }

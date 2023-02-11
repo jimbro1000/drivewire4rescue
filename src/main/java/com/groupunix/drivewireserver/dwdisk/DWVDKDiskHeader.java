@@ -61,7 +61,7 @@ public class DWVDKDiskHeader {
    * @return version
    */
   public int getVersion() {
-    return (BYTE_MASK & data[VERSION_OFFSET]);
+    return BYTE_MASK & data[VERSION_OFFSET];
   }
 
   /**
@@ -71,7 +71,7 @@ public class DWVDKDiskHeader {
    */
   @SuppressWarnings("unused")
   public int getVersionCompatible() {
-    return (BYTE_MASK & data[VERSION_COMPATIBLE_OFFSET]);
+    return BYTE_MASK & data[VERSION_COMPATIBLE_OFFSET];
   }
 
   /**
@@ -81,7 +81,7 @@ public class DWVDKDiskHeader {
    */
   @SuppressWarnings("unused")
   public int getSourceID() {
-    return (BYTE_MASK & data[SOURCE_ID_OFFSET]);
+    return BYTE_MASK & data[SOURCE_ID_OFFSET];
   }
 
   /**
@@ -91,7 +91,7 @@ public class DWVDKDiskHeader {
    */
   @SuppressWarnings("unused")
   public int getSourceVersion() {
-    return (BYTE_MASK & data[SOURCE_VERSION_OFFSET]);
+    return BYTE_MASK & data[SOURCE_VERSION_OFFSET];
   }
 
   /**
@@ -100,7 +100,7 @@ public class DWVDKDiskHeader {
    * @return disk tracks
    */
   public int getTracks() {
-    return (BYTE_MASK & data[TRACKS_OFFSET]);
+    return BYTE_MASK & data[TRACKS_OFFSET];
   }
 
   /**
@@ -109,7 +109,7 @@ public class DWVDKDiskHeader {
    * @return number of disk sides
    */
   public int getSides() {
-    return (BYTE_MASK & data[SIDES_OFFSET]);
+    return BYTE_MASK & data[SIDES_OFFSET];
   }
 
   /**
@@ -119,7 +119,7 @@ public class DWVDKDiskHeader {
    */
   @SuppressWarnings("unused")
   public int getFlags() {
-    return (BYTE_MASK & data[FLAGS_OFFSET]);
+    return BYTE_MASK & data[FLAGS_OFFSET];
   }
 
   /**
