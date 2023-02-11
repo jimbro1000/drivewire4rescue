@@ -95,9 +95,9 @@ public class DWHelp {
   @SuppressWarnings("unused")
   private void loadWikiTopics(final String sourceUrlString)
       throws IOException {
-    Source source = new Source(new URL(sourceUrlString));
+    final Source source = new Source(new URL(sourceUrlString));
     source.getRenderer().setMaxLineLength(MAX_LINE_LENGTH);
-    String renderedText = source.getRenderer().toString();
+    final String renderedText = source.getRenderer().toString();
     String[] lines = renderedText.split("\n");
     String curkey = null;
     int blanks = 0;
@@ -113,7 +113,7 @@ public class DWHelp {
         } else {
           blanks = 0;
         }
-        if ((blanks < 2) && (curkey != null)) {
+        if (blanks < 2 && curkey != null) {
           System.out.println("Line: " + lines[i]);
           this.help.addProperty(
               packageTopic(this.spaceToDot(curkey)),
@@ -144,7 +144,7 @@ public class DWHelp {
    */
   public boolean hasTopic(final String topic) {
     if (this.help != null) {
-      return (this.help.containsKey(packageTopic(topic)));
+      return this.help.containsKey(packageTopic(topic));
     }
     return false;
   }
@@ -160,13 +160,13 @@ public class DWHelp {
       throws DWHelpTopicNotFoundException {
     String topicName;
     if (this.hasTopic(topic)) {
-      StringBuilder text = new StringBuilder();
+      final StringBuilder text = new StringBuilder();
       topicName = this.spaceToDot(topic);
-      String[] txts = help.getStringArray(packageTopic(topicName));
-      for (String txt : txts) {
+      final String[] txts = help.getStringArray(packageTopic(topicName));
+      for (final String txt : txts) {
         text.append(txt).append("\r\n");
       }
-      return (text.toString());
+      return text.toString();
     } else {
       throw new DWHelpTopicNotFoundException(
           "There is no help available for the topic '" + topic + "'."
@@ -186,11 +186,11 @@ public class DWHelp {
    */
   @SuppressWarnings("unchecked")
   public ArrayList<String> getTopics(final String topic) {
-    ArrayList<String> res = new ArrayList<>();
+    final ArrayList<String> res = new ArrayList<>();
     if (this.help != null) {
-      Iterator<String> itk = help.configurationAt("topics").getKeys();
+      final Iterator<String> itk = help.configurationAt("topics").getKeys();
       while (itk.hasNext()) {
-        String key = itk.next();
+        final String key = itk.next();
         if (key.endsWith(TEXT_SUFFIX)) {
           res.add(
               this.dotToSpace(
@@ -200,7 +200,7 @@ public class DWHelp {
         }
       }
     }
-    return (res);
+    return res;
   }
 
   /**
@@ -239,11 +239,11 @@ public class DWHelp {
     help.addProperty(key, "");
     help.addProperty(key, dwc.getShortHelp());
     if (dwc.getCommandList() != null) {
-      for (DWCommand dwsc : dwc.getCommandList().getCommands()) {
-        if (!prefix.equals("")) {
-          addAllTopics(dwsc, prefix + " " + dwc.getCommand());
+      for (final DWCommand dwSc : dwc.getCommandList().getCommands()) {
+        if (prefix.equals("")) {
+          addAllTopics(dwSc, dwc.getCommand());
         } else {
-          addAllTopics(dwsc, dwc.getCommand());
+          addAllTopics(dwSc, prefix + " " + dwc.getCommand());
         }
       }
     }
@@ -257,13 +257,13 @@ public class DWHelp {
    */
   @SuppressWarnings("unchecked")
   public ArrayList<String> getSectionTopics(final String section) {
-    ArrayList<String> res = new ArrayList<>();
+    final ArrayList<String> res = new ArrayList<>();
     if (this.help != null) {
-      Iterator<String> itk = help
+      final Iterator<String> itk = help
           .configurationAt(TOPICS_PREFIX + section)
           .getKeys();
       while (itk.hasNext()) {
-        String key = itk.next();
+        final String key = itk.next();
         if (key.endsWith(TEXT_SUFFIX)) {
           res.add(
               this.dotToSpace(

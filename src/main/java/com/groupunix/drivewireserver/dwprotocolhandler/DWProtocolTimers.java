@@ -41,25 +41,25 @@ public class DWProtocolTimers {
   /**
    * Reset timer.
    *
-   * @param tno timer id
-   * @param tme time
+   * @param timer timer id
+   * @param time time
    */
-  public void resetTimer(final byte tno, final long tme) {
-    this.timers[(tno & BYTE_MASK)] = tme;
+  public void resetTimer(final byte timer, final long time) {
+    this.timers[timer & BYTE_MASK] = time;
     // Dependencies
-    switch (tno) {
+    switch (timer) {
       // init and reset are also np ops
       case DWDefs.TIMER_DWINIT,
-          DWDefs.TIMER_RESET -> resetTimer(DWDefs.TIMER_NP_OP, tme);
+          DWDefs.TIMER_RESET -> resetTimer(DWDefs.TIMER_NP_OP, time);
       // read/write is an io op
       case DWDefs.TIMER_READ,
-          DWDefs.TIMER_WRITE -> resetTimer(DWDefs.TIMER_IO, tme);
+          DWDefs.TIMER_WRITE -> resetTimer(DWDefs.TIMER_IO, time);
       // io ops are also np ops
-      case DWDefs.TIMER_IO -> resetTimer(DWDefs.TIMER_NP_OP, tme);
+      case DWDefs.TIMER_IO -> resetTimer(DWDefs.TIMER_NP_OP, time);
       // poll is an op
-      case DWDefs.TIMER_POLL -> resetTimer(DWDefs.TIMER_OP, tme);
+      case DWDefs.TIMER_POLL -> resetTimer(DWDefs.TIMER_OP, time);
       // np ops are also ops
-      case DWDefs.TIMER_NP_OP -> resetTimer(DWDefs.TIMER_OP, tme);
+      case DWDefs.TIMER_NP_OP -> resetTimer(DWDefs.TIMER_OP, time);
       default -> {
       }
     }
@@ -72,8 +72,8 @@ public class DWProtocolTimers {
    * @return timer
    */
   public long getTimer(final byte tno) {
-    if (this.timers[(tno & BYTE_MASK)] > 0) {
-      return System.currentTimeMillis() - this.timers[(tno & BYTE_MASK)];
+    if (this.timers[tno & BYTE_MASK] > 0) {
+      return System.currentTimeMillis() - this.timers[tno & BYTE_MASK];
     }
     return 0;
   }
@@ -86,7 +86,7 @@ public class DWProtocolTimers {
    */
   public byte[] getTimerBytes(final byte tno) {
     byte[] res = new byte[TIMER_LEN];
-    long input = getTimer(tno);
+    final long input = getTimer(tno);
     int index = 0;
     res[index++] = (byte) ((input >> (BYTE_BITS + BYTE_BITS + BYTE_BITS))
         & BYTE_MASK);

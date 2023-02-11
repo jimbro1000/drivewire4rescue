@@ -129,42 +129,42 @@ public class DWRFMFD {
    * @return byte array
    */
   public byte[] getFD() {
-    byte[] b = new byte[SECTOR_SIZE];
+    byte[] bytes = new byte[SECTOR_SIZE];
 
     for (int i = 0; i < SECTOR_SIZE; i++) {
-      b[i] = 0;
+      bytes[i] = 0;
     }
-    b[OFFSET_ATTRIBUTES] = getAttributes();
-    System.arraycopy(getOwner(), 0, b, OFFSET_OWNER, OWNER_SIZE);
-    System.arraycopy(getLastModifiedDate(), 0, b, OFFSET_DATE, DATE_LENGTH);
-    b[OFFSET_LINK] = getLink();
-    System.arraycopy(getSize(), 0, b, OFFSET_SIZE, SIZE_LENGTH);
-    System.arraycopy(getCreat(), 0, b, OFFSET_CREAT, CREAT_LENGTH);
-    return b;
+    bytes[OFFSET_ATTRIBUTES] = getAttributes();
+    System.arraycopy(getOwner(), 0, bytes, OFFSET_OWNER, OWNER_SIZE);
+    System.arraycopy(
+        getLastModifiedDate(), 0, bytes, OFFSET_DATE, DATE_LENGTH
+    );
+    bytes[OFFSET_LINK] = getLink();
+    System.arraycopy(getSize(), 0, bytes, OFFSET_SIZE, SIZE_LENGTH);
+    System.arraycopy(getCreat(), 0, bytes, OFFSET_CREAT, CREAT_LENGTH);
+    return bytes;
   }
 
   /**
    * Set file descriptor parameters.
    *
-   * @param fd file descriptor
+   * @param descriptor file descriptor
    */
-  public void setFD(final byte[] fd) {
-    byte[] b;
-
-    setAttributes(fd[OFFSET_ATTRIBUTES]);
-    b = new byte[OWNER_SIZE];
-    System.arraycopy(fd, OFFSET_OWNER, b, 0, OWNER_SIZE);
-    setOwner(b);
-    b = new byte[DATE_LENGTH];
-    System.arraycopy(fd, OFFSET_DATE, b, 0, DATE_LENGTH);
-    setLastModifiedDate(b);
-    setLink(fd[OFFSET_LINK]);
-    b = new byte[SIZE_LENGTH];
-    System.arraycopy(fd, OFFSET_SIZE, b, 0, SIZE_LENGTH);
-    setSize(b);
-    b = new byte[CREAT_LENGTH];
-    System.arraycopy(fd, OFFSET_CREAT, b, 0, CREAT_LENGTH);
-    setCreat(b);
+  public void setFD(final byte[] descriptor) {
+    setAttributes(descriptor[OFFSET_ATTRIBUTES]);
+    final byte[] fileOwner = new byte[OWNER_SIZE];
+    System.arraycopy(descriptor, OFFSET_OWNER, fileOwner, 0, OWNER_SIZE);
+    setOwner(fileOwner);
+    final byte[] date = new byte[DATE_LENGTH];
+    System.arraycopy(descriptor, OFFSET_DATE, date, 0, DATE_LENGTH);
+    setLastModifiedDate(date);
+    setLink(descriptor[OFFSET_LINK]);
+    final byte[] size = new byte[SIZE_LENGTH];
+    System.arraycopy(descriptor, OFFSET_SIZE, size, 0, SIZE_LENGTH);
+    setSize(size);
+    final byte[] creat = new byte[CREAT_LENGTH];
+    System.arraycopy(descriptor, OFFSET_CREAT, creat, 0, CREAT_LENGTH);
+    setCreat(creat);
   }
 
   /**
@@ -216,18 +216,17 @@ public class DWRFMFD {
   }
 
   private byte[] lengthToBytes(final long length) {
-    double maxLen = Math.pow(SECTOR_SIZE, SIZE_LENGTH) / 2;
-
+    final double maxLen = Math.pow(SECTOR_SIZE, SIZE_LENGTH) / 2;
     if (length > maxLen) {
       LOGGER.error("File too big: " + length + " bytes in '"
           + this.pathstr + "' (max " + maxLen + ")");
-      return (new byte[]{0, 0, 0, 0});
+      return new byte[]{0, 0, 0, 0};
     }
-    byte[] b = new byte[SIZE_LENGTH];
+    byte[] bytes = new byte[SIZE_LENGTH];
     for (int i = 0; i < SIZE_LENGTH; i++) {
-      b[SIZE_LENGTH - 1 - i] = (byte) (length >>> (i * BYTE_BITS));
+      bytes[SIZE_LENGTH - 1 - i] = (byte) (length >>> (i * BYTE_BITS));
     }
-    return b;
+    return bytes;
   }
 
   /**
@@ -237,34 +236,35 @@ public class DWRFMFD {
    * @return byte array
    */
   private byte[] timeToBytes(final long time) {
-    GregorianCalendar c = new GregorianCalendar();
+    final GregorianCalendar calendar = new GregorianCalendar();
     int index = 0;
-    c.setTime(new Date(time));
-    byte[] b = new byte[DATE_TIME_LEN];
-    b[index++] = (byte) (c.get(Calendar.YEAR) - GREGORIAN_YEAR_OFFSET);
-    b[index++] = (byte) (c.get(Calendar.MONTH) + 1);
-    b[index++] = (byte) (c.get(Calendar.DAY_OF_MONTH));
-    b[index++] = (byte) (c.get(Calendar.HOUR_OF_DAY));
-    b[index] = (byte) (c.get(Calendar.MINUTE));
-    return b;
+    calendar.setTime(new Date(time));
+    byte[] bytes = new byte[DATE_TIME_LEN];
+    bytes[index++] = (byte) (calendar.get(Calendar.YEAR)
+        - GREGORIAN_YEAR_OFFSET);
+    bytes[index++] = (byte) (calendar.get(Calendar.MONTH) + 1);
+    bytes[index++] = (byte) (calendar.get(Calendar.DAY_OF_MONTH));
+    bytes[index++] = (byte) (calendar.get(Calendar.HOUR_OF_DAY));
+    bytes[index] = (byte) (calendar.get(Calendar.MINUTE));
+    return bytes;
   }
 
   /**
    * Convert byte array to long (time).
    *
-   * @param b byte array
+   * @param bytes byte array
    * @return long time
    */
   @SuppressWarnings("unused")
-  private long bytesToTime(final byte[] b) {
-    GregorianCalendar c = new GregorianCalendar();
+  private long bytesToTime(final byte[] bytes) {
+    final GregorianCalendar calendar = new GregorianCalendar();
     int index = 0;
-    c.set(Calendar.YEAR, b[index++] + GREGORIAN_YEAR_OFFSET);
-    c.set(Calendar.MONTH, b[index++] - 1);
-    c.set(Calendar.DAY_OF_MONTH, b[index++]);
-    c.set(Calendar.HOUR_OF_DAY, b[index++]);
-    c.set(Calendar.MINUTE, b[index]);
-    return c.getTimeInMillis();
+    calendar.set(Calendar.YEAR, bytes[index++] + GREGORIAN_YEAR_OFFSET);
+    calendar.set(Calendar.MONTH, bytes[index++] - 1);
+    calendar.set(Calendar.DAY_OF_MONTH, bytes[index++]);
+    calendar.set(Calendar.HOUR_OF_DAY, bytes[index++]);
+    calendar.set(Calendar.MINUTE, bytes[index]);
+    return calendar.getTimeInMillis();
   }
 
   /**

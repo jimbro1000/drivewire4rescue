@@ -72,22 +72,22 @@ public class DWRFMDirEntry {
   /**
    * RMF Directory Entry.
    *
-   * @param fo file object
+   * @param file file object
    * @throws FileSystemException failed to read from source
    */
-  public DWRFMDirEntry(final FileObject fo) throws FileSystemException {
-    if (fo != null) {
-      this.fileName = fo.getName().getBaseName();
-      if (fo.getType() == FileType.FOLDER) {
+  public DWRFMDirEntry(final FileObject file) throws FileSystemException {
+    if (file != null) {
+      this.fileName = file.getName().getBaseName();
+      if (file.getType() == FileType.FOLDER) {
         this.filePerms = FOLDER;
       }
-      if (fo.isReadable()) {
+      if (file.isReadable()) {
         this.filePerms += READABLE;
       }
-      if (fo.isWriteable()) {
+      if (file.isWriteable()) {
         this.filePerms += WRITEABLE;
       }
-      this.fileSize = fo.getContent().getSize();
+      this.fileSize = file.getContent().getSize();
     }
   }
 

@@ -813,7 +813,8 @@ public class DWDiskDrives {
    * @return path parameter
    */
   public String getObjPath(final String objName) {
-    @SuppressWarnings("unchecked") final List<HierarchicalConfiguration> objs = this.dwProtocolHandler
+    @SuppressWarnings("unchecked")
+    final List<HierarchicalConfiguration> objs = this.dwProtocolHandler
         .getConfig()
         .configurationsAt("NamedObject");
     for (final HierarchicalConfiguration obj : objs) {
