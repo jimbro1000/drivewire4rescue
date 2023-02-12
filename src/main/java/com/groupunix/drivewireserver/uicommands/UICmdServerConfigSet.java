@@ -10,6 +10,7 @@ public class UICmdServerConfigSet extends DWCommand {
    * UI Command Server Config Set.
    */
   public UICmdServerConfigSet() {
+    super();
     setCommand("set");
     setShortHelp("Set server configuration item");
     setUsage("ui server config set [item] [value]");
@@ -27,7 +28,7 @@ public class UICmdServerConfigSet extends DWCommand {
           false, DWDefs.RC_SYNTAX_ERROR, "Must specify item"
       );
     }
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
     if (args.length == 1) {
       return doSetConfig(args[0]);
     } else {
@@ -53,7 +54,7 @@ public class UICmdServerConfigSet extends DWCommand {
         DriveWireServer.getServerConfiguration().setProperty(item, null);
       }
     }
-    return (new DWCommandResponse(item + " unset."));
+    return new DWCommandResponse(item + " unset.");
   }
 
   private DWCommandResponse doSetConfig(final String item, final String value) {

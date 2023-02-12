@@ -24,6 +24,7 @@ public class UICmdServerTerminate extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdServerTerminate(final DWUIClientThread clientThread) {
+    super();
     this.dwuiClientThread = clientThread;
     this.dwProtocol = null;
     setHelp();
@@ -35,6 +36,7 @@ public class UICmdServerTerminate extends DWCommand {
    * @param protocol protocol
    */
   public UICmdServerTerminate(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
     this.dwuiClientThread = null;
     setHelp();

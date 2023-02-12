@@ -30,6 +30,7 @@ public class UICmdInstanceTimerShow extends DWCommand {
    * @param protocol protocol
    */
   public UICmdInstanceTimerShow(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
     this.dwuiClientThread = null;
     setHelp();
@@ -41,6 +42,7 @@ public class UICmdInstanceTimerShow extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdInstanceTimerShow(final DWUIClientThread clientThread) {
+    super();
     this.dwuiClientThread = clientThread;
     this.dwProtocol = null;
     setHelp();
@@ -76,7 +78,7 @@ public class UICmdInstanceTimerShow extends DWCommand {
       }
     }
     if (cmdline.length() == 0) {
-      StringBuilder txt = new StringBuilder();
+      final StringBuilder txt = new StringBuilder();
       for (int i = 0; i < MAX_TIMERS; i++) {
         if (dwProtocol.getTimers().getTimer((byte) i) > 0) {
           txt.append(getTimerData((byte) i)).append("\r\n");
@@ -84,9 +86,9 @@ public class UICmdInstanceTimerShow extends DWCommand {
       }
       return new DWCommandResponse(txt.toString());
     } else {
-      String[] args = cmdline.split(" ");
+      final String[] args = cmdline.split(" ");
       try {
-        byte tno = (byte) Integer.parseInt(args[0]);
+        final byte tno = (byte) Integer.parseInt(args[0]);
         return new DWCommandResponse(getTimerData(tno));
       } catch (NumberFormatException e) {
         return new DWCommandResponse(

@@ -15,6 +15,7 @@ public class UICmdServerConfigShow extends DWCommand {
    * UI Cmd Server Config Show.
    */
   public UICmdServerConfigShow() {
+    super();
     setCommand("show");
     setShortHelp("Show server configuration");
     setUsage("ui server config show [item]");
@@ -28,12 +29,13 @@ public class UICmdServerConfigShow extends DWCommand {
    */
   @SuppressWarnings("unchecked")
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder res = new StringBuilder();
+    final StringBuilder res = new StringBuilder();
     if (cmdline.length() == 0) {
-      Iterator<String> i = DriveWireServer.getServerConfiguration().getKeys();
-      while (i.hasNext()) {
-        String key = i.next();
-        String value = StringUtils.join(
+      final Iterator<String> iterator
+          = DriveWireServer.getServerConfiguration().getKeys();
+      while (iterator.hasNext()) {
+        final String key = iterator.next();
+        final String value = StringUtils.join(
             DriveWireServer.getServerConfiguration().getStringArray(key),
             ", "
         );
@@ -41,7 +43,7 @@ public class UICmdServerConfigShow extends DWCommand {
       }
     } else {
       if (DriveWireServer.getServerConfiguration().containsKey(cmdline)) {
-        String value = StringUtils.join(
+        final String value = StringUtils.join(
             DriveWireServer.getServerConfiguration().getStringArray(cmdline),
             ", "
         );

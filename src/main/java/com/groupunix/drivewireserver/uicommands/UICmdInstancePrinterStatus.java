@@ -28,6 +28,7 @@ public class UICmdInstancePrinterStatus extends DWCommand {
    * @param clientThread UI client thread
    */
   public UICmdInstancePrinterStatus(final DWUIClientThread clientThread) {
+    super();
     this.uiClientRef = clientThread;
     this.dwProtocolHandler = null;
     setHelp();
@@ -39,6 +40,7 @@ public class UICmdInstancePrinterStatus extends DWCommand {
    * @param protocol protocol handler
    */
   public UICmdInstancePrinterStatus(final DWProtocolHandler protocol) {
+    super();
     this.dwProtocolHandler = protocol;
     this.uiClientRef = null;
     setHelp();
@@ -75,16 +77,16 @@ public class UICmdInstancePrinterStatus extends DWCommand {
         );
       }
     }
-    StringBuilder res = new StringBuilder();
+    final StringBuilder res = new StringBuilder();
     res.append("currentprinter|")
         .append(dwProtocolHandler.getConfig().getString(
         "CurrentPrinter", "none"))
         .append("\r\n");
 
     @SuppressWarnings("unchecked")
-    List<HierarchicalConfiguration> profiles
+    final List<HierarchicalConfiguration> profiles
         = dwProtocolHandler.getConfig().configurationsAt("Printer");
-    for (HierarchicalConfiguration mProfile : profiles) {
+    for (final HierarchicalConfiguration mProfile : profiles) {
       res.append("printer|")
           .append(mProfile.getString("[@name]"))
           .append("|")

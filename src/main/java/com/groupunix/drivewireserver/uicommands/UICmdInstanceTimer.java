@@ -13,7 +13,8 @@ public class UICmdInstanceTimer extends DWCommand {
    * @param protocol protocol
    */
   public UICmdInstanceTimer(final DWProtocol protocol) {
-    DWCommandList commands = this.getCommandList();
+    super();
+    final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdInstanceTimerShow(protocol));
     commands.addCommand(new UICmdInstanceTimerReset(protocol));
     setHelp();
@@ -25,7 +26,8 @@ public class UICmdInstanceTimer extends DWCommand {
    * @param clientThread client thread reference
    */
   public UICmdInstanceTimer(final DWUIClientThread clientThread) {
-    DWCommandList commands = this.getCommandList();
+    super();
+    final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdInstanceTimerShow(clientThread));
     commands.addCommand(new UICmdInstanceTimerReset(clientThread));
     setHelp();

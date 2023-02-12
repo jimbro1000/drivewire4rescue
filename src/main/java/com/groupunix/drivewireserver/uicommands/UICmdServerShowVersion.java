@@ -9,6 +9,7 @@ public class UICmdServerShowVersion extends DWCommand {
    * UI Command Server Show Version.
    */
   public UICmdServerShowVersion() {
+    super();
     setCommand("version");
     setShortHelp("show server version");
     setUsage("ui server show version");

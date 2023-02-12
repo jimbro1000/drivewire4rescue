@@ -25,6 +25,7 @@ public class UICmdInstanceStatus extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdInstanceStatus(final DWUIClientThread clientThread) {
+    super();
     this.clientRef = clientThread;
     this.dwProtocol = null;
     setHelp();
@@ -36,6 +37,7 @@ public class UICmdInstanceStatus extends DWCommand {
    * @param protocol protocol
    */
   public UICmdInstanceStatus(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
     this.clientRef = null;
     setHelp();
@@ -55,9 +57,7 @@ public class UICmdInstanceStatus extends DWCommand {
    */
   @Override
   public DWCommandResponse parse(final String cmdline) {
-    String txt = "";
     int hno = 0;
-
     if (cmdline.length() > 0) {
       try {
         hno = Integer.parseInt(cmdline);
@@ -83,6 +83,7 @@ public class UICmdInstanceStatus extends DWCommand {
         hno = this.clientRef.getInstance();
       }
     }
+    String txt = "";
     txt = "num|" + hno + "\n";
     txt += "name|" + dwProtocol.getConfig()
         .getString("[@name]", "not set") + "\n";
@@ -112,7 +113,7 @@ public class UICmdInstanceStatus extends DWCommand {
             .getString("Protocol", "DriveWire")
             .equals("DriveWire")
     ) {
-      DWProtocolHandler dwProto = (DWProtocolHandler) dwProtocol;
+      final DWProtocolHandler dwProto = (DWProtocolHandler) dwProtocol;
       txt += "lastopcode|" + DWUtils.prettyOP(dwProto.getLastOpcode()) + "\n";
       txt += "lastgetstat|" + DWUtils.prettySS(dwProto.getLastGetStat()) + "\n";
       txt += "lastsetstat|" + DWUtils.prettySS(dwProto.getLastSetStat()) + "\n";

@@ -9,6 +9,7 @@ public class UICmdServerConfigSerial extends DWCommand {
    * UI Command Server Config Serial.
    */
   public UICmdServerConfigSerial() {
+    super();
     setCommand("serial");
     setShortHelp("Show server config serial#");
     setUsage("ui server config serial");
@@ -21,7 +22,7 @@ public class UICmdServerConfigSerial extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    return (new DWCommandResponse(DriveWireServer.getConfigSerial() + ""));
+    return new DWCommandResponse(DriveWireServer.getConfigSerial() + "");
   }
 
   /**

@@ -41,6 +41,7 @@ public class UICmdTestDGraph extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdTestDGraph(final DWUIClientThread clientThread) {
+    super();
     this.dwuiClientThread = clientThread;
     setCommand("dgraph");
     setShortHelp("Test disk graphics");

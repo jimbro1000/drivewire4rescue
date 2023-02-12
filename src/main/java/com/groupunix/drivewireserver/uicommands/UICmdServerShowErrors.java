@@ -23,6 +23,7 @@ public class UICmdServerShowErrors extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdServerShowErrors(final DWUIClientThread clientThread) {
+    super();
     this.dwProtocol = DriveWireServer.getHandler(clientThread.getInstance());
     setHelp();
   }
@@ -33,6 +34,7 @@ public class UICmdServerShowErrors extends DWCommand {
    * @param protocol protocol
    */
   public UICmdServerShowErrors(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
     setHelp();
   }
@@ -51,11 +53,12 @@ public class UICmdServerShowErrors extends DWCommand {
    */
   @Override
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder res = new StringBuilder();
+    final StringBuilder res = new StringBuilder();
     if (dwProtocol != null) {
-      List<String> rconfs = dwProtocol.getHelp().getSectionTopics("resultcode");
+      final List<String> rconfs
+          = dwProtocol.getHelp().getSectionTopics("resultcode");
       if (rconfs != null) {
-        for (String rc : rconfs) {
+        for (final String rc : rconfs) {
           try {
             res.append(rc.substring(1))
                 .append("|")

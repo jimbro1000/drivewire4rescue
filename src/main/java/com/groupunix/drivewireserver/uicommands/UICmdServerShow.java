@@ -13,7 +13,8 @@ public class UICmdServerShow extends DWCommand {
    * @param clientThread UI client thread
    */
   public UICmdServerShow(final DWUIClientThread clientThread) {
-    DWCommandList commands = this.getCommandList();
+    super();
+    final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdServerShowVersion());
     commands.addCommand(new UICmdServerShowInstances());
     commands.addCommand(new UICmdServerShowMIDIDevs());
@@ -35,7 +36,8 @@ public class UICmdServerShow extends DWCommand {
    * @param protocol protocol
    */
   public UICmdServerShow(final DWProtocol protocol) {
-    DWCommandList commands = this.getCommandList();
+    super();
+    final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdServerShowVersion());
     commands.addCommand(new UICmdServerShowInstances());
     commands.addCommand(new UICmdServerShowMIDIDevs());

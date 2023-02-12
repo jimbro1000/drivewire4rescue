@@ -11,6 +11,7 @@ public class UICmdServerShowLog extends DWCommand {
    * UI Command Server Show Log.
    */
   public UICmdServerShowLog() {
+    super();
     setCommand("log");
     setShortHelp("show log buffer");
     setUsage("ui server show log");
@@ -24,10 +25,10 @@ public class UICmdServerShowLog extends DWCommand {
    */
   @Override
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder txt = new StringBuilder();
-    ArrayList<String> log = DriveWireServer
+    final StringBuilder txt = new StringBuilder();
+    final ArrayList<String> log = DriveWireServer
         .getLogEvents(DriveWireServer.getLogEventsSize());
-    for (String l : log) {
+    for (final String l : log) {
       txt.append(l);
     }
     return new DWCommandResponse(txt.toString());

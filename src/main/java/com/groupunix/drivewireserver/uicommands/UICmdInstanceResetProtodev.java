@@ -22,6 +22,7 @@ public class UICmdInstanceResetProtodev extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdInstanceResetProtodev(final DWUIClientThread clientThread) {
+    super();
     this.dwuiClientThread = clientThread;
     this.dwProtocol = null;
     setHelp();
@@ -33,6 +34,7 @@ public class UICmdInstanceResetProtodev extends DWCommand {
    * @param protocol protocol
    */
   public UICmdInstanceResetProtodev(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
     this.dwuiClientThread = null;
     setHelp();

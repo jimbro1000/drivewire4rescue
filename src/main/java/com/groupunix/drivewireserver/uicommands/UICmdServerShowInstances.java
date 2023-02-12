@@ -9,6 +9,7 @@ public class UICmdServerShowInstances extends DWCommand {
    * UI Command Server Show Instances.
    */
   public UICmdServerShowInstances() {
+    super();
     setCommand("instances");
     setShortHelp("show available instances");
     setUsage("ui server show instances");
@@ -22,7 +23,7 @@ public class UICmdServerShowInstances extends DWCommand {
    */
   @Override
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder txt = new StringBuilder();
+    final StringBuilder txt = new StringBuilder();
     for (int i = 0; i < DriveWireServer.getNumHandlers(); i++) {
       txt.append(i)
           .append("|")

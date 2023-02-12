@@ -24,6 +24,7 @@ public class UICmdServerShowHelp extends DWCommand {
    * @param clientThread client thread reference
    */
   public UICmdServerShowHelp(final DWUIClientThread clientThread) {
+    super();
     this.uiClientThreadRef = clientThread;
     this.dwProtocol = null;
     setHelp();
@@ -35,6 +36,7 @@ public class UICmdServerShowHelp extends DWCommand {
    * @param protocol protocol
    */
   public UICmdServerShowHelp(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
     this.uiClientThreadRef = null;
     setHelp();

@@ -24,6 +24,7 @@ public class UICmdServerShowTopics extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdServerShowTopics(final DWUIClientThread clientThread) {
+    super();
     this.clientThreadRef = clientThread;
     this.dwProtocol = null;
     setHelp();
@@ -35,6 +36,7 @@ public class UICmdServerShowTopics extends DWCommand {
    * @param protocol protocol
    */
   public UICmdServerShowTopics(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
     clientThreadRef = null;
     setHelp();
@@ -54,14 +56,14 @@ public class UICmdServerShowTopics extends DWCommand {
    */
   @Override
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder txt = new StringBuilder();
+    final StringBuilder txt = new StringBuilder();
     if (this.dwProtocol == null) {
       this.dwProtocol = DriveWireServer.getHandler(
           clientThreadRef.getInstance()
       );
     }
-    ArrayList<String> tops = dwProtocol.getHelp().getTopics(null);
-    for (String top : tops) {
+    final ArrayList<String> tops = dwProtocol.getHelp().getTopics(null);
+    for (final String top : tops) {
       txt.append(top).append("\n");
     }
     return new DWCommandResponse(txt.toString());

@@ -12,6 +12,7 @@ public class UICmdServerFileDir extends DWCommand {
    * UI Command Server File Dir.
    */
   public UICmdServerFileDir() {
+    super();
     setCommand("dir");
     setShortHelp("List directory contents");
     setUsage("ui server file dir [path]");
@@ -24,19 +25,19 @@ public class UICmdServerFileDir extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    File dir = new File(cmdline);
-    StringBuilder text = new StringBuilder();
-    File[] contents = dir.listFiles();
+    final File dir = new File(cmdline);
+    final StringBuilder text = new StringBuilder();
+    final File[] contents = dir.listFiles();
 
     if (contents != null) {
-      for (File f : contents) {
-        if (f.isDirectory()) {
-          text.append(DWUtils.getFileDescriptor(f)).append("|false\n");
+      for (final File file : contents) {
+        if (file.isDirectory()) {
+          text.append(DWUtils.getFileDescriptor(file)).append("|false\n");
         }
       }
-      for (File f : contents) {
-        if (!f.isDirectory()) {
-          text.append(DWUtils.getFileDescriptor(f)).append("|false\n");
+      for (final File file : contents) {
+        if (!file.isDirectory()) {
+          text.append(DWUtils.getFileDescriptor(file)).append("|false\n");
         }
       }
     }

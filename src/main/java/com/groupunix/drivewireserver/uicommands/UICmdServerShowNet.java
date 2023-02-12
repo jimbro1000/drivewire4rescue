@@ -15,6 +15,7 @@ public class UICmdServerShowNet extends DWCommand {
    * UI Command Server Show Net.
    */
   public UICmdServerShowNet() {
+    super();
     setCommand("net");
     setShortHelp("show available network interfaces");
     setUsage("ui server show net");
@@ -28,13 +29,14 @@ public class UICmdServerShowNet extends DWCommand {
    */
   @Override
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder res = new StringBuilder();
-    Enumeration<NetworkInterface> nets;
+    final StringBuilder res = new StringBuilder();
     try {
-      nets = NetworkInterface.getNetworkInterfaces();
-      for (NetworkInterface netint : Collections.list(nets)) {
-        Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-        for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+      final Enumeration<NetworkInterface> nets
+          = NetworkInterface.getNetworkInterfaces();
+      for (final NetworkInterface netint : Collections.list(nets)) {
+        final Enumeration<InetAddress> inetAddresses
+            = netint.getInetAddresses();
+        for (final InetAddress inetAddress : Collections.list(inetAddresses)) {
           res.append(inetAddress.getHostAddress())
               .append("|")
               .append(netint.getName())

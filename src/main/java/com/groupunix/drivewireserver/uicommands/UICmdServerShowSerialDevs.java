@@ -12,6 +12,7 @@ public class UICmdServerShowSerialDevs extends DWCommand {
    * UI Command Server Show Serial Devices.
    */
   public UICmdServerShowSerialDevs() {
+    super();
     setCommand("serialdevs");
     setShortHelp("show available serial devices");
     setUsage("ui server show serialdevs");
@@ -25,9 +26,9 @@ public class UICmdServerShowSerialDevs extends DWCommand {
    */
   @Override
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder txt = new StringBuilder();
-    ArrayList<String> ports = DriveWireServer.getAvailableSerialPorts();
-    for (String port : ports) {
+    final StringBuilder txt = new StringBuilder();
+    final ArrayList<String> ports = DriveWireServer.getAvailableSerialPorts();
+    for (final String port : ports) {
       txt.append(port).append("\n");
     }
     return new DWCommandResponse(txt.toString());

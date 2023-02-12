@@ -13,6 +13,7 @@ public class UICmdServerFileDefaultDir extends DWCommand {
    * UI Command Server File Default Dir.
    */
   public UICmdServerFileDefaultDir() {
+    super();
     setCommand("defaultdir");
     setShortHelp("Show default dir dir");
     setUsage("ui server file defaultdir");

@@ -11,6 +11,7 @@ public class UICmdServerConfigFreeze extends DWCommand {
    * UI Command Server Configuration freeze.
    */
   public UICmdServerConfigFreeze() {
+    super();
     setCommand("freeze");
     setShortHelp("Set server configuration item");
     setUsage("ui server config freeze [boolean]");
@@ -23,7 +24,7 @@ public class UICmdServerConfigFreeze extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
     if (args.length == 1) {
       return doSetFreeze(args[0]);
     } else {
@@ -48,10 +49,10 @@ public class UICmdServerConfigFreeze extends DWCommand {
   private DWCommandResponse doSetFreeze(final String state) {
     if (state.equalsIgnoreCase("true")) {
       DriveWireServer.setConfigFreeze(true);
-      return (new DWCommandResponse("Config freeze set."));
+      return new DWCommandResponse("Config freeze set.");
     } else {
       DriveWireServer.setConfigFreeze(false);
-      return (new DWCommandResponse("Config freeze unset."));
+      return new DWCommandResponse("Config freeze unset.");
     }
   }
 }

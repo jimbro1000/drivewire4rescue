@@ -34,6 +34,7 @@ public class UICmdSync extends DWCommand {
    * @param clientThread client thread ref.
    */
   public UICmdSync(final DWUIClientThread clientThread) {
+    super();
     this.dwuiClientThread = clientThread;
     this.lastevt = new DWEvent((byte) 0, -1);
     setCommand("sync");
@@ -60,7 +61,7 @@ public class UICmdSync extends DWCommand {
       LOGGER.debug("immediate I/O error: " + e1.getMessage());
       wanttodie = true;
     }
-    while ((!wanttodie) && (!dwuiClientThread.getSocket().isClosed())) {
+    while (!wanttodie && !dwuiClientThread.getSocket().isClosed()) {
       try {
         sendEvent(this.dwuiClientThread.getEventQueue().take());
       } catch (InterruptedException | IOException e) {
@@ -76,7 +77,7 @@ public class UICmdSync extends DWCommand {
   }
 
   private void sendEvent(final DWEvent msg) throws IOException {
-    for (String key : msg.getParamKeys()) {
+    for (final String key : msg.getParamKeys()) {
       // only send changed params
       if (!lastevt.hasParam(key)
           || !lastevt.getParam(key).equals(msg.getParam(key))) {

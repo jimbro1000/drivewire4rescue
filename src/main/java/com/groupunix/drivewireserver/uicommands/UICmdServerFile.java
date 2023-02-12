@@ -9,7 +9,8 @@ public class UICmdServerFile extends DWCommand {
    * UI Command Server File.
    */
   public UICmdServerFile() {
-    DWCommandList commands = this.getCommandList();
+    super();
+    final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdServerFileRoots());
     commands.addCommand(new UICmdServerFileDefaultDir());
     commands.addCommand(new UICmdServerFileDir());

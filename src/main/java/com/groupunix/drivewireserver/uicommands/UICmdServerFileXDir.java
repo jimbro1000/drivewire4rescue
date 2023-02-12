@@ -12,6 +12,7 @@ public class UICmdServerFileXDir extends DWCommand {
    * UI Command Server File XDir.
    */
   public UICmdServerFileXDir() {
+    super();
     setCommand("xdir");
     setShortHelp("List directory contents (short form)");
     setUsage("ui server file xdir [path]");
@@ -24,25 +25,25 @@ public class UICmdServerFileXDir extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    File dir = new File(cmdline);
-    File[] contents = dir.listFiles();
+    final File dir = new File(cmdline);
+    final File[] contents = dir.listFiles();
     if (contents == null) {
       return new DWCommandResponse("");
     }
-    StringBuilder text = new StringBuilder();
-    for (File f : contents) {
-      if (f.isDirectory()) {
+    final StringBuilder text = new StringBuilder();
+    for (final File file : contents) {
+      if (file.isDirectory()) {
         try {
-          text.append(DWUtils.getFileXDescriptor(f)).append("\n");
+          text.append(DWUtils.getFileXDescriptor(file)).append("\n");
         } catch (DWFileSystemInvalidFilenameException ignored) {
         }
       }
     }
 
-    for (File f : contents) {
-      if (!f.isDirectory()) {
+    for (final File file : contents) {
+      if (!file.isDirectory()) {
         try {
-          text.append(DWUtils.getFileXDescriptor(f)).append("\n");
+          text.append(DWUtils.getFileXDescriptor(file)).append("\n");
         } catch (DWFileSystemInvalidFilenameException ignored) {
         }
       }

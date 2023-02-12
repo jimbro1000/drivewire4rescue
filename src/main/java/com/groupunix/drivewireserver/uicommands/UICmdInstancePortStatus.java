@@ -26,6 +26,7 @@ public class UICmdInstancePortStatus extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdInstancePortStatus(final DWUIClientThread clientThread) {
+    super();
     this.dwuiClientThread = clientThread;
     setHelp();
   }
@@ -36,6 +37,7 @@ public class UICmdInstancePortStatus extends DWCommand {
    * @param protocol protocol
    */
   public UICmdInstancePortStatus(final DWVSerialProtocol protocol) {
+    super();
     this.dwvSerialProtocol = protocol;
     setHelp();
   }
@@ -54,13 +56,11 @@ public class UICmdInstancePortStatus extends DWCommand {
    */
   @Override
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder res = new StringBuilder();
     if (this.dwvSerialProtocol == null) {
       if (
-          (DriveWireServer.isValidHandlerNo(this.dwuiClientThread.getInstance())
-              && (DriveWireServer.getHandler(
-              this.dwuiClientThread.getInstance()).hasVSerial())
-          )
+          DriveWireServer.isValidHandlerNo(this.dwuiClientThread.getInstance())
+              && DriveWireServer.getHandler(
+              this.dwuiClientThread.getInstance()).hasVSerial()
       ) {
         dwvSerialProtocol = (DWVSerialProtocol) DriveWireServer
             .getHandler(this.dwuiClientThread.getInstance());
@@ -72,6 +72,7 @@ public class UICmdInstancePortStatus extends DWCommand {
         );
       }
     }
+    final StringBuilder res = new StringBuilder();
     if (!(dwvSerialProtocol == null)
         && !(dwvSerialProtocol.getVPorts() == null)) {
       for (int p = 0; p < dwvSerialProtocol.getVPorts().getMaxPorts(); p++) {

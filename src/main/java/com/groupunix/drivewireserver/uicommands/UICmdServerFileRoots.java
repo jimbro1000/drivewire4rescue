@@ -11,6 +11,7 @@ public class UICmdServerFileRoots extends DWCommand {
    * UI Command Server File Roots.
    */
   public UICmdServerFileRoots() {
+    super();
     setCommand("roots");
     setShortHelp("List filesystem roots");
     setUsage("ui server file roots");
@@ -23,10 +24,10 @@ public class UICmdServerFileRoots extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    File[] roots = File.listRoots();
-    StringBuilder text = new StringBuilder();
-    for (File f : roots) {
-      text.append(DWUtils.getFileDescriptor(f)).append("|true\n");
+    final File[] roots = File.listRoots();
+    final StringBuilder text = new StringBuilder();
+    for (final File file : roots) {
+      text.append(DWUtils.getFileDescriptor(file)).append("|true\n");
     }
     return new DWCommandResponse(text.toString());
   }

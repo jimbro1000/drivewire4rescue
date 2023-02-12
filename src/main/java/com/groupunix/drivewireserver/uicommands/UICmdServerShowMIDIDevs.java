@@ -15,6 +15,7 @@ public class UICmdServerShowMIDIDevs extends DWCommand {
    * UI Command Server Show MIDI Devices.
    */
   public UICmdServerShowMIDIDevs() {
+    super();
     setCommand("mididevs");
     setShortHelp("show available MIDI devices");
     setUsage("ui server show mididevs");
@@ -28,12 +29,12 @@ public class UICmdServerShowMIDIDevs extends DWCommand {
    */
   @Override
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder res = new StringBuilder();
-    // hack.. should look at current instance, but I just don't care
+    final StringBuilder res = new StringBuilder();
+    // hack... should look at current instance, but I just don't care
     if (DriveWireServer.getHandler(0)
         .getConfig().getBoolean("UseMIDI", true)) {
       MidiDevice device;
-      MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+      final MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
       for (int i = 0; i < infos.length; i++) {
         try {
           device = MidiSystem.getMidiDevice(infos[i]);

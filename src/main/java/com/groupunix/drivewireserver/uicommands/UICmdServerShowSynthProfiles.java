@@ -14,10 +14,7 @@ public class UICmdServerShowSynthProfiles extends DWCommand {
    * UI Command Server Show Synth Profiles.
    */
   public UICmdServerShowSynthProfiles() {
-    setHelp();
-  }
-
-  private void setHelp() {
+    super();
     setCommand("synthprofiles");
     setShortHelp("show MIDI synth profiles");
     setUsage("ui server show synthprofiles");
@@ -32,13 +29,11 @@ public class UICmdServerShowSynthProfiles extends DWCommand {
   @SuppressWarnings("unchecked")
   @Override
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder res = new StringBuilder();
-
-    List<HierarchicalConfiguration> profiles = DriveWireServer
+    final StringBuilder res = new StringBuilder();
+    final List<HierarchicalConfiguration> profiles = DriveWireServer
         .getServerConfiguration()
         .configurationsAt("midisynthprofile");
-
-    for (HierarchicalConfiguration mprof : profiles) {
+    for (final HierarchicalConfiguration mprof : profiles) {
       res.append(mprof.getString("[@name]"))
           .append("|")
           .append(mprof.getString("[@desc]"))

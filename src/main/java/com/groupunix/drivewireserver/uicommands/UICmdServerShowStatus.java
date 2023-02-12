@@ -11,6 +11,7 @@ public class UICmdServerShowStatus extends DWCommand {
    * UI Command Server Show Status.
    */
   public UICmdServerShowStatus() {
+    super();
     setCommand("status");
     setShortHelp("show server status");
     setUsage("ui server show status");

@@ -13,6 +13,7 @@ public class UICmdServerConfigWrite extends DWCommand {
    * UI Command Server Configuration Write.
    */
   public UICmdServerConfigWrite() {
+    super();
     setCommand("write");
     setShortHelp("Write config xml");
     setUsage("ui server config write");
@@ -25,14 +26,13 @@ public class UICmdServerConfigWrite extends DWCommand {
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
-    String res = "";
-    StringWriter sw = new StringWriter();
+    final StringWriter writer = new StringWriter();
     try {
-      DriveWireServer.getServerConfiguration().save(sw);
+      DriveWireServer.getServerConfiguration().save(writer);
     } catch (ConfigurationException e) {
       e.printStackTrace();
     }
-    return new DWCommandResponse(sw.getBuffer().toString());
+    return new DWCommandResponse(writer.getBuffer().toString());
   }
 
   /**

@@ -18,6 +18,7 @@ public class UICmdServerShowLocalDisks extends DWCommand {
    * UI Command Server Show Local Disks.
    */
   public UICmdServerShowLocalDisks() {
+    super();
     setCommand("localdisks");
     setShortHelp("show server local disks");
     setUsage("ui server show localdisks");
@@ -31,8 +32,6 @@ public class UICmdServerShowLocalDisks extends DWCommand {
    */
   @Override
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder res = new StringBuilder();
-
     if (!DriveWireServer.getServerConfiguration()
         .containsKey("LocalDiskDir")) {
       return new DWCommandResponse(
@@ -41,14 +40,15 @@ public class UICmdServerShowLocalDisks extends DWCommand {
           "LocalDiskDir must be defined in configuration"
       );
     }
+    final StringBuilder res = new StringBuilder();
     try {
-      String path = DriveWireServer.getServerConfiguration().getString(
-          "LocalDiskDir");
-      FileSystemManager fsManager;
-      fsManager = VFS.getManager();
-      FileObject dirobj = fsManager.resolveFile(path);
-      FileObject[] children = dirobj.getChildren();
-      for (FileObject child : children) {
+      final String path = DriveWireServer
+          .getServerConfiguration()
+          .getString("LocalDiskDir");
+      final FileSystemManager fsManager = VFS.getManager();
+      final FileObject dirobj = fsManager.resolveFile(path);
+      final FileObject[] children = dirobj.getChildren();
+      for (final FileObject child : children) {
         if (child.getType() == FileType.FILE) {
           res.append(child.getName()).append("\n");
         }

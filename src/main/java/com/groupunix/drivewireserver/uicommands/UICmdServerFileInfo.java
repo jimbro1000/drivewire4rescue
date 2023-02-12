@@ -12,6 +12,7 @@ public class UICmdServerFileInfo extends DWCommand {
    * UI Command Server File Info.
    */
   public UICmdServerFileInfo() {
+    super();
     setCommand("info");
     setShortHelp("Show file details");
     setUsage("ui server file info");

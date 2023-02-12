@@ -13,7 +13,8 @@ public class UICmdServerConfig extends DWCommand {
    * @param ignoredClientThread not used
    */
   public UICmdServerConfig(final DWUIClientThread ignoredClientThread) {
-    DWCommandList commands = this.getCommandList();
+    super();
+    final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdServerConfigShow());
     commands.addCommand(new UICmdServerConfigSet());
     commands.addCommand(new UICmdServerConfigSerial());
@@ -28,7 +29,8 @@ public class UICmdServerConfig extends DWCommand {
    * @param ignoredProtocol not used
    */
   public UICmdServerConfig(final DWProtocol ignoredProtocol) {
-    DWCommandList commands = this.getCommandList();
+    super();
+    final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdServerConfigShow());
     commands.addCommand(new UICmdServerConfigSet());
     commands.addCommand(new UICmdServerConfigWrite());

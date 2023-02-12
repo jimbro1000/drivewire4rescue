@@ -25,6 +25,7 @@ public class UICmdInstanceTimerReset extends DWCommand {
    * @param protocol protocol
    */
   public UICmdInstanceTimerReset(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
     setHelp();
   }
@@ -35,6 +36,7 @@ public class UICmdInstanceTimerReset extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdInstanceTimerReset(final DWUIClientThread clientThread) {
+    super();
     this.dwuiClientThread = clientThread;
     setHelp();
   }
@@ -60,14 +62,14 @@ public class UICmdInstanceTimerReset extends DWCommand {
           "Must specify timer #"
       );
     } else {
-      String[] args = cmdline.split(" ");
-      // TODO ASSumes we are using DW protocol
+      final String[] args = cmdline.split(" ");
+      // TODO Assumes we are using DW protocol
       if (this.dwProtocol == null) {
         dwProtocol = DriveWireServer
             .getHandler(this.dwuiClientThread.getInstance());
       }
       try {
-        byte tno = (byte) Integer.parseInt(args[0]);
+        final byte tno = (byte) Integer.parseInt(args[0]);
         this.dwProtocol.getTimers().resetTimer(tno);
         return new DWCommandResponse(
             "Reset timer " + (tno & BYTE_MASK)

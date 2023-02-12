@@ -31,6 +31,7 @@ public class UICmdInstanceMIDIStatus extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdInstanceMIDIStatus(final DWUIClientThread clientThread) {
+    super();
     this.dwuiClientThread = clientThread;
     setHelp();
   }
@@ -41,6 +42,7 @@ public class UICmdInstanceMIDIStatus extends DWCommand {
    * @param protocol protocol
    */
   public UICmdInstanceMIDIStatus(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
     setHelp();
   }
@@ -68,15 +70,15 @@ public class UICmdInstanceMIDIStatus extends DWCommand {
             this.dwuiClientThread.getInstance()
         );
       } else {
-        return (new DWCommandResponse(res.toString()));
+        return new DWCommandResponse(res.toString());
       }
     }
     if (this.dwProtocol.hasMIDI()) {
-      DWProtocolHandler dwProto = (DWProtocolHandler) dwProtocol;
+      final DWProtocolHandler dwProto = (DWProtocolHandler) dwProtocol;
 
-      if (!(dwProto == null)
-          && !(dwProto.getVPorts() == null)
-          && !(dwProto.getVPorts().getMidiDeviceInfo() == null)) {
+      if (dwProto != null
+          && dwProto.getVPorts() != null
+          && dwProto.getVPorts().getMidiDeviceInfo() != null) {
         try {
           res = new StringBuilder(
               "enabled|"
@@ -89,33 +91,33 @@ public class UICmdInstanceMIDIStatus extends DWCommand {
           res.append("cprofile|")
               .append(dwProto.getVPorts().getMidiProfileName())
               .append("\r\n");
-          MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+          final MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
           for (int j = 0; j < infos.length; j++) {
-            MidiDevice.Info i = infos[j];
-            MidiDevice dev = MidiSystem.getMidiDevice(i);
+            final MidiDevice.Info info = infos[j];
+            final MidiDevice dev = MidiSystem.getMidiDevice(info);
             res.append("device|")
                 .append(j)
                 .append("|")
                 .append(dev.getClass().getSimpleName())
                 .append("|")
-                .append(i.getName())
+                .append(info.getName())
                 .append("|")
-                .append(i.getDescription())
+                .append(info.getDescription())
                 .append("|")
-                .append(i.getVendor())
+                .append(info.getVendor())
                 .append("|")
-                .append(i.getVersion())
+                .append(info.getVersion())
                 .append("\r\n");
           }
           @SuppressWarnings("unchecked")
-          List<HierarchicalConfiguration> profiles =
+          final List<HierarchicalConfiguration> profiles =
               DriveWireServer.getServerConfiguration().configurationsAt(
                   "midisynthprofile");
-          for (HierarchicalConfiguration mprof : profiles) {
+          for (final HierarchicalConfiguration midiProfile : profiles) {
             res.append("profile|")
-                .append(mprof.getString("[@name]"))
+                .append(midiProfile.getString("[@name]"))
                 .append("|")
-                .append(mprof.getString("[@desc]"))
+                .append(midiProfile.getString("[@desc]"))
                 .append("\r\n");
           }
         } catch (MidiUnavailableException e) {

@@ -11,6 +11,7 @@ public class UICmdTest extends DWCommand {
    * @param clientThread client thread reference
    */
   public UICmdTest(final DWUIClientThread clientThread) {
+    super();
     this.getCommandList().addCommand(new UICmdTestDGraph(clientThread));
     this.setCommand("test");
     this.setShortHelp("Test commands");
