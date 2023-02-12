@@ -27,6 +27,7 @@ public class UICmdInstanceConfigShow extends DWCommand {
    * @param clientThread UI Client thread
    */
   public UICmdInstanceConfigShow(final DWUIClientThread clientThread) {
+    super();
     this.uiRef = clientThread;
     setHelp();
   }
@@ -37,6 +38,7 @@ public class UICmdInstanceConfigShow extends DWCommand {
    * @param protocol Drivewire protocol
    */
   public UICmdInstanceConfigShow(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
     setHelp();
   }
@@ -55,7 +57,7 @@ public class UICmdInstanceConfigShow extends DWCommand {
    */
   @SuppressWarnings("unchecked")
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder res = new StringBuilder();
+    final StringBuilder res = new StringBuilder();
     int instance;
     if (this.uiRef != null) {
       instance = this.uiRef.getInstance();
@@ -63,18 +65,18 @@ public class UICmdInstanceConfigShow extends DWCommand {
       instance = this.dwProtocol.getHandlerNo();
     }
     if (cmdline.length() == 0) {
-      Iterator<String> i = DriveWireServer
-              .getHandler(instance)
-              .getConfig()
-              .getKeys();
-      while (i.hasNext()) {
-        String key = i.next();
-        String value = StringUtils.join(
-                DriveWireServer
-                        .getHandler(instance)
-                        .getConfig()
-                        .getStringArray(key),
-                ", "
+      final Iterator<String> iterator = DriveWireServer
+          .getHandler(instance)
+          .getConfig()
+          .getKeys();
+      while (iterator.hasNext()) {
+        final String key = iterator.next();
+        final String value = StringUtils.join(
+            DriveWireServer
+                .getHandler(instance)
+                .getConfig()
+                .getStringArray(key),
+            ", "
         );
         res.append(key).append(" = ").append(value).append("\r\n");
       }
@@ -83,12 +85,12 @@ public class UICmdInstanceConfigShow extends DWCommand {
                 .getHandler(instance)
                 .getConfig()
                 .containsKey(cmdline)) {
-        String value = StringUtils.join(
-                DriveWireServer
-                        .getHandler(instance)
-                        .getConfig()
-                        .getStringArray(cmdline),
-                ", "
+        final String value = StringUtils.join(
+            DriveWireServer
+                .getHandler(instance)
+                .getConfig()
+                .getStringArray(cmdline),
+            ", "
         );
         return new DWCommandResponse(value);
       } else {

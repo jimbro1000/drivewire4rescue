@@ -18,6 +18,7 @@ public class UICmdInstanceAttach extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdInstanceAttach(final DWUIClientThread clientThread) {
+    super();
     clientRef = clientThread;
     setCommand("attach");
     setShortHelp("attach to instance #");
@@ -33,7 +34,7 @@ public class UICmdInstanceAttach extends DWCommand {
   @Override
   public DWCommandResponse parse(final String cmdline) {
     try {
-      int handler = Integer.parseInt(cmdline);
+      final int handler = Integer.parseInt(cmdline);
       if (DriveWireServer.isValidHandlerNo(handler)) {
         // set this connection's instance
         clientRef.setInstance(handler);

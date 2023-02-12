@@ -13,7 +13,8 @@ public class UICmdInstanceConfig extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdInstanceConfig(final DWUIClientThread clientThread) {
-    DWCommandList commands = this.getCommandList();
+    super();
+    final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdInstanceConfigShow(clientThread));
     commands.addCommand(new UICmdInstanceConfigSet(clientThread));
     setHelp();
@@ -25,7 +26,8 @@ public class UICmdInstanceConfig extends DWCommand {
    * @param protocol protocol
    */
   public UICmdInstanceConfig(final DWProtocol protocol) {
-    DWCommandList commands = this.getCommandList();
+    super();
+    final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdInstanceConfigShow(protocol));
     commands.addCommand(new UICmdInstanceConfigSet(protocol));
     setHelp();

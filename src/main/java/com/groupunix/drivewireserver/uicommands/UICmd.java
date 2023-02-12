@@ -18,7 +18,8 @@ public class UICmd extends DWCommand {
    * @param clientThread ui client thread
    */
   public UICmd(final DWUIClientThread clientThread) {
-    DWCommandList commands = new DWCommandList(null);
+    super();
+    final DWCommandList commands = new DWCommandList(null);
     commands.addCommand(new UICmdInstance(clientThread));
     commands.addCommand(new UICmdServer(clientThread));
     commands.addCommand(new UICmdSync(clientThread));
@@ -32,7 +33,8 @@ public class UICmd extends DWCommand {
    * @param protocol protocol
    */
   public UICmd(final DWProtocol protocol) {
-    DWCommandList commands = new DWCommandList(null);
+    super();
+    final DWCommandList commands = new DWCommandList(null);
     commands.addCommand(new UICmdInstance(protocol));
     commands.addCommand(new UICmdServer(protocol));
     this.setCommandList(commands);
@@ -46,7 +48,7 @@ public class UICmd extends DWCommand {
    */
   public DWCommandResponse parse(final String cmdline) {
     if (cmdline.length() == 0) {
-      return (new DWCommandResponse(this.getCommandList().getShortHelp()));
+      return new DWCommandResponse(this.getCommandList().getShortHelp());
     }
     return getCommandList().parse(cmdline);
   }

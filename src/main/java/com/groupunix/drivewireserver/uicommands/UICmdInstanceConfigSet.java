@@ -23,6 +23,7 @@ public class UICmdInstanceConfigSet extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdInstanceConfigSet(final DWUIClientThread clientThread) {
+    super();
     this.dwuiClientThread = clientThread;
     setHelp();
   }
@@ -33,6 +34,7 @@ public class UICmdInstanceConfigSet extends DWCommand {
    * @param protocol protocol
    */
   public UICmdInstanceConfigSet(final DWProtocol protocol) {
+    super();
     this.dwProtocol = protocol;
     setHelp();
   }
@@ -57,7 +59,7 @@ public class UICmdInstanceConfigSet extends DWCommand {
           "Must specify item"
       );
     }
-    String[] args = cmdline.split(" ");
+    final String[] args = cmdline.split(" ");
     if (args.length == 1) {
       return doSetConfig(args[0]);
     } else {
@@ -75,7 +77,7 @@ public class UICmdInstanceConfigSet extends DWCommand {
    * @return true
    */
   public boolean validate(final String cmdline) {
-    return (true);
+    return true;
   }
 
   private DWCommandResponse doSetConfig(final String item) {

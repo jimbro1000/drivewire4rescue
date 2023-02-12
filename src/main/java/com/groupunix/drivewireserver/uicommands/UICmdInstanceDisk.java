@@ -12,6 +12,7 @@ public class UICmdInstanceDisk extends DWCommand {
    * @param clientThread client thread ref.
    */
   public UICmdInstanceDisk(final DWUIClientThread clientThread) {
+    super();
     this.getCommandList()
         .addCommand(new UICmdInstanceDiskShow(clientThread));
     setHelp();
@@ -23,6 +24,7 @@ public class UICmdInstanceDisk extends DWCommand {
    * @param protocolHandler protocol handler
    */
   public UICmdInstanceDisk(final DWProtocolHandler protocolHandler) {
+    super();
     this.getCommandList()
         .addCommand(new UICmdInstanceDiskShow(protocolHandler));
     setHelp();

@@ -30,6 +30,7 @@ public class UICmdInstanceDiskShow extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdInstanceDiskShow(final DWUIClientThread clientThread) {
+    super();
     this.dwuiClientThread = clientThread;
     setHelp();
   }
@@ -40,6 +41,7 @@ public class UICmdInstanceDiskShow extends DWCommand {
    * @param protocolHandler protocol handler
    */
   public UICmdInstanceDiskShow(final DWProtocolHandler protocolHandler) {
+    super();
     this.dwProtocolHandler = protocolHandler;
     setHelp();
   }
@@ -58,8 +60,6 @@ public class UICmdInstanceDiskShow extends DWCommand {
    */
   @SuppressWarnings("unchecked")
   public DWCommandResponse parse(final String cmdline) {
-    StringBuilder res = new StringBuilder();
-
     // TODO hackish!
     if (this.dwProtocolHandler == null) {
       if (DriveWireServer.getHandler(this.dwuiClientThread.getInstance())
@@ -74,6 +74,7 @@ public class UICmdInstanceDiskShow extends DWCommand {
         );
       }
     }
+    final StringBuilder res = new StringBuilder();
     if (cmdline.length() == 0) {
       if (dwProtocolHandler.getDiskDrives() == null) {
         return new DWCommandResponse(
@@ -101,16 +102,17 @@ public class UICmdInstanceDiskShow extends DWCommand {
     } else {
       // disk details
       try {
-        int driveno = Integer.parseInt(cmdline);
-        if ((!(dwProtocolHandler.getDiskDrives() == null))
-            && (dwProtocolHandler.getDiskDrives().isLoaded(driveno))) {
+        final int driveno = Integer.parseInt(cmdline);
+        if (dwProtocolHandler.getDiskDrives() != null
+            && dwProtocolHandler.getDiskDrives().isLoaded(driveno)) {
           res.append("*loaded|true\n");
-          HierarchicalConfiguration disk = dwProtocolHandler.getDiskDrives()
+          final HierarchicalConfiguration disk = dwProtocolHandler
+              .getDiskDrives()
               .getDisk(driveno)
               .getParams();
-          Iterator<String> itk = disk.getKeys();
+          final Iterator<String> itk = disk.getKeys();
           while (itk.hasNext()) {
-            String option = itk.next();
+            final String option = itk.next();
             res.append(option)
                 .append("|")
                 .append(disk.getProperty(option))
@@ -120,16 +122,16 @@ public class UICmdInstanceDiskShow extends DWCommand {
           res.append("*loaded|false\n");
         }
       } catch (NumberFormatException e) {
-        return (new DWCommandResponse(
+        return new DWCommandResponse(
             false,
             DWDefs.RC_SYNTAX_ERROR,
-            "Non numeric drive number")
+            "Non numeric drive number"
         );
       } catch (DWDriveNotLoadedException e) {
         res.append("*loaded|false\n");
       } catch (DWDriveNotValidException e) {
-        return (new DWCommandResponse(
-            false, DWDefs.RC_INVALID_DRIVE, e.getMessage())
+        return new DWCommandResponse(
+            false, DWDefs.RC_INVALID_DRIVE, e.getMessage()
         );
       }
     }

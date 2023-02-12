@@ -15,7 +15,8 @@ public class UICmdInstance extends DWCommand {
    * @param clientThread client thread ref
    */
   public UICmdInstance(final DWUIClientThread clientThread) {
-    DWCommandList commands = this.getCommandList();
+    super();
+    final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdInstanceAttach(clientThread));
     commands.addCommand(new UICmdInstanceConfig(clientThread));
     commands.addCommand(new UICmdInstanceDisk(clientThread));
@@ -34,7 +35,8 @@ public class UICmdInstance extends DWCommand {
    * @param protocol protocol
    */
   public UICmdInstance(final DWProtocol protocol) {
-    DWCommandList commands = this.getCommandList();
+    super();
+    final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdInstanceConfig(protocol));
     if (protocol.hasDisks()) {
       commands.addCommand(new UICmdInstanceDisk((DWProtocolHandler) protocol));
