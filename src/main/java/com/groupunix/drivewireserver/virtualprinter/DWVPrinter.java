@@ -38,18 +38,18 @@ public class DWVPrinter {
     LOGGER.debug("dwprinter init for handler #" + protocol.getHandlerNo());
     // load drivers
     @SuppressWarnings("unchecked")
-    List<HierarchicalConfiguration> printers = protocol
+    final List<HierarchicalConfiguration> printers = protocol
         .getConfig().configurationsAt("Printer");
-    for (HierarchicalConfiguration printer : printers) {
+    for (final HierarchicalConfiguration printer : printers) {
       if (printer.containsKey("[@name]") && printer.containsKey("Driver")) {
         // definition appears valid
         // now can we instantiate the requested driver...
         try {
           @SuppressWarnings("unchecked")
-          Constructor<DWVPrinterDriver> pconst
+          final Constructor<DWVPrinterDriver> pconst
               = (Constructor<DWVPrinterDriver>) Class.forName(
-                  ("com.groupunix.drivewireserver.virtualprinter.DWVPrinter"
-                      + printer.getString("Driver")),
+                  "com.groupunix.drivewireserver.virtualprinter.DWVPrinter"
+                      + printer.getString("Driver"),
               true,
               this.getClass()
                   .getClassLoader()
@@ -124,7 +124,7 @@ public class DWVPrinter {
 
   private DWVPrinterDriver getCurrentDriver()
       throws DWPrinterNotDefinedException {
-    String currentPrinter = this.dwProtocol
+    final String currentPrinter = this.dwProtocol
         .getConfig()
         .getString("CurrentPrinter", null);
     if (currentPrinter == null) {
@@ -132,9 +132,9 @@ public class DWVPrinter {
           "No current printer is set in the configuration"
       );
     }
-    for (DWVPrinterDriver drv : this.drivers) {
+    for (final DWVPrinterDriver drv : this.drivers) {
       if (drv.getPrinterName().equals(currentPrinter)) {
-        return (drv);
+        return drv;
       }
     }
     throw new DWPrinterNotDefinedException(
@@ -148,7 +148,7 @@ public class DWVPrinter {
   public void flush() {
     LOGGER.debug("Printer flush");
     // get out of main thread for flush...
-    Thread flusher = new Thread(new Runnable() {
+    final Thread flusher = new Thread(new Runnable() {
       @Override
       public void run() {
         Thread.currentThread().setName("printflush-"

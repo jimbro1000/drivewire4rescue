@@ -62,7 +62,7 @@ public class DWVPrinterTEXT implements DWVPrinterDriver {
    */
   @Override
   public String getDriverName() {
-    return ("TEXT");
+    return "TEXT";
   }
 
   /**
@@ -75,11 +75,11 @@ public class DWVPrinterTEXT implements DWVPrinterDriver {
   @Override
   public void flush()
       throws IOException, DWPrinterNotDefinedException, DWPrinterFileError {
-    File file = getPrinterFile();
-    FileOutputStream fos = new FileOutputStream(file);
+    final File file = getPrinterFile();
+    final FileOutputStream fos = new FileOutputStream(file);
     while (this.printBuffer.getAvailable() > 0) {
-      byte[] buf = new byte[BUFFER_SIZE];
-      int read = this.printBuffer.getInputStream().read(buf);
+      final byte[] buf = new byte[BUFFER_SIZE];
+      final int read = this.printBuffer.getInputStream().read(buf);
       fos.write(buf, 0, read);
     }
     fos.flush();
@@ -109,11 +109,11 @@ public class DWVPrinterTEXT implements DWVPrinterDriver {
     // $name - printer name
     // $file - full file path
     String result = cmd;
-    HashMap<String, String> vars = new HashMap<>();
+    final HashMap<String, String> vars = new HashMap<>();
     vars.put("name", hierarchicalConfiguration.getString("Name"));
     // double \ so the replaceall doesn't eat it later
     vars.put("file", file.getCanonicalPath().replaceAll("\\\\", "\\\\\\\\"));
-    for (Map.Entry<String, String> e : vars.entrySet()) {
+    for (final Map.Entry<String, String> e : vars.entrySet()) {
       result = result.replaceAll("\\$" + e.getKey(), e.getValue());
     }
     return result;
@@ -125,7 +125,7 @@ public class DWVPrinterTEXT implements DWVPrinterDriver {
    * @return file extension
    */
   public String getFileExtension() {
-    return (".txt");
+    return ".txt";
   }
 
   /**
@@ -134,7 +134,7 @@ public class DWVPrinterTEXT implements DWVPrinterDriver {
    * @return file prefix
    */
   public String getFilePrefix() {
-    return ("dw_text_");
+    return "dw_text_";
   }
 
   /**
@@ -150,9 +150,9 @@ public class DWVPrinterTEXT implements DWVPrinterDriver {
       if (DWUtils.fileExistsOrCreate(
           this.hierarchicalConfiguration.getString("OutputFile")
       )) {
-        return (new File(
+        return new File(
             this.hierarchicalConfiguration.getString("OutputFile")
-        ));
+        );
       } else {
         throw new DWPrinterFileError(
             "Cannot find or create the output file '"

@@ -298,7 +298,7 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
    */
   @Override
   public String getDriverName() {
-    return ("FX80");
+    return "FX80";
   }
 
   private void processEscapeCode(final int code) {
@@ -330,7 +330,7 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
   private void processUnprintable(final int code) throws DWPrinterFileError {
     switch (code) {
       case TAB_CODE -> {
-        xpos += (TAB_CHARS * charWidth);
+        xpos += TAB_CHARS * charWidth;
       }
       case NEWLINE_CODE -> {
         xpos = 0;
@@ -387,25 +387,25 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
     ypos = lineHeight;
 
     while (this.printBuffer.getAvailable() > 0) {
-      char c = (char) this.printBuffer.getInputStream().read();
+      final char nextChar = (char) this.printBuffer.getInputStream().read();
       // control codes
       if (mEscape) {
-        processEscapeCode(c);
+        processEscapeCode(nextChar);
         this.charWidth = getCPI();
         this.mEscape = false;
       } else if (
-          ((int) c < MIN_CHR_INT)
-              || ((int) c == DEL_CHR)
-              || (((int) c > DEL_CHR) && ((int) c < MIN_GRAPH_CHAR))
-              || ((int) c == MAX_CHR_INT)
+          (int) nextChar < MIN_CHR_INT
+              || (int) nextChar == DEL_CHR
+              || (int) nextChar > DEL_CHR && (int) nextChar < MIN_GRAPH_CHAR
+              || (int) nextChar == MAX_CHR_INT
       ) {
-        processUnprintable(c);
+        processUnprintable(nextChar);
         // apply
         this.charWidth = getCPI();
       } else {
-        drawCharacter(c, xpos, ypos);
+        drawCharacter(nextChar, xpos, ypos);
         if (mExpanded) {
-          xpos += (charWidth * 2);
+          xpos += charWidth * 2;
         } else {
           xpos += charWidth;
         }
@@ -445,15 +445,15 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
    * @return cpi
    */
   private double getCPI() {
-    double sz;
+    double size;
     if (mElite) {
-      sz = szEliteDPI;
+      size = szEliteDPI;
     } else if (mCompressed) {
-      sz = szCompressedDPI;
+      size = szCompressedDPI;
     } else {
-      sz = szPicaDPI;
+      size = szPicaDPI;
     }
-    return (sz);
+    return size;
   }
 
   /**
@@ -505,41 +505,47 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
   /**
    * Draw character.
    *
-   * @param ch character
-   * @param x  x position
-   * @param y  y position
+   * @param character character
+   * @param xPosition  x position
+   * @param yPosition  y position
    */
   private void drawCharacter(
-      final int ch, final double x, final double y
+      final int character, final double xPosition, final double yPosition
   ) {
-    double xPos = x;
+    double xPos = xPosition;
     // draw one character... just testing
     for (int i = 0; i < CHARACTER_COLS; i++) {
-      int lBits = charset.getCharacterCol(ch, i);
-      drawCharCol(lBits, xPos, y);
+      final int lBits = charset.getCharacterCol(character, i);
+      drawCharCol(lBits, xPos, yPosition);
       if (mDoublestrike) {
         drawCharCol(
-            lBits, xPos, y + (defYSizeDPI / Y_FACTOR_1 / Y_FACTOR_2)
+            lBits,
+            xPos,
+            yPosition + defYSizeDPI / Y_FACTOR_1 / Y_FACTOR_2
         );
       }
       if (mExpanded) {
-        xPos += (this.charWidth / EXPANDED_CHAR_X);
-        drawCharCol(lBits, xPos, y);
+        xPos += this.charWidth / EXPANDED_CHAR_X;
+        drawCharCol(lBits, xPos, yPosition);
         if (mDoublestrike) {
           drawCharCol(
-              lBits, xPos, y + (defYSizeDPI / Y_FACTOR_1 / Y_FACTOR_2)
+              lBits,
+              xPos,
+              yPosition + defYSizeDPI / Y_FACTOR_1 / Y_FACTOR_2
           );
         }
       } else if (mEmphasized) {
-        xPos += (this.charWidth / EMPHASISED_CHAR_X);
-        drawCharCol(lBits, xPos, y);
+        xPos += this.charWidth / EMPHASISED_CHAR_X;
+        drawCharCol(lBits, xPos, yPosition);
         if (mDoublestrike) {
           drawCharCol(
-              lBits, xPos, y + (defYSizeDPI / Y_FACTOR_1 / Y_FACTOR_2)
+              lBits,
+              xPos,
+              yPosition + defYSizeDPI / Y_FACTOR_1 / Y_FACTOR_2
           );
         }
       } else {
-        xPos += (this.charWidth / DEFAULT_CHAR_X);
+        xPos += this.charWidth / DEFAULT_CHAR_X;
       }
     }
   }
@@ -548,29 +554,24 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
    * Draw character column.
    *
    * @param lBits control bits
-   * @param xPos  x position
-   * @param yPos  y position
+   * @param xPosition  x position
+   * @param yPosition  y position
    */
   private void drawCharCol(
-      final int lBits, final double xPos, final double yPos
+      final int lBits, final double xPosition, final double yPosition
   ) {
-    double dy = yPos;
+    double yPos = yPosition;
     // draw one column
     for (int i = 0; i < BITS_LINE_LENGTH; i++) {
       if ((lBits & (int) Math.pow(2, i)) == Math.pow(2, i)) {
-//        int r = (int) (char_width / 5);
-//        @SuppressWarnings("unused")
-//        int x = ((int) xPos) - (r / 2);
-//        @SuppressWarnings("unused")
-//        int y = ((int) yPos) - (r / 2);
-        int ix = (int) xPos;
-        int iy = (int) dy;
-        int[] pdx = {ix - 2, ix, ix + 2, ix};
-        int[] pdy = {iy, iy - 2, iy, iy + 2};
-        int[] sdx = {ix - 2, ix - 1, ix + 1, ix + 2,
-            ix + 2, ix + 1, ix - 1, ix - 2};
-        int[] sdy = {iy - 1, iy - 2, iy - 2, iy - 1,
-            iy + 1, iy + 2, iy + 2, iy + 1};
+        final int tmpX = (int) xPosition;
+        final int tmpY = (int) yPos;
+        final int[] pdx = {tmpX - 2, tmpX, tmpX + 2, tmpX};
+        final int[] pdy = {tmpY, tmpY - 2, tmpY, tmpY + 2};
+        final int[] sdx = {tmpX - 2, tmpX - 1, tmpX + 1, tmpX + 2,
+            tmpX + 2, tmpX + 1, tmpX - 1, tmpX - 2};
+        final int[] sdy = {tmpY - 1, tmpY - 2, tmpY - 2, tmpY - 1,
+            tmpY + 1, tmpY + 2, tmpY + 2, tmpY + 1};
         rGraphic.setColor(Color.GRAY);
         rGraphic.drawPolygon(sdx, sdy, OCTAGON);
         rGraphic.setColor(Color.BLACK);
@@ -578,11 +579,8 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
         rGraphic.setColor(Color.DARK_GRAY);
         rGraphic.drawPolygon(pdx, pdy, RECTANGLE);
         rGraphic.setColor(Color.BLACK);
-//        r = (int) (char_width / 6);
-//        x = ((int) xPos) - (r / 2);
-//        y = ((int) yPos) - (r / 2);
       }
-      dy -= (lineHeight / DPI_PER_LINE);
+      yPos -= lineHeight / DPI_PER_LINE;
     }
   }
 
@@ -590,8 +588,8 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
    * Load character.
    *
    * @param fName file name
-   * @throws NumberFormatException
-   * @throws IOException
+   * @throws NumberFormatException invalid number format
+   * @throws IOException read failure
    */
   private void loadCharacter(final String fName)
       throws NumberFormatException, IOException {
@@ -601,15 +599,15 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
     int[] charbits = new int[CHAR_BITS_SIZE];
     int prop = 0;
 
-    FileInputStream fStream = new FileInputStream(fName);
-    DataInputStream in = new DataInputStream(fStream);
-    BufferedReader br = new BufferedReader(
-        new InputStreamReader(in, DWDefs.ENCODING)
+    final FileInputStream fStream = new FileInputStream(fName);
+    final DataInputStream inputStream = new DataInputStream(fStream);
+    final BufferedReader reader = new BufferedReader(
+        new InputStreamReader(inputStream, DWDefs.ENCODING)
     );
     String strLine;
-    while ((strLine = br.readLine()) != null) {
+    while ((strLine = reader.readLine()) != null) {
       curline++;
-      if ((!strLine.startsWith("#")) && (strLine.length() != 0)) {
+      if (!strLine.startsWith("#") && strLine.length() != 0) {
         // process input
         if (strLine.startsWith("c")) {
           if (curchar > -1) {
@@ -620,8 +618,8 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
             charbits = new int[CHAR_BITS_SIZE];
           }
           //start new char
-          int tmpInt = Integer.parseInt(strLine.substring(1));
-          if ((tmpInt < 0) || (tmpInt > MAX_CHARACTER_INT)) {
+          final int tmpInt = Integer.parseInt(strLine.substring(1));
+          if (tmpInt < 0 || tmpInt > MAX_CHARACTER_INT) {
             System.err.println(
                 "Error at line " + curline
                     + ": invalid character number, must be 0-255 "
@@ -633,9 +631,9 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
           }
         } else if (strLine.startsWith("p")) {
           // set prop val
-          int tmpInt = Integer.parseInt(strLine.substring(1));
-          if ((tmpInt < MIN_PROPORTIONAL_LENGTH)
-              || (tmpInt > MAX_PROPORTIONAL_LENGTH)) {
+          final int tmpInt = Integer.parseInt(strLine.substring(1));
+          if (tmpInt < MIN_PROPORTIONAL_LENGTH
+              || tmpInt > MAX_PROPORTIONAL_LENGTH) {
             System.err.println(
                 "Error at line " + curline
                     + ": invalid proportional length, must be 1-12 "
@@ -650,10 +648,10 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
             // boolean bits
             tmpval = 0;
             for (int i = 0; i < BITS_LINE_LENGTH; i++) {
-              char c = strLine.charAt(i);
-              if (c == '1') {
+              final char chr = strLine.charAt(i);
+              if (chr == '1') {
                 tmpval += Math.pow(2, i);
-              } else if (c != '0') {
+              } else if (chr != '0') {
                 System.err.println(
                     "Error at line " + curline
                         + " (in character " + curchar
@@ -664,7 +662,7 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
           } else {
             // decimal value
             tmpval = Integer.parseInt(strLine);
-            if ((tmpval < 0) || (tmpval > MAX_DECIMAL)) {
+            if (tmpval < 0 || tmpval > MAX_DECIMAL) {
               tmpval = 0;
               System.err.println(
                   "Error at line " + curline
@@ -678,7 +676,7 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
         }
       }
     }
-    in.close();
+    inputStream.close();
     // finish last char
     charset.setCharacter(curchar, charbits, prop);
   }
@@ -694,7 +692,7 @@ public class DWVPrinterFX80 implements DWVPrinterDriver {
       throws IOException, DWPrinterFileError {
     if (configuration.containsKey("OutputFile")) {
       if (DWUtils.fileExistsOrCreate(configuration.getString("OutputFile"))) {
-        return (new File(configuration.getString("OutputFile")));
+        return new File(configuration.getString("OutputFile"));
       } else {
         throw new DWPrinterFileError(
             "Cannot find or create the output file '"

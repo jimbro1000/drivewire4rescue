@@ -33,6 +33,6 @@ public class DWVPrinterFX80CharacterSet {
    * @return column bits
    */
   public int getCharacterCol(final int characterCode, final int column) {
-    return (characters[characterCode].getCol(column));
+    return characters[characterCode].getCol(column);
   }
 }

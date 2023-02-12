@@ -29,7 +29,7 @@ public class DWVPrinterFX80Character {
    */
   public int getCol(final int col) {
     // get bits for this col
-    return (columnBits[col]);
+    return columnBits[col];
   }
 
   /**
