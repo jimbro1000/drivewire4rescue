@@ -122,14 +122,14 @@ public class VModemProtocolHandler implements Runnable, DWVSerialProtocol {
       wanttodie = true;
     }
 
-    Thread vModemToSerialT = new Thread(new Runnable() {
+    final Thread vModemToSerialT = new Thread(new Runnable() {
       private boolean wanttodie = false;
 
       @Override
       public void run() {
         while (!wanttodie) {
           try {
-            int bread = dwProtocolDevice.comRead1(false);
+            final int bread = dwProtocolDevice.comRead1(false);
             vSerialPorts.serWrite(0, bread);
             if (logdevbytes) {
               logger.debug("read byte from serial device: " + bread);
@@ -142,16 +142,16 @@ public class VModemProtocolHandler implements Runnable, DWVSerialProtocol {
       }
     });
     vModemToSerialT.start();
-    if (!wanttodie && (this.dwProtocolDevice != null)) {
+    if (!wanttodie && this.dwProtocolDevice != null) {
       this.ready = true;
       logger.debug("handler #" + handlerNo + " is ready");
     } else {
       logger.warn("handler #" + handlerNo + " failed to get ready");
     }
-    byte[] buffer = new byte[SERIAL_BUFFER_SIZE];
-    while (!wanttodie && (this.dwProtocolDevice != null)) {
+    final byte[] buffer = new byte[SERIAL_BUFFER_SIZE];
+    while (!wanttodie && this.dwProtocolDevice != null) {
       try {
-        int bread = vSerialPorts.getPortOutput(0).read(buffer);
+        final int bread = vSerialPorts.getPortOutput(0).read(buffer);
         this.dwProtocolDevice.comWrite(buffer, bread, false);
         if (logdevbytes) {
           logger.debug("read " + bread + " bytes from vmodem: "
@@ -166,12 +166,12 @@ public class VModemProtocolHandler implements Runnable, DWVSerialProtocol {
   }
 
   private void setupProtocolDevice() {
-    if ((dwProtocolDevice != null)) {
+    if (dwProtocolDevice != null) {
       dwProtocolDevice.shutdown();
     }
     // create serial device
-    if ((config.containsKey("SerialDevice")
-        && config.containsKey("SerialRate"))) {
+    if (config.containsKey("SerialDevice")
+        && config.containsKey("SerialRate")) {
       try {
         dwProtocolDevice = new DWSerialDevice(this);
       } catch (NoSuchPortException e1) {

@@ -24,14 +24,14 @@ public class DWSerialReader implements SerialPortEventListener {
   /**
    * Serial Reader.
    *
-   * @param in input stream
-   * @param q  event queue
+   * @param input         input stream
+   * @param blockingQueue event queue
    */
   public DWSerialReader(
-      final InputStream in, final ArrayBlockingQueue<Byte> q
+      final InputStream input, final ArrayBlockingQueue<Byte> blockingQueue
   ) {
-    this.queue = q;
-    this.inputStream = in;
+    this.queue = blockingQueue;
+    this.inputStream = input;
   }
 
   /**

@@ -126,7 +126,7 @@ public class DWRFMHandler {
     LOGGER.debug("CLOSE");
     // read path #
     try {
-      int pathNumber = device.comRead1(true);
+      final int pathNumber = device.comRead1(true);
       if (this.paths[pathNumber] == null) {
         LOGGER.error("close on null path: " + pathNumber);
       } else {
@@ -144,9 +144,9 @@ public class DWRFMHandler {
     LOGGER.debug("SETSTT");
     // read path #
     try {
-      int pathNumber = device.comRead1(true);
+      final int pathNumber = device.comRead1(true);
       // read call
-      int call = device.comRead1(true);
+      final int call = device.comRead1(true);
       LOGGER.debug("SETSTT path " + pathNumber + " call " + call);
       if (call == OS9Defs.SS_FD) {
         setSttFd(device, pathNumber);
@@ -160,12 +160,12 @@ public class DWRFMHandler {
     LOGGER.debug("GETSTT");
     // read path #
     try {
-      int pathNumber = device.comRead1(true);
+      final int pathNumber = device.comRead1(true);
       // read call
-      int call = device.comRead1(true);
+      final int call = device.comRead1(true);
       LOGGER.debug("GETSTT path " + pathNumber + " call " + call);
       switch (call) {
-        case OS9Defs.SS_FD -> getSttFd(device, pathNumber);
+        case OS9Defs.SS_FD -> writeSttFd(device, pathNumber);
         case OS9Defs.SS_DIR_ENT -> setSttFd(device, pathNumber);
         default -> {
         }
@@ -176,12 +176,12 @@ public class DWRFMHandler {
   }
 
 
-  private void getSttFd(final DWProtocolDevice device, final int pathNumber) {
+  private void writeSttFd(final DWProtocolDevice device, final int pathNumber) {
     LOGGER.debug("getstt_fd");
-    // read # bytes wanted
+    // write # bytes wanted
     try {
-      int size = DWUtils.int2(device.comRead(2));
-      byte[] buf = this.paths[pathNumber].getFd(size);
+      final int size = DWUtils.int2(device.comRead(2));
+      final byte[] buf = this.paths[pathNumber].getFd(size);
       device.comWrite(buf, size, true);
       LOGGER.debug("sent " + size + " bytes of FD for path " + pathNumber);
     } catch (IOException | DWCommTimeOutException e) {
@@ -193,8 +193,8 @@ public class DWRFMHandler {
     LOGGER.debug("getstt_fd");
     // read # bytes coming
     try {
-      int size = DWUtils.int2(device.comRead(2));
-      byte[] buf = device.comRead(size);
+      final int size = DWUtils.int2(device.comRead(2));
+      final byte[] buf = device.comRead(size);
       this.paths[pathNumber].setFd(buf);
       LOGGER.debug("read " + size + " bytes of FD for path " + pathNumber);
     } catch (IOException | DWCommTimeOutException e) {
@@ -211,12 +211,12 @@ public class DWRFMHandler {
     LOGGER.debug("WRITLN");
     // read path #
     try {
-      int pathNumber = device.comRead1(true);
+      final int pathNumber = device.comRead1(true);
       // read sending bytes
-      byte[] maxBytesB = device.comRead(2);
-      int maxBytes = DWUtils.int2(maxBytesB);
+      final byte[] maxBytesB = device.comRead(2);
+      final int maxBytes = DWUtils.int2(maxBytesB);
       // read bytes
-      byte[] buf = device.comRead(maxBytes);
+      final byte[] buf = device.comRead(maxBytes);
       // write to file
       this.paths[pathNumber].writeBytes(buf, maxBytes);
       this.paths[pathNumber].incSeekPos(maxBytes);
@@ -235,13 +235,13 @@ public class DWRFMHandler {
     LOGGER.debug("READLN");
     // read path #
     try {
-      int pathNumber = device.comRead1(true);
+      final int pathNumber = device.comRead1(true);
       // read max bytes
-      byte[] maxBytesB = device.comRead(2);
-      int maxBytes = DWUtils.int2(maxBytesB);
+      final byte[] maxBytesB = device.comRead(2);
+      final int maxBytes = DWUtils.int2(maxBytesB);
       int availBytes = this.paths[pathNumber].getBytesAvail(maxBytes);
       LOGGER.debug("initial AB: " + availBytes);
-      byte[] buf = new byte[availBytes];
+      final byte[] buf = new byte[availBytes];
       System.arraycopy(
           this.paths[pathNumber].getBytes(availBytes),
           0,
@@ -250,12 +250,12 @@ public class DWRFMHandler {
           availBytes
       );
       // find $0D or end
-      int x = 0;
-      while (x < availBytes) {
-        if (buf[x] == (byte) CARRIAGE_RETURN) {
-          availBytes = x + 1;
+      int index = 0;
+      while (index < availBytes) {
+        if (buf[index] == (byte) CARRIAGE_RETURN) {
+          availBytes = index + 1;
         }
-        x++;
+        index++;
       }
       LOGGER.debug("adjusted AB: " + availBytes);
       device.comWrite1(availBytes, true);
@@ -290,15 +290,15 @@ public class DWRFMHandler {
     LOGGER.debug("READ");
     // read path #
     try {
-      int pathNumber = device.comRead1(true);
+      final int pathNumber = device.comRead1(true);
       // read max bytes
-      byte[] maxBytesB = device.comRead(2);
+      final byte[] maxBytesB = device.comRead(2);
       int maxBytes = DWUtils.int2(maxBytesB);
-      int availBytes = this.paths[pathNumber].getBytesAvail(maxBytes);
+      final int availBytes = this.paths[pathNumber].getBytesAvail(maxBytes);
       if (maxBytes > availBytes) {
         maxBytes = availBytes;
       }
-      byte[] buf = new byte[maxBytes];
+      final byte[] buf = new byte[maxBytes];
       System.arraycopy(
           this.paths[pathNumber].getBytes(maxBytes),
           0,
@@ -327,9 +327,9 @@ public class DWRFMHandler {
   private void doOpRfmSeek(final DWProtocolDevice device) {
     LOGGER.debug("SEEK");
     try {
-      int pathNumber = device.comRead1(true);
+      final int pathNumber = device.comRead1(true);
       // read seek pos
-      byte[] seekPosition = device.comRead(SEEK_LEN);
+      final byte[] seekPosition = device.comRead(SEEK_LEN);
       this.paths[pathNumber].setSeekPos(DWUtils.int4(seekPosition));
       // assume it worked, for now
       device.comWrite1(0, true);
@@ -377,13 +377,13 @@ public class DWRFMHandler {
     LOGGER.debug("CREATE");
     // read path #
     try {
-      int pathNumber = device.comRead1(true);
-      int modeByte = device.comRead1(true) & BYTE_MASK;
-      String pathString = buildPath(device);
+      final int pathNumber = device.comRead1(true);
+      final int modeByte = device.comRead1(true) & BYTE_MASK;
+      final String pathString = buildPath(device);
       // send result
       this.paths[pathNumber] = new DWRFMPath(this.handlerId, pathNumber);
       this.paths[pathNumber].setPathStr(pathString);
-      int result = this.paths[pathNumber].createFile();
+      final int result = this.paths[pathNumber].createFile();
       device.comWrite1(result, true);
       LOGGER.debug("create path " + pathNumber + " mode " + modeByte + ", to "
           + pathString + ": result " + result);
@@ -401,14 +401,14 @@ public class DWRFMHandler {
     LOGGER.debug("OPEN");
     // read path #
     try {
-      int pathNumber = device.comRead1(true);
-      int modeByte = device.comRead1(true) & BYTE_MASK;
-      String pathString = buildPath(device);
+      final int pathNumber = device.comRead1(true);
+      final int modeByte = device.comRead1(true) & BYTE_MASK;
+      final String pathString = buildPath(device);
       // send result
       // anything needed for dealing with multiple opens..
       this.paths[pathNumber] = new DWRFMPath(this.handlerId, pathNumber);
       this.paths[pathNumber].setPathStr(pathString);
-      int result = this.paths[pathNumber].openFile(modeByte);
+      final int result = this.paths[pathNumber].openFile(modeByte);
       device.comWrite1(result, true);
       LOGGER.debug("open path " + pathNumber + " mode " + modeByte + ", to "
           + pathString + ": result " + result);
@@ -419,7 +419,7 @@ public class DWRFMHandler {
 
   private String buildPath(final DWProtocolDevice device)
       throws DWCommTimeOutException, IOException {
-    StringBuilder pathString = new StringBuilder();
+    final StringBuilder pathString = new StringBuilder();
     int nextChar = device.comRead1(true);
     while (nextChar != CARRIAGE_RETURN) {
       pathString.append((char) nextChar);

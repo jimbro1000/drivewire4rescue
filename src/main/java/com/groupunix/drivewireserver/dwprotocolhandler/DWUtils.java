@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 
 import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwexceptions.DWFileSystemInvalidFilenameException;
@@ -30,7 +31,7 @@ public class DWUtils {
   /**
    * Maximum possible file length.
    */
-  public static final long MAX_FILE_LENGTH = 4294967295L;
+  public static final long MAX_FILE_LENGTH = 4_294_967_295L;
   /**
    * Chunk size for file copy.
    */
@@ -192,11 +193,11 @@ public class DWUtils {
   /**
    * Twos complement of byte value.
    *
-   * @param b byte
+   * @param value byte
    * @return reversed byte
    */
-  public static byte reverseByte(final int b) {
-    return (byte) Integer.reverseBytes(Integer.reverse(b));
+  public static byte reverseByte(final int value) {
+    return (byte) Integer.reverseBytes(Integer.reverse(value));
   }
 
   /**
@@ -239,44 +240,45 @@ public class DWUtils {
   /**
    * Format byte array as hex string.
    *
-   * @param in byte array
+   * @param byteArray byte array
    * @return formatted string
    */
-  public static String byteArrayToHexString(final byte[] in) {
-    return byteArrayToHexString(in, in.length);
+  public static String byteArrayToHexString(final byte[] byteArray) {
+    return byteArrayToHexString(byteArray, byteArray.length);
   }
 
   /**
    * Format byte array as hex string.
    *
-   * @param in  byte array
-   * @param len array length
+   * @param byteArray byte array
+   * @param len       array length
    * @return formatted string
    */
-  public static String byteArrayToHexString(final byte[] in, final int len) {
-    byte ch;
-    int i = 0;
-
-    if (in == null || in.length == 0) {
+  public static String byteArrayToHexString(
+      final byte[] byteArray, final int len
+  ) {
+    if (byteArray == null || byteArray.length == 0) {
       return null;
     }
 
-    String[] pseudo = {"0", "1", "2",
-        "3", "4", "5", "6", "7", "8",
-        "9", "A", "B", "C", "D", "E",
-        "F"};
+    final String[] pseudo = {"0", "1",
+        "2", "3", "4", "5", "6", "7",
+        "8", "9", "A", "B", "C", "D",
+        "E", "F"};
 
-    StringBuilder out = new StringBuilder();
-    while (i < len) {
-      ch = (byte) (in[i] & HIGH_NIBBLE_MASK);
-      ch = (byte) (ch >>> NIBBLE_BITS);
+    final StringBuilder out = new StringBuilder();
+    byte charByte;
+    int index = 0;
+    while (index < len) {
+      charByte = (byte) (byteArray[index] & HIGH_NIBBLE_MASK);
+      charByte = (byte) (charByte >>> NIBBLE_BITS);
       // shift the bits down
-      ch = (byte) (ch & LOW_NIBBLE_MASK);
+      charByte = (byte) (charByte & LOW_NIBBLE_MASK);
       // must do this is high order bit is on!
-      out.append(pseudo[ch]); // convert the
-      ch = (byte) (in[i] & LOW_NIBBLE_MASK); // Strip off
-      out.append(pseudo[ch]); // convert the
-      i++;
+      out.append(pseudo[charByte]); // convert the
+      charByte = (byte) (byteArray[index] & LOW_NIBBLE_MASK); // Strip off
+      out.append(pseudo[charByte]); // convert the
+      index++;
     }
     return out.toString();
   }
@@ -378,8 +380,8 @@ public class DWUtils {
    * @return formatted string
    */
   public static String prettyOP(final byte opcode) {
-    if ((opcode >= DWDefs.OP_FASTWRITE_BASE)
-        && (opcode <= OP_FASTWRITE_BASE_MAX)) {
+    if (opcode >= DWDefs.OP_FASTWRITE_BASE
+        && opcode <= OP_FASTWRITE_BASE_MAX) {
       return "OP_FASTWRITE_" + (opcode - DWDefs.OP_FASTWRITE_BASE);
     }
     return switch (opcode) {
@@ -419,11 +421,11 @@ public class DWUtils {
    */
   @SuppressWarnings({"unchecked", "unused"})
   public static ArrayList<String> getPortNames() {
-    ArrayList<String> ports = new ArrayList<>();
-    java.util.Enumeration<CommPortIdentifier> portEnum
+    final ArrayList<String> ports = new ArrayList<>();
+    final Enumeration<CommPortIdentifier> portEnum
         = CommPortIdentifier.getPortIdentifiers();
     while (portEnum.hasMoreElements()) {
-      CommPortIdentifier portIdentifier = portEnum.nextElement();
+      final CommPortIdentifier portIdentifier = portEnum.nextElement();
       if (portIdentifier.getPortType() == 1) {
         ports.add(portIdentifier.getName());
       }
@@ -445,57 +447,58 @@ public class DWUtils {
     // make midi messages into something humans can read...
     String action;
     String chan = "";
-    String d1 = "";
-    String d2 = "";
+    String data1String = "";
+    String data2String = "";
 
-    if ((statusByte >= MIDI_NOTE_CHANNEL)
-        && (statusByte <= MIDI_NOTE_CHANNEL_MAX)) {
+    if (statusByte >= MIDI_NOTE_CHANNEL
+        && statusByte <= MIDI_NOTE_CHANNEL_MAX) {
       action = "Note off";
       chan = "Chan: " + (statusByte - MIDI_NOTE_CHANNEL);
-      d1 = "Pitch: " + prettyMidiPitch(data1);
-      d2 = "Vel: " + data2;
-    } else if ((statusByte >= MIDI_NOTE_ON_CHANNEL)
-        && (statusByte <= MIDI_NOTE_ON_CHANNEL_MAX)) {
+      data1String = "Pitch: " + prettyMidiPitch(data1);
+      data2String = "Vel: " + data2;
+    } else if (statusByte >= MIDI_NOTE_ON_CHANNEL
+        && statusByte <= MIDI_NOTE_ON_CHANNEL_MAX) {
       action = "Note on";
       chan = "Chan: " + (statusByte - MIDI_NOTE_ON_CHANNEL);
-      d1 = "Pitch: " + prettyMidiPitch(data1);
-      d2 = "Vel: " + data2;
-    } else if ((statusByte >= MIDI_KEY_PRESS)
-        && (statusByte <= MIDI_KEY_PRESS_MAX)) {
+      data1String = "Pitch: " + prettyMidiPitch(data1);
+      data2String = "Vel: " + data2;
+    } else if (statusByte >= MIDI_KEY_PRESS
+        && statusByte <= MIDI_KEY_PRESS_MAX) {
       action = "Key press";
       chan = "Chan: " + (statusByte - MIDI_KEY_PRESS);
-      d1 = "Key: " + data1;
-      d2 = "Pressure: " + data2;
-    } else if ((statusByte >= MIDI_CTR_CHANGE)
-        && (statusByte <= MIDI_CTR_CHANGE_MAX)) {
+      data1String = "Key: " + data1;
+      data2String = "Pressure: " + data2;
+    } else if (statusByte >= MIDI_CTR_CHANGE
+        && statusByte <= MIDI_CTR_CHANGE_MAX) {
       action = "Ctr change";
       chan = "Chan: " + (statusByte - MIDI_CTR_CHANGE);
-      d1 = "Controller: " + data1;
-      d2 = "Value: " + data2;
-    } else if ((statusByte >= MIDI_PRG_CHANGE)
-        && (statusByte <= MIDI_PRG_CHANGE_MAX)) {
+      data1String = "Controller: " + data1;
+      data2String = "Value: " + data2;
+    } else if (statusByte >= MIDI_PRG_CHANGE
+        && statusByte <= MIDI_PRG_CHANGE_MAX) {
       action = "Prg change";
       chan = "Chan: " + (statusByte - MIDI_PRG_CHANGE);
-      d1 = "Preset: " + data1;
-    } else if ((statusByte >= MIDI_CHAN_PRESS)
-        && (statusByte <= MIDI_CHAN_PRESS_MAX)) {
+      data1String = "Preset: " + data1;
+    } else if (statusByte >= MIDI_CHAN_PRESS
+        && statusByte <= MIDI_CHAN_PRESS_MAX) {
       action = "Chan press";
       chan = "Chan: " + (statusByte - MIDI_CHAN_PRESS);
-      d1 = "Pressure: " + data1;
-    } else if ((statusByte >= MIDI_PITCH_BEND_CHANNEL)
-        && (statusByte <= MIDI_PITCH_BEND_CHANNEL_MAX)) {
+      data1String = "Pressure: " + data1;
+    } else if (statusByte >= MIDI_PITCH_BEND_CHANNEL
+        && statusByte <= MIDI_PITCH_BEND_CHANNEL_MAX) {
       action = "Pitch bend";
       chan = "Chan: " + (statusByte - MIDI_PITCH_BEND_CHANNEL);
-      d1 = "LSB: " + data1;
-      d2 = "MSB: " + data2;
+      data1String = "LSB: " + data1;
+      data2String = "MSB: " + data2;
     } else if (statusByte == MIDI_TIMING_TICK) {
       action = "Timing tick";
     } else {
       action = "Unknown: " + statusByte;
-      d1 = "Data1: " + data1;
-      d2 = "Data2: " + data2;
+      data1String = "Data1: " + data1;
+      data2String = "Data2: " + data2;
     }
-    return String.format("%-10s %-10s %-20s %-20s", action, chan, d1, d2);
+    return String.format("%-10s %-10s %-20s %-20s",
+        action, chan, data1String, data2String);
   }
 
   /**
@@ -505,14 +508,14 @@ public class DWUtils {
    * @return formatted note string
    */
   private static String prettyMidiPitch(final int pitch) {
-    String[] notes = new String[]{
+    final String[] notes = {
         "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
     };
     return String.format(
         "%-3d %-2s %d",
         pitch,
         notes[pitch % NOTES_PER_OCTAVE],
-        (pitch / NOTES_PER_OCTAVE) - 1
+        pitch / NOTES_PER_OCTAVE - 1
     );
   }
 
@@ -528,8 +531,8 @@ public class DWUtils {
    */
   public static String dropFirstToken(final String txt) {
     // drop first token in string
-    StringBuilder rest = new StringBuilder();
-    String[] tokens = txt.split(" ");
+    final StringBuilder rest = new StringBuilder();
+    final String[] tokens = txt.split(" ");
     for (int x = 1; x < tokens.length; x++) {
       if (rest.length() > 0) {
         rest.append(" ");
@@ -559,15 +562,15 @@ public class DWUtils {
    * Ignores case
    * </p>
    *
-   * @param tf string
+   * @param test string
    * @return boolean
    */
   @SuppressWarnings("unused")
-  public static boolean isStringFalse(final String tf) {
-    if (tf.equalsIgnoreCase("false")) {
+  public static boolean isStringFalse(final String test) {
+    if (test.equalsIgnoreCase("false")) {
       return true;
     }
-    return tf.equalsIgnoreCase("off");
+    return test.equalsIgnoreCase("off");
   }
 
   /**
@@ -577,15 +580,15 @@ public class DWUtils {
    * Ignores case
    * </p>
    *
-   * @param tf string
+   * @param test string
    * @return boolean
    */
   @SuppressWarnings("unused")
-  public static boolean isStringTrue(final String tf) {
-    if (tf.equalsIgnoreCase("true")) {
+  public static boolean isStringTrue(final String test) {
+    if (test.equalsIgnoreCase("true")) {
       return true;
     }
-    return tf.equalsIgnoreCase("on");
+    return test.equalsIgnoreCase("on");
   }
 
   /**
@@ -611,7 +614,7 @@ public class DWUtils {
    * @return true
    */
   public static boolean dirExistsOrCreate(final String directoryName) {
-    File theDir = new File(directoryName);
+    final File theDir = new File(directoryName);
     // if the directory does not exist, create it
     if (theDir.exists()) {
       return true;
@@ -628,7 +631,7 @@ public class DWUtils {
    */
   public static boolean fileExistsOrCreate(final String fileName)
       throws IOException {
-    File theFile = new File(fileName);
+    final File theFile = new File(fileName);
     // if the file does not exist, create it
     if (theFile.exists()) {
       return true;
@@ -647,8 +650,7 @@ public class DWUtils {
       final String fromFileName,
       final String toFileName
   ) throws IOException {
-    File fromFile = new File(fromFileName);
-    File toFile = new File(toFileName);
+    final File fromFile = new File(fromFileName);
 
     if (!fromFile.exists()) {
       throw new IOException("no source file: " + fromFileName);
@@ -659,6 +661,7 @@ public class DWUtils {
     if (!fromFile.canRead()) {
       throw new IOException("source file is unreadable: " + fromFileName);
     }
+    File toFile = new File(toFileName);
     if (toFile.isDirectory()) {
       toFile = new File(toFile, fromFile.getName());
     }
@@ -670,7 +673,7 @@ public class DWUtils {
       if (parent == null) {
         parent = System.getProperty("user.dir");
       }
-      File dir = new File(parent);
+      final File dir = new File(parent);
       if (!dir.exists()) {
         throw new IOException("destination directory doesn't exist: "
             + parent);
@@ -685,13 +688,13 @@ public class DWUtils {
       }
     }
     try (
-        FileInputStream from = new FileInputStream(fromFile);
-        FileOutputStream to = new FileOutputStream(toFile)
+        FileInputStream input = new FileInputStream(fromFile);
+        FileOutputStream output = new FileOutputStream(toFile)
     ) {
-      byte[] buffer = new byte[COPY_CHUNK_SIZE];
+      final byte[] buffer = new byte[COPY_CHUNK_SIZE];
       int bytesRead;
-      while ((bytesRead = from.read(buffer)) != -1) {
-        to.write(buffer, 0, bytesRead);
+      while ((bytesRead = input.read(buffer)) != -1) {
+        output.write(buffer, 0, bytesRead);
       }
     }
   }
@@ -699,38 +702,38 @@ public class DWUtils {
   /**
    * Shorten local uri.
    *
-   * @param df
+   * @param uriPath
    * @return short uri
    */
-  public static String shortenLocalURI(final String df) {
-    if (df.startsWith(FILE_URI_PREFIX)) {
-      if (df.charAt(DRIVE_LETTER_MARKER) == ':') {
-        return df.substring(FILE_URI_PREFIX.length());
+  public static String shortenLocalURI(final String uriPath) {
+    if (uriPath.startsWith(FILE_URI_PREFIX)) {
+      if (uriPath.charAt(DRIVE_LETTER_MARKER) == ':') {
+        return uriPath.substring(FILE_URI_PREFIX.length());
       } else {
-        return df.substring(FILE_URI_PREFIX.length() - 1);
+        return uriPath.substring(FILE_URI_PREFIX.length() - 1);
       }
     }
-    return (df);
+    return uriPath;
   }
 
   /**
    * Get file descriptor.
    *
-   * @param f file
+   * @param file file
    * @return descriptor string
    */
-  public static String getFileDescriptor(final File f) {
+  public static String getFileDescriptor(final File file) {
     String res = "";
     try {
       res = File.separator;
-      res += "|" + f.getCanonicalPath();
-      res += "|" + f.getParent();
-      if (f.getParent() != null) {
+      res += "|" + file.getCanonicalPath();
+      res += "|" + file.getParent();
+      if (file.getParent() != null) {
         // these checks take a long time on removable media
         // with no disk in the drive
-        res += "|" + f.length();
-        res += "|" + f.lastModified();
-        res += "|" + f.isDirectory();
+        res += "|" + file.length();
+        res += "|" + file.lastModified();
+        res += "|" + file.isDirectory();
       } else {
         res += "|0|0|true";
       }
@@ -743,34 +746,34 @@ public class DWUtils {
   /**
    * Get file XDir descriptor.
    *
-   * @param f file
+   * @param file file
    * @return descriptor string
    * @throws DWFileSystemInvalidFilenameException invalid filename
    */
   @SuppressWarnings("deprecation")
-  public static String getFileXDescriptor(final File f)
+  public static String getFileXDescriptor(final File file)
       throws DWFileSystemInvalidFilenameException {
-    if (f.length() > MAX_FILE_LENGTH) {
+    if (file.length() > MAX_FILE_LENGTH) {
       throw new DWFileSystemInvalidFilenameException(
           "File too large for XDir"
       );
     }
-    if (f.getName().length() > FILENAME_LEN_MAX) {
+    if (file.getName().length() > FILENAME_LEN_MAX) {
       throw new DWFileSystemInvalidFilenameException(
           "Filename too long for XDir"
       );
     }
-    byte[] res = new byte[FXD_HEADER_LEN + f.getName().length()];
+    byte[] res = new byte[FXD_HEADER_LEN + file.getName().length()];
     int pos = 0;
-    long l = f.length();
+    final long len = file.length();
 
     int bytePos = DOUBLE_WORD_LEN;
     while (bytePos > 0) {
-      res[pos++] = (byte) (l >>> BYTE_BITS * --bytePos);
+      res[pos++] = (byte) (len >>> BYTE_BITS * --bytePos);
     }
 
     // 5 byte OS9 style modified date - Y M D Hr Min
-    Date moddate = new Date(f.lastModified());
+    final Date moddate = new Date(file.lastModified());
     res[pos++] = (byte) (moddate.getYear());
     res[pos++] = (byte) (moddate.getMonth());
     res[pos++] = (byte) (moddate.getDate());
@@ -778,21 +781,21 @@ public class DWUtils {
     res[pos++] = (byte) (moddate.getMinutes());
 
     // is directory
-    if (f.isDirectory()) {
+    if (file.isDirectory()) {
       res[pos++] = (byte) 1;
     } else {
       res[pos++] = (byte) 0;
     }
     // is readonly
-    if (f.canWrite()) {
+    if (file.canWrite()) {
       res[pos++] = (byte) 0;
     } else {
       res[pos++] = (byte) 1;
     }
     // name length
-    res[pos++] = (byte) f.getName().length();
-    byte[] nameBytes = f.getName().getBytes(DWDefs.ENCODING);
-    for (int i = 0; i < f.getName().length(); i++) {
+    res[pos++] = (byte) file.getName().length();
+    final byte[] nameBytes = file.getName().getBytes(DWDefs.ENCODING);
+    for (int i = 0; i < file.getName().length(); i++) {
       res[pos++] = nameBytes[i];
     }
     return new String(res, DWDefs.ENCODING);
@@ -841,12 +844,12 @@ public class DWUtils {
    * @return thread group
    */
   public static ThreadGroup getRootThreadGroup() {
-    ThreadGroup tg = Thread.currentThread().getThreadGroup();
+    ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
     ThreadGroup ptg;
-    while ((ptg = tg.getParent()) != null) {
-      tg = ptg;
+    while ((ptg = threadGroup.getParent()) != null) {
+      threadGroup = ptg;
     }
-    return tg;
+    return threadGroup;
   }
 
   /**
@@ -856,11 +859,11 @@ public class DWUtils {
    * @return os9 formatted string
    */
   public static String os9String(final byte[] buf) {
-    StringBuilder res = new StringBuilder();
+    final StringBuilder res = new StringBuilder();
     int pos = 0;
     while (
-        (pos < buf.length)
-            && ((buf[pos] & BYTE_MASK) < COCO_STRING_TERMINATOR)
+        pos < buf.length
+            && (buf[pos] & BYTE_MASK) < COCO_STRING_TERMINATOR
     ) {
       res.append((char) (buf[pos] & BYTE_MASK));
       pos++;
@@ -879,8 +882,8 @@ public class DWUtils {
    */
   public static String pretty5ByteDateTime(final byte[] data) {
     return String.format("%02d:%02d ",
-        (data[HOURS] & BYTE_MASK),
-        (data[MINUTES] & BYTE_MASK)
+        data[HOURS] & BYTE_MASK,
+        data[MINUTES] & BYTE_MASK
     ) + pretty3ByteDate(data);
   }
 
@@ -893,9 +896,9 @@ public class DWUtils {
   public static String pretty3ByteDate(final byte[] data) {
     return String.format(
         "%02d/%02d/%04d",
-        (data[MONTH] & BYTE_MASK),
-        (data[DAY] & BYTE_MASK),
-        (CENTURY_OFFSET + (data[YEAR] & BYTE_MASK))
+        data[MONTH] & BYTE_MASK,
+        data[DAY] & BYTE_MASK,
+        CENTURY_OFFSET + (data[YEAR] & BYTE_MASK)
     );
   }
 
@@ -907,14 +910,14 @@ public class DWUtils {
    */
   @SuppressWarnings("unused")
   public String cocoString(final byte[] bytes) {
-    StringBuilder ret = new StringBuilder();
-    int i = 0;
+    final StringBuilder res = new StringBuilder();
+    int index = 0;
     // thanks to Christopher Hawks
-    while ((i < bytes.length - 1) && (bytes[i] > 0)) {
-      ret.append((char) bytes[i]);
-      i++;
+    while (index < bytes.length - 1 && bytes[index] > 0) {
+      res.append((char) bytes[index]);
+      index++;
     }
-    ret.append((char) (bytes[i] + COCO_STRING_TERMINATOR));
-    return ret.toString();
+    res.append((char) (bytes[index] + COCO_STRING_TERMINATOR));
+    return res.toString();
   }
 }

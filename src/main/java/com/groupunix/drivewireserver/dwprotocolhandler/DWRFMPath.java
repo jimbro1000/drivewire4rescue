@@ -289,12 +289,12 @@ public class DWRFMPath {
     }
     // File mode
     // return # bytes left in file from current seek pos, up to maxBytes
-    File f = new File(this.localRoot + this.pathString);
-    if (f.exists()) {
+    final File file = new File(this.localRoot + this.pathString);
+    if (file.exists()) {
       // we only handle int sized files...
-      int tmpSize = Math.min(
+      final int tmpSize = Math.min(
           BYTES_AVAILABLE_CAP,
-          (int) f.length() - this.seekPosition
+          (int) file.length() - this.seekPosition
       );
       return Math.min(tmpSize, maxBytes);
     } else {
@@ -315,17 +315,17 @@ public class DWRFMPath {
     // TODO structure blindly assumes this will work.
     // like above need to implement exceptions/error handling passed up to
     // caller
-    byte[] buf = new byte[availBytes];
+    final byte[] buf = new byte[availBytes];
     if (this.dirMode) {
       System.arraycopy(this.dirBuffer, this.seekPosition, buf, 0, availBytes);
       // this.seekpos += availbytes;
       return buf;
     }
-    File f = new File(this.localRoot + this.pathString);
-    if (f.exists()) {
+    final File file = new File(this.localRoot + this.pathString);
+    if (file.exists()) {
       LOGGER.debug("FILE: asked for " + availBytes);
       try (
-          RandomAccessFile inFile = new RandomAccessFile(f, "r")
+          RandomAccessFile inFile = new RandomAccessFile(file, "r")
       ) {
         inFile.seek(seekPosition);
         //TODO what if we don't get buf.length??
@@ -355,18 +355,18 @@ public class DWRFMPath {
    * @throws FileSystemException write failure
    */
   public void setFd(final byte[] buf) throws FileSystemException {
-    DWRFMFD fd = new DWRFMFD(
+    final DWRFMFD dwrfmfd = new DWRFMFD(
         DriveWireServer
             .getHandler(this.handlerId)
             .getConfig()
             .getString("RFMRoot", "/")
             + this.pathString
     );
-    fd.readFD();
-    byte[] fdTmp = fd.getFD();
+    dwrfmfd.readFD();
+    final byte[] fdTmp = dwrfmfd.getFD();
     System.arraycopy(buf, 0, fdTmp, 0, buf.length);
-    fd.setFD(fdTmp);
-    fd.writeFD();
+    dwrfmfd.setFD(fdTmp);
+    dwrfmfd.writeFD();
   }
 
   /**
@@ -377,17 +377,17 @@ public class DWRFMPath {
    * @throws FileSystemException read failure
    */
   public byte[] getFd(final int size) throws FileSystemException {
-    byte[] b = new byte[size];
-    DWRFMFD fd = new DWRFMFD(
+    final byte[] bytes = new byte[size];
+    final DWRFMFD dwrfmfd = new DWRFMFD(
         DriveWireServer
             .getHandler(this.handlerId)
             .getConfig()
             .getString("RFMRoot", "/")
             + this.pathString
     );
-    fd.readFD();
-    System.arraycopy(fd.getFD(), 0, b, 0, size);
-    return b;
+    dwrfmfd.readFD();
+    System.arraycopy(dwrfmfd.getFD(), 0, bytes, 0, size);
+    return bytes;
   }
 
   /**
@@ -398,10 +398,10 @@ public class DWRFMPath {
    */
   public void writeBytes(final byte[] buf, final int maxBytes) {
     // write to file
-    File f = new File(this.localRoot + this.pathString);
-    if (f.exists()) {
+    final File file = new File(this.localRoot + this.pathString);
+    if (file.exists()) {
       try (
-          RandomAccessFile inFile = new RandomAccessFile(f, "rw")
+          RandomAccessFile inFile = new RandomAccessFile(file, "rw")
       ) {
         inFile.seek(this.seekPosition);
         //TODO what if we don't get buf.length??

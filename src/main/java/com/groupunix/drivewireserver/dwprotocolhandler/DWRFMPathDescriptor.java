@@ -65,12 +65,12 @@ public class DWRFMPathDescriptor {
   /**
    * Set PD byte array.
    *
-   * @param pd path descriptor byte array
+   * @param pathDescriptor path descriptor byte array
    */
-  public void setPdBytes(final byte[] pd) {
-    int pdLen = pd.length;
-    byte[] tmp = new byte[pdLen];
-    System.arraycopy(pd, 0, tmp, 0, pdLen);
+  public void setPdBytes(final byte[] pathDescriptor) {
+    final int pdLen = pathDescriptor.length;
+    final byte[] tmp = new byte[pdLen];
+    System.arraycopy(pathDescriptor, 0, tmp, 0, pdLen);
     this.pdBytes = tmp;
   }
 
@@ -81,7 +81,7 @@ public class DWRFMPathDescriptor {
    */
   @SuppressWarnings("unused")
   public byte getPD() {
-    return (this.pdBytes[PD_OFFSET]);
+    return this.pdBytes[PD_OFFSET];
   }
 
   /**
@@ -91,7 +91,7 @@ public class DWRFMPathDescriptor {
    */
   @SuppressWarnings("unused")
   public byte getMOD() {
-    return (this.pdBytes[MOD_OFFSET]);
+    return this.pdBytes[MOD_OFFSET];
   }
 
   /**
@@ -101,7 +101,7 @@ public class DWRFMPathDescriptor {
    */
   @SuppressWarnings("unused")
   public byte getCNT() {
-    return (this.pdBytes[CNT_OFFSET]);
+    return this.pdBytes[CNT_OFFSET];
   }
 
   /**
@@ -124,7 +124,7 @@ public class DWRFMPathDescriptor {
    */
   @SuppressWarnings("unused")
   public byte getCPR() {
-    return (this.pdBytes[CPR_OFFSET]);
+    return this.pdBytes[CPR_OFFSET];
   }
 
   /**
@@ -137,7 +137,7 @@ public class DWRFMPathDescriptor {
     byte[] tmp = new byte[2];
     tmp[0] = this.pdBytes[RGS_OFFSET];
     tmp[1] = this.pdBytes[RGS_OFFSET + 1];
-    return (tmp);
+    return tmp;
   }
 
   /**
@@ -160,7 +160,7 @@ public class DWRFMPathDescriptor {
    */
   @SuppressWarnings("unused")
   public byte[] getFST() {
-    byte[] fstBytes = new byte[FST_LENGTH];
+    final byte[] fstBytes = new byte[FST_LENGTH];
     System.arraycopy(this.pdBytes, FST_OFFSET, fstBytes, 0, FST_LENGTH);
     return fstBytes;
   }

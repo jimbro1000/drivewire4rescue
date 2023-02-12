@@ -157,7 +157,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
    * @return config
    */
   public HierarchicalConfiguration getConfig() {
-    return (this.config);
+    return this.config;
   }
 
   /**
@@ -173,7 +173,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
    * @return connected
    */
   public boolean connected() {
-    return (dwProtocolDevice.connected());
+    return dwProtocolDevice.connected();
   }
 
   /**
@@ -312,11 +312,11 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
     }
     try {
       // read flag byte
-      int flag = dwProtocolDevice.comRead1(true);
+      final int flag = dwProtocolDevice.comRead1(true);
       // read arg length
-      int argLen = dwProtocolDevice.comRead1(true);
+      final int argLen = dwProtocolDevice.comRead1(true);
       // read arg
-      byte[] buf = dwProtocolDevice.comRead(argLen);
+      final byte[] buf = dwProtocolDevice.comRead(argLen);
       logger.debug("DIRFILEREQUEST fl: " + flag + "  arg: "
           + new String(buf, DWDefs.ENCODING));
       //respond
@@ -338,7 +338,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
       logger.info("DoOP_RETRIEVENAME");
     }
     try {
-      int arglen = dwProtocolDevice.comRead1(true);
+      final int arglen = dwProtocolDevice.comRead1(true);
       if (arglen == ARG_BYTES) {
         dwProtocolDevice.comWrite1('T', false);
         dwProtocolDevice.comWrite1('e', false);
@@ -387,10 +387,9 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
 
   @SuppressWarnings("unused")
   private void doOpWrite(final byte opcode) {
-    byte[] cocosum = new byte[2];
+    final byte[] cocosum = new byte[2];
     byte[] responsebuf;
-    byte response;
-    byte[] sector = new byte[SECTOR_SIZE];
+    final byte[] sector = new byte[SECTOR_SIZE];
 
     try {
       // read rest of packet
@@ -419,7 +418,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
       return;
     }
     // do the write
-    response = DWDefs.DWOK;
+    byte response = DWDefs.DWOK;
     try {
       // Seek to LSN in DSK image
       diskDrives.seekSector(lastDrive, DWUtils.int3(lastLSN));
@@ -604,7 +603,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
    * @return init time
    */
   public GregorianCalendar getInitTime() {
-    return (dwinitTime);
+    return dwinitTime;
   }
 
   /**
@@ -622,7 +621,7 @@ public class MCXProtocolHandler implements Runnable, DWProtocol {
    * @return device
    */
   public DWProtocolDevice getProtoDev() {
-    return (this.dwProtocolDevice);
+    return this.dwProtocolDevice;
   }
 
   /**

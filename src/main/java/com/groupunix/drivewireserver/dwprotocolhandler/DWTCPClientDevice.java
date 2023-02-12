@@ -109,7 +109,7 @@ public class DWTCPClientDevice implements DWProtocolDevice {
     if (data < 0) {
       // read problem
       LOGGER.info("socket error reading device");
-      return (-1);
+      return -1;
     }
     logByte("TCPREAD: " + data);
     return data;
@@ -126,8 +126,8 @@ public class DWTCPClientDevice implements DWProtocolDevice {
     try {
       sock.getOutputStream().write(data, 0, len);
       if (bytelog) {
-        StringBuilder tmps = new StringBuilder();
-        for (byte datum : data) {
+        final StringBuilder tmps = new StringBuilder();
+        for (final byte datum : data) {
           tmps.append(" ").append(datum & BYTE_MASK);
         }
         logByte("WRITE " + data.length + ":" + tmps);

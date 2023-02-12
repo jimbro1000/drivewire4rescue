@@ -106,7 +106,7 @@ public class DWTCPDevice implements DWProtocolDevice {
    */
   private void closeClient() {
     LOGGER.debug("closing client connection");
-    if ((skt != null) && (!skt.isClosed())) {
+    if (skt != null && !skt.isClosed()) {
       try {
         skt.close();
       } catch (IOException e) {
@@ -140,7 +140,7 @@ public class DWTCPDevice implements DWProtocolDevice {
   public int comRead1(final boolean timeout) {
     int data = -1;
     if (skt == null) {
-      getClientConnection();
+      fetchClientConnection();
     }
     if (skt != null) {
       try {
@@ -170,14 +170,14 @@ public class DWTCPDevice implements DWProtocolDevice {
    * @param prefix require response prefix
    */
   public void comWrite(final byte[] data, final int len, final boolean prefix) {
-    if ((skt == null) || (skt.isClosed())) {
+    if (skt == null || skt.isClosed()) {
       return;
     }
     try {
       skt.getOutputStream().write(data, 0, len);
       if (bytelog) {
-        StringBuilder tmps = new StringBuilder();
-        for (byte datum : data) {
+        final StringBuilder tmps = new StringBuilder();
+        for (final byte datum : data) {
           tmps.append(" ").append(datum & BYTE_MASK);
         }
         logByte("WRITE " + data.length + ":" + tmps);
@@ -194,7 +194,7 @@ public class DWTCPDevice implements DWProtocolDevice {
    * @param prefix require response prefix
    */
   public void comWrite1(final int data, final boolean prefix) {
-    if ((skt == null) || (skt.isClosed())) {
+    if (skt == null || skt.isClosed()) {
       return;
     }
     try {
@@ -228,7 +228,7 @@ public class DWTCPDevice implements DWProtocolDevice {
    * Wait for new client connection
    * </p>
    */
-  private void getClientConnection() {
+  private void fetchClientConnection() {
     LOGGER.debug("waiting for client...");
     try {
       skt = srvr.accept();
@@ -266,7 +266,7 @@ public class DWTCPDevice implements DWProtocolDevice {
    */
   @Override
   public String getDeviceName() {
-    return ("listen:" + this.tcpport);
+    return "listen:" + this.tcpport;
   }
 
   /**
@@ -276,7 +276,7 @@ public class DWTCPDevice implements DWProtocolDevice {
    */
   @Override
   public String getDeviceType() {
-    return ("tcp");
+    return "tcp";
   }
 
   /**
