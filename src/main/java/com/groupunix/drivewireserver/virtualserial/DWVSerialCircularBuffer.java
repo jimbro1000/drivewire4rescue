@@ -145,12 +145,13 @@ public class DWVSerialCircularBuffer {
    *
    * @since ostermillerutils 1.00.00
    */
-  protected InputStream in = new CircularByteBufferInputStream();
+  protected InputStream inputStream = new CircularByteBufferInputStream();
   /**
    * Input stream closed.
    * <p>
    * true if the close() method has been called on the InputStream
    * </p>
+   *
    * @since ostermillerutils 1.00.00
    */
   protected boolean inputStreamClosed = false;
@@ -306,7 +307,7 @@ public class DWVSerialCircularBuffer {
    * @since ostermillerutils 1.00.00
    */
   public InputStream getInputStream() {
-    return in;
+    return inputStream;
   }
 
   /**
@@ -366,19 +367,19 @@ public class DWVSerialCircularBuffer {
    * @since ostermillerutils 1.00.00
    */
   private void resize() {
-    byte[] newBuffer = new byte[buffer.length * 2];
-    int marked = marked();
-    int available = available();
+    final byte[] newBuffer = new byte[buffer.length * 2];
+    final int marked = marked();
+    final int available = available();
     if (markPosition <= writePosition) {
       // any space between the mark and
       // the first write needs to be saved.
       // In this case it is all in one piece.
-      int length = writePosition - markPosition;
+      final int length = writePosition - markPosition;
       System.arraycopy(buffer, markPosition, newBuffer, 0, length);
     } else {
-      int length1 = buffer.length - markPosition;
+      final int length1 = buffer.length - markPosition;
       System.arraycopy(buffer, markPosition, newBuffer, 0, length1);
-      int length2 = writePosition;
+      final int length2 = writePosition;
       System.arraycopy(buffer, 0, newBuffer, length1, length2);
     }
     buffer = newBuffer;
@@ -398,10 +399,10 @@ public class DWVSerialCircularBuffer {
       // any space between the first write and
       // the mark except one byte is available.
       // In this case it is all in one piece.
-      return (markPosition - writePosition - 1);
+      return markPosition - writePosition - 1;
     }
     // space at the beginning and end.
-    return ((buffer.length - 1) - (writePosition - markPosition));
+    return (buffer.length - 1) - (writePosition - markPosition);
   }
 
   /**
@@ -415,10 +416,10 @@ public class DWVSerialCircularBuffer {
   private int available() {
     if (readPosition <= writePosition) {
       // no control chars */
-      return (writePosition - readPosition);
+      return writePosition - readPosition;
     } else {
       // no control chars
-      return (buffer.length - (readPosition - writePosition));
+      return buffer.length - (readPosition - writePosition);
     }
   }
 
@@ -433,10 +434,10 @@ public class DWVSerialCircularBuffer {
       // any space between the markPosition and
       // the first write is marked.  In this case i
       // is all in one piece.
-      return (readPosition - markPosition);
+      return readPosition - markPosition;
     }
     // space at the beginning and end.
-    return (buffer.length - (markPosition - readPosition));
+    return buffer.length - (markPosition - readPosition);
   }
 
   /**
@@ -516,7 +517,7 @@ public class DWVSerialCircularBuffer {
               "InputStream has been closed, it is not ready."
           );
         }
-        return (DWVSerialCircularBuffer.this.available());
+        return DWVSerialCircularBuffer.this.available();
       }
     }
 
@@ -587,9 +588,9 @@ public class DWVSerialCircularBuffer {
             throw new IOException("InputStream has been closed; "
                 + "cannot read from a closed InputStream.");
           }
-          int available = DWVSerialCircularBuffer.this.available();
+          final int available = DWVSerialCircularBuffer.this.available();
           if (available > 0) {
-            int result = buffer[readPosition] & BYTE_MASK;
+            final int result = buffer[readPosition] & BYTE_MASK;
             readPosition++;
             if (readPosition == buffer.length) {
               readPosition = 0;
@@ -648,11 +649,11 @@ public class DWVSerialCircularBuffer {
             throw new IOException("InputStream has been closed; "
                 + "cannot read from a closed InputStream.");
           }
-          int available = DWVSerialCircularBuffer.this.available();
+          final int available = DWVSerialCircularBuffer.this.available();
           if (available > 0) {
-            int length = Math.min(len, available);
-            int firstLen = Math.min(length, buffer.length - readPosition);
-            int secondLen = length - firstLen;
+            final int length = Math.min(len, available);
+            final int firstLen = Math.min(length, buffer.length - readPosition);
+            final int secondLen = length - firstLen;
             System.arraycopy(buffer, readPosition, cbuf, off, firstLen);
             if (secondLen > 0) {
               System.arraycopy(buffer, 0, cbuf, off + firstLen, secondLen);
@@ -702,14 +703,14 @@ public class DWVSerialCircularBuffer {
      * This method will block until some bytes are available,
      * an I/O error occurs, or the end of the stream is reached.
      *
-     * @param n The number of bytes to skip
+     * @param nBytes The number of bytes to skip
      * @return The number of bytes actually skipped
      * @throws IllegalArgumentException if n is negative.
      * @throws IOException              if the stream is closed.
      * @since ostermillerutils 1.00.00
      */
     @Override
-    public long skip(final long n)
+    public long skip(final long nBytes)
         throws IOException, IllegalArgumentException {
       while (true) {
         synchronized (DWVSerialCircularBuffer.this) {
@@ -717,11 +718,11 @@ public class DWVSerialCircularBuffer {
             throw new IOException("InputStream has been closed; "
                 + "cannot skip bytes on a closed InputStream.");
           }
-          int available = DWVSerialCircularBuffer.this.available();
+          final int available = DWVSerialCircularBuffer.this.available();
           if (available > 0) {
-            int length = Math.min((int) n, available);
-            int firstLen = Math.min(length, buffer.length - readPosition);
-            int secondLen = length - firstLen;
+            final int length = Math.min((int) nBytes, available);
+            final int firstLen = Math.min(length, buffer.length - readPosition);
+            final int secondLen = length - firstLen;
             if (secondLen > 0) {
               readPosition = secondLen;
             } else {
@@ -865,12 +866,12 @@ public class DWVSerialCircularBuffer {
                 "CircularByteBuffer is full; cannot write " + len + " bytes"
             );
           }
-          int realLen = Math.min(len, spaceLeft);
-          int firstLen = Math.min(realLen,
+          final int realLen = Math.min(len, spaceLeft);
+          final int firstLen = Math.min(realLen,
               buffer.length - writePosition);
-          int secondLen = Math.min(realLen - firstLen,
+          final int secondLen = Math.min(realLen - firstLen,
               buffer.length - markPosition - 1);
-          int written = firstLen + secondLen;
+          final int written = firstLen + secondLen;
           if (firstLen > 0) {
             System.arraycopy(cbuf, off, buffer, writePosition, firstLen);
           }
@@ -905,7 +906,7 @@ public class DWVSerialCircularBuffer {
      * If the buffer allows blocking writes, this method will block until
      * all the data has been written rather than throw an IOException.
      *
-     * @param c number of bytes to be written
+     * @param nBytes number of bytes to be written
      * @throws BufferOverflowException if buffer does not allow blocking writes
      *                                 and the buffer is full.
      * @throws IOException             if the stream is closed,
@@ -913,7 +914,7 @@ public class DWVSerialCircularBuffer {
      * @since ostermillerutils 1.00.00
      */
     @Override
-    public void write(final int c) throws IOException {
+    public void write(final int nBytes) throws IOException {
       boolean written = false;
       while (!written) {
         synchronized (DWVSerialCircularBuffer.this) {
@@ -940,7 +941,7 @@ public class DWVSerialCircularBuffer {
             );
           }
           if (spaceLeft > 0) {
-            buffer[writePosition] = (byte) (c & BYTE_MASK);
+            buffer[writePosition] = (byte) (nBytes & BYTE_MASK);
             writePosition++;
             if (writePosition == buffer.length) {
               writePosition = 0;

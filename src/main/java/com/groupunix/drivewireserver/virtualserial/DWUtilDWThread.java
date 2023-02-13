@@ -75,7 +75,7 @@ public class DWUtilDWThread implements Runnable {
     try {
       this.dwVSerialPorts.markConnected(vport);
       this.dwVSerialPorts.setUtilMode(this.vport, DWDefs.UTILMODE_DWCMD);
-      DWCommandResponse resp = commands.parse(this.strargs);
+      final DWCommandResponse resp = commands.parse(this.strargs);
       if (resp.isSuccess()) {
         if (resp.isUseBytes()) {
           dwVSerialPorts.sendUtilityOKResponse(
@@ -92,8 +92,8 @@ public class DWUtilDWThread implements Runnable {
         );
       }
       // wait for output to flush
-      while ((dwVSerialPorts.bytesWaiting(this.vport) > 0)
-          && (dwVSerialPorts.isOpen(this.vport))) {
+      while (dwVSerialPorts.bytesWaiting(this.vport) > 0
+          && dwVSerialPorts.isOpen(this.vport)) {
         LOGGER.debug("pause for the cause: "
             + dwVSerialPorts.bytesWaiting(this.vport) + " bytes left");
         Thread.sleep(POLL_OUTPUT_DELAY);

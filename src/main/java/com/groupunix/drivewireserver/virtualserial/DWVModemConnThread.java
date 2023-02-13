@@ -17,67 +17,67 @@ public class DWVModemConnThread implements Runnable {
   /**
    * IAC protocol command.
    */
-  public static final int IAC = 255;
+  public static final int CMD_IAC = 255;
   /**
    * SE protocol command.
    */
-  public static final int SE = 240;
+  public static final int CMD_SE = 240;
   /**
    * NOP protocol command.
    */
-  public static final int NOP = 241;
+  public static final int CMD_NOP = 241;
   /**
    * DM protocol command.
    */
-  public static final int DM = 242;
+  public static final int CMD_DM = 242;
   /**
    * BREAK protocol command.
    */
-  public static final int BREAK = 243;
+  public static final int CMD_BREAK = 243;
   /**
    * IP protocol command.
    */
-  public static final int IP = 244;
+  public static final int CMD_IP = 244;
   /**
    * AO protocol command.
    */
-  public static final int AO = 245;
+  public static final int CMD_AO = 245;
   /**
    * AYT protocol command.
    */
-  public static final int AYT = 246;
+  public static final int CMD_AYT = 246;
   /**
    * EC protocol command.
    */
-  public static final int EC = 247;
+  public static final int CMD_EC = 247;
   /**
    * EL protocol command.
    */
-  public static final int EL = 248;
+  public static final int CMD_EL = 248;
   /**
    * GA protocol command.
    */
-  public static final int GA = 249;
+  public static final int CMD_GA = 249;
   /**
    * SB protocol command.
    */
-  public static final int SB = 250;
+  public static final int CMD_SB = 250;
   /**
    * WILL protocol command.
    */
-  public static final int WILL = 251;
+  public static final int CMD_WILL = 251;
   /**
    * WONT protocol command.
    */
-  public static final int WONT = 252;
+  public static final int CMD_WONT = 252;
   /**
    * Do protocol command.
    */
-  public static final int DO = 253;
+  public static final int CMD_DO = 253;
   /**
    * DONT protocol command.
    */
-  public static final int DONT = 254;
+  public static final int CMD_DONT = 254;
   /**
    * Log appender.
    */
@@ -166,49 +166,49 @@ public class DWVModemConnThread implements Runnable {
 
     if (!wanttodie) {
       try {
-        if ((sktchan != null) && sktchan.isConnected()) {
+        if (sktchan != null && sktchan.isConnected()) {
           modem.getVSerialPorts().markConnected(vport);
           modem.getVSerialPorts().setUtilMode(vport, DWDefs.UTILMODE_VMODEMOUT);
           modem.getVSerialPorts().setPortChannel(vport, sktchan);
           modem.getVSerialPorts().getPortInput(vport)
               .write("CONNECT\r\n".getBytes(DWDefs.ENCODING));
         }
-        while ((sktchan != null) && sktchan.isConnected()) {
+        while (sktchan != null && sktchan.isConnected()) {
           int data = sktchan.socket().getInputStream().read();
 
           if (data >= 0) {
             // telnet stuff
             if (telmode == 1) {
               switch (data) {
-                case SE:
-                case NOP:
-                case DM:
-                case BREAK:
-                case IP:
-                case AO:
-                case AYT:
-                case EC:
-                case EL:
-                case GA:
-                case SB:
+                case CMD_SE:
+                case CMD_NOP:
+                case CMD_DM:
+                case CMD_BREAK:
+                case CMD_IP:
+                case CMD_AO:
+                case CMD_AYT:
+                case CMD_EC:
+                case CMD_EL:
+                case CMD_GA:
+                case CMD_SB:
                   break;
 
-                case WILL:
+                case CMD_WILL:
                   data = sktchan.socket().getInputStream().read();
                   sktchan.socket().getOutputStream().write(BYTE_MASK);
-                  sktchan.socket().getOutputStream().write(DONT);
+                  sktchan.socket().getOutputStream().write(CMD_DONT);
                   sktchan.socket().getOutputStream().write(data);
                   break;
 
-                case WONT:
-                case DONT:
+                case CMD_WONT:
+                case CMD_DONT:
                   data = sktchan.socket().getInputStream().read();
                   break;
 
-                case DO:
+                case CMD_DO:
                   data = sktchan.socket().getInputStream().read();
                   sktchan.socket().getOutputStream().write(BYTE_MASK);
-                  sktchan.socket().getOutputStream().write(WONT);
+                  sktchan.socket().getOutputStream().write(CMD_WONT);
                   sktchan.socket().getOutputStream().write(data);
                   break;
 
@@ -216,7 +216,7 @@ public class DWVModemConnThread implements Runnable {
               }
               telmode = 0;
             }
-            if (data == IAC) {
+            if (data == CMD_IAC) {
               telmode = 1;
             } else {
               // write it to the serial port

@@ -101,22 +101,24 @@ public class DWVPortTCPServerThread implements Runnable {
 
       int lastbyte = -1;
 
-      while ((!wanttodie) && (sktchan.isOpen())
-          && (dwVSerialPorts.isOpen(this.vport) || (mode == MODE_TERM))) {
+      while (!wanttodie
+          && sktchan.isOpen()
+          && dwVSerialPorts.isOpen(this.vport)
+          || mode == MODE_TERM) {
 
-        int databyte = sktchan.socket().getInputStream().read();
+        final int databyte = sktchan.socket().getInputStream().read();
         if (databyte == -1) {
           wanttodie = true;
         } else {
           // filter CR,NULL if in telnet or term mode
           // unless PD.INT and PD.QUT = 0
-          if (((mode == MODE_TELNET) || (mode == MODE_TERM))
-              && ((dwVSerialPorts.getPdInt(this.vport) != 0)
-              || (dwVSerialPorts.getPdQut(this.vport) != 0))) {
+          if ((mode == MODE_TELNET || mode == MODE_TERM)
+              && (dwVSerialPorts.getPdInt(this.vport) != 0
+              || dwVSerialPorts.getPdQut(this.vport) != 0)) {
             // TODO filter CR/LF.. should do this better
-            if (!((lastbyte == CARRIAGE_RETURN)
-                && ((databyte == NEWLINE)
-                || (databyte == 0)))) {
+            if (!(lastbyte == CARRIAGE_RETURN
+                && (databyte == NEWLINE
+                || databyte == 0))) {
               // write it to the serial port
               dwVSerialPorts.writeToCoco(this.vport, (byte) databyte);
               lastbyte = databyte;
@@ -135,8 +137,8 @@ public class DWVPortTCPServerThread implements Runnable {
           LOGGER.debug("exit stage 1, flush buffer");
           // flush buffer, term port
           try {
-            while ((dwVSerialPorts.bytesWaiting(this.vport) > 0)
-                && (dwVSerialPorts.isOpen(this.vport))) {
+            while (dwVSerialPorts.bytesWaiting(this.vport) > 0
+                && dwVSerialPorts.isOpen(this.vport)) {
               LOGGER.debug("pause for the cause: "
                   + dwVSerialPorts.bytesWaiting(this.vport) + " bytes left");
               Thread.sleep(FLUSH_DELAY);

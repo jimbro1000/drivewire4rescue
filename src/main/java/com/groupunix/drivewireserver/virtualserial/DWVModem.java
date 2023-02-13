@@ -211,12 +211,12 @@ public class DWVModem {
    * @param command command string
    */
   public void processCommand(final String command) {
-    int errors = 0;
-    String cmd = command;
     // hitting enter on a blank line is ok
-    if (cmd.length() == 0) {
+    if (command.length() == 0) {
       return;
     }
+    int errors = 0;
+    String cmd = command;
     // A/ repeats last command
     if (cmd.equalsIgnoreCase("A/")) {
       cmd = this.vmodemLastcommand;
@@ -277,7 +277,7 @@ public class DWVModem {
                 extended = true;
               }
 
-              if ((!extended) && cmd.toUpperCase().charAt(i) == 'D') {
+              if (!extended && cmd.toUpperCase().charAt(i) == 'D') {
                 dialing = true;
               }
 
@@ -461,7 +461,7 @@ public class DWVModem {
       // registers
       case 'S':
         // valid?
-        if ((regval <= BYTE_MASK) && (val <= BYTE_MASK)) {
+        if (regval <= BYTE_MASK && val <= BYTE_MASK) {
           // display or set
           if (thisarg.equals("?")) {
             // display
@@ -477,7 +477,10 @@ public class DWVModem {
 
       // dial
       case 'D':
-        if (!(thisarg.length() == 0)) {
+        if (thisarg.length() == 0) {
+          // ATD without a number/host?
+          errors++;
+        } else {
           // if its ATDL, dont reset vs_dev so we redial last host
           if (!thisarg.equalsIgnoreCase("L")) {
             this.vmodemDialstring = thisarg;
@@ -488,9 +491,6 @@ public class DWVModem {
           //don't print another response
           errors = -1;
           return errors;
-        } else {
-          // ATD without a number/host?
-          errors++;
         }
         break;
       default:
@@ -498,7 +498,7 @@ public class DWVModem {
         errors++;
         break;
     }
-    return (errors);
+    return errors;
   }
 
   private void doCommandAnswerMode(final int val) {
@@ -523,7 +523,7 @@ public class DWVModem {
     int tcpport;
 
     // parse dialstring
-    String[] dparts = this.vmodemDialstring.split(":");
+    final String[] dparts = this.vmodemDialstring.split(":");
 
     if (dparts.length == 1) {
       tcphost = dparts[0];
@@ -621,8 +621,8 @@ public class DWVModem {
    * @return end of line combo
    */
   private String getCRLF() {
-    return (Character.toString((char) this.vmodemRegisters[REG_CR])
-        + (char) this.vmodemRegisters[REG_LF]);
+    return Character.toString((char) this.vmodemRegisters[REG_CR])
+        + (char) this.vmodemRegisters[REG_LF];
   }
 
   private void sendResponse(final int resp) {
@@ -689,10 +689,10 @@ public class DWVModem {
   /**
    * Set echo flag.
    *
-   * @param b echo flag
+   * @param echo echo flag
    */
-  public void setEcho(final boolean b) {
-    this.vmodemRegisters[REG_ECHO] = b ? 1 : 0;
+  public void setEcho(final boolean echo) {
+    this.vmodemRegisters[REG_ECHO] = echo ? 1 : 0;
   }
 
   /**
@@ -707,10 +707,10 @@ public class DWVModem {
   /**
    * Set verbose flag.
    *
-   * @param b verbose
+   * @param verbose verbose
    */
-  public void setVerbose(final boolean b) {
-    this.vmodemRegisters[REG_VERBOSE] = b ? 1 : 0;
+  public void setVerbose(final boolean verbose) {
+    this.vmodemRegisters[REG_VERBOSE] = verbose ? 1 : 0;
   }
 
   /**
@@ -728,7 +728,7 @@ public class DWVModem {
    * @return CR
    */
   public int getCR() {
-    return (this.vmodemRegisters[REG_CR]);
+    return this.vmodemRegisters[REG_CR];
   }
 
   /**
@@ -737,7 +737,7 @@ public class DWVModem {
    * @return LF
    */
   public int getLF() {
-    return (this.vmodemRegisters[REG_LF]);
+    return this.vmodemRegisters[REG_LF];
   }
 
   /**
@@ -746,7 +746,7 @@ public class DWVModem {
    * @return BS
    */
   public int getBS() {
-    return (this.vmodemRegisters[REG_BS]);
+    return this.vmodemRegisters[REG_BS];
   }
 
   /**

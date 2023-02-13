@@ -123,26 +123,26 @@ public class DWAPISerialPortDef {
   /**
    * Set parameters.
    *
-   * @param sp serial port
+   * @param port serial port
    * @throws UnsupportedCommOperationException invalid operation
    */
-  public void setParams(final SerialPort sp)
+  public void setParams(final SerialPort port)
       throws UnsupportedCommOperationException {
     if (this.baudRate == -1) {
-      this.baudRate = sp.getBaudRate();
+      this.baudRate = port.getBaudRate();
     }
     if (this.dataBits == -1) {
-      this.dataBits = sp.getDataBits();
+      this.dataBits = port.getDataBits();
     }
     if (this.stopBits == -1) {
-      this.stopBits = sp.getStopBits();
+      this.stopBits = port.getStopBits();
     }
     if (this.parityType == -1) {
-      this.parityType = sp.getParity();
+      this.parityType = port.getParity();
     }
-    sp.setSerialPortParams(baudRate, dataBits, stopBits, parityType);
+    port.setSerialPortParams(baudRate, dataBits, stopBits, parityType);
     if (this.flowControl > -1) {
-      sp.setFlowControlMode(this.flowControl);
+      port.setFlowControlMode(this.flowControl);
     }
   }
 }

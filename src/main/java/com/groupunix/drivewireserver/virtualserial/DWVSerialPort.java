@@ -37,7 +37,7 @@ public class DWVSerialPort {
   /**
    * Output buffer size.
    */
-  private static final int OUTPUT_BUFFER_SIZE = 10240;
+  private static final int OUTPUT_BUFFER_SIZE = 10_240;
   /**
    * Default port number.
    */
@@ -122,7 +122,7 @@ public class DWVSerialPort {
   /**
    * DD byte array.
    */
-  private byte[] dD = new byte[DD_LEN];
+  private byte[] ddBytes = new byte[DD_LEN];
   /**
    * Input buffer.
    */
@@ -213,8 +213,8 @@ public class DWVSerialPort {
     this.vPort = port;
     this.dwvSerialProtocol = protocol;
 
-    if ((port != serialPorts.getNTermPort())
-        && (port < (serialPorts.getMaxPorts()))) {
+    if (port != serialPorts.getNTermPort()
+        && port < serialPorts.getMaxPorts()) {
       this.portHandler = new DWVPortHandler(protocol, port);
       if (protocol.getConfig().getBoolean("LogMIDIBytes", false)) {
         this.logMidiBytes = true;
@@ -228,7 +228,7 @@ public class DWVSerialPort {
    * @return bytes waiting to read
    */
   public int bytesWaiting() {
-    int bytes = inputBuffer.getAvailable();
+    final int bytes = inputBuffer.getAvailable();
     // never admit to having more than 255 bytes
     return Math.min(bytes, BYTE_MASK);
   }
@@ -263,15 +263,15 @@ public class DWVSerialPort {
         } else if (databyte == SEND_MIDI) {
           // We ignore other status stuff for now
           sendMIDI(databyte);
-        } else if ((databyte >= MIDI_PRG_CHANGE)
-            && (databyte <= MIDI_CHAN_PRESS_MAX)) {
+        } else if (databyte >= MIDI_PRG_CHANGE
+            && databyte <= MIDI_CHAN_PRESS_MAX) {
           // Program change and channel pressure have 1 data byte
           mmsgDatabytes = 1;
           lastMmsgStatus = mmsgStatus;
           mmsgStatus = databyte;
           mmsgPos = 0;
-        } else if ((databyte >= MIDI_NOTE_CHANNEL)
-            && (databyte <= MIDI_PITCH_BEND_CHANNEL_MAX)) {
+        } else if (databyte >= MIDI_NOTE_CHANNEL
+            && databyte <= MIDI_PITCH_BEND_CHANNEL_MAX) {
           // Note on/off, key pressure, controller change,
           // pitch bend have 2 data bytes
           mmsgDatabytes = 2;
@@ -288,8 +288,8 @@ public class DWVSerialPort {
               mmsgPos = 1;
             } else {
               // send midimsg with 1 data byte
-              if ((mmsgStatus >= MIDI_MSG_BASE)
-                  && (databyte < MIDI_CHAN_PRESS)) {
+              if (mmsgStatus >= MIDI_MSG_BASE
+                  && databyte < MIDI_CHAN_PRESS) {
                 if (dwvSerialProtocol.getVPorts().getMidiVoicelock()) {
                   // ignore program change
                   LOGGER.debug(
@@ -297,7 +297,7 @@ public class DWVSerialPort {
                   );
                 } else {
                   // translate program changes
-                  int xinstr = dwvSerialProtocol.getVPorts()
+                  final int xinstr = dwvSerialProtocol.getVPorts()
                       .getGMInstrument(databyte);
                   sendMIDI(mmsgStatus, xinstr, 0);
                   // set cache
@@ -320,9 +320,9 @@ public class DWVSerialPort {
       }
     } else {
       // if we are connected, pass the data
-      if ((this.connected) || (this.vPort == vSerialPorts.getNTermPort())
-          || ((this.vPort >= vSerialPorts.getMaxNPorts())
-          && (this.vPort < vSerialPorts.getMaxPorts()))) {
+      if (this.connected || this.vPort == vSerialPorts.getNTermPort()
+          || this.vPort >= vSerialPorts.getMaxNPorts()
+          && this.vPort < vSerialPorts.getMaxPorts()) {
         if (socketChannel == null) {
           LOGGER.debug("write to null io channel on port " + this.vPort);
         } else {
@@ -332,7 +332,7 @@ public class DWVSerialPort {
                   + " " + outputBuffer.remaining() + " "
                   + outputBuffer.limit() + " " + outputBuffer.capacity());
               outputBuffer.flip();
-              int wrote = socketChannel.write(outputBuffer);
+              final int wrote = socketChannel.write(outputBuffer);
               outputBuffer.compact();
               System.out.println("full wrote " + wrote);
               if (wrote == 0) {
@@ -358,7 +358,7 @@ public class DWVSerialPort {
   }
 
   private void sendMIDI(final int statusByte) {
-    ShortMessage mmsg = new ShortMessage();
+    final ShortMessage mmsg = new ShortMessage();
     try {
       mmsg.setMessage(statusByte);
       dwvSerialProtocol.getVPorts().sendMIDIMsg(mmsg, -1);
@@ -366,7 +366,7 @@ public class DWVSerialPort {
       LOGGER.warn("MIDI: " + e.getMessage());
     }
     if (logMidiBytes) {
-      byte[] tmpb = {(byte) statusByte};
+      final byte[] tmpb = {(byte) statusByte};
       LOGGER.info("midimsg: " + DWUtils.byteArrayToHexString(tmpb));
     }
   }
@@ -375,7 +375,7 @@ public class DWVSerialPort {
                         final int data1,
                         final int data2
   ) {
-    ShortMessage mmsg = new ShortMessage();
+    final ShortMessage mmsg = new ShortMessage();
     try {
       mmsg.setMessage(statusByte, data1, data2);
       dwvSerialProtocol.getVPorts().sendMIDIMsg(mmsg, -1);
@@ -463,7 +463,7 @@ public class DWVSerialPort {
    * @return output stream
    */
   public OutputStream getPortInput() {
-    return (inputBuffer.getOutputStream());
+    return inputBuffer.getOutputStream();
   }
 
   /**
@@ -472,7 +472,7 @@ public class DWVSerialPort {
    * @return input stream
    */
   public InputStream getPortOutput() {
-    return (inputBuffer.getInputStream());
+    return inputBuffer.getInputStream();
   }
 
   /**
@@ -482,8 +482,7 @@ public class DWVSerialPort {
    */
   public byte read1() {
     try {
-      int dataByte = inputBuffer.getInputStream().read();
-      return (byte) dataByte;
+      return (byte) inputBuffer.getInputStream().read();
     } catch (IOException e) {
       LOGGER.error("in read1: " + e.getMessage());
     }
@@ -497,7 +496,7 @@ public class DWVSerialPort {
    * @return byte array
    */
   public byte[] readM(final int tmplen) {
-    byte[] buf = new byte[tmplen];
+    final byte[] buf = new byte[tmplen];
     try {
       inputBuffer.getInputStream().read(buf, 0, tmplen);
       return buf;
@@ -533,7 +532,7 @@ public class DWVSerialPort {
    * @return open state
    */
   public boolean isOpen() {
-    return (this.opens > 0) || (this.utilMode == DWDefs.UTILMODE_NINESERVER);
+    return this.opens > 0 || this.utilMode == DWDefs.UTILMODE_NINESERVER;
   }
 
   /**
@@ -543,14 +542,14 @@ public class DWVSerialPort {
     this.opens++;
     LOGGER.debug("open port " + this.vPort + ", total opens: " + this.opens);
     // fire off NineServer thread if we are a window device
-    if ((this.vPort >= vSerialPorts.getMaxNPorts())
-        && (this.vPort < vSerialPorts.getMaxPorts())) {
-      String tcphost = this.dwvSerialProtocol.getConfig().getString(
+    if (this.vPort >= vSerialPorts.getMaxNPorts()
+        && this.vPort < vSerialPorts.getMaxPorts()) {
+      final String tcphost = this.dwvSerialProtocol.getConfig().getString(
           "NineServer" + this.vPort,
           this.dwvSerialProtocol.getConfig()
               .getString("NineServer", "127.0.0.1")
       );
-      int tcpport = this.dwvSerialProtocol.getConfig().getInt(
+      final int tcpport = this.dwvSerialProtocol.getConfig().getInt(
           "NineServerPort" + this.vPort,
           this.dwvSerialProtocol.getConfig().getInt(
               "NineServerPort",
@@ -563,7 +562,8 @@ public class DWVSerialPort {
       wcdata[0] = ASCII_ESC;
       wcdata[1] = ASCII_DEL;
       wcdata[2] = ASCII_SOH;
-      String pname = this.dwvSerialProtocol.getVPorts().prettyPort(this.vPort);
+      final String pname =
+          this.dwvSerialProtocol.getVPorts().prettyPort(this.vPort);
       for (int i = DEVICE_CMD_OFFSET; i < wcdata.length; i++) {
         if (i - DEVICE_CMD_OFFSET < pname.length()) {
           wcdata[i] = (byte) pname.charAt(i - DEVICE_CMD_OFFSET);
@@ -572,7 +572,7 @@ public class DWVSerialPort {
         }
       }
       // start TCP thread
-      Thread utilthread = new Thread(new DWVPortTCPConnectionThread(
+      final Thread utilthread = new Thread(new DWVPortTCPConnectionThread(
           this.dwvSerialProtocol, this.vPort, tcphost, tcpport, false, wcdata
       ));
       utilthread.setDaemon(true);
@@ -591,12 +591,12 @@ public class DWVSerialPort {
           + this.opens + " data in buffer: "
           + this.inputBuffer.getAvailable());
       // send term if last open and not window
-      if ((this.opens == 0)
-          && (this.getUtilMode() != DWDefs.UTILMODE_NINESERVER)) {
+      if (this.opens == 0
+          && this.getUtilMode() != DWDefs.UTILMODE_NINESERVER) {
         LOGGER.debug("setting term on port " + this.vPort);
         this.wanttodie = true;
         // close socket channel if connected
-        if ((this.socketChannel != null) && (this.socketChannel.isOpen())) {
+        if (this.socketChannel != null && this.socketChannel.isOpen()) {
           LOGGER.debug("closing io channel on port " + this.vPort);
           try {
             this.socketChannel.close();
@@ -618,16 +618,16 @@ public class DWVSerialPort {
    * @return shutdown flag
    */
   public boolean isTerm() {
-    return (wanttodie);
+    return wanttodie;
   }
 
   /**
    * Set port channel.
    *
-   * @param sc socket channel
+   * @param channel socket channel
    */
-  public void setPortChannel(final SocketChannel sc) {
-    this.socketChannel = sc;
+  public void setPortChannel(final SocketChannel channel) {
+    this.socketChannel = channel;
   }
 
   /**
@@ -636,7 +636,7 @@ public class DWVSerialPort {
    * @return mode
    */
   public int getUtilMode() {
-    return (this.utilMode);
+    return this.utilMode;
   }
 
   /**
@@ -693,7 +693,7 @@ public class DWVSerialPort {
    * @param txt response message
    */
   public void sendUtilityFailResponse(final byte errno, final String txt) {
-    String sErrNo = String.format("%03d", (errno & BYTE_MASK));
+    final String sErrNo = String.format("%03d", errno & BYTE_MASK);
     LOGGER.debug("command failed: " + sErrNo + " " + txt);
     try {
       inputBuffer.getOutputStream().write(
@@ -725,10 +725,10 @@ public class DWVSerialPort {
   /**
    * Get device description.
    *
-   * @return device description bye array
+   * @return device description byte array
    */
   public byte[] getDD() {
-    return (this.dD);
+    return this.ddBytes;
   }
 
   /**
@@ -737,7 +737,7 @@ public class DWVSerialPort {
    * @param devDescr byte array
    */
   public void setDD(final byte[] devDescr) {
-    this.dD = devDescr;
+    this.ddBytes = devDescr;
   }
 
   /**
@@ -746,7 +746,7 @@ public class DWVSerialPort {
    * @return total open count
    */
   public int getOpen() {
-    return (this.opens);
+    return this.opens;
   }
 
   /**
@@ -768,7 +768,7 @@ public class DWVSerialPort {
    * @return connection number
    */
   public int getConn() {
-    return (this.connNo);
+    return this.connNo;
   }
 
   /**

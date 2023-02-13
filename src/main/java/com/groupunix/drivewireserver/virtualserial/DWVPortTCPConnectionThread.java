@@ -92,18 +92,18 @@ public class DWVPortTCPConnectionThread implements Runnable {
    * @param vPort     virtual port
    * @param tcpHostIn tcp host in
    * @param tcpPortIn tcp port in
-   * @param rc        report connect
+   * @param report    report connect
    */
   public DWVPortTCPConnectionThread(final DWVSerialProtocol protocol,
                                     final int vPort,
                                     final String tcpHostIn,
                                     final int tcpPortIn,
-                                    final boolean rc) {
+                                    final boolean report) {
     LOGGER.debug("init tcp connection thread");
     this.vport = vPort;
     this.tcpport = tcpPortIn;
     this.tcphost = tcpHostIn;
-    this.reportConnect = rc;
+    this.reportConnect = report;
     this.dwVSerialPorts = protocol.getVPorts();
 
   }
@@ -115,20 +115,20 @@ public class DWVPortTCPConnectionThread implements Runnable {
    * @param vPort     virtual port
    * @param tcpHostIn tcp host in
    * @param tcpPortIn tcp port in
-   * @param rc        report connect
+   * @param report    report connect
    * @param wcData    wc data
    */
   public DWVPortTCPConnectionThread(final DWVSerialProtocol protocol,
                                     final int vPort,
                                     final String tcpHostIn,
                                     final int tcpPortIn,
-                                    final boolean rc,
+                                    final boolean report,
                                     final byte[] wcData) {
     LOGGER.debug("init NineServer connection thread");
     this.vport = vPort;
     this.tcpport = tcpPortIn;
     this.tcphost = tcpHostIn;
-    this.reportConnect = rc;
+    this.reportConnect = report;
     this.wcdata = wcData;
     this.dwVSerialPorts = protocol.getVPorts();
   }
@@ -194,13 +194,13 @@ public class DWVPortTCPConnectionThread implements Runnable {
       LOGGER.warn(e.getMessage());
     }
 
-    byte[] readbytes = new byte[READ_BUFFER_SIZE];
-    ByteBuffer readBuffer = ByteBuffer.wrap(readbytes);
+    final byte[] readbytes = new byte[READ_BUFFER_SIZE];
+    final ByteBuffer readBuffer = ByteBuffer.wrap(readbytes);
 
-    while ((!wanttodie) && (sktchan.isOpen())
-        && (dwVSerialPorts.isOpen(this.vport))) {
+    while (!wanttodie && sktchan.isOpen()
+        && dwVSerialPorts.isOpen(this.vport)) {
       try {
-        int readsize = sktchan.read(readBuffer);
+        final int readsize = sktchan.read(readBuffer);
         if (readsize == -1) {
           LOGGER.debug("got end of input stream");
           wanttodie = true;
@@ -218,10 +218,12 @@ public class DWVPortTCPConnectionThread implements Runnable {
     }
     if (wanttodie) {
       LOGGER.debug("exit because wanttodie");
-    } else if (!sktchan.isConnected()) {
+    } else if (sktchan.isConnected()) {
+      if (!dwVSerialPorts.isOpen(this.vport)) {
+        LOGGER.debug("exit because port is not open");
+      }
+    } else {
       LOGGER.debug("exit because skt isClosed");
-    } else if (!dwVSerialPorts.isOpen(this.vport)) {
-      LOGGER.debug("exit because port is not open");
     }
     // only if we got connected...
     if (sktchan != null) {
@@ -229,8 +231,8 @@ public class DWVPortTCPConnectionThread implements Runnable {
         LOGGER.debug("exit stage 1, flush buffer");
         // flush buffer, term port
         try {
-          while ((dwVSerialPorts.bytesWaiting(this.vport) > 0)
-              && (dwVSerialPorts.isOpen(this.vport))) {
+          while (dwVSerialPorts.bytesWaiting(this.vport) > 0
+              && dwVSerialPorts.isOpen(this.vport)) {
             LOGGER.debug("pause for the cause: "
                 + dwVSerialPorts.bytesWaiting(this.vport) + " bytes left");
             Thread.sleep(READ_DELAY_MILLIS);

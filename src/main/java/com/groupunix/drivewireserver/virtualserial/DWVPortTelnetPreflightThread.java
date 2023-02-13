@@ -97,7 +97,12 @@ public class DWVPortTelnetPreflightThread implements Runnable {
     this.dwVSerialPorts = serialProtocol.getVPorts();
   }
 
-  static byte[] prepTelnet() {
+  /**
+   * Prepare telnet init.
+   *
+   * @return init message
+   */
+  public static byte[] prepTelnet() {
     int index = 0;
     byte[] buf = new byte[TELNET_MSG_LEN];
     buf[index++] = (byte) TELNET_ESC;
@@ -131,7 +136,7 @@ public class DWVPortTelnetPreflightThread implements Runnable {
       if (this.telnet) {
         // ask telnet to turn off echo, should probably be a setting
         // or left to the client
-        byte[] buf = prepTelnet();
+        final byte[] buf = prepTelnet();
         socketChannel.socket().getOutputStream().write(buf, 0, TELNET_MSG_LEN);
         // read back the echoed controls - TODO has issues
         for (int i = 0; i < TELNET_MSG_LEN; i++) {
@@ -143,8 +148,8 @@ public class DWVPortTelnetPreflightThread implements Runnable {
         LOGGER.debug("thread exiting after auth");
         return;
       }
-      if ((dwvSerialProtocol.getConfig().containsKey("TelnetBannerFile"))
-          && (banner)) {
+      if (dwvSerialProtocol.getConfig().containsKey("TelnetBannerFile")
+          && banner) {
         displayFile(socketChannel.socket().getOutputStream(),
             dwvSerialProtocol.getConfig().getString("TelnetBannerFile"));
       }
@@ -161,7 +166,7 @@ public class DWVPortTelnetPreflightThread implements Runnable {
     }
     if (socketChannel.isConnected()) {
       //add connection to pool
-      int conno = this.dwVSerialPorts
+      final int conno = this.dwVSerialPorts
           .getListenerPool().addConn(this.vPort, socketChannel, 1);
       // announce new connection to listener
       try {
@@ -184,13 +189,13 @@ public class DWVPortTelnetPreflightThread implements Runnable {
     try (
       FileInputStream fStream = new FileInputStream(fName)
     ) {
-      DataInputStream in = new DataInputStream(fStream);
-      BufferedReader br = new BufferedReader(
-          new InputStreamReader(in, DWDefs.ENCODING)
+      final DataInputStream inputStream = new DataInputStream(fStream);
+      final BufferedReader reader = new BufferedReader(
+          new InputStreamReader(inputStream, DWDefs.ENCODING)
       );
       String strLine;
       LOGGER.debug("sending file '" + fName + "' to telnet client");
-      while ((strLine = br.readLine()) != null) {
+      while ((strLine = reader.readLine()) != null) {
         outputStream.write(strLine.getBytes(DWDefs.ENCODING));
         outputStream.write("\r\n".getBytes(DWDefs.ENCODING));
       }

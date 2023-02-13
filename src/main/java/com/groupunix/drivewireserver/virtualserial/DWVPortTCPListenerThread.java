@@ -85,9 +85,9 @@ public class DWVPortTCPListenerThread implements Runnable {
     LOGGER.debug("run");
     try {
       // startup server
-      ServerSocketChannel srvr = ServerSocketChannel.open();
+      final ServerSocketChannel srvr = ServerSocketChannel.open();
       try {
-        InetSocketAddress sktaddr = new InetSocketAddress(this.tcpport);
+        final InetSocketAddress sktaddr = new InetSocketAddress(this.tcpport);
         srvr.socket().setReuseAddress(true);
         srvr.socket().bind(sktaddr, BACKLOG);
         this.dwVSerialPorts.getListenerPool().addListener(this.vport, srvr);
@@ -105,10 +105,10 @@ public class DWVPortTCPListenerThread implements Runnable {
 
       this.dwVSerialPorts.setUtilMode(vport, DWDefs.UTILMODE_TCPLISTEN);
 
-      while ((!wantToDie) && dwVSerialPorts.isOpen(this.vport)
-          && (srvr.isOpen()) && (!srvr.socket().isClosed())) {
+      while (!wantToDie && dwVSerialPorts.isOpen(this.vport)
+          && srvr.isOpen() && !srvr.socket().isClosed()) {
         LOGGER.debug("waiting for connection");
-        SocketChannel skt = srvr.accept();
+        final SocketChannel skt = srvr.accept();
         LOGGER.info("new connection from " + skt.socket().getInetAddress());
         this.dwVSerialPorts.getListenerPool().addConn(this.vport, skt, opMode);
         if (opMode == 2) {
@@ -117,7 +117,7 @@ public class DWVPortTCPListenerThread implements Runnable {
         } else {
           // run telnet preflight, let it add the connection to the pool
           // if things work out
-          Thread pfthread = new Thread(new DWVPortTelnetPreflightThread(
+          final Thread pfthread = new Thread(new DWVPortTelnetPreflightThread(
               this.dwProto, this.vport, skt, this.doTelnet, this.doBanner
           ));
           pfthread.start();
@@ -161,7 +161,7 @@ public class DWVPortTCPListenerThread implements Runnable {
    * @return mode
    */
   public int getMode() {
-    return (this.opMode);
+    return this.opMode;
   }
 
   /**

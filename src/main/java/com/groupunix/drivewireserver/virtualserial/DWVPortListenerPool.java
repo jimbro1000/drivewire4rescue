@@ -89,12 +89,12 @@ public class DWVPortListenerPool {
   public void validateConn(final int connectionNo)
       throws DWConnectionNotValidException {
     if (
-        (connectionNo < 0)
-            || (connectionNo > DWVPortListenerPool.MAX_CONN)
-            || (this.sockets[connectionNo] == null)
+        connectionNo < 0
+            || connectionNo > DWVPortListenerPool.MAX_CONN
+            || this.sockets[connectionNo] == null
     ) {
-      throw (new DWConnectionNotValidException(
-          "Invalid connection #" + connectionNo)
+      throw new DWConnectionNotValidException(
+          "Invalid connection #" + connectionNo
       );
     }
   }
@@ -258,20 +258,20 @@ public class DWVPortListenerPool {
   /**
    * Get listener port at index.
    *
-   * @param i index
+   * @param index index
    * @return server port
    */
-  public int getListenerPort(final int i) {
-    return serverSocketPorts[i];
+  public int getListenerPort(final int index) {
+    return serverSocketPorts[index];
   }
 
   /**
    * Get connection port at index.
    *
-   * @param i index
+   * @param index index
    * @return port
    */
-  public int getConnPort(final int i) {
-    return socketPorts[i];
+  public int getConnPort(final int index) {
+    return socketPorts[index];
   }
 }

@@ -75,23 +75,23 @@ public class DWAPITCP {
    * @return command response
    */
   public DWCommandResponse process() {
-    if ((cmdParts.length == CONNECT_ARGS_LEN)
-        && (cmdParts[1].equalsIgnoreCase("connect"))) {
+    if (cmdParts.length == CONNECT_ARGS_LEN
+        && cmdParts[1].equalsIgnoreCase("connect")) {
       return doTCPConnect(
           cmdParts[CONNECT_HOST_ARG_INDEX], cmdParts[CONNECT_PORT_ARG_INDEX]
       );
-    } else if ((cmdParts.length >= LISTEN_ARGS_LEN_MIN)
-        && (cmdParts[1].equalsIgnoreCase("listen"))) {
+    } else if (cmdParts.length >= LISTEN_ARGS_LEN_MIN
+        && cmdParts[1].equalsIgnoreCase("listen")) {
       return doTCPListen(cmdParts);
-    } else if ((cmdParts.length == LISTEN_TELNET_ARGS_LEN)
-        && (cmdParts[1].equalsIgnoreCase("listentelnet"))) {
+    } else if (cmdParts.length == LISTEN_TELNET_ARGS_LEN
+        && cmdParts[1].equalsIgnoreCase("listentelnet")) {
       // old
       return doTCPListen(cmdParts[2], 1);
-    } else if ((cmdParts.length == JOIN_ARGS_LEN)
-        && (cmdParts[1].equalsIgnoreCase("join"))) {
+    } else if (cmdParts.length == JOIN_ARGS_LEN
+        && cmdParts[1].equalsIgnoreCase("join")) {
       return doTCPJoin(cmdParts[2]);
-    } else if ((cmdParts.length == KILL_ARGS_LEN)
-        && (cmdParts[1].equalsIgnoreCase("kill"))) {
+    } else if (cmdParts.length == KILL_ARGS_LEN
+        && cmdParts[1].equalsIgnoreCase("kill")) {
       return doTCPKill(cmdParts[2]);
     }
     return new DWCommandResponse(
@@ -116,7 +116,7 @@ public class DWAPITCP {
     try {
       this.dwvSerialProtocol.getVPorts().getListenerPool().validateConn(conno);
       // start TCP thread
-      Thread utilthread = new Thread(new DWVPortTCPServerThread(
+      final Thread utilthread = new Thread(new DWVPortTCPServerThread(
           this.dwvSerialProtocol, this.virtualPort, conno
       ));
       utilthread.start();
@@ -169,7 +169,7 @@ public class DWAPITCP {
       );
     }
     // start TCP thread
-    Thread utilthread = new Thread(new DWVPortTCPConnectionThread(
+    final Thread utilthread = new Thread(new DWVPortTCPConnectionThread(
         this.dwvSerialProtocol, this.virtualPort, tcphost, tcpport
     ));
     utilthread.start();
@@ -188,7 +188,7 @@ public class DWAPITCP {
           "non-numeric port in tcp listen command"
       );
     }
-    DWVPortTCPListenerThread listener = new DWVPortTCPListenerThread(
+    final DWVPortTCPListenerThread listener = new DWVPortTCPListenerThread(
         this.dwvSerialProtocol, this.virtualPort, tcpport
     );
     // simulate old behavior
@@ -196,7 +196,7 @@ public class DWAPITCP {
     listener.setDoBanner(true);
     listener.setDoTelnet(true);
     // start TCP listener thread
-    Thread listenThread = new Thread(listener);
+    final Thread listenThread = new Thread(listener);
     listenThread.start();
     return new DWCommandResponse("listening on port " + tcpport);
   }
@@ -213,7 +213,7 @@ public class DWAPITCP {
           "non-numeric port in tcp listen command"
       );
     }
-    DWVPortTCPListenerThread listener = new DWVPortTCPListenerThread(
+    final DWVPortTCPListenerThread listener = new DWVPortTCPListenerThread(
         this.dwvSerialProtocol, this.virtualPort, tcpport
     );
     // parse options
@@ -229,7 +229,7 @@ public class DWAPITCP {
       }
     }
     // start TCP listener thread
-    Thread listenThread = new Thread(listener);
+    final Thread listenThread = new Thread(listener);
     listenThread.start();
     return new DWCommandResponse("listening on port " + tcpport);
   }

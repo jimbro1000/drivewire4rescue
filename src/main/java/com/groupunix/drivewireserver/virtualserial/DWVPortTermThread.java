@@ -105,7 +105,7 @@ public class DWVPortTermThread implements Runnable {
     try {
       dwVSerialPorts.openPort(TERM_PORT);
 
-      InetSocketAddress sktaddr = new InetSocketAddress(this.tcpport);
+      final InetSocketAddress sktaddr = new InetSocketAddress(this.tcpport);
 
       srvr.socket().setReuseAddress(true);
       srvr.socket().bind(sktaddr, BACKLOG);
@@ -119,7 +119,7 @@ public class DWVPortTermThread implements Runnable {
       LOGGER.error("Error opening term port: " + e.getMessage());
       return;
     }
-    while ((!wanttodie) && (srvr.isOpen())) {
+    while (!wanttodie && srvr.isOpen()) {
       LOGGER.debug("waiting for connection");
       SocketChannel skt;
       try {
@@ -172,8 +172,8 @@ public class DWVPortTermThread implements Runnable {
 
   private void startConn(final SocketChannel skt) {
     // do telnet init stuff
-    byte[] buf = DWVPortTelnetPreflightThread.prepTelnet();
-    int len = buf.length;
+    final byte[] buf = DWVPortTelnetPreflightThread.prepTelnet();
+    final int len = buf.length;
     try {
       skt.socket().getOutputStream().write(buf, 0, len);
       for (int i = 0; i < len; i++) {

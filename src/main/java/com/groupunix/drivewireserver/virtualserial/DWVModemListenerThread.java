@@ -75,16 +75,16 @@ public class DWVModemListenerThread implements Runnable {
 
     // startup server
     try {
-      ServerSocketChannel srvr = ServerSocketChannel.open();
-      InetSocketAddress sktaddr = new InetSocketAddress(this.tcpport);
+      final ServerSocketChannel srvr = ServerSocketChannel.open();
+      final InetSocketAddress sktaddr = new InetSocketAddress(this.tcpport);
       srvr.socket().setReuseAddress(true);
       srvr.socket().bind(sktaddr, BACKLOG);
 
-      while ((!wanttodie)
+      while (!wanttodie
           && dwVSerialPorts.isOpen(this.vport)
-          && (srvr.isOpen())) {
+          && srvr.isOpen()) {
         LOGGER.debug("waiting for connection");
-        SocketChannel skt = srvr.accept();
+        final SocketChannel skt = srvr.accept();
         LOGGER.info("new connection from "
             + skt.socket().getInetAddress().getHostAddress());
         synchronized (this.clientConnected) {
@@ -107,7 +107,7 @@ public class DWVModemListenerThread implements Runnable {
             }
           } else {
             this.clientConnected = true;
-            Thread vmthread = new Thread(
+            final Thread vmthread = new Thread(
                 new DWVModemConnThread(dwVModem, skt, this)
             );
             vmthread.start();
@@ -131,11 +131,11 @@ public class DWVModemListenerThread implements Runnable {
   /**
    * Set connected flag.
    *
-   * @param b connected
+   * @param connected connected
    */
-  public void setConnected(final boolean b) {
+  public void setConnected(final boolean connected) {
     synchronized (this.clientConnected) {
-      this.clientConnected = b;
+      this.clientConnected = connected;
     }
   }
 }

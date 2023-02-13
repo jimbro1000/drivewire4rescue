@@ -83,8 +83,8 @@ public class DWVPortHandler {
     } else {
       // add character to command
       // handle backspace
-      if ((databyte == this.vModem.getBS())
-          && (this.portCommand.length() > 0)) {
+      if (databyte == this.vModem.getBS()
+          && this.portCommand.length() > 0) {
         this.portCommand = this.portCommand
             .substring(0, this.portCommand.length() - 1);
       } else if (databyte > 0) {
@@ -107,8 +107,8 @@ public class DWVPortHandler {
       return;
     }
     // anything beginning with AT or A/ is a modem command
-    if ((cmd.toUpperCase().startsWith("AT"))
-        || (cmd.toUpperCase().startsWith("A/"))) {
+    if (cmd.toUpperCase().startsWith("AT")
+        || cmd.toUpperCase().startsWith("A/")) {
       this.vModem.processCommand(cmd);
     } else {
       processAPICommand(cmd);
@@ -117,7 +117,7 @@ public class DWVPortHandler {
 
   private void processAPICommand(final String cmd) {
     // new API based implementation 1/2/10
-    String[] cmdparts = cmd.split("\\s+");
+    final String[] cmdparts = cmd.split("\\s+");
     if (cmdparts.length > 0) {
       if (cmdparts[0].equalsIgnoreCase("tcp")) {
         respond(
@@ -154,13 +154,13 @@ public class DWVPortHandler {
   /**
    * Respond to command.
    *
-   * @param cr command response
+   * @param response command response
    */
-  public void respond(final DWCommandResponse cr) {
-    if (cr.isSuccess()) {
-      respondOk(cr.getResponseText());
+  public void respond(final DWCommandResponse response) {
+    if (response.isSuccess()) {
+      respondOk(response.getResponseText());
     } else {
-      respondFail(cr.getResponseCode(), cr.getResponseText());
+      respondFail(response.getResponseCode(), response.getResponseText());
     }
   }
 
@@ -186,11 +186,11 @@ public class DWVPortHandler {
    * @param txt   error text
    */
   public void respondFail(final byte errno, final String txt) {
-    String perrno = String.format("%03d", errno & BYTE_MASK);
-    LOGGER.debug("command failed: " + perrno + " " + txt);
+    final String pErrNo = String.format("%03d", errno & BYTE_MASK);
+    LOGGER.debug("command failed: " + pErrNo + " " + txt);
     try {
       dwVSerialPorts.writeToCoco(this.vport,
-          "FAIL " + perrno + " " + txt + (char) CARRIAGE_RETURN);
+          "FAIL " + pErrNo + " " + txt + (char) CARRIAGE_RETURN);
     } catch (DWPortNotValidException e) {
       LOGGER.error(e.getMessage());
     }

@@ -75,12 +75,12 @@ public class DWAPISerial {
   /**
    * Test if string is an integer.
    *
-   * @param s
+   * @param intString
    * @return bool
    */
-  public static boolean isInteger(final String s) {
+  public static boolean isInteger(final String intString) {
     try {
-      Integer.parseInt(s);
+      Integer.parseInt(intString);
     } catch (NumberFormatException e) {
       return false;
     }
@@ -94,12 +94,12 @@ public class DWAPISerial {
    * @return command response
    */
   public DWCommandResponse process() {
-    if ((command.length > 2)
-        && ((command.length & 1) == 1)
+    if (command.length > 2
+        && (command.length & 1) == 1
         && command[1].equals("join")) {
       return doCommandJoin(command);
     }
-    if ((command.length > 2)
+    if (command.length > 2
         && command[1].equals("show")) {
       return doCommandShow(command[2]);
     } else if (command.length > 1
@@ -156,12 +156,11 @@ public class DWAPISerial {
 
   private DWCommandResponse doCommandJoin(final String[] cmd) {
     // validate
-    String port = cmd[2];
-    DWAPISerialPortDef spd = new DWAPISerialPortDef();
+    final DWAPISerialPortDef spd = new DWAPISerialPortDef();
 
     for (int i = ARG_START; i < cmd.length; i += 2) {
-      String item = cmd[i];
-      String val = cmd[i + 1];
+      final String item = cmd[i];
+      final String val = cmd[i + 1];
       int valno = -1;
       try {
         valno = Integer.parseInt(val);
@@ -172,7 +171,7 @@ public class DWAPISerial {
       if (item.equalsIgnoreCase("r") && isInteger(val)) {
         spd.setRate(valno);
       } else if (item.equalsIgnoreCase("sb") && isInteger(val)) {
-        int stopBits = stopBits(valno);
+        final int stopBits = stopBits(valno);
         if (stopBits == -1) {
           return new DWCommandResponse(
               false,
@@ -183,7 +182,7 @@ public class DWAPISerial {
         spd.setStopbits(stopBits);
       } else if (item.equalsIgnoreCase("p") && val.length() == 1) {
         // parity
-        int parity = parity(val);
+        final int parity = parity(val);
         if (parity == -1) {
           return new DWCommandResponse(
               false,
@@ -194,7 +193,7 @@ public class DWAPISerial {
         spd.setParity(parity);
       } else if (item.equalsIgnoreCase("db") && isInteger(val)) {
         // data bits
-        int dataBits = dataBits(valno);
+        final int dataBits = dataBits(valno);
         if (dataBits == -1) {
           return new DWCommandResponse(
               false,
@@ -204,9 +203,9 @@ public class DWAPISerial {
         }
         spd.setDatabits(dataBits);
       } else if (item.equalsIgnoreCase("fc")) {
-        int fc = 0;
-        for (byte b : val.getBytes(DWDefs.ENCODING)) {
-          int fcVal = flowControl(b);
+        int flowControl = 0;
+        for (final byte b : val.getBytes(DWDefs.ENCODING)) {
+          final int fcVal = flowControl(b);
           if (fcVal == -1) {
             return new DWCommandResponse(
                 false,
@@ -214,22 +213,24 @@ public class DWAPISerial {
                 "Syntax error on arg fc (R,r,X,x or n is valid)"
             );
           }
-          fc += fcVal;
+          flowControl += fcVal;
         }
-        spd.setFlowcontrol(fc);
+        spd.setFlowcontrol(flowControl);
       }
     }
     CommPort commPort = null;
+    final String port = cmd[2];
     try {
-      CommPortIdentifier pi = CommPortIdentifier.getPortIdentifier(port);
-      if (pi.isCurrentlyOwned()) {
+      final CommPortIdentifier identifier
+          = CommPortIdentifier.getPortIdentifier(port);
+      if (identifier.isCurrentlyOwned()) {
         return new DWCommandResponse(
             false,
             DWDefs.RC_SERIAL_PORTINUSE,
             "Port in use"
         );
       }
-      commPort = pi.open("DriveWireServer", OPEN_PORT_TIMEOUT);
+      commPort = identifier.open("DriveWireServer", OPEN_PORT_TIMEOUT);
       if (!(commPort instanceof SerialPort)) {
         return new DWCommandResponse(
             false,
@@ -237,11 +238,11 @@ public class DWAPISerial {
             "Invalid port"
         );
       }
-      final SerialPort sp = (SerialPort) commPort;
-      spd.setParams(sp);
+      final SerialPort serialPort = (SerialPort) commPort;
+      spd.setParams(serialPort);
 
       // join em
-      Thread inputT = new Thread(() -> {
+      final Thread inputT = new Thread(() -> {
         boolean wanttodie = false;
         dwVSerialPorts.markConnected(virtualPort);
         while (!wanttodie) {
@@ -256,7 +257,7 @@ public class DWAPISerial {
             wanttodie = true;
           } else {
             try {
-              sp.getOutputStream().write(databyte);
+              serialPort.getOutputStream().write(databyte);
             } catch (IOException e) {
               wanttodie = true;
             }
@@ -266,12 +267,12 @@ public class DWAPISerial {
 
       inputT.setDaemon(true);
       inputT.start();
-      Thread outputT = new Thread(() -> {
+      final Thread outputT = new Thread(() -> {
         boolean wanttodie = false;
         while (!wanttodie) {
           int databyte = -1;
           try {
-            databyte = sp.getInputStream().read();
+            databyte = serialPort.getInputStream().read();
             System.out.println("output: " + databyte);
           } catch (IOException e) {
             wanttodie = true;
@@ -303,11 +304,12 @@ public class DWAPISerial {
 
   private DWCommandResponse doCommandShow(final String port) {
     String res;
-    boolean ok = true;
+    boolean cmdOk = true;
     try {
-      CommPortIdentifier pi = CommPortIdentifier.getPortIdentifier(port);
+      final CommPortIdentifier identifier
+          = CommPortIdentifier.getPortIdentifier(port);
 
-      if (pi.isCurrentlyOwned()) {
+      if (identifier.isCurrentlyOwned()) {
         return new DWCommandResponse(
             false,
             DWDefs.RC_SERIAL_PORTINUSE,
@@ -316,17 +318,18 @@ public class DWAPISerial {
       } else {
         CommPort commPort = null;
         try {
-          commPort = pi.open("DriveWireServer", OPEN_PORT_TIMEOUT);
+          commPort = identifier.open("DriveWireServer", OPEN_PORT_TIMEOUT);
           if (commPort instanceof SerialPort) {
-            SerialPort sp = (SerialPort) commPort;
-            res = sp.getBaudRate() + "|" + sp.getDataBits() + "|";
-            if (sp.getParity() == SerialPort.PARITY_EVEN) {
+            final SerialPort serialPort = (SerialPort) commPort;
+            res = serialPort.getBaudRate() + "|"
+                + serialPort.getDataBits() + "|";
+            if (serialPort.getParity() == SerialPort.PARITY_EVEN) {
               res += "E";
-            } else if (sp.getParity() == SerialPort.PARITY_ODD) {
+            } else if (serialPort.getParity() == SerialPort.PARITY_ODD) {
               res += "O";
-            } else if (sp.getParity() == SerialPort.PARITY_NONE) {
+            } else if (serialPort.getParity() == SerialPort.PARITY_NONE) {
               res += "N";
-            } else if (sp.getParity() == SerialPort.PARITY_MARK) {
+            } else if (serialPort.getParity() == SerialPort.PARITY_MARK) {
               res += "M";
             } else {
               res += "S";
@@ -334,9 +337,9 @@ public class DWAPISerial {
 
             res += "|";
 
-            if (sp.getStopBits() == SerialPort.STOPBITS_1) {
+            if (serialPort.getStopBits() == SerialPort.STOPBITS_1) {
               res += "1";
-            } else if (sp.getStopBits() == SerialPort.STOPBITS_2) {
+            } else if (serialPort.getStopBits() == SerialPort.STOPBITS_2) {
               res += "2";
             } else {
               res += "5";
@@ -344,59 +347,63 @@ public class DWAPISerial {
 
             res += "|";
 
-            if ((sp.getFlowControlMode() & SerialPort.FLOWCONTROL_RTSCTS_IN)
+            if ((serialPort.getFlowControlMode()
+                & SerialPort.FLOWCONTROL_RTSCTS_IN)
                 == SerialPort.FLOWCONTROL_RTSCTS_IN) {
               res += "R";
             }
 
-            if ((sp.getFlowControlMode() & SerialPort.FLOWCONTROL_XONXOFF_IN)
+            if ((serialPort.getFlowControlMode()
+                & SerialPort.FLOWCONTROL_XONXOFF_IN)
                 == SerialPort.FLOWCONTROL_XONXOFF_IN) {
               res += "X";
             }
 
-            if ((sp.getFlowControlMode() & SerialPort.FLOWCONTROL_RTSCTS_OUT)
+            if ((serialPort.getFlowControlMode()
+                & SerialPort.FLOWCONTROL_RTSCTS_OUT)
                 == SerialPort.FLOWCONTROL_RTSCTS_OUT) {
               res += "r";
             }
 
-            if ((sp.getFlowControlMode() & SerialPort.FLOWCONTROL_XONXOFF_OUT)
+            if ((serialPort.getFlowControlMode()
+                & SerialPort.FLOWCONTROL_XONXOFF_OUT)
                 == SerialPort.FLOWCONTROL_XONXOFF_OUT) {
               res += "x";
             }
 
             res += "|";
 
-            if (sp.isCD()) {
+            if (serialPort.isCD()) {
               res += "CD ";
             }
 
-            if (sp.isCTS()) {
+            if (serialPort.isCTS()) {
               res += "CTS ";
             }
 
-            if (sp.isDSR()) {
+            if (serialPort.isDSR()) {
               res += "DSR ";
             }
 
-            if (sp.isDTR()) {
+            if (serialPort.isDTR()) {
               res += "DTR ";
             }
 
-            if (sp.isRI()) {
+            if (serialPort.isRI()) {
               res += "RI ";
             }
 
-            if (sp.isRTS()) {
+            if (serialPort.isRTS()) {
               res += "RTS ";
             }
 
             res = res.trim();
           } else {
-            ok = false;
+            cmdOk = false;
             res = "Invalid port";
           }
         } catch (Exception e) {
-          ok = false;
+          cmdOk = false;
           res = e.toString();
         } finally {
           if (commPort != null) {
@@ -405,18 +412,18 @@ public class DWAPISerial {
         }
       }
     } catch (Exception e) {
-      ok = false;
+      cmdOk = false;
       res = e.getClass().getSimpleName();
     }
-    if (ok) {
+    if (cmdOk) {
       return new DWCommandResponse(res);
     }
     return new DWCommandResponse(false, DWDefs.RC_SERIAL_PORTERROR, res);
   }
 
   private DWCommandResponse doCommandDevs() {
-    StringBuilder res = new StringBuilder();
-    for (String p : DriveWireServer.getAvailableSerialPorts()) {
+    final StringBuilder res = new StringBuilder();
+    for (final String p : DriveWireServer.getAvailableSerialPorts()) {
       if (!res.toString().equals("")) {
         res.append("|");
       }
