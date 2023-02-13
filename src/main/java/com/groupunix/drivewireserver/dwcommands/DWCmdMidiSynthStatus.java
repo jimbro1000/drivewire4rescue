@@ -112,7 +112,7 @@ public class DWCmdMidiSynthStatus extends DWCommand {
       text += "Profile:   "
           + dwProtocolHandler.getVPorts().getMidiProfileName() + "\r\n";
       text += "Instrlock: "
-          + dwProtocolHandler.getVPorts().getMidiVoicelock() + "\r\n";
+          + dwProtocolHandler.getVPorts().isMidiVoicelock() + "\r\n";
     } else {
       text += "MIDI is disabled.\r\n";
     }

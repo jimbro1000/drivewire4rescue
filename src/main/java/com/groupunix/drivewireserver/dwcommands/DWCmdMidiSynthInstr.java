@@ -55,7 +55,7 @@ public class DWCmdMidiSynthInstr extends DWCommand {
               + "channel # and an instrument # as arguments"
       );
     }
-    if (dwProtocolHandler.getVPorts().setMIDIInstr(channel, instr)) {
+    if (dwProtocolHandler.getVPorts().setupMIDIInstr(channel, instr)) {
       return new DWCommandResponse(
           "Set MIDI channel "
               + (channel + 1) + " to instrument " + instr

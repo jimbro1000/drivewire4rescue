@@ -72,7 +72,7 @@ public class DWCmdMidiSynthBank extends DWCommand {
         );
       }
       if (dwProtocolHandler.getVPorts().isSoundbankSupported(soundbank)) {
-        if (dwProtocolHandler.getVPorts().setMidiSoundbank(soundbank, path)) {
+        if (dwProtocolHandler.getVPorts().setupMidiSoundbank(soundbank, path)) {
           return new DWCommandResponse(
               "Soundbank loaded without error"
           );

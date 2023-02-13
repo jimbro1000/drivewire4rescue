@@ -37,7 +37,7 @@ public final class DWCmdMidiSynthLock extends DWCommand {
   }
 
   private DWCommandResponse doMidiSynthLock() {
-    if (dwProtocolHandler.getVPorts().getMidiVoicelock()) {
+    if (dwProtocolHandler.getVPorts().isMidiVoicelock()) {
       dwProtocolHandler.getVPorts().setMidiVoicelock(false);
       return new DWCommandResponse(
           "Unlocked MIDI instruments, program changes will be processed"

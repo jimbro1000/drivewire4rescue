@@ -290,7 +290,7 @@ public class DWVSerialPort {
               // send midimsg with 1 data byte
               if (mmsgStatus >= MIDI_MSG_BASE
                   && databyte < MIDI_CHAN_PRESS) {
-                if (dwvSerialProtocol.getVPorts().getMidiVoicelock()) {
+                if (dwvSerialProtocol.getVPorts().isMidiVoicelock()) {
                   // ignore program change
                   LOGGER.debug(
                       "MIDI: ignored program change due to instrument lock."

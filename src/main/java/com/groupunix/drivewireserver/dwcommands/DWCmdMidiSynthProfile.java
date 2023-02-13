@@ -44,7 +44,7 @@ public final class DWCmdMidiSynthProfile extends DWCommand {
   }
 
   private DWCommandResponse doMidiSynthProfile(final String path) {
-    if (dwProtocolHandler.getVPorts().setMidiProfile(path)) {
+    if (dwProtocolHandler.getVPorts().setupMidiProfile(path)) {
       return new DWCommandResponse(
           "Set translation profile to '" + path + "'"
       );
