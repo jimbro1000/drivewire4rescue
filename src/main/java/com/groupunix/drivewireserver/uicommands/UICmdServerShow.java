@@ -14,16 +14,7 @@ public class UICmdServerShow extends DWCommand {
    */
   public UICmdServerShow(final DWUIClientThread clientThread) {
     super();
-    final DWCommandList commands = this.getCommandList();
-    commands.addCommand(new UICmdServerShowVersion());
-    commands.addCommand(new UICmdServerShowInstances());
-    commands.addCommand(new UICmdServerShowMIDIDevs());
-    commands.addCommand(new UICmdServerShowSynthProfiles());
-    commands.addCommand(new UICmdServerShowLocalDisks());
-    commands.addCommand(new UICmdServerShowSerialDevs());
-    commands.addCommand(new UICmdServerShowStatus());
-    commands.addCommand(new UICmdServerShowNet());
-    commands.addCommand(new UICmdServerShowLog());
+    final DWCommandList commands = prepareCommonCommands();
     commands.addCommand(new UICmdServerShowTopics(clientThread));
     commands.addCommand(new UICmdServerShowHelp(clientThread));
     commands.addCommand(new UICmdServerShowErrors(clientThread));
@@ -37,6 +28,14 @@ public class UICmdServerShow extends DWCommand {
    */
   public UICmdServerShow(final DWProtocol protocol) {
     super();
+    final DWCommandList commands = prepareCommonCommands();
+    commands.addCommand(new UICmdServerShowTopics(protocol));
+    commands.addCommand(new UICmdServerShowHelp(protocol));
+    commands.addCommand(new UICmdServerShowErrors(protocol));
+    setHelp();
+  }
+
+  private DWCommandList prepareCommonCommands() {
     final DWCommandList commands = this.getCommandList();
     commands.addCommand(new UICmdServerShowVersion());
     commands.addCommand(new UICmdServerShowInstances());
@@ -47,10 +46,7 @@ public class UICmdServerShow extends DWCommand {
     commands.addCommand(new UICmdServerShowStatus());
     commands.addCommand(new UICmdServerShowNet());
     commands.addCommand(new UICmdServerShowLog());
-    commands.addCommand(new UICmdServerShowTopics(protocol));
-    commands.addCommand(new UICmdServerShowHelp(protocol));
-    commands.addCommand(new UICmdServerShowErrors(protocol));
-    setHelp();
+    return commands;
   }
 
   private void setHelp() {

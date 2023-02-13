@@ -126,12 +126,22 @@ public abstract class DWDisk {
   /**
    * Seek sector.
    *
-   * @param lsn logical sector number
+   * @param newLSN logical sector number
    * @throws DWInvalidSectorException Invalid LSN
    * @throws DWSeekPastEndOfDeviceException Seek past end of disk
    */
-  public abstract void seekSector(int lsn)
-      throws DWInvalidSectorException, DWSeekPastEndOfDeviceException;
+  public void seekSector(final int newLSN)
+      throws DWInvalidSectorException, DWSeekPastEndOfDeviceException {
+    if (newLSN < 0) {
+      throw new DWInvalidSectorException("Sector " + newLSN + " is not valid");
+    } else if (newLSN > (this.getSectors().size() - 1)) {
+      throw new DWSeekPastEndOfDeviceException(
+          "Attempt to seek beyond end of image"
+      );
+    } else {
+      this.setParam("_lsn", newLSN);
+    }
+  }
 
   /**
    * Write byte array to sector.
@@ -140,8 +150,15 @@ public abstract class DWDisk {
    * @throws DWDriveWriteProtectedException Write protected
    * @throws IOException Failed to write to file object
    */
-  public abstract void writeSector(byte[] data)
-      throws DWDriveWriteProtectedException, IOException;
+  public void writeSector(final byte[] data)
+      throws DWDriveWriteProtectedException, IOException {
+    if (this.isWriteProtect()) {
+      throw new DWDriveWriteProtectedException("Disk is write protected");
+    } else {
+      this.getSectors().get(this.getLSN()).setData(data);
+      this.incParam("_writes");
+    }
+  }
 
   /**
    * read disk sector.
@@ -150,8 +167,10 @@ public abstract class DWDisk {
    * @throws IOException Failed to read from file object
    * @throws DWImageFormatException Invalid file format
    */
-  public abstract byte[] readSector()
-      throws IOException, DWImageFormatException;
+  public byte[] readSector() throws IOException, DWImageFormatException {
+    this.incParam("_reads");
+    return this.getSectors().get(this.getLSN()).getData();
+  }
 
   /**
    * load disk.

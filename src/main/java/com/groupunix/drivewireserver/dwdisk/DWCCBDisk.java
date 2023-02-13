@@ -1,10 +1,7 @@
 package com.groupunix.drivewireserver.dwdisk;
 
 import com.groupunix.drivewireserver.DWDefs;
-import com.groupunix.drivewireserver.dwexceptions.DWDriveWriteProtectedException;
 import com.groupunix.drivewireserver.dwexceptions.DWImageFormatException;
-import com.groupunix.drivewireserver.dwexceptions.DWInvalidSectorException;
-import com.groupunix.drivewireserver.dwexceptions.DWSeekPastEndOfDeviceException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.log4j.Logger;
@@ -144,53 +141,5 @@ public class DWCCBDisk extends DWDisk {
         DWUtils.prettyFileSystem(DWDefs.DISK_FILESYSTEM_CCB)
     );
     fis.close();
-  }
-
-  /**
-   * Seek disk sector.
-   *
-   * @param newLSN logical sector number
-   * @throws DWInvalidSectorException invalid sector
-   * @throws DWSeekPastEndOfDeviceException attempt to seek past end of disk
-   */
-  public void seekSector(final int newLSN)
-      throws DWInvalidSectorException, DWSeekPastEndOfDeviceException {
-    if (newLSN < 0) {
-      throw new DWInvalidSectorException("Sector " + newLSN + " is not valid");
-    } else if (newLSN > (this.getSectors().size() - 1)) {
-      throw new DWSeekPastEndOfDeviceException(
-          "Attempt to seek beyond end of image"
-      );
-    } else {
-      this.setParam("_lsn", newLSN);
-    }
-  }
-
-  /**
-   * Write disk sector.
-   *
-   * @param data byte array of new sector content
-   * @throws DWDriveWriteProtectedException failed to write to protected disk
-   * @throws IOException write failure
-   */
-  public void writeSector(final byte[] data)
-      throws DWDriveWriteProtectedException, IOException {
-    if (this.isWriteProtect()) {
-      throw new DWDriveWriteProtectedException("Disk is write protected");
-    } else {
-      this.getSectors().get(this.getLSN()).setData(data);
-      this.incParam("_writes");
-    }
-  }
-
-  /**
-   * Read disk sector.
-   *
-   * @return byte array of sector content
-   * @throws IOException read failure
-   */
-  public byte[] readSector() throws IOException {
-    this.incParam("_reads");
-    return this.getSectors().get(this.getLSN()).getData();
   }
 }

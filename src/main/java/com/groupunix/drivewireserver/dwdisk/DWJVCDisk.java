@@ -7,10 +7,7 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.log4j.Logger;
 
 import com.groupunix.drivewireserver.DWDefs;
-import com.groupunix.drivewireserver.dwexceptions.DWDriveWriteProtectedException;
 import com.groupunix.drivewireserver.dwexceptions.DWImageFormatException;
-import com.groupunix.drivewireserver.dwexceptions.DWInvalidSectorException;
-import com.groupunix.drivewireserver.dwexceptions.DWSeekPastEndOfDeviceException;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWUtils;
 
 import static com.groupunix.drivewireserver.DWDefs.BYTE_SHIFT;
@@ -149,53 +146,5 @@ public class DWJVCDisk extends DWDisk {
         "_filesystem",
         DWUtils.prettyFileSystem(DWDiskDrives.getDiskFSType(this.getSectors()))
     );
-  }
-
-  /**
-   * Seek sector by LSN.
-   *
-   * @param newLSN logical sector number
-   * @throws DWInvalidSectorException
-   * @throws DWSeekPastEndOfDeviceException
-   */
-  public void seekSector(final int newLSN)
-      throws DWInvalidSectorException, DWSeekPastEndOfDeviceException {
-    if (newLSN < 0) {
-      throw new DWInvalidSectorException("Sector " + newLSN + " is not valid");
-    } else if (newLSN > (this.getSectors().size() - 1)) {
-      throw new DWSeekPastEndOfDeviceException(
-          "Attempt to seek beyond end of image"
-      );
-    } else {
-      this.setParam("_lsn", newLSN);
-    }
-  }
-
-  /**
-   * Write sector.
-   *
-   * @param data byte array
-   * @throws DWDriveWriteProtectedException
-   * @throws IOException
-   */
-  public void writeSector(final byte[] data)
-      throws DWDriveWriteProtectedException, IOException {
-    if (this.isWriteProtect()) {
-      throw new DWDriveWriteProtectedException("Disk is write protected");
-    } else {
-      this.getSectors().get(this.getLSN()).setData(data);
-      this.incParam("_writes");
-    }
-  }
-
-  /**
-   * Read disk sector.
-   *
-   * @return sector data byte array
-   * @throws IOException
-   */
-  public byte[] readSector() throws IOException {
-    this.incParam("_reads");
-    return this.getSectors().get(this.getLSN()).getData();
   }
 }
