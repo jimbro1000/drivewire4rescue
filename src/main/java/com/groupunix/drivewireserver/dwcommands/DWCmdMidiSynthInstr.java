@@ -11,8 +11,8 @@ public class DWCmdMidiSynthInstr extends DWCommand {
 
   /**
    * Drivewire Midi Synth Instruction constructor.
-   * @param protocolHandler
-   * @param parent
+   * @param protocolHandler handler
+   * @param parent parent command
    */
   public DWCmdMidiSynthInstr(
       final DWProtocolHandler protocolHandler,
@@ -71,7 +71,7 @@ public class DWCmdMidiSynthInstr extends DWCommand {
 
   /**
    * Validate command.
-   * @param cmdline
+   * @param cmdline command line
    * @return true if valid
    */
   public boolean validate(final String cmdline) {

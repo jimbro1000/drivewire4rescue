@@ -9,7 +9,7 @@ public class DWCmdMidiSynth extends DWCommand {
   private final DWProtocolHandler dwProtocolHandler;
 
   /**
-   * Midi synch command constructor.
+   * Midi synth command constructor.
    * @param protocolHandler protocol handler
    * @param parent parent command
    */
@@ -52,7 +52,7 @@ public class DWCmdMidiSynth extends DWCommand {
 
   /**
    * validate command.
-   * @param cmdline
+   * @param cmdline command line
    * @return true if command valid
    */
   public boolean validate(final String cmdline) {

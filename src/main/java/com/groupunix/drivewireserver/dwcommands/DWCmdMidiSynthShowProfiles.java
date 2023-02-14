@@ -27,7 +27,6 @@ public class DWCmdMidiSynthShowProfiles extends DWCommand {
    * @param cmdline command string
    * @return command response
    */
-  @SuppressWarnings("unchecked")
   public DWCommandResponse parse(final String cmdline) {
     final StringBuilder text = new StringBuilder();
     text.append("\r\nAvailable sound translation profiles:\r\n\n");

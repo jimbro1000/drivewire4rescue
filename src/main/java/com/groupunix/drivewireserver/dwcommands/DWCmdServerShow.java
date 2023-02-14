@@ -7,7 +7,7 @@ public class DWCmdServerShow extends DWCommand {
   /**
    * Drivewire protocol.
    */
-  private DWProtocol dwProtocol;
+  private final DWProtocol dwProtocol;
 
   /**
    * Server show command constructor.

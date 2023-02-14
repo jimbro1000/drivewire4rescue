@@ -105,7 +105,6 @@ public final class DWCmdDiskShow extends DWCommand {
       ignores.add("_path");
       ignores.add("_last_modified");
 
-      @SuppressWarnings("unchecked")
       final Iterator<String> itk = params.getKeys();
       while (itk.hasNext()) {
         final String param = itk.next();

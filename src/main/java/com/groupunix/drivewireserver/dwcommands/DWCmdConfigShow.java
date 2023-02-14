@@ -70,7 +70,6 @@ public class DWCmdConfigShow extends DWCommand {
     return true;
   }
 
-  @SuppressWarnings("unchecked")
   private DWCommandResponse doShowConfig() {
     final StringBuilder text = new StringBuilder(
         "Current protocol handler configuration:\r\n\n"

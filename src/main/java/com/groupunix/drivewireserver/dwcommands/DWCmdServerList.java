@@ -65,7 +65,7 @@ public final class DWCmdServerList extends DWCommand {
       ins = content.getInputStream();
 
       final byte[] buffer = new byte[BUFFER_SIZE];
-      int size = 0;
+      int size;
 
       while ((size = ins.read(buffer)) >= 0) {
         baos.write(buffer, 0, size);

@@ -67,8 +67,8 @@ public class DWDMKDisk extends DWDisk {
    * DMK disc constructor.
    *
    * @param fileObj source file object
-   * @throws IOException
-   * @throws DWImageFormatException
+   * @throws IOException read/write failure
+   * @throws DWImageFormatException invalid disk image
    */
   public DWDMKDisk(final FileObject fileObj)
       throws IOException, DWImageFormatException {

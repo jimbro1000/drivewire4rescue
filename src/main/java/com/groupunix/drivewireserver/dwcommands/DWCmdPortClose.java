@@ -9,12 +9,12 @@ public class DWCmdPortClose extends DWCommand {
   /**
    * Port serial protocol.
    */
-  private DWVSerialProtocol dwProtocol;
+  private final DWVSerialProtocol dwProtocol;
 
   /**
    * Port close command constructor.
-   * @param protocol
-   * @param parent
+   * @param protocol serial protocol
+   * @param parent parent command
    */
   public DWCmdPortClose(
       final DWVSerialProtocol protocol,
@@ -30,7 +30,7 @@ public class DWCmdPortClose extends DWCommand {
 
   /**
    * Parse command.
-   * @param cmdline
+   * @param cmdline command line
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
@@ -68,7 +68,7 @@ public class DWCmdPortClose extends DWCommand {
 
   /**
    * Validate command.
-   * @param cmdline
+   * @param cmdline command line
    * @return true if valid
    */
   public boolean validate(final String cmdline) {

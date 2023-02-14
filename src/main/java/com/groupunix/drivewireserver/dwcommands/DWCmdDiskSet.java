@@ -34,7 +34,7 @@ public class DWCmdDiskSet extends DWCommand {
 
   /**
    * Parse command.
-   * @param cmdline
+   * @param cmdline command line
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
@@ -108,7 +108,7 @@ public class DWCmdDiskSet extends DWCommand {
 
   /**
    * Validate command.
-   * @param cmdline
+   * @param cmdline command line
    * @return true if valid
    */
   public boolean validate(final String cmdline) {

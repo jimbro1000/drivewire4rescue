@@ -9,7 +9,7 @@ public class DWCmdMidiSynthShowChannels extends DWCommand {
   /**
    * Drivewire protocol handler.
    */
-  private DWProtocolHandler dwProtocolHandler;
+  private final DWProtocolHandler dwProtocolHandler;
 
   /**
    * Show Midi Synthesiser Channels constructor.

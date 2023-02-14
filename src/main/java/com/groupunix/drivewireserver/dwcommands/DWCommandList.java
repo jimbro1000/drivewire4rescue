@@ -1,9 +1,6 @@
 package com.groupunix.drivewireserver.dwcommands;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.dwexceptions.DWHelpTopicNotFoundException;
@@ -153,25 +150,25 @@ public final class DWCommandList {
       );
     } else {
       if (args.length == 2 && args[1].equals("?")) {
-        return getLongHelp(getCommandMatch(args[0]));
+        return getLongHelp(Objects.requireNonNull(getCommandMatch(args[0])));
       } else if (args.length == 2 && args[1].equals("*")) {
-        return getCmdTree(getCommandMatch(args[0]));
+        return getCmdTree(Objects.requireNonNull(getCommandMatch(args[0])));
       } else {
-        return getCommandMatch(args[0]).parse(DWUtils.dropFirstToken(cmdline));
+        return Objects.requireNonNull(getCommandMatch(args[0]))
+            .parse(DWUtils.dropFirstToken(cmdline));
       }
     }
   }
 
   private DWCommandResponse getCmdTree(final DWCommand command) {
-    String text = "";
-    // figure out whole command..
+    // figure out whole command...
     final StringBuilder cmdline = new StringBuilder(command.getCommand());
     DWCommand tmpCommand = command;
     while (tmpCommand.getParentCmd() != null) {
       tmpCommand = tmpCommand.getParentCmd();
       cmdline.insert(0, tmpCommand.getCommand() + " ");
     }
-    text = "Tree for " + cmdline + "\r\n\n";
+    String text = "Tree for " + cmdline + "\r\n\n";
     text += makeTreeString(command, 0);
     if (this.outputCols <= MAX_COLS) {
       text = text.toUpperCase();
@@ -197,8 +194,7 @@ public final class DWCommandList {
   }
 
   private DWCommandResponse getLongHelp(final DWCommand command) {
-    String text = "";
-    // figure out whole command..
+    // figure out whole command...
     final StringBuilder cmdline = new StringBuilder(command.getCommand());
 
     DWCommand tmp = command;
@@ -207,7 +203,7 @@ public final class DWCommandList {
       tmp = tmp.getParentCmd();
       cmdline.insert(0, tmp.getCommand() + " ");
     }
-    text = command.getUsage() + "\r\n\r\n";
+    String text = command.getUsage() + "\r\n\r\n";
     text += command.getShortHelp() + "\r\n";
 
     if (this.dwProtocol != null) {
@@ -229,15 +225,12 @@ public final class DWCommandList {
    * @return possible commands
    */
   public String getShortHelp() {
-    String helpText = "";
     final ArrayList<String> options = new ArrayList<>();
-
     for (final DWCommand cmd : this.commands) {
       options.add(cmd.getCommand());
     }
-
     Collections.sort(options);
-    helpText = DWCommandList.colLayout(options, this.outputCols);
+    String helpText = DWCommandList.colLayout(options, this.outputCols);
     helpText = "Possible commands:\r\n\r\n" + helpText;
     return helpText;
   }
@@ -294,7 +287,8 @@ public final class DWCommandList {
       // ambiguous
       return false;
     } else {
-      return getCommandMatch(args[0]).validate(DWUtils.dropFirstToken(cmdline));
+      return Objects.requireNonNull(getCommandMatch(args[0]))
+          .validate(DWUtils.dropFirstToken(cmdline));
     }
   }
 

@@ -67,7 +67,7 @@ public class DWCmdDiskWrite extends DWCommand {
                 .getDriveNoFromString(args[0]), DWUtils.dropFirstToken(cmdline)
         );
       } catch (DWDriveNotValidException e) {
-        // its an int, but its not a valid drive
+        // it's an int, but it's not a valid drive
         return new DWCommandResponse(
             false,
             DWDefs.RC_INVALID_DRIVE,

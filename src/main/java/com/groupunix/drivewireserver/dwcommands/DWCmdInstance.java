@@ -4,6 +4,8 @@ import com.groupunix.drivewireserver.DWDefs;
 import com.groupunix.drivewireserver.DriveWireServer;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
+import java.util.Objects;
+
 public final class DWCmdInstance extends DWCommand {
   /**
    * Drivewire protocol.
@@ -54,14 +56,16 @@ public final class DWCmdInstance extends DWCommand {
           "Instance " + instanceNumber + " is not defined."
       );
     }
-    if (!DriveWireServer.getHandler(instanceNumber).isReady()) {
+    if (!Objects.requireNonNull(DriveWireServer.getHandler(instanceNumber))
+        .isReady()) {
       return new DWCommandResponse(
           false,
           DWDefs.RC_INSTANCE_ALREADY_STARTED,
           "Instance " + instanceNumber + " is not started."
       );
     }
-    if (DriveWireServer.getHandler(instanceNumber).isDying()) {
+    if (Objects.requireNonNull(DriveWireServer.getHandler(instanceNumber))
+        .isDying()) {
       return new DWCommandResponse(
           false,
           DWDefs.RC_INSTANCE_NOT_READY,

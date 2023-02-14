@@ -3,6 +3,8 @@ package com.groupunix.drivewireserver.dwcommands;
 import com.groupunix.drivewireserver.DriveWireServer;
 import com.groupunix.drivewireserver.dwprotocolhandler.DWProtocol;
 
+import java.util.Objects;
+
 public final class DWCmdInstanceShow extends DWCommand {
   /**
    * Protocol.
@@ -36,11 +38,13 @@ public final class DWCmdInstanceShow extends DWCommand {
     text.append("DriveWire protocol handler instances:\r\n\n");
     for (int i = 0; i < DriveWireServer.getNumHandlers(); i++) {
       text.append("#").append(i).append("  (");
-      if (DriveWireServer.getHandler(i).isDying()) {
+      if (Objects.requireNonNull(DriveWireServer.getHandler(i)).isDying()) {
         text.append("Dying..)   ");
-      } else if (DriveWireServer.getHandler(i).isReady()) {
+      } else if (Objects.requireNonNull(DriveWireServer.getHandler(i))
+          .isReady()) {
         text.append("Ready)     ");
-      } else if (DriveWireServer.getHandler(i).isStarted()) {
+      } else if (Objects.requireNonNull(DriveWireServer.getHandler(i))
+          .isStarted()) {
         text.append("Starting)  ");
       } else {
         text.append("Not ready) ");
@@ -48,38 +52,35 @@ public final class DWCmdInstanceShow extends DWCommand {
       if (DriveWireServer.getHandler(i) == null) {
         text.append(" Null (?)\r\n");
       } else {
-        final String proto = DriveWireServer
-            .getHandler(i)
+        final String proto = Objects.requireNonNull(DriveWireServer
+            .getHandler(i))
             .getConfig()
             .getString("Protocol", "DriveWire");
         text.append(String.format("Proto: %-11s", proto));
-        final String dwType = DriveWireServer
-            .getHandler(i)
+        final String dwType = Objects.requireNonNull(DriveWireServer
+            .getHandler(i))
             .getConfig()
             .getString("DeviceType", "Unknown");
         if (dwType.equals("serial") || proto.equals("VModem")) {
           text.append(String.format("Type: %-11s", "serial"));
           text.append(" Dev: ")
-              .append(DriveWireServer
-              .getHandler(i)
+              .append(Objects.requireNonNull(DriveWireServer.getHandler(i))
               .getConfig()
               .getString("SerialDevice", "Unknown"));
         } else if (dwType.equals("tcp-server")) {
           text.append(String.format("Type: %-11s", "tcp-server"));
           text.append("Port: ")
-              .append(DriveWireServer
-              .getHandler(i)
+              .append(Objects.requireNonNull(DriveWireServer.getHandler(i))
               .getConfig()
               .getString("TCPServerPort", "Unknown"));
         } else if (dwType.equals("tcp-client")) {
           text.append(String.format("Type: %-11s", dwType));
           text.append("Host: ")
-              .append(DriveWireServer
-              .getHandler(i)
+              .append(Objects.requireNonNull(DriveWireServer.getHandler(i))
               .getConfig()
               .getString("TCPClientHost", "Unknown"))
-              .append(":").append(DriveWireServer
-              .getHandler(i)
+              .append(":")
+              .append(Objects.requireNonNull(DriveWireServer.getHandler(i))
               .getConfig()
               .getString("TCPClientPort", "Unknown"));
         }

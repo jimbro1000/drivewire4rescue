@@ -30,7 +30,7 @@ public class DWCmdDiskEject extends DWCommand {
 
   /**
    * parse command.
-   * @param cmdline
+   * @param cmdline command line
    * @return command response
    */
   public DWCommandResponse parse(final String cmdline) {
@@ -91,7 +91,7 @@ public class DWCmdDiskEject extends DWCommand {
 
   /**
    * validate command.
-   * @param cmdline
+   * @param cmdline command line
    * @return true if command valid
    */
   public boolean validate(final String cmdline) {

@@ -102,13 +102,12 @@ public final class DWCmdDiskDosList extends DWCommand {
       IOException,
       DWDiskInvalidSectorNumber,
       DWFileSystemInvalidDirectoryException {
-    String res = "";
-
     final DWDECBFileSystem tmp = new DWDECBFileSystem(
         dwProtocolHandler.getDiskDrives().getDisk(driveNumber)
     );
-    res = new String(tmp.getFileContents(filename), DWDefs.ENCODING);
-    return new DWCommandResponse(res);
+    return new DWCommandResponse(
+        new String(tmp.getFileContents(filename), DWDefs.ENCODING)
+    );
   }
 
   /**
